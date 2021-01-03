@@ -2,194 +2,225 @@
 # Form implementation generated from reading ui file 'window1.6.ui'
 # Created by: PyQt5 UI code generator 5.13.0
 
-from PyQt5 import QtCore, QtGui, QtWidgets
+import os, pickle, numpy as np
+from typing import List, Tuple
+from PyQt5 import QtCore, QtWidgets
+from PyQt5.QtGui import QFont
+from PyQt5.QtWidgets import QWidget, QGridLayout, QLabel, QGroupBox, QComboBox, QSizePolicy, QFrame, \
+    QPushButton, QFormLayout, QSpinBox
+
+
+from MPRWindow import Ui_MPRWindow
+import getMPR
 import AxialCoronalViewer
 import ViewerProp
-from vtk.qt.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
-import getMPR
-from MPRWindow import Ui_MPRWindow
-import glob
-import os
 from getListOfFiles import getListOfFiles
-import pickle
-import numpy as np
-class Ui_MainWindow(object):
-    def setupUi(self, MainWindow):
+
+
+class Ui_MainWindow:
+    def buildMainWindow(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
-        MainWindow.showFullScreen()
+        # MainWindow.showFullScreen()
         MainWindow.showMaximized()
         MainWindow.setStyleSheet("background-color: rgb(171, 216, 255);\n"
                                  "border-color: rgb(0, 0, 0);")
-        self.centralwidget = QtWidgets.QWidget(MainWindow)
+        self.centralwidget = QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
-        self.gridLayout_3 = QtWidgets.QGridLayout(self.centralwidget)
-        self.gridLayout_3.setObjectName("gridLayout_3")
-        self.gridLayout_3.setContentsMargins(0, 0, 0, 0)
-        self.label_3 = QtWidgets.QLabel(self.centralwidget)
-        font = QtGui.QFont()
-        font.setBold(True)
+
+    def buildMainLayoutManager(self):
+        self.mainLayout = QGridLayout(self.centralwidget)
+        self.mainLayout.setObjectName("mainLayout")
+        self.mainLayout.setContentsMargins(0, 0, 0, 0)
+
+    def _getCommonFont(self) -> QFont:
+        font = QFont()
         font.setWeight(75)
-        self.label_3.setFont(font)
-        self.label_3.setObjectName("label_3")
-        self.gridLayout_3.addWidget(self.label_3, 1, 4, 1, 1)
-        self.label_7 = QtWidgets.QLabel(self.centralwidget)
-        font = QtGui.QFont()
         font.setBold(True)
-        font.setWeight(75)
-        self.label_7.setFont(font)
-        self.label_7.setAlignment(QtCore.Qt.AlignCenter)
-        self.label_7.setObjectName("label_7")
-        self.gridLayout_3.addWidget(self.label_7, 2, 5, 1, 1)
-        self.groupBox = QtWidgets.QGroupBox(self.centralwidget)
+        return font
+
+    def commonLabel(self, obj_name: str, font: QFont, alignment=None) -> QLabel:
+        #Shortens process of creating new label with central widget as its parent
+        cur_label = QLabel(self.centralwidget)
+        cur_label.setObjectName(obj_name)
+        if font is not None:
+            cur_label.setFont(font)
+        if alignment is not None:
+            cur_label.setAlignment(QtCore.Qt.AlignCenter)
+        return cur_label
+
+    def buildImageBoundaries(self):
+        boundaries: List[Tuple[QLabel, str]] = [(self.leftLeftBoundary, "leftLeftBoundary"), (self.leftRightBoundary, "leftRightBoundary"),
+                      (self.rightLeftBoundary, "rightLeftBoundary"), (self.rightRightBoundary, "rightLeftBoundary")]
+        for boundary in boundaries:
+            curBoundary = self.commonLabel(boundary[1], self._getCommonFont()())
+            boundary[0] = curBoundary
+
+        self.mainLayout.addWidget(self.leftLeftBoundary, 1, 0, 1, 1)
+        self.mainLayout.addWidget(self.leftRightBoundary, 1, 2, 1, 1)
+        self.mainLayout.addWidget(self.rightLeftBoundary, 1, 4, 1, 1)
+        self.mainLayout.addWidget(self.rightRightBoundary, 1, 6, 1, 1)
+
+    def _buildSizePolicy(self, titleBox: QComboBox):
+        sizePolicy = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(titleBox.sizePolicy().hasHeightForWidth())
+
+    def buildImageLists(self):
+        self.AxialImagesList = QComboBox(self.groupBox)
+        self.AxialImagesList.setObjectName("AxialImagesList")
+        self.AxialImagesList.setSizePolicy(self._buildSizePolicy())
+        self.settingsLayout.addWidget(self.AxialImagesList, 1, 1, 1, 1)
+        self.CoronalImagesList = QComboBox(self.groupBox)
+        self.CoronalImagesList.setObjectName("CoronalImagesList")
+        self.CoronalImagesList.setSizePolicy(self._buildSizePolicy(self.CoronalImagesList))
+        self.settingsLayout.addWidget(self.CoronalImagesList, 2, 1, 1, 1)
+
+    def _setGroupBox(self):
+        self.groupBox = QGroupBox(self.centralwidget)
         self.groupBox.showMaximized()
         # self.groupBox.setMaximumSize(QtCore.QSize(500, 16777215))
         self.groupBox.setObjectName("groupBox")
-        self.gridLayout_4 = QtWidgets.QGridLayout(self.groupBox)
-        self.gridLayout_4.setObjectName("gridLayout_4")
-        self.Coronallabel = QtWidgets.QLabel(self.groupBox)
-        self.Coronallabel.setObjectName("Coronallabel")
-        self.gridLayout_4.addWidget(self.Coronallabel, 2, 0, 1, 1)
-        self.AxialSeqBox = QtWidgets.QComboBox(self.groupBox)
-        self.AxialSeqBox.setObjectName("AxialSeqBox")
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Preferred)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.AxialSeqBox.sizePolicy().hasHeightForWidth())
-        self.AxialSeqBox.setSizePolicy(sizePolicy)
-        # self.AxialSeqBox.addItem("")
-        # self.AxialSeqBox.addItem("")
-        # self.AxialSeqBox.addItem("")
-        # self.AxialSeqBox.addItem("")
-        self.gridLayout_4.addWidget(self.AxialSeqBox, 1, 1, 1, 1)
-        self.CoronalSeqBox = QtWidgets.QComboBox(self.groupBox)
-        self.CoronalSeqBox.setObjectName("CoronalSeqBox")
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Preferred)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.CoronalSeqBox.sizePolicy().hasHeightForWidth())
-        self.CoronalSeqBox.setSizePolicy(sizePolicy)
 
-        # self.CoronalSeqBox.addItem("")
-        # self.CoronalSeqBox.addItem("")
-        # self.CoronalSeqBox.addItem("")
-        # self.CoronalSeqBox.addItem("")
-        self.gridLayout_4.addWidget(self.CoronalSeqBox, 2, 1, 1, 1)
-        self.Axiallabel = QtWidgets.QLabel(self.groupBox)
-        self.Axiallabel.setObjectName("Axiallabel")
-        self.gridLayout_4.addWidget(self.Axiallabel, 1, 0, 1, 1)
-        self.line_2 = QtWidgets.QFrame(self.groupBox)
-        self.line_2.setFrameShape(QtWidgets.QFrame.HLine)
-        self.line_2.setFrameShadow(QtWidgets.QFrame.Sunken)
-        self.line_2.setObjectName("line_2")
-        self.gridLayout_4.addWidget(self.line_2, 4, 1, 1, 1)
-        self.line_4 = QtWidgets.QFrame(self.groupBox)
-        self.line_4.setFrameShape(QtWidgets.QFrame.HLine)
-        self.line_4.setFrameShadow(QtWidgets.QFrame.Sunken)
-        self.line_4.setObjectName("line_4")
-        self.gridLayout_4.addWidget(self.line_4, 4, 2, 1, 1)
-        self.line_3 = QtWidgets.QFrame(self.groupBox)
-        self.line_3.setFrameShape(QtWidgets.QFrame.HLine)
-        self.line_3.setFrameShadow(QtWidgets.QFrame.Sunken)
-        self.line_3.setObjectName("line_3")
-        self.gridLayout_4.addWidget(self.line_3, 4, 0, 1, 1)
-        # self.UpLowBox = QtWidgets.QComboBox(self.groupBox)
-        # self.UpLowBox.setObjectName("UpLowBox")
-        # self.UpLowBox.addItem("")
-        # self.UpLowBox.addItem("")
-        # self.gridLayout_4.addWidget(self.UpLowBox, 3, 0, 1, 1)
-        self.pushButton_2 = QtWidgets.QPushButton(self.groupBox)
+    def buildSettingsLayoutManager(self):
+        self.settingsLayout = QGridLayout(self.groupBox)
+        self.settingsLayout.setObjectName("settingsLayout")
+
+    def _setCoronalLabel(self):
+        self.Coronallabel = self.commonLabel("Coronallabel")
+        self.settingsLayout.addWidget(self.Coronallabel, 2, 0, 1, 1)
+
+
+    def _setAxialLabel(self):
+        self.Axiallabel = self.commonLabel("Axiallabel")
+        self.settingsLayout.addWidget(self.Axiallabel, 1, 0, 1, 1)
+
+    def buildFrame(self, obj_name):
+        curFrame = QFrame(self.groupBox)
+        curFrame.setFrameShape(QtWidgets.QFrame.HLine)
+        curFrame.setFrameShadow(QtWidgets.QFrame.Sunken)
+        curFrame.setObjectName(obj_name)
+        return curFrame
+
+    def _setLi2(self):
+        self.line_2 = self.buildFrame("line_2")
+        self.settingsLayout.addWidget(self.line_2, 4, 1, 1, 1)
+
+    def _setLi4(self):
+        self.line_4 = self.buildFrame("line_4")
+        self.settingsLayout.addWidget(self.line_4, 4, 2, 1, 1)
+
+    def _setLi3(self):
+        self.line_3 = self.buildFrame("line_3")
+        self.settingsLayout.addWidget(self.line_3, 4, 0, 1, 1)
+
+    def _setPb2(self):
+        self.pushButton_2 = QPushButton(self.groupBox)
         self.pushButton_2.setObjectName("pushButton_2")
-        self.gridLayout_4.addWidget(self.pushButton_2, 3, 1, 1, 1)
-        self.formLayout = QtWidgets.QFormLayout()
+        self.settingsLayout.addWidget(self.pushButton_2, 3, 1, 1, 1)
+
+    def _setFl(self):
+        self.formLayout = QFormLayout()
         self.formLayout.setObjectName("formLayout")
-        self.window_label = QtWidgets.QLabel(self.groupBox)
+        self.window_label = QLabel(self.groupBox)
         self.window_label.setObjectName("window_label")
-        self.formLayout.setWidget(0, QtWidgets.QFormLayout.LabelRole, self.window_label)
-        self.spinBoxWindow = QtWidgets.QSpinBox(self.groupBox)
+        self.formLayout.setWidget(0, QFormLayout.LabelRole, self.window_label)
+
+    def _setSB1(self):
+        self.spinBoxWindow = QSpinBox(self.groupBox)
         self.spinBoxWindow.setMinimum(-9999)
         self.spinBoxWindow.setMaximum(9999)
         self.spinBoxWindow.setProperty("value", 1600)
         self.spinBoxWindow.setObjectName("spinBoxWindow")
-        self.formLayout.setWidget(0, QtWidgets.QFormLayout.FieldRole, self.spinBoxWindow)
-        self.level_label = QtWidgets.QLabel(self.groupBox)
+        self.formLayout.setWidget(0, QFormLayout.FieldRole, self.spinBoxWindow)
+
+    def _setll1(self):
+        self.level_label = QLabel(self.groupBox)
         self.level_label.setObjectName("level_label")
-        self.formLayout.setWidget(1, QtWidgets.QFormLayout.LabelRole, self.level_label)
+        self.formLayout.setWidget(1, QFormLayout.LabelRole, self.level_label)
+
+    def _setSB2(self):
         self.spinBoxLevel = QtWidgets.QSpinBox(self.groupBox)
         self.spinBoxLevel.setMinimum(-9999)
         self.spinBoxLevel.setMaximum(9999)
         self.spinBoxLevel.setProperty("value", 800)
         self.spinBoxLevel.setObjectName("spinBoxLevel")
-        self.formLayout.setWidget(1, QtWidgets.QFormLayout.FieldRole, self.spinBoxLevel)
-        self.gridLayout_4.addLayout(self.formLayout, 5, 1, 1, 1)
+        self.formLayout.setWidget(1, QFormLayout.FieldRole, self.spinBoxLevel)
 
-        self.gridLayout_3.addWidget(self.groupBox, 3, 1, 1, 1)
-        self.label_6 = QtWidgets.QLabel(self.centralwidget)
-        font = QtGui.QFont()
-        font.setBold(True)
-        font.setWeight(75)
-        self.label_6.setFont(font)
-        self.label_6.setObjectName("label_6")
-        self.gridLayout_3.addWidget(self.label_6, 1, 6, 1, 1)
-        self.label_8 = QtWidgets.QLabel(self.centralwidget)
-        font = QtGui.QFont()
-        font.setBold(True)
-        font.setWeight(75)
-        self.label_8.setFont(font)
-        self.label_8.setAlignment(QtCore.Qt.AlignCenter)
-        self.label_8.setObjectName("label_8")
-        self.gridLayout_3.addWidget(self.label_8, 2, 1, 1, 1)
-        self.CoronalFrame = QtWidgets.QGroupBox(self.centralwidget)
+    def underBoundaries(self):
+        self.pLabel = self.getCommonLabel("pLabel", self._getCommonFont()(), QtCore.Qt.AlignCenter)
+        self.mainLayout.addWidget(self.pLabel, 2, 5, 1, 1)
+        self.iLabel = self.getCommonLabel("iLabel", self._getCommonFont()(), QtCore.Qt.AlignCenter)
+        self.mainLayout.addWidget(self.label_8, 2, 1, 1, 1)
+
+    def _setCoronalFrame(self):
+        self.CoronalFrame = QGroupBox(self.centralwidget)
         self.CoronalFrame.setObjectName("CoronalFrame")
         self.CoronalFrame.showMaximized()
-        self.gridLayout_3.addWidget(self.CoronalFrame, 1, 1, 1, 1)
-        self.label_2 = QtWidgets.QLabel(self.centralwidget)
-        font = QtGui.QFont()
-        font.setBold(True)
-        font.setWeight(75)
+        self.mainLayout.addWidget(self.CoronalFrame, 1, 1, 1, 1)
+
+    def _setL2(self):
+        self.label_2 = QLabel(self.centralwidget)
+        font = self._getCommonFont()()
         self.label_2.setFont(font)
         self.label_2.setAlignment(QtCore.Qt.AlignCenter)
         self.label_2.setObjectName("label_2")
-        self.gridLayout_3.addWidget(self.label_2, 0, 1, 1, 1)
+        self.mainLayout.addWidget(self.label_2, 0, 1, 1, 1)
+
+    def _setL(self):
         self.label = QtWidgets.QLabel(self.centralwidget)
-        font = QtGui.QFont()
-        font.setBold(True)
-        font.setWeight(75)
-        self.label.setFont(font)
+        font = self._getCommonFont()()
         self.label.setAutoFillBackground(False)
         self.label.setAlignment(QtCore.Qt.AlignCenter)
         self.label.setObjectName("label")
-        self.gridLayout_3.addWidget(self.label, 0, 5, 1, 1)
-        self.label_4 = QtWidgets.QLabel(self.centralwidget)
-        font = QtGui.QFont()
-        font.setBold(True)
-        font.setWeight(75)
-        self.label_4.setFont(font)
-        self.label_4.setObjectName("label_4")
-        self.gridLayout_3.addWidget(self.label_4, 1, 2, 1, 1)
-        self.AxialFrame = QtWidgets.QGroupBox(self.centralwidget)
-        self.AxialFrame.showMaximized()
-        self.AxialFrame.setObjectName("AxialFrame")
-        # self.gridLayout_3.addWidget(self.AxialFrame, 1, 5, 1, 1)
-        self.label_9 = QtWidgets.QLabel(self.centralwidget)
-        font = QtGui.QFont()
-        font.setBold(True)
-        font.setWeight(75)
-        self.label_9.setFont(font)
-        self.label_9.setAlignment(QtCore.Qt.AlignCenter)
-        self.label_9.setObjectName("label_9")
-        self.gridLayout_3.addWidget(self.label_9, 1, 0, 1, 1)
-        self.line = QtWidgets.QFrame(self.centralwidget)
-        self.line.setFrameShape(QtWidgets.QFrame.VLine)
-        self.line.setFrameShadow(QtWidgets.QFrame.Sunken)
-        self.line.setObjectName("line")
-        self.gridLayout_3.addWidget(self.line, 1, 3, 1, 1)
+        self.mainLayout.addWidget(self.label, 0, 5, 1, 1)
 
-        self.groupBox_2 = QtWidgets.QGroupBox(self.centralwidget)
+    def _setLi(self):
+        self.line = QFrame(self.centralwidget)
+        self.line.setFrameShape(QFrame.VLine)
+        self.line.setFrameShadow(QFrame.Sunken)
+        self.line.setObjectName("line")
+        self.mainLayout.addWidget(self.line, 1, 3, 1, 1)
+
+    def _setGb2(self):
+        self.groupBox_2 = QGroupBox(self.centralwidget)
         self.groupBox_2.setTitle("")
         self.groupBox_2.setObjectName("groupBox_2")
-        self.gridLayout = QtWidgets.QGridLayout(self.groupBox_2)
+
+    def setupUi(self, MainWindow):
+        self.buildMainWindow(MainWindow)
+        self.buildMainLayoutManager()
+        self.buildImageBoundaries() # Sets L/R marking on sides of NRRM images
+
+        self._setGroupBox()
+        self.buildSettingsLayoutManager()
+        self._setCoronalLabel()
+        self.buildImageLists()
+        self._setAxialLabel()
+        self._setLi2()
+        self._setLi4()
+        self._setLi3()
+        self._setPb2()
+        self._setFl()
+        self._setSB1()
+        self._setll1()
+        self.settingsLayout.addLayout(self.formLayout, 5, 1, 1, 1)
+        self.mainLayout.addWidget(self.groupBox, 3, 1, 1, 1)
+
+        self._setCoronalFrame()
+        self._setL2()
+        self._setL()
+        #?
+        self.AxialFrame = QGroupBox(self.centralwidget)
+        self.AxialFrame.showMaximized()
+        self.AxialFrame.setObjectName("AxialFrame")
+        # self.mainLayout.addWidget(self.AxialFrame, 1, 5, 1, 1)
+        self._setLi()
+
+        self._setGb2()
+        self.gridLayout = QGridLayout(self.groupBox_2)
         self.gridLayout.setObjectName("gridLayout")
-        self.Calculate = QtWidgets.QPushButton(self.groupBox_2)
+        self.Calculate = QPushButton(self.groupBox_2)
         self.Calculate.setObjectName("Newpoint")
         self.gridLayout.addWidget(self.Calculate, 2, 2, 1, 1)
         self.pushButton = QtWidgets.QPushButton(self.groupBox_2)
@@ -214,7 +245,7 @@ class Ui_MainWindow(object):
         # self.gridLayout.addWidget(self.pushButton_3, 1, 2, 1, 1)
         spacerItem1 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
         self.gridLayout.addItem(spacerItem1, 1, 3, 1, 1)
-        self.gridLayout_3.addWidget(self.groupBox_2, 3, 5, 1, 1)
+        self.mainLayout.addWidget(self.groupBox_2, 3, 5, 1, 1)
 
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(MainWindow)
@@ -264,18 +295,18 @@ class Ui_MainWindow(object):
         self.CoronalViewer.UpdateWindowLevel_Val()
 
     def LoadViewer(self):
-        self.ViewerProperties = ViewerProp.viewerLogic(self.FilesList,str(self.AxialSeqBox.currentIndex()),
-                                                       str(self.CoronalSeqBox.currentIndex()))
+        self.ViewerProperties = ViewerProp.viewerLogic(self.FilesList,str(self.AxialImagesList.currentIndex()),
+                                                       str(self.CoronalImagesList.currentIndex()))
 
         # display axial viewer
         AxialVTKQidget = QVTKRenderWindowInteractor(self.AxialFrame)
-        self.gridLayout_3.addWidget(AxialVTKQidget, 1, 5, 1, 1)
+        self.mainLayout.addWidget(AxialVTKQidget, 1, 5, 1, 1)
         self.AxialViewer = AxialCoronalViewer.PlaneViewerQT(AxialVTKQidget, self.ViewerProperties, 'Axial')
 
         # dispaly coronal viewer
 
         CoronalVTKQidget = QVTKRenderWindowInteractor(self.CoronalFrame)
-        self.gridLayout_3.addWidget(CoronalVTKQidget, 1, 1, 1, 1)
+        self.mainLayout.addWidget(CoronalVTKQidget, 1, 1, 1, 1)
         self.CoronalViewer = AxialCoronalViewer.PlaneViewerQT(CoronalVTKQidget, self.ViewerProperties, 'Coronal')
 
 
@@ -283,20 +314,20 @@ class Ui_MainWindow(object):
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
-        self.label_3.setText(_translate("MainWindow", "R"))
-        self.label_7.setText(_translate("MainWindow", "P"))
+        self.rightLeftBoundary.setText(_translate("MainWindow", "R"))
+        self.pLabel.setText(_translate("MainWindow", "P"))
         self.groupBox.setTitle(_translate("MainWindow", "Settings"))
         self.Axiallabel.setText(_translate("MainWindow", "Axial"))
         self.Coronallabel.setText(_translate("MainWindow", "Coronal"))
         self.level_label.setText(_translate("MainWindow", "Level"))
         self.window_label.setText(_translate("MainWindow", "Window"))
         self.pushButton_2.setText(_translate("MainWindow", "Update"))
-        self.label_6.setText(_translate("MainWindow", "L"))
+        self.rightRightBoundary.setText(_translate("MainWindow", "L"))
         self.label_8.setText(_translate("MainWindow", "I"))
         self.label_2.setText(_translate("MainWindow", "S (Coronal)"))
         self.label.setText(_translate("MainWindow", "A (Axial)"))
-        self.label_4.setText(_translate("MainWindow", "L"))
-        self.label_9.setText(_translate("MainWindow", "R"))
+        self.leftLeftBoundary.setText(_translate("MainWindow", "L"))
+        self.leftRightBoundary.setText(_translate("MainWindow", "R"))
         self.Calculate.setText(_translate("MainWindow", "Calculate MPR"))
         self.pushButton.setText(_translate("MainWindow", "Set Points - Calculate MPR"))
         # self.pushButton_3.setText(_translate("MainWindow", "Display Cursor"))
@@ -311,8 +342,8 @@ class Ui_MainWindow(object):
         for i in range(len(self.FilesList)):
             basename = os.path.basename(self.FilesList[i])
             basename = basename[:-5]
-            self.AxialSeqBox.addItem(basename)
-            self.CoronalSeqBox.addItem(basename)
+            self.AxialImagesList.addItem(basename)
+            self.CoronalImagesList.addItem(basename)
 
     def calc_clicked(self):
         # print("in Window: ", self.CoronalViewer.PickingPointsIm)

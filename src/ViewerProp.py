@@ -5,7 +5,7 @@ import math
 from vtk.util import numpy_support
 
 
-class viewerLogic():
+class viewerLogic:
     def __init__(self,FilesList,Setting_Ax, Setting_Co):
         # dict = SeqDic.Dict()
         # AxialSettings = Setting_UL+"_Ax"+"_"+Setting_Ax
