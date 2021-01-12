@@ -1,104 +1,93 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from scipy.interpolate import RegularGridInterpolator, BSpline, Rbf, interp2d, griddata,splprep,splev
-import vtk
-from vtk.util import numpy_support
+from scipy.interpolate import RegularGridInterpolator, splprep,splev
+from typing import List
+from AxialCoronalViewer import PlaneViewerQT
+import ViewerProp
 
-class PointsToPlansVectors():
-    def __init__(self, viewerLogic, ListOfPoints, ViewMode, Height = 10, viewAngle = 0,Plot = 0):
+
+class PointsToPlansVectors:
+    def __init__(self, viewerLogic: ViewerProp.viewerLogic, allPoints: List[np.array], ViewMode: str, Height = 10, viewAngle = 0, Plot = False):
         self.Plot = Plot
         self.Height = Height
         self.viewAngle = viewAngle
 
+        # should be changed to assert
         if ViewMode == 'Coronal':
             V = np.asarray(viewerLogic.CoronalArrayDicom)
-
-            ##
             self.V = V
-            ##
             V_origin = np.asarray(viewerLogic.CoronalVTKOrigin)
             V_spacing = np.asarray(viewerLogic.CoronalVTKSpacing)
             V_dim = np.asarray(viewerLogic.CoronalDimensions)
 
-            # self.x = np.arange(V_origin[0],V_origin[0]+V_dim[0]*V_spacing[0], V_spacing[0])
-            # self.y = np.arange(V_origin[1],V_origin[1]+V_dim[1]*V_spacing[1], V_spacing[1])
-            # self.z = np.arange(V_origin[2], V_origin[2] + V_dim[2] * V_spacing[2], V_spacing[2])
-            # self.x = np.arange(-V_dim[0] * V_spacing[0] / 2, V_dim[0] * V_spacing[0] / 2, V_spacing[0])
-            # self.y = np.arange(-V_dim[1] * V_spacing[1] / 2, V_dim[1] * V_spacing[1] / 2, V_spacing[1])
-            # self.z = np.arange(-V_dim[2] * V_spacing[2] / 2, V_dim[2] * V_spacing[2] / 2, V_spacing[2])
-            # self.x = np.linspace(V_origin[0], V_origin[0] + (V_dim[0] - 1) * V_spacing[0], V_dim[0])
-            # self.y = np.linspace(V_origin[1], V_origin[1] + (V_dim[1] - 1) * V_spacing[1], V_dim[1])
-            # self.z = np.linspace(V_origin[2], V_origin[2] + (V_dim[2] - 1) * V_spacing[2], V_dim[2])
             self.x = np.linspace(-V_dim[0] * V_spacing[0] / 2, (V_dim[0] ) * V_spacing[0]/2, V_dim[0])
             self.y = np.linspace(-V_dim[1] * V_spacing[1] / 2, (V_dim[1] ) * V_spacing[1]/2, V_dim[1])
             self.z = np.linspace(-V_dim[2] * V_spacing[2] / 2, (V_dim[2] ) * V_spacing[2]/2, V_dim[2])
-            # self.x = np.linspace(-(V_dim[0]-1) * V_spacing[0] / 2, (V_dim[0]-1 ) * V_spacing[0]/2, V_dim[0])
-            # self.y = np.linspace(-(V_dim[1]-1) * V_spacing[1] / 2, (V_dim[1]-1 ) * V_spacing[1]/2, V_dim[1])
-            # self.z = np.linspace(-(V_dim[2]-1) * V_spacing[2] / 2, (V_dim[2]-1 ) * V_spacing[2]/2, V_dim[2])
-            # if
-        #my_interpolating_function = interpulation3d(x, y, z, V)
+
         self.delta = V_spacing[0]
 
-        Pts = np.asarray(ListOfPoints)
+        Pts = np.asarray(allPoints)
         self.Org_points = Pts
-        ListOfPoints = self.Org_points[:, 0:3]
-        # self.LinearVTKlist = self.LinearCenterLine(ListOfPoints)
-        Linear = self.LinearCenterLine(ListOfPoints, self.delta*2)
-        x = np.squeeze(ListOfPoints[:, 0])
-        y = np.squeeze(ListOfPoints[:, 1])
-        z = np.squeeze(ListOfPoints[:, 2])
+        allPoints = self.Org_points[:, 0:3] # should be replaceable by [:, :]
+        # self.LinearVTKlist = self.LinearCenterLine(allPoints)
+        Linear = self.LinearCenterLine(allPoints, self.delta*2)
+        x = np.squeeze(allPoints[:, 0])
+        y = np.squeeze(allPoints[:, 1])
+        z = np.squeeze(allPoints[:, 2])
         if self.Plot:
-            fig = plt.figure()
-            ax = fig.add_subplot(111, projection='3d')
-            ax.plot(x, y, z,'-ob')
-
-            plt.show()
+            self.plotPoints(x, y, z)
 
         # f = interp2d(x, y, z, kind='cubic')
         # rbfi = Rbf(x, y, z,'cubic')
         # zi = rbfi(np.squeeze(Linear[:, 0]), np.squeeze(Linear[:, 1]))
         # self.LinearVTKlist = np.array(np.squeeze(Linear[:, 0]),np.squeeze(Linear[:, 1]),zi)
         # self.LinearVTKlist = f(np.squeeze(Linear[:, 0]),np.squeeze(Linear[:, 1]))
-        self.LinearVTKlist = self.bspline(ListOfPoints,self.delta,degree=2)
-        # self.LinearVTKlist = self.LinearCenterLine(ListOfPoints,self.delta)
+        self.LinearVTKlist = self.bspline(allPoints,self.delta,degree=2)
+        # self.LinearVTKlist = self.LinearCenterLine(allPoints,self.delta)
         self.FindVectors()
         self.getStraightMPRVector(self.x, self.y, self.z, V)
 
-    def LinearCenterLine(self, ListOfPoints,delta):
-        # ListOfPoints = self.Org_points[:, 0:3]
+    def plotPoints(self, x, y, z):
+        fig = plt.figure()
+        ax = fig.add_subplot(111, projection='3d')
+        ax.plot(x, y, z, '-ob')
+        plt.show()
+
+    def LinearCenterLine(self, allPoints,delta):
+        # allPoints = self.Org_points[:, 0:3]
         LinearVTKlist = np.zeros([1, 3])
-        for i in range(1, ListOfPoints.shape[0]):
-            Vector = ListOfPoints[i] - ListOfPoints[i - 1]
-            point = ListOfPoints[i - 1]
+        for i in range(1, allPoints.shape[0]):
+            Vector = allPoints[i] - allPoints[i - 1]
+            point = allPoints[i - 1]
             LinearVTKlist = np.append(LinearVTKlist, [point], axis=0)
-            dist = np.linalg.norm(ListOfPoints[i] - point)
+            dist = np.linalg.norm(allPoints[i] - point)
             while dist > delta:
                 point = point + (delta / np.linalg.norm(Vector)) * Vector
                 LinearVTKlist = np.append(LinearVTKlist, [point], axis=0)
-                dist = np.linalg.norm(ListOfPoints[i] - point)
-            ListOfPoints[i] = point + (delta / np.linalg.norm(Vector)) * Vector
-        LinearVTKlist = np.append(LinearVTKlist, [ListOfPoints[i]], axis=0)
+                dist = np.linalg.norm(allPoints[i] - point)
+            allPoints[i] = point + (delta / np.linalg.norm(Vector)) * Vector
+        LinearVTKlist = np.append(LinearVTKlist, [allPoints[i]], axis=0)
         LinearVTKlist = LinearVTKlist[1:]
         return LinearVTKlist
         # self.LinearVTKlist = LinearVTKlist
 
-    # def LinearCenterLine2(self, ListOfPoints, delta):
+    # def LinearCenterLine2(self, allPoints, delta):
     #     LinearVTKlist = np.zeros([1, 3])
-    #     for i in range(1, ListOfPoints.shape[0]):
+    #     for i in range(1, allPoints.shape[0]):
 
-    def bspline(self, ListOfPoints, delta, n=100, degree=3, ):
+    def bspline(self, allPoints, delta, n=100, degree=3, ):
         """ Calculate n samples on a bspline
 
             cv :      Array ov control vertices
             n  :      Number of samples to return
             degree:   Curve degree
         """
-        x = np.squeeze(ListOfPoints[:, 0])
-        y = np.squeeze(ListOfPoints[:, 1])
-        z = np.squeeze(ListOfPoints[:, 2])
+        x = np.squeeze(allPoints[:, 0])
+        y = np.squeeze(allPoints[:, 1])
+        z = np.squeeze(allPoints[:, 2])
         dist =0
-        for i in range(len(ListOfPoints)-1):
-            dist += np.linalg.norm(ListOfPoints[i+1]-ListOfPoints[i])
+        for i in range(len(allPoints)-1):
+            dist += np.linalg.norm(allPoints[i+1]-allPoints[i])
         n = np.int(round(dist/delta))
 
         tck, u = splprep([x, y, z], s=2)
@@ -111,7 +100,7 @@ class PointsToPlansVectors():
         if self.Plot:
             fig = plt.figure()
             ax = fig.add_subplot(111, projection='3d')
-            ax.plot(ListOfPoints[:, 0], ListOfPoints[:, 1], ListOfPoints[:, 2],'-ob')
+            ax.plot(allPoints[:, 0], allPoints[:, 1], allPoints[:, 2],'-ob')
             # ax.plot(xline, yline, zline, '-og')
             ax.plot(x_fine, y_fine, z_fine,'-*r')
             # ax.plot(L[:,0], L[:,1], L[:,2], '-*b')
@@ -121,12 +110,12 @@ class PointsToPlansVectors():
 
         return B
     def FindVectors(self):
-        ListOfPoints = self.LinearVTKlist
+        allPoints = self.LinearVTKlist
         Vector1_list = []
         Vector2_list = []
-        xline = np.squeeze(ListOfPoints[:, 0])
-        yline = np.squeeze(ListOfPoints[:, 1])
-        zline = np.squeeze(ListOfPoints[:, 2])
+        xline = np.squeeze(allPoints[:, 0])
+        yline = np.squeeze(allPoints[:, 1])
+        zline = np.squeeze(allPoints[:, 2])
         if self.Plot:
             # fig = plt.figure()
             # ax = fig.add_subplot(111, projection='3d')
@@ -189,9 +178,7 @@ class PointsToPlansVectors():
         self.Vector1_list = np.asarray(Vector1_list)
         self.Vector2_list = np.asarray(Vector2_list)
 
-    def interpulation3d(self,x, y, z, V):
-        my_interpolating_function = RegularGridInterpolator((x, y, z), V, method='linear')
-        return my_interpolating_function
+
 
     def getStraightMPRVector(self, x, y, z, V):
         # Heigth in cm, Angle in deg
@@ -270,41 +257,23 @@ class PointsToPlansVectors():
             ax1.scatter(Ponits_x, Ponits_y, c='r')
             plt.show()
 
-        X_dis = []
-        Y_dis = []
-        for i in range(MPR_indexs_np.shape[0] - 1):
-            x_i = []
-            y_i = []
-            for j in range(MPR_indexs_np.shape[1] - 1):
-                D_j = np.linalg.norm(MPR_indexs_np[i, j, :] - MPR_indexs_np[i, j + 1, :])
-                x_i.append(D_j)
-                D_i = np.linalg.norm(MPR_indexs_np[i, j, :] - MPR_indexs_np[i + 1, j, :])
-                y_i.append(D_i)
-            X_dis.append(x_i)
-            Y_dis.append(y_i)
-        X_dis = np.asarray(X_dis)
-        Y_dis = np.asarray(Y_dis)
-
         V = np.flip(V, 1)
-        my_interpolating_function = self.interpulation3d(x, y, z, V)
+        interpolatingFunction = RegularGridInterpolator((x, y, z), V, method='linear')
         MPR_indexs_np_reshape = np.reshape(MPR_indexs_np, (MPR_indexs_np.shape[0] * MPR_indexs_np.shape[1], 3))
-        MPR_M = my_interpolating_function(MPR_indexs_np_reshape)
+        MPR_M = interpolatingFunction(MPR_indexs_np_reshape)
         print(MPR_M.shape)
         self.MPR_M = np.reshape(MPR_M, (MPR_indexs_np.shape[0], MPR_indexs_np.shape[1]))
         print(MPR_M.shape)
 
-        # self.MPR_M = my_interpolating_function(MPR_indexs_np)
         self.MPR_indexs_np = MPR_indexs_np
-        # extent = np.linalg.norm
         if self.Plot:
             fig, ax = plt.subplots()
-            #ax.imshow(MPR_M,origin='upper')
             ax.imshow(self.MPR_M)
             plt.gca().invert_yaxis()
-            #plt.scatter(Ponits_x,Ponits_y)
             plt.show()
         print("")
         #MPR_M_vtk = numpy_support.numpy_to_vtk(num_array=MPR_M, deep=True, array_type=vtk.VTK_FLOAT)
+
 
     def PlotSelectedPointsForDis(self, Piots_pos):
         plan2 = np.transpose(self.V[:, :, min(self.Pointz_zslice).astype(int)])

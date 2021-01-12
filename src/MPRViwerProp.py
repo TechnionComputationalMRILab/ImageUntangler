@@ -1,6 +1,6 @@
-from vtk.util import numpy_support
 
-class viewerLogic():
+
+class viewerLogic:
     def __init__(self,MPR_M,delta,MPRPosiotion,ListOfPoints,Height,angle, ConvViewerProperties, ConvViewMode):
         self.MPR_M = MPR_M
         self.delta = delta

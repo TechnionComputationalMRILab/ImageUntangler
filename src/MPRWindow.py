@@ -8,17 +8,16 @@
 
 
 from PyQt5 import QtCore, QtGui, QtWidgets
-import vtk
 import numpy as np
 from vtk.qt.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
-from vtk.util import numpy_support
 import getMPR
 import MPRViewer
 import MPRViwerProp
 import pickle
 
-class Ui_MPRWindow(object):
-    def setupUi(self, MPRWindow,MPR_M,delta,MPRPosiotion,ConvViewerProperties,ListOfPoints,ConvViewMode):
+
+class Ui_MPRWindow:
+    def setupUi(self, MPRWindow, MPR_M, delta, MPRPosiotion, ConvViewerProperties, ListOfPoints, ConvViewMode):
 
 
 

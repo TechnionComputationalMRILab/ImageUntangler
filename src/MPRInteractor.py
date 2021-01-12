@@ -1,6 +1,7 @@
 import vtk
 import numpy as np
 
+
 class MPRInteractorStyle(vtk.vtkInteractorStyleImage):
     def __init__(self, parent, MPRWindow):
 

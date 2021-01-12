@@ -1,5 +1,4 @@
 import vtk
-import numpy as np
 
 
 class AxialViewerInteractorStyle(vtk.vtkInteractorStyleImage):
