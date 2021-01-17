@@ -15,38 +15,26 @@ class viewerLogic:
         self.zoomFactor = 1
         self.SliceIDx =[]
 
-        self.AxialSliceID = [] # is this ever anything besides an empty list? Shouldn't it be an Integer
-        self.AxialArrayDicom = None
-
-
-        self.CoronalData = []
-        self.CoronalVTKOrigin = []
-        self.CoronalVTKSpacing = []
-        self.CoronalDimensions = []
-        self.CoronalSliceID = []
-        self.CoronalExtent = []
-        self.CoronalArrayDicom = None
-
         self.CoronalCenterSliceID = None
         self.AxialCenterSliceID = None
 
-        self.AxialViewer = []
-        self.CoronalViewer = []
+        self.AxialViewer = None # kinda wacky - ViewerProp and AxialCoronalViewer own each other
+        self.CoronalViewer = None
 
-        self.ReadCoronal()
+        self.CoronalData = self.ReadCoronal()
         self.AxialData = self.ReadAxial()
-        self.LevelVal = (self.CoronalArrayDicom.max()+self.CoronalArrayDicom.min())/2
-        self.WindowVal = (self.CoronalArrayDicom.max()-self.CoronalArrayDicom.min())
+        self.LevelVal = (self.CoronalData.dicomArray.max()+self.CoronalData.dicomArray.min())/2
+        self.WindowVal = (self.CoronalData.dicomArray.max()-self.CoronalData.dicomArray.min())
 
-        self.CoronalBaseParallelScale = 0.5 * ((self.CoronalExtent[1] - self.CoronalExtent[0]) *self.CoronalVTKSpacing[0])
-        self.AxialBaseParallelScale = 0.5 * ((self.AxialExtent[1] - self.AxialExtent[0]) *self.AxialVTKSpacing[0])
+        self.CoronalBaseParallelScale = 0.5 * ((self.CoronalData.extent[1] - self.CoronalData.extent[0]) *self.CoronalData.spacing[0])
+        self.AxialBaseParallelScale = 0.5 * ((self.AxialData.extent[1] - self.AxialData.extent[0]) * self.AxialData.spacing[0])
 
     def ReadAxial(self):
         reader = vtkNrrdReader()
         reader.SetFileName(self.axialImagePath)
         reader.Update()
         axialImageData = reader.GetOutput()
-        return ImageProperties(axialImageData.GetSpacing(), axialImageData.GetDimensions(),
+        return ImageProperties(axialImageData, axialImageData.GetSpacing(), axialImageData.GetDimensions(),
                                                axialImageData.GetExtent(), axialImageData.GetPointData(), axialImageData.GetOrigin())
 
 
@@ -54,24 +42,15 @@ class viewerLogic:
         reader = vtk.vtkNrrdReader()
         reader.SetFileName(self.coronalImagePath)
         reader.Update()
-        self.CoronalData = reader.GetOutput()
-        coronal_point_data = self.CoronalData.GetPointData()
-        assert (coronal_point_data.GetNumberOfArrays() == 1)
-        self.CoronalVTKOrigin = self.CoronalData.GetOrigin()
-        self.CoronalVTKSpacing = self.CoronalData.GetSpacing()
-        self.CoronalDimensions = self.CoronalData.GetDimensions()
-        self.CoronalExtent = self.CoronalData.GetExtent()
-        center_z = self.CoronalVTKOrigin[2] + self.CoronalVTKSpacing[2] * 0.5 * (self.CoronalExtent[4] + self.CoronalExtent[5])
-        self.start_center_z = center_z
-        ic(self.CoronalSliceID)
+        coronalImageData = reader.GetOutput()
+        return ImageProperties(coronalImageData, coronalImageData.GetSpacing(), coronalImageData.GetDimensions(),
+                               coronalImageData.GetExtent(), coronalImageData.GetPointData(), coronalImageData.GetOrigin())
+        """
         if np.mod(self.CoronalSliceID, 2) == 0:
             self.CoronalSliceID = int((center_z - self.CoronalVTKOrigin[2]) / self.CoronalVTKSpacing[2] - 0.5)
         else:
             self.CoronalSliceID = int((center_z - self.CoronalVTKOrigin[2]) / self.CoronalVTKSpacing[2])
-        self.CoronalCenterSliceID = self.CoronalSliceID
-        coronal_array_data = coronal_point_data.GetArray(0)
-        self.CoronalArrayDicom = numpy_support.vtk_to_numpy(coronal_array_data)
-        self.CoronalArrayDicom = self.CoronalArrayDicom.reshape(self.CoronalDimensions, order='F')
+        """
 
     def updateZoomFactor(self, ZoomFactor):
         self.zoomFactor = ZoomFactor
@@ -83,20 +62,19 @@ class viewerLogic:
     def MoveCursor(self, PickerCursorCords, ViewMode):
         picking_idx_image = np.zeros(3)
         if ViewMode == 'Axial':
-            spacing = self.AxialVTKSpacing
-            shape = np.asarray(self.AxialDimensions)
-            self.SliceIDx = self.AxialSliceID
+            spacing = self.AxialData.spacing
+            shape = np.asarray(self.AxialData.dimensions)
+            self.SliceIDx = self.AxialData.sliceID
         elif ViewMode == 'Coronal':
-            spacing = self.CoronalVTKSpacing
-            shape = np.asarray(self.CoronalDimensions)
-            self.SliceIDx = self.CoronalSliceID
+            spacing = self.CoronalData.spacing
+            shape = np.asarray(self.CoronalData.dimensions)
+            self.SliceIDx = self.CoronalData.sliceID
 
         viewer_origin = shape / 2.0
         picking_idx_image[2] = self.SliceIDx
         picking_idx_image[0] = PickerCursorCords[0] / spacing[0] + viewer_origin[0]
         picking_idx_image[1] = shape[1] - (PickerCursorCords[1] / spacing[1] + viewer_origin[1])
         picking_idx_image = np.int32(np.round(picking_idx_image))
-        # print(picking_idx_image)
         axial_curser_coords =self.AxialViewer.Cursor.GetFocalPoint()
         coronal_curser_coords = self.CoronalViewer.Cursor.GetFocalPoint()
         if ViewMode == "Axial":
@@ -140,15 +118,18 @@ class viewerLogic:
 
 
 class ImageProperties:
-    def __init__(self, spacing, dimensions, extent, pointData, origin):
+    def __init__(self, fullData, spacing, dimensions, extent, pointData, origin):
+        self.fullData = fullData # ??temp
         self.spacing = spacing
         self.dimensions = dimensions
         self.extent = extent
-
+        self.origin = origin
         center_z = origin[2] + spacing[2] * 0.5 * (extent[4] + extent[5])
-        self.AxialSliceID = math.ceil((center_z-origin[2]) / spacing[2])
-        self.AxialCenterSliceID = self.AxialSliceID
+        self.sliceID = math.ceil((center_z-origin[2]) / spacing[2])
+        self.centerSliceID = self.sliceID
         imageData = pointData.GetArray(0)
         ic(imageData)
         self.dicomArray = numpy_support.vtk_to_numpy(imageData)
         self.dicomArray = self.dicomArray.reshape(dimensions, order='F')
+
+

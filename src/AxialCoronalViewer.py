@@ -1,21 +1,21 @@
 import vtk
-import AxialViewerInteractorStyle
 import numpy as np
+from vtk.qt.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
+import AxialViewerInteractorStyle
+import ViewerProp
 
 
 class PlaneViewerQT:
-    # ZminVTK: object
-
-    def __init__(self, interactor, viewerLogic, ViewMode):
+    def __init__(self, interactor: QVTKRenderWindowInteractor, viewerLogic: ViewerProp.viewerLogic , ViewMode: str):
         self.viewerLogic = viewerLogic
         self.interactor = interactor
         # self.visualizationWindow = self.viewerLogic.WindowVal
         # self.visualizationLevel = self.viewerLogic.LevelVal
         self.ViewMode = ViewMode
         if self.ViewMode == 'Axial':
-            self.SliceIDx = self.viewerLogic.AxialSliceID
+            self.SliceIDx = self.viewerLogic.AxialData.sliceID
         elif self.ViewMode == 'Coronal':
-            self.SliceIDx = self.viewerLogic.CoronalSliceID
+            self.SliceIDx = self.viewerLogic.CoronalData.sliceID
 
         self.vtkVol = []
         self.center = []
@@ -57,14 +57,13 @@ class PlaneViewerQT:
 
     def setVtkVols(self):
         if self.ViewMode == 'Axial':
-            self.vtkVol = self.viewerLogic.AxialData
+            imageDataSource = self.viewerLogic.AxialData
         elif self.ViewMode == 'Coronal':
-            self.vtkVol = self.viewerLogic.CoronalData
-        # self.vtkVol = self.viewerLogic.AxialData
-        x0, y0, z0 = self.vtkVol.GetOrigin()
-        x_spacing, y_spacing, z_spacing = self.vtkVol.GetSpacing()
-        x_min, x_max, y_min, y_max, z_min, z_max = self.vtkVol.GetExtent()
-
+            imageDataSource = self.viewerLogic.CoronalData
+        x0, y0, z0 = imageDataSource.origin
+        x_spacing, y_spacing, z_spacing = imageDataSource.spacing
+        x_min, x_max, y_min, y_max, z_min, z_max = imageDataSource.extent
+        self.vtkVol = imageDataSource.fullData
 
         self.center = [x0 + x_spacing * 0.5 * (x_min + x_max),
                        y0 + y_spacing * 0.5 * (y_min + y_max),
@@ -73,12 +72,7 @@ class PlaneViewerQT:
         self.StartCenter = self.center
         self.ZminVTK = z0
         self.ZmaxVTK = z0 + z_spacing * (z_min + z_max)
-        # if (z_max-z_min+1)%2 == 0:
-        #     self.ZminVTK = z0 - 0.5 * z_spacing
-        #     self.ZmaxVTK = z0 + z_spacing * (z_max -z_min + 0.5)
-        # else:
-        #     self.ZminVTK = z0
-        #     self.ZmaxVTK = z0 + z_spacing * (z_max -z_min + 1)
+
 
         # Matrices for axial, coronal, sagittal, oblique view orientations
         self.XY = vtk.vtkMatrix4x4()
@@ -87,24 +81,6 @@ class PlaneViewerQT:
                              0, 0, 1, self.center[2],
                              0, 0, 0, 1))
 
-        # self.axial = vtk.vtkMatrix4x4()
-        #
-        # self.axial.DeepCopy((1, 0, 0, self.center[0],
-        #                      0, -1, 0, self.center[1],
-        #                      0, 0, 1, self.center[2],
-        #                      0, 0, 0, 1))
-        #
-        # self.coronal = vtk.vtkMatrix4x4()
-        # self.coronal.DeepCopy((1, 0, 0, self.center[0],
-        #                        0, 0, 1, self.center[1],
-        #                        0, -1, 0, self.center[2],
-        #                        0, 0, 0, 1))
-        #
-        # self.sagittal = vtk.vtkMatrix4x4()
-        # self.sagittal.DeepCopy((0, 0, -1, self.center[0],
-        #                         -1, 0, 0, self.center[1],
-        #                         0, -1, 0, self.center[2],
-        #                         0, 0, 0, 1))
 
         # Extract a slice in the desired orientation
         self.reslice = vtk.vtkImageReslice()
@@ -182,9 +158,9 @@ class PlaneViewerQT:
         self.center = center
         self.SliceIDx = sliceIdx
         if self.ViewMode == 'Axial':
-            self.viewerLogic.AxialSliceID = sliceIdx
+            self.viewerLogic.AxialData.sliceID = sliceIdx
         elif self.ViewMode == 'Coronal':
-            self.viewerLogic.CoronalSliceID = sliceIdx
+            self.viewerLogic.CoronalData.sliceID = sliceIdx
 
         self.PresentPoint()
 
@@ -337,11 +313,11 @@ class PlaneViewerQT:
     def PresentCurser(self):
         start_idx_image = np.zeros(3)
         if self.ViewMode == 'Axial':
-            spacing = self.viewerLogic.AxialVTKSpacing
-            shape = np.asarray(self.viewerLogic.AxialDimensions)
+            spacing = self.viewerLogic.AxialData.spacing
+            shape = np.asarray(self.viewerLogic.AxialData.dimensions)
         elif self.ViewMode == 'Coronal':
-            spacing = self.viewerLogic.CoronalVTKSpacing
-            shape = np.asarray(self.viewerLogic.CoronalDimensions)
+            spacing = self.viewerLogic.CoronalData.spacing
+            shape = np.asarray(self.viewerLogic.CoronalData.dimensions)
 
         extent = self.reslice.GetOutput().GetExtent()
 
