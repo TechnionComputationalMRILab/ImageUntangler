@@ -1,32 +1,21 @@
 import vtk
 import numpy as np
 import math
+from icecream import ic
+from vtk import vtkNrrdReader
 from vtk.util import numpy_support
 
 
 class viewerLogic:
-    def __init__(self, FilesList, Setting_Ax, Setting_Co):
-        # dict = SeqDic.Dict()
-        # AxialSettings = Setting_UL+"_Ax"+"_"+Setting_Ax
-        # CoronalSettings = Setting_UL+"_Cor"+"_"+Setting_Co
-        # if dict.get(AxialSettings)=="" or dict.get(CoronalSettings)=="":
-        #     print("File Not Exist!")
-        #     return
+    def __init__(self, mriSeqs, axialImageIndex, coronalImageIndex):
 
-        self.AxPath = FilesList[int(Setting_Ax)]
-        self.CorPath = FilesList[int(Setting_Co)]
-        self.WindowVal = None
-        self.LevelVal = None
+        self.axialImagePath = mriSeqs[int(axialImageIndex)]
+        self.coronalImagePath = mriSeqs[int(coronalImageIndex)]
 
         self.zoomFactor = 1
         self.SliceIDx =[]
 
-        self.AxialData = []
-        self.AxialVTKOrigin =[]
-        self.AxialVTKSpacing = []
-        self.AxialDimensions = []
-        self.AxialSliceID = []
-        self.AxialExtent = []
+        self.AxialSliceID = [] # is this ever anything besides an empty list? Shouldn't it be an Integer
         self.AxialArrayDicom = None
 
 
@@ -44,42 +33,26 @@ class viewerLogic:
         self.AxialViewer = []
         self.CoronalViewer = []
 
-        # read data
         self.ReadCoronal()
-        self.ReadAxial()
-        # self.CoronalBaseParallelScale = 0.5 * ((self.CoronalExtent[3] - self.CoronalExtent[2]) *
-        #                                        self.CoronalVTKSpacing[1])
-        #
-        # AxialToCoronalFactor =(self.CoronalExtent[1] *self.CoronalVTKSpacing[0]) /\
-        #                            (self.AxialExtent[1] * self.AxialVTKSpacing[0])
-        # self.AxialBaseParallelScale = self.CoronalBaseParallelScale / AxialToCoronalFactor
+        self.AxialData = self.ReadAxial()
         self.LevelVal = (self.CoronalArrayDicom.max()+self.CoronalArrayDicom.min())/2
         self.WindowVal = (self.CoronalArrayDicom.max()-self.CoronalArrayDicom.min())
+
         self.CoronalBaseParallelScale = 0.5 * ((self.CoronalExtent[1] - self.CoronalExtent[0]) *self.CoronalVTKSpacing[0])
         self.AxialBaseParallelScale = 0.5 * ((self.AxialExtent[1] - self.AxialExtent[0]) *self.AxialVTKSpacing[0])
 
     def ReadAxial(self):
-        reader = vtk.vtkNrrdReader()
-        reader.SetFileName(self.AxPath)
+        reader = vtkNrrdReader()
+        reader.SetFileName(self.axialImagePath)
         reader.Update()
-        self.AxialData = reader.GetOutput()
-        axial_point_data = self.AxialData.GetPointData()
-        assert (axial_point_data.GetNumberOfArrays() == 1)
-        self.AxialVTKOrigin = self.AxialData.GetOrigin()
-        self.AxialVTKSpacing = self.AxialData.GetSpacing()
-        self.AxialDimensions = self.AxialData.GetDimensions()
-        self.AxialExtent = self.AxialData.GetExtent()
-        center_z = self.AxialVTKOrigin[2] + self.AxialVTKSpacing[2] * 0.5 * (self.AxialExtent[4] + self.AxialExtent[5])
-        self.AxialSliceID = math.ceil((center_z-self.AxialVTKOrigin[2]) / self.AxialVTKSpacing[2])
-        self.AxialCenterSliceID = self.AxialSliceID
-        axial_array_data = axial_point_data.GetArray(0)
-        self.AxialArrayDicom = numpy_support.vtk_to_numpy(axial_array_data)
-        self.AxialArrayDicom = self.AxialArrayDicom.reshape(self.AxialDimensions, order='F')
+        axialImageData = reader.GetOutput()
+        return ImageProperties(axialImageData.GetSpacing(), axialImageData.GetDimensions(),
+                                               axialImageData.GetExtent(), axialImageData.GetPointData(), axialImageData.GetOrigin())
 
 
     def ReadCoronal(self):
         reader = vtk.vtkNrrdReader()
-        reader.SetFileName(self.CorPath)
+        reader.SetFileName(self.coronalImagePath)
         reader.Update()
         self.CoronalData = reader.GetOutput()
         coronal_point_data = self.CoronalData.GetPointData()
@@ -90,10 +63,8 @@ class viewerLogic:
         self.CoronalExtent = self.CoronalData.GetExtent()
         center_z = self.CoronalVTKOrigin[2] + self.CoronalVTKSpacing[2] * 0.5 * (self.CoronalExtent[4] + self.CoronalExtent[5])
         self.start_center_z = center_z
-        # self.CoronalSliceID = math.ceil((center_z - self.CoronalVTKOrigin[2]) / self.CoronalVTKSpacing[2])
-        # center = matrix.MultiplyPoint((0, 0, sliceSpacing * deltaY, 1))
-        # if self.CoronalDimensions[2]
-        if np.mod(self.CoronalSliceID,2)==0:
+        ic(self.CoronalSliceID)
+        if np.mod(self.CoronalSliceID, 2) == 0:
             self.CoronalSliceID = int((center_z - self.CoronalVTKOrigin[2]) / self.CoronalVTKSpacing[2] - 0.5)
         else:
             self.CoronalSliceID = int((center_z - self.CoronalVTKOrigin[2]) / self.CoronalVTKSpacing[2])
@@ -168,11 +139,16 @@ class viewerLogic:
             self.AxialViewer.window.Render()
 
 
-        # set new focal points
-        '''
-        self.AxialViewer.Cursor.SetFocalPoint(axial_curser_coords)
-        self.AxialViewer.window.Render()
+class ImageProperties:
+    def __init__(self, spacing, dimensions, extent, pointData, origin):
+        self.spacing = spacing
+        self.dimensions = dimensions
+        self.extent = extent
 
-        self.CoronalViewer.Cursor.SetFocalPoint(CoronalCurserCoords)
-        self.CoronalViewer.window.Render()
-        '''
+        center_z = origin[2] + spacing[2] * 0.5 * (extent[4] + extent[5])
+        self.AxialSliceID = math.ceil((center_z-origin[2]) / spacing[2])
+        self.AxialCenterSliceID = self.AxialSliceID
+        imageData = pointData.GetArray(0)
+        ic(imageData)
+        self.dicomArray = numpy_support.vtk_to_numpy(imageData)
+        self.dicomArray = self.dicomArray.reshape(dimensions, order='F')
