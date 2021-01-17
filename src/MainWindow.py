@@ -18,6 +18,7 @@ from MPRWindow import Ui_MPRWindow
 from getMPR import PointsToPlansVectors
 import AxialCoronalViewer
 import ViewerProp
+from ViewerProp import viewerLogic
 
 
 class Ui_MainWindow:
@@ -383,7 +384,7 @@ class Ui_MainWindow:
             self.CoronalImagesList.addItem(basename)
 
     def loadImageViewers(self):
-        self.ViewerProperties = ViewerProp.viewerLogic(self.FilesList, str(self.AxialImagesList.currentIndex()),
+        self.ViewerProperties = viewerLogic(self.FilesList, str(self.AxialImagesList.currentIndex()),
                                                        str(self.CoronalImagesList.currentIndex()))
 
         # display axial viewer
