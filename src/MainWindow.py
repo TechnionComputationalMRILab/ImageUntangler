@@ -15,7 +15,7 @@ from vtk.qt.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
 
 
 from MPRWindow import Ui_MPRWindow
-import getMPR
+from getMPR import PointsToPlansVectors
 import AxialCoronalViewer
 import ViewerProp
 
@@ -306,7 +306,7 @@ class Ui_MainWindow:
             self.CoronalViewer.interactorStyle.actions["PickingLength"] = 0
             self.putLengthDotsButton.setStyleSheet("QPushButton { background-color: rgb(171, 216, 255); }")
             
-    def openMPRWindow(self,MPR_M,delta, MPRposition, ListOfPoints,ViewMode):
+    def openMPRWindow(self, MPR_M, delta, MPRposition, ListOfPoints,ViewMode):
         self.window = QMainWindow()
         self.ui = Ui_MPRWindow()
         self.ui.setupUi(self.window, MPR_M, delta,MPRposition,self.ViewerProperties,ListOfPoints,ViewMode)
@@ -315,12 +315,11 @@ class Ui_MainWindow:
     def calculateMPR(self):
         points = self.CoronalViewer.PickingPointsIm
         ViewMode = 'Coronal'
-        plot =0
-        GetMPR = getMPR.PointsToPlansVectors(self.ViewerProperties, points, ViewMode, Plot = plot, Height = 40, viewAngle = 180)
+        GetMPR = PointsToPlansVectors(self.ViewerProperties, points, ViewMode, Plot = False, Height = 40, viewAngle = 180)
         MPR_M = GetMPR.MPR_M
         delta = GetMPR.delta
         MPRposition = GetMPR.MPR_indexs_np
-        self.openMPRWindow(MPR_M,delta, MPRposition, points, ViewMode)
+        self.openMPRWindow(MPR_M, delta, MPRposition, points, ViewMode)
     
     def pickleDistances(self, DistancePickingIndexs, allDistances):
 

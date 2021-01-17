@@ -2,8 +2,8 @@ import vtk
 import AxialViewerInteractorStyle
 import numpy as np
 
-class PlaneViewerQT():
 
+class PlaneViewerQT:
     # ZminVTK: object
 
     def __init__(self, interactor, viewerLogic, ViewMode):
@@ -201,7 +201,7 @@ class PlaneViewerQT():
         self.updateWindowLevel_Label()
 
     def AddToPickingList(self, PickingCoords):
-        PointIdImage = np.zeros(3)
+        # PointIdImage = np.zeros(3)
         # if self.ViewMode == 'Axial':
         #     spacing = self.viewerLogic.AxialVTKSpacing
         #     self.SliceIDx = self.viewerLogic.AxialSliceID
