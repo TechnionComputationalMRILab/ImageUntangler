@@ -360,22 +360,36 @@ class Ui_MainWindow:
         self.windowSizeButton.setValue(self.ViewerProperties.WindowVal)
         self.levelSizeButton.setValue(self.ViewerProperties.LevelVal)
 
-    def getNRRDFiles(self, directory: str):
+    def combineFormats(self, images: List[str]):
+        for i in range(len(images)-1):
+            if images[i][-4:]!=images[i+1][-4:]:
+                print(images)
+                return True
+        return False
+
+    def isValidDicom(self, filename: str):
+        return filename[-3:].upper()=="DCM" or filename[-5:].upper() == "DICOM"
+
+    def getMRIimages(self, directory: str):
         # returns list of all .nrrd files in directories/subdirectories
         allFiles = os.listdir(directory)
-        nrrdFiles = list()
+        MRIimages = list()
         for entry in allFiles:
             fullPath = os.path.join(directory, entry)
             if os.path.isdir(fullPath):
-                nrrdFiles = nrrdFiles + self.getNRRDFiles(fullPath)
+                MRIimages = MRIimages + self.getMRIimages(fullPath)
             else:
                 if fullPath[-4:] == "nrrd":
-                    nrrdFiles.append(fullPath)
-        return nrrdFiles
+                    MRIimages.append(fullPath)
+                elif self.isValidDicom(fullPath):
+                    MRIimages.append(fullPath)
+        if self.combineFormats(MRIimages):
+            raise ValueError("DO NOT COMBINE DICOM AND NRRD FILES FOR A SINGLE PATIENT")
+        return MRIimages
 
     def loadImages(self):
         folderPath = str(QFileDialog.getExistingDirectory())
-        self.FilesList = self.getNRRDFiles(folderPath)
+        self.FilesList = self.getMRIimages(folderPath)
         for i in range(len(self.FilesList)):
             basename = os.path.basename(self.FilesList[i])
             basename = basename[:-5]
@@ -384,7 +398,7 @@ class Ui_MainWindow:
 
     def loadImageViewers(self):
         self.ViewerProperties = viewerLogic(self.FilesList, str(self.AxialImagesList.currentIndex()),
-                                                       str(self.CoronalImagesList.currentIndex()))
+                                                       str(self.CoronalImagesList.currentIndex()), self.FilesList[0][-4:]!="nrrd")
 
         # display axial viewer
         AxialVTKQidget = QVTKRenderWindowInteractor(self.axialImageFrame)

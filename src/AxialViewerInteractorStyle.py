@@ -18,7 +18,7 @@ class AxialViewerInteractorStyle(vtk.vtkInteractorStyleImage):
 
 
         ## Create callbacks for slicing the image
-        self.actions = {}
+        self.actions = dict()
         self.actions["Slicing"] = 0
         self.actions["Windowing"] = 0
         self.actions["Zooming"] = 0
@@ -38,7 +38,7 @@ class AxialViewerInteractorStyle(vtk.vtkInteractorStyleImage):
     def ButtonCallback(self, obj, event):
         Shift = self.parent.GetShiftKey()
         if event == "MiddleButtonPressEvent":
-            if Shift ==1:
+            if self.parent.GetShiftKey() == 1:
                 self.actions["Panning"] = 1
                 vtk.vtkInteractorStyleImage.OnMiddleButtonDown(self)
             else:
@@ -78,7 +78,7 @@ class AxialViewerInteractorStyle(vtk.vtkInteractorStyleImage):
                 vtk.vtkInteractorStyleImage.OnLeftButtonUp(self)
             elif self.actions["PickingMPR"] == 0 and self.actions["PickingLength"] == 0 and self.actions["Cursor"] == 1:
                 self.actions["Cursor"] = 0
-                AxialViewerInteractorStyle.OnPickingCurserLeftButtonUp(self)
+                AxialViewerInteractorStyle.OnPickingCursorLeftButtonUp(self)
             elif self.actions["PickingMPR"] == 1:
                 AxialViewerInteractorStyle.OnPickingLeftButtonUp(self,mouseX,mouseY)
             elif self.actions["PickingLength"] == 1:
@@ -103,17 +103,17 @@ class AxialViewerInteractorStyle(vtk.vtkInteractorStyleImage):
             if self.viewMode == 'Axial':
                 # sliceIdx = int(round((center[2] - self.baseViewer.viewerLogic.AxialVTKOrigin[2]) /
                 #                      self.baseViewer.viewerLogic.AxialVTKSpacing[2] + 0.5))
-                sliceIdx = int((center[2] - self.baseViewer.viewerLogic.CoronalVTKOrigin[2]) /
-                               self.baseViewer.viewerLogic.CoronalVTKSpacing[2] - 0.5)
-                if sliceIdx >= 0 and sliceIdx <= self.baseViewer.viewerLogic.AxialExtent[5]:
+                sliceIdx = int((center[2] - self.baseViewer.viewerLogic.CoronalData.origin[2]) /
+                               self.baseViewer.viewerLogic.CoronalData.spacing[2] - 0.5)
+                if sliceIdx >= 0 and sliceIdx <= self.baseViewer.viewerLogic.AxialData.extent[5]:
                     self.baseViewer.UpdateViewerMatrixCenter(center, sliceIdx)
 
             elif self.viewMode == 'Coronal':
-                # sliceIdx = int(round((center[2] - self.baseViewer.viewerLogic.CoronalVTKOrigin[2]) /
-                #                      self.baseViewer.viewerLogic.CoronalVTKSpacing[2] + 0.5))
-                sliceIdx = int((center[2] - self.baseViewer.viewerLogic.CoronalVTKOrigin[2]) /
-                               self.baseViewer.viewerLogic.CoronalVTKSpacing[2] - 0.5)
-                if sliceIdx >= 0 and sliceIdx <= self.baseViewer.viewerLogic.CoronalExtent[5]:
+                # sliceIdx = int(round((center[2] - self.baseViewer.viewerLogic.CoronalData.origin[2]) /
+                #                      self.baseViewer.viewerLogic.CoronalData.spacing[2] + 0.5))
+                sliceIdx = int((center[2] - self.baseViewer.viewerLogic.CoronalData.origin[2]) /
+                               self.baseViewer.viewerLogic.CoronalData.spacing[2] - 0.5)
+                if sliceIdx >= 0 and sliceIdx <= self.baseViewer.viewerLogic.CoronalData.extent[5]:
                     self.baseViewer.UpdateViewerMatrixCenter(center, sliceIdx)
 
             # self.baseViewer.PresentPoint()
@@ -159,29 +159,29 @@ class AxialViewerInteractorStyle(vtk.vtkInteractorStyleImage):
             if self.viewMode == 'Axial':
                 # sliceIdx = int(round((center[2] - self.baseViewer.viewerLogic.AxialVTKOrigin[2]) /
                 #                      self.baseViewer.viewerLogic.AxialVTKSpacing[2] + 0.5))
-                sliceIdx = int((center[2] - self.baseViewer.viewerLogic.CoronalVTKOrigin[2]) /
-                               self.baseViewer.viewerLogic.CoronalVTKSpacing[2] - 0.5)
-                if sliceIdx >= 0 and sliceIdx <= self.baseViewer.viewerLogic.AxialExtent[5]:
+                sliceIdx = int((center[2] - self.baseViewer.viewerLogic.CoronalData.origin[2]) /
+                               self.baseViewer.viewerLogic.CoronalData.spacing[2] - 0.5)
+                if sliceIdx >= 0 and sliceIdx <= self.baseViewer.viewerLogic.AxialData.extent[5]:
                     self.baseViewer.UpdateViewerMatrixCenter(center, sliceIdx)
 
             elif self.viewMode == 'Coronal':
-                # sliceIdx = int(round((center[2] - self.baseViewer.viewerLogic.CoronalVTKOrigin[2]) /
-                #                      self.baseViewer.viewerLogic.CoronalVTKSpacing[2] + 0.5))
-                sliceIdx = int((center[2] - self.baseViewer.viewerLogic.CoronalVTKOrigin[2]) /
-                               self.baseViewer.viewerLogic.CoronalVTKSpacing[2] - 0.5)
-                if sliceIdx >= 0 and sliceIdx <= self.baseViewer.viewerLogic.CoronalExtent[5]:
+                # sliceIdx = int(round((center[2] - self.baseViewer.viewerLogic.CoronalData.origin[2]) /
+                #                      self.baseViewer.viewerLogic.CoronalData.spacing[2] + 0.5))
+                sliceIdx = int((center[2] - self.baseViewer.viewerLogic.CoronalData.origin[2]) /
+                               self.baseViewer.viewerLogic.CoronalData.spacing[2] - 0.5)
+                if sliceIdx >= 0 and sliceIdx <= self.baseViewer.viewerLogic.CoronalData.extent[5]:
                     self.baseViewer.UpdateViewerMatrixCenter(center, sliceIdx)
 
             # if self.viewMode == 'Axial':
             #     sliceIdx = int(round((center[2] - self.baseViewer.viewerLogic.AxialVTKOrigin[2])/
             #                    self.baseViewer.viewerLogic.AxialVTKSpacing[2] + 0.5))
-            #     if sliceIdx>= 0 and sliceIdx <= self.baseViewer.viewerLogic.AxialExtent[5]:
+            #     if sliceIdx>= 0 and sliceIdx <= self.baseViewer.viewerLogic.AxialData.extent[5]:
             #         self.baseViewer.UpdateViewerMatrixCenter(center, sliceIdx)
             #
             # elif self.viewMode == 'Coronal':
-            #     sliceIdx =int(round((center[2] - self.baseViewer.viewerLogic.CoronalVTKOrigin[2]) /
-            #                    self.baseViewer.viewerLogic.CoronalVTKSpacing[2] + 0.5))
-            #     if sliceIdx>= 0 and sliceIdx <= self.baseViewer.viewerLogic.CoronalExtent[5]:
+            #     sliceIdx =int(round((center[2] - self.baseViewer.viewerLogic.CoronalData.origin[2]) /
+            #                    self.baseViewer.viewerLogic.CoronalData.spacing[2] + 0.5))
+            #     if sliceIdx>= 0 and sliceIdx <= self.baseViewer.viewerLogic.CoronalData.extent[5]:
             #         self.baseViewer.UpdateViewerMatrixCenter(center, sliceIdx)
             # self.baseViewer.PresentPoint()
 
@@ -197,30 +197,30 @@ class AxialViewerInteractorStyle(vtk.vtkInteractorStyleImage):
             if self.viewMode == 'Axial':
                 # sliceIdx = int(round((center[2] - self.baseViewer.viewerLogic.AxialVTKOrigin[2]) /
                 #                      self.baseViewer.viewerLogic.AxialVTKSpacing[2] + 0.5))
-                sliceIdx = int((center[2] - self.baseViewer.viewerLogic.CoronalVTKOrigin[2]) /
-                               self.baseViewer.viewerLogic.CoronalVTKSpacing[2] - 0.5)
-                if sliceIdx >= 0 and sliceIdx <= self.baseViewer.viewerLogic.AxialExtent[5]:
+                sliceIdx = int((center[2] - self.baseViewer.viewerLogic.CoronalData.origin[2]) /
+                               self.baseViewer.viewerLogic.CoronalData.extent[2] - 0.5)
+                if sliceIdx >= 0 and sliceIdx <= self.baseViewer.viewerLogic.AxialData.extent[5]:
                     self.baseViewer.UpdateViewerMatrixCenter(center, sliceIdx)
 
             elif self.viewMode == 'Coronal':
-                # sliceIdx = int(round((center[2] - self.baseViewer.viewerLogic.CoronalVTKOrigin[2]) /
-                #                      self.baseViewer.viewerLogic.CoronalVTKSpacing[2] + 0.5))
-                sliceIdx = int((center[2] - self.baseViewer.viewerLogic.CoronalVTKOrigin[2]) /
-                               self.baseViewer.viewerLogic.CoronalVTKSpacing[2] - 0.5)
-                if sliceIdx >= 0 and sliceIdx <= self.baseViewer.viewerLogic.CoronalExtent[5]:
+                # sliceIdx = int(round((center[2] - self.baseViewer.viewerLogic.CoronalData.origin[2]) /
+                #                      self.baseViewer.viewerLogic.CoronalData.spacing[2] + 0.5))
+                sliceIdx = int((center[2] - self.baseViewer.viewerLogic.CoronalData.origin[2]) /
+                               self.baseViewer.viewerLogic.CoronalData.spacing[2] - 0.5)
+                if sliceIdx >= 0 and sliceIdx <= self.baseViewer.viewerLogic.CoronalData.extent[5]:
                     self.baseViewer.UpdateViewerMatrixCenter(center, sliceIdx)
             # if self.viewMode == 'Axial':
             #     sliceIdx = int(round((center[2] - self.baseViewer.viewerLogic.AxialVTKOrigin[2])
             #                     / self.baseViewer.viewerLogic.AxialVTKSpacing[2] + 0.5))
-            #     # if sliceIdx >= 0 and sliceIdx <= self.baseViewer.viewerLogic.AxialExtent[5]:
-            #     if sliceIdx>= 0 and sliceIdx <= self.baseViewer.viewerLogic.AxialExtent[5]:
+            #     # if sliceIdx >= 0 and sliceIdx <= self.baseViewer.viewerLogic.AxialData.extent[5]:
+            #     if sliceIdx>= 0 and sliceIdx <= self.baseViewer.viewerLogic.AxialData.extent[5]:
             #         self.baseViewer.UpdateViewerMatrixCenter(center, sliceIdx)
             #
             # elif self.viewMode == 'Coronal':
-            #     sliceIdx = int(round((center[2] - self.baseViewer.viewerLogic.CoronalVTKOrigin[2]) /
-            #                    self.baseViewer.viewerLogic.CoronalVTKSpacing[2] + 0.5))
-            #     if sliceIdx >= 0 and sliceIdx <= self.baseViewer.viewerLogic.CoronalExtent[5]:
-            #         # if sliceIdx >= 0 and sliceIdx <= self.baseViewer.viewerLogic.CoronalExtent[5]:
+            #     sliceIdx = int(round((center[2] - self.baseViewer.viewerLogic.CoronalData.origin[2]) /
+            #                    self.baseViewer.viewerLogic.CoronalData.spacing[2] + 0.5))
+            #     if sliceIdx >= 0 and sliceIdx <= self.baseViewer.viewerLogic.CoronalData.extent[5]:
+            #         # if sliceIdx >= 0 and sliceIdx <= self.baseViewer.viewerLogic.CoronalData.extent[5]:
             #         self.baseViewer.UpdateViewerMatrixCenter(center, sliceIdx)
             # self.baseViewer.PresentPoint()
 
@@ -229,8 +229,8 @@ class AxialViewerInteractorStyle(vtk.vtkInteractorStyleImage):
 
     def OnPickingLeftButtonDown(self):
         pass
-    def OnPickingLeftButtonUp(self,mouseX,mouseY):
-
+    
+    def OnPickingLeftButtonUp(self, mouseX, mouseY):
         # print((mouseX, mouseY))
         if self.picker.Pick(mouseX, mouseY, 0.0, self.baseViewer.renderer):
             self.picker2.Pick(mouseX, mouseY, 0.0, self.baseViewer.renderer)
@@ -239,8 +239,9 @@ class AxialViewerInteractorStyle(vtk.vtkInteractorStyleImage):
             matrix = self.baseViewer.reslice.GetResliceAxes()
             center = matrix.MultiplyPoint((0, 0, 0, 1))
             # PickingCoordsZ = center[2]-self.baseViewer.viewerLogic.start_center_z
-            # PickingCoordsZ = (center[2] - self.baseViewer.viewerLogic.CoronalVTKOrigin[2])
-            PickingCoordsZ = (center[2] - self.baseViewer.viewerLogic.CoronalVTKOrigin[2]) - self.baseViewer.viewerLogic.CoronalDimensions[2] * self.baseViewer.viewerLogic.CoronalVTKSpacing[2] / 2
+            # PickingCoordsZ = (center[2] - self.baseViewer.viewerLogic.CoronalData.origin[2])
+            PickingCoordsZ = (center[2] - self.baseViewer.viewerLogic.CoronalData.origin[2]) - self.baseViewer.viewerLogic.CoronalData.dimensions[2]\
+                             * self.baseViewer.viewerLogic.CoronalData.spacing[2] / 2
             PickingCoords = (PickingCoords[0],PickingCoords[1],PickingCoordsZ)
             # PickingCoordsold = self.pickerold.GetPickPosition()
             self.PickingCoords = PickingCoords
@@ -253,7 +254,8 @@ class AxialViewerInteractorStyle(vtk.vtkInteractorStyleImage):
             PickingCoords = self.picker.GetPickPosition()
             matrix = self.baseViewer.reslice.GetResliceAxes()
             center = matrix.MultiplyPoint((0, 0, 0, 1))
-            PickingCoordsZ = (center[2] - self.baseViewer.viewerLogic.CoronalVTKOrigin[2]) - self.baseViewer.viewerLogic.CoronalDimensions[2] * self.baseViewer.viewerLogic.CoronalVTKSpacing[2] / 2
+            PickingCoordsZ = (center[2] - self.baseViewer.viewerLogic.CoronalData.origin[2]) - self.baseViewer.viewerLogic.CoronalData.dimensions[2]\
+                             * self.baseViewer.viewerLogic.CoronalData.spacing[2] / 2
             PickingCoords = (PickingCoords[0],PickingCoords[1],PickingCoordsZ)
             self.baseViewer.AddToLenPickingList(PickingCoords)
 
@@ -273,7 +275,7 @@ class AxialViewerInteractorStyle(vtk.vtkInteractorStyleImage):
     def OnPickingCurserLeftButtonDown(self):
         pass
 
-    def OnPickingCurserLeftButtonUp(self):
+    def OnPickingCursorLeftButtonUp(self):
         (mouseX, mouseY) = self.parent.GetEventPosition()
         if self.picker.Pick(mouseX, mouseY, 0.0, self.baseViewer.renderer):
             self.CurserPickingCoords = self.picker.GetPickPosition()

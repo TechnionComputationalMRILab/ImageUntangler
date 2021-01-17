@@ -14,11 +14,11 @@ class PointsToPlansVectors:
 
         # should be changed to assert
         if ViewMode == 'Coronal':
-            V = np.asarray(viewerLogic.CoronalArrayDicom)
+            V = np.asarray(viewerLogic.CoronalData.dicomArray)
             self.V = V
-            V_origin = np.asarray(viewerLogic.CoronalVTKOrigin)
-            V_spacing = np.asarray(viewerLogic.CoronalVTKSpacing)
-            V_dim = np.asarray(viewerLogic.CoronalDimensions)
+            V_origin = np.asarray(viewerLogic.CoronalData.origin)
+            V_spacing = np.asarray(viewerLogic.CoronalData.spacing)
+            V_dim = np.asarray(viewerLogic.CoronalData.dimensions)
 
             self.x = np.linspace(-V_dim[0] * V_spacing[0] / 2, (V_dim[0] ) * V_spacing[0]/2, V_dim[0])
             self.y = np.linspace(-V_dim[1] * V_spacing[1] / 2, (V_dim[1] ) * V_spacing[1]/2, V_dim[1])
