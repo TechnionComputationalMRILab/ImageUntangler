@@ -90,7 +90,9 @@ class PointsToPlansVectors:
             dist += np.linalg.norm(allPoints[i+1]-allPoints[i])
         n = np.int(round(dist/delta))
 
+        #print([x, y, z].shape)
         tck, u = splprep([x, y, z], s=2)
+
         x_knots, y_knots, z_knots = splev(tck[0], tck)
         u_fine = np.linspace(0, 1, n)
         x_fine, y_fine, z_fine = splev(u_fine, tck)

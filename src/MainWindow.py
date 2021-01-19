@@ -14,6 +14,7 @@ from PyQt5.QtWidgets import QWidget, QGridLayout, QLabel, QGroupBox, QComboBox, 
 from vtk.qt.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
 
 
+from AxialCoronalViewer import PlaneViewerQT
 from MPRWindow import Ui_MPRWindow
 from getMPR import PointsToPlansVectors
 import AxialCoronalViewer
@@ -284,10 +285,10 @@ class Ui_MainWindow:
     def WindowLevelUpdate(self):
         self.AxialViewer.visualizationWindow =  self.windowSizeButton.value()
         self.AxialViewer.visualizationLevel = self.levelSizeButton.value()
-        self.AxialViewer.UpdateWindowLevel_Val()
+        self.AxialViewer.updateWindowAndLevel()
         self.CoronalViewer.visualizationWindow =  self.windowSizeButton.value()
         self.CoronalViewer.visualizationLevel = self.levelSizeButton.value()
-        self.CoronalViewer.UpdateWindowLevel_Val()
+        self.CoronalViewer.updateWindowAndLevel()
 
     def pickMPRpointsStatus(self):
         if self.CoronalViewer.interactorStyle.actions["PickingMPR"] == 0:
@@ -313,8 +314,9 @@ class Ui_MainWindow:
         self.window.show()
 
     def calculateMPR(self):
-        points = self.CoronalViewer.PickingPointsIm
+        points = self.CoronalViewer.mprPoints.points
         ViewMode = 'Coronal'
+        print(points)
         GetMPR = PointsToPlansVectors(self.ViewerProperties, points, ViewMode, Plot = False, Height = 40, viewAngle = 180)
         MPR_M = GetMPR.MPR_M
         delta = GetMPR.delta
@@ -335,7 +337,7 @@ class Ui_MainWindow:
 
     def calculateDistances(self):
         """ Calculates distances between set points and outputs reselt to GUI"""
-        DistancePickingIndexs = self.CoronalViewer.LenPickingPointsIm
+        DistancePickingIndexs = self.CoronalViewer.lengthPoints.points
         DistancePickingIndexs = np.asarray(DistancePickingIndexs)
         allDistances = [np.linalg.norm(DistancePickingIndexs[j + 1, 0:3] - DistancePickingIndexs[j, 0:3]) for j in range(len(DistancePickingIndexs) - 1)]
         allDistances = np.asarray(allDistances)
@@ -392,7 +394,7 @@ class Ui_MainWindow:
         self.FilesList = self.getMRIimages(folderPath)
         for i in range(len(self.FilesList)):
             basename = os.path.basename(self.FilesList[i])
-            basename = basename[:-5]
+            basename = basename[:basename.rfind(".")]
             self.AxialImagesList.addItem(basename)
             self.CoronalImagesList.addItem(basename)
 
@@ -403,7 +405,7 @@ class Ui_MainWindow:
         # display axial viewer
         AxialVTKQidget = QVTKRenderWindowInteractor(self.axialImageFrame)
         self.mainLayout.addWidget(AxialVTKQidget, 1, 5, 1, 1)
-        self.AxialViewer = AxialCoronalViewer.PlaneViewerQT(AxialVTKQidget, self.ViewerProperties, 'Axial')
+        self.AxialViewer = PlaneViewerQT(AxialVTKQidget, self.ViewerProperties, 'Axial')
 
         # display coronal viewer
         CoronalVTKQidget = QVTKRenderWindowInteractor(self.CoronalImageFrame)

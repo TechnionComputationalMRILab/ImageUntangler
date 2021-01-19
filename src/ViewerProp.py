@@ -1,71 +1,52 @@
-import vtk
 import numpy as np
 import math
+from typing import List
 from icecream import ic
 from vtk import vtkNrrdReader, vtkDICOMImageReader
 from vtk.util import numpy_support
 
 
 class viewerLogic:
-    def __init__(self, mriSeqs, axialImageIndex, coronalImageIndex, isDicom=False):
-
-        self.axialImagePath = mriSeqs[int(axialImageIndex)]
-        self.coronalImagePath = mriSeqs[int(coronalImageIndex)]
-
+    def __init__(self, mriSeqs: List[str], axialImageIndex: str, coronalImageIndex: str, isDicom=False):
         self.zoomFactor = 1
         self.SliceIDx =[]
 
         self.CoronalCenterSliceID = None
         self.AxialCenterSliceID = None
 
-        self.AxialViewer = None # kinda wacky - ViewerProp and AxialCoronalViewer own each other
+        self.AxialViewer = None
         self.CoronalViewer = None
 
-        self.CoronalData = self.ReadCoronal(isDicom)
-        self.AxialData = self.ReadAxial(isDicom)
+        coronalImagePath = mriSeqs[int(coronalImageIndex)]
+        self.CoronalData = self.getImageData(coronalImagePath, isDicom)
+
+        axialImagePath = mriSeqs[int(axialImageIndex)]
+        self.AxialData = self.getImageData(axialImagePath, isDicom)
+
         self.LevelVal = (self.CoronalData.dicomArray.max()+self.CoronalData.dicomArray.min())/2
         self.WindowVal = (self.CoronalData.dicomArray.max()-self.CoronalData.dicomArray.min())
 
-        self.CoronalBaseParallelScale = 0.5 * ((self.CoronalData.extent[1] - self.CoronalData.extent[0]) *self.CoronalData.spacing[0])
-        self.AxialBaseParallelScale = 0.5 * ((self.AxialData.extent[1] - self.AxialData.extent[0]) * self.AxialData.spacing[0])
-
-    def ReadAxial(self, isDicom: bool):
+    @staticmethod
+    def getImageData(imgPath: str, isDicom: bool):
         if isDicom:
             reader = vtkDICOMImageReader()
         else:
             reader = vtkNrrdReader()
-        reader.SetFileName(self.axialImagePath)
+        reader.SetFileName(imgPath)
         reader.Update()
-        axialImageData = reader.GetOutput()
-        return ImageProperties(axialImageData, axialImageData.GetSpacing(), axialImageData.GetDimensions(),
-                                               axialImageData.GetExtent(), axialImageData.GetPointData(), axialImageData.GetOrigin())
-
-
-    def ReadCoronal(self, isDicom: bool):
-        if isDicom:
-            reader = vtkDICOMImageReader()
-        else:
-            reader = vtkNrrdReader()
-        reader.SetFileName(self.coronalImagePath)
-        reader.Update()
-        coronalImageData = reader.GetOutput()
-        return ImageProperties(coronalImageData, coronalImageData.GetSpacing(), coronalImageData.GetDimensions(),
-                               coronalImageData.GetExtent(), coronalImageData.GetPointData(), coronalImageData.GetOrigin())
-        """
-        if np.mod(self.CoronalSliceID, 2) == 0:
-            self.CoronalSliceID = int((center_z - self.CoronalData.origin[2]) / self.CoronalVTKSpacing[2] - 0.5)
-        else:
-            self.CoronalSliceID = int((center_z - self.CoronalData.origin[2]) / self.CoronalVTKSpacing[2])
-        """
+        imageData = reader.GetOutput()
+        return ImageProperties(imageData, imageData.GetSpacing(), imageData.GetDimensions(),
+                                               imageData.GetExtent(), imageData.GetPointData(), imageData.GetOrigin())
 
     def updateZoomFactor(self, ZoomFactor):
         self.zoomFactor = ZoomFactor
-        self.AxialViewer.renderer.GetActiveCamera().SetParallelScale(self.AxialBaseParallelScale * ZoomFactor)
+        self.AxialViewer.renderer.GetActiveCamera().SetParallelScale(self.AxialData.getParallelScale() * ZoomFactor)
         self.AxialViewer.window.Render()
-        self.CoronalViewer.renderer.GetActiveCamera().SetParallelScale(self.CoronalBaseParallelScale * ZoomFactor)
+        self.CoronalViewer.renderer.GetActiveCamera().SetParallelScale(self.CoronalData.getParallelScale() * ZoomFactor)
         self.CoronalViewer.window.Render()
 
     def MoveCursor(self, PickerCursorCords, ViewMode: str):
+        print("REACHED")
         picking_idx_image = np.zeros(3)
         if ViewMode == 'Axial':
             spacing = self.AxialData.spacing
@@ -75,7 +56,8 @@ class viewerLogic:
             spacing = self.CoronalData.spacing
             shape = np.asarray(self.CoronalData.dimensions)
             self.SliceIDx = self.CoronalData.sliceID
-
+        ic(self.SliceIDx)
+        ic(ViewMode)
         viewer_origin = shape / 2.0
         picking_idx_image[2] = self.SliceIDx
         picking_idx_image[0] = PickerCursorCords[0] / spacing[0] + viewer_origin[0]
@@ -133,9 +115,11 @@ class ImageProperties:
         center_z = origin[2] + spacing[2] * 0.5 * (extent[4] + extent[5])
         self.sliceID = math.ceil((center_z-origin[2]) / spacing[2])
         self.centerSliceID = self.sliceID
-        imageData = pointData.GetArray(0)
-        ic(imageData)
-        self.dicomArray = numpy_support.vtk_to_numpy(imageData)
+        nn = pointData.GetArray(0)
+        self.dicomArray = numpy_support.vtk_to_numpy(nn)
         self.dicomArray = self.dicomArray.reshape(dimensions, order='F')
+
+    def getParallelScale(self):
+        return 0.5 * self.spacing[0] * (self.extent[1] - self.extent[0])
 
 
