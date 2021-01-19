@@ -115,7 +115,7 @@ class PlaneViewerQT:
         self.window.Render()
         self.SliceIDx = sliceIdx
         self.imageData.sliceID = sliceIdx
-        self.presentPoints(self.mprPoints)
+        self.presentPoints(self.mprPoints, sliceIdx)
 
     def updateWindowAndLevel(self):
         self.viewerLogic.WindowVal = self.actor.GetProperty().GetColorWindow()

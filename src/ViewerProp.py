@@ -46,6 +46,7 @@ class viewerLogic:
         self.CoronalViewer.window.Render()
 
     def MoveCursor(self, PickerCursorCords, ViewMode: str):
+        # called when moving bulls eye
         print("REACHED")
         picking_idx_image = np.zeros(3)
         if ViewMode == 'Axial':
@@ -63,21 +64,16 @@ class viewerLogic:
         picking_idx_image[0] = PickerCursorCords[0] / spacing[0] + viewer_origin[0]
         picking_idx_image[1] = shape[1] - (PickerCursorCords[1] / spacing[1] + viewer_origin[1])
         picking_idx_image = np.int32(np.round(picking_idx_image))
-        axial_curser_coords =self.AxialViewer.Cursor.GetFocalPoint()
         coronal_curser_coords = self.CoronalViewer.Cursor.GetFocalPoint()
         if ViewMode == "Axial":
-            # update cursor
             self.AxialViewer.Cursor.SetFocalPoint(PickerCursorCords)
             self.AxialViewer.window.Render()
             coronal_curser_coords = (PickerCursorCords[0], coronal_curser_coords[1], coronal_curser_coords[2])
             self.CoronalViewer.Cursor.SetFocalPoint(coronal_curser_coords)
-            # self.CoronalViewer.window.Render()
 
-            newSliceIDx = int(round(self.CoronalDimensions[2] * picking_idx_image[1] / shape[1]))
+            newSliceIDx = int(round(self.CoronalData.dimensions[2] * picking_idx_image[1] / shape[1]))
             center_z = self.CoronalData.origin[2] + newSliceIDx *  self.CoronalData.spacing[2]
 
-            # deltaY = self.CoronalSliceID - round( self.CoronalDimensions[2] * ((shape[1]/2 - picking_idx_image[1])/shape[1]))
-            # sliceSpacing = self.CoronalViewer.reslice.GetOutput().GetSpacing()[2]
             self.CoronalViewer.reslice.Update()
             matrix = self.CoronalViewer.reslice.GetResliceAxes()
             # center_z = matrix.GetElement(2, 3) + sliceSpacing * deltaY
