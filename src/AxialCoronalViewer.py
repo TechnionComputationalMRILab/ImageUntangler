@@ -45,7 +45,7 @@ class PlaneViewerQT:
 
     def performReslice(self):
         # Extract a slice in the desired orientation
-        x0, y0, z0 = self.viewerLogic.AxialData.origin
+        x0, y0, z0 = self.imageData.origin
         x_spacing, y_spacing, z_spacing = self.imageData.spacing
         x_min, x_max, y_min, y_max, z_min, z_max = self.imageData.extent
 
