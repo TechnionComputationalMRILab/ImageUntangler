@@ -59,7 +59,7 @@ class AxialViewerInteractorStyle(vtkInteractorStyleImage):
             vtkInteractorStyleImage.OnRightButtonUp(self)
 
         if event == "LeftButtonPressEvent":
-            self.setCursorStatus()
+            self.actions["Cursor"] = self.cursorInBullsEye()
             if self.actions["PickingMPR"] == 0 and self.actions["PickingLength"] == 0 and self.actions["Cursor"] == 0:
                 self.actions["Windowing"] = 1
                 vtkInteractorStyleImage.OnLeftButtonDown(self)
@@ -147,17 +147,16 @@ class AxialViewerInteractorStyle(vtkInteractorStyleImage):
             self.pickedCoordinates = pickedCoordinates
             self.baseViewer.addPoint(pointType, self.pickedCoordinates)
 
-    def setCursorStatus(self):
+    def cursorInBullsEye(self) -> int:
         (mouseX, mouseY) = self.parent.GetEventPosition()
         if self.pointPicker.Pick(mouseX, mouseY, 0.0, self.baseViewer.renderer):
             StartCursorPickedCoordinates = self.pointPicker.GetPickPosition()
             cursorFocalPoint = self.baseViewer.Cursor.GetFocalPoint()
             if (abs(StartCursorPickedCoordinates[0]-cursorFocalPoint[0]) <= 3*self.baseViewer.Cursor.GetRadius())\
                     and (abs(StartCursorPickedCoordinates[1]-cursorFocalPoint[1]) <= self.baseViewer.Cursor.GetRadius()):
-                self.actions["Cursor"] = 1
+                return 1
             else:
-                self.actions["Cursor"] = 0
-
+                return 0
 
     def OnPickingCursorLeftButtonUp(self):
         (mouseX, mouseY) = self.parent.GetEventPosition()

@@ -410,7 +410,7 @@ class Ui_MainWindow:
         # display coronal viewer
         CoronalVTKQidget = QVTKRenderWindowInteractor(self.CoronalImageFrame)
         self.mainLayout.addWidget(CoronalVTKQidget, 1, 1, 1, 1)
-        self.CoronalViewer = AxialCoronalViewer.PlaneViewerQT(CoronalVTKQidget, self.ViewerProperties, 'Coronal')
+        self.CoronalViewer = PlaneViewerQT(CoronalVTKQidget, self.ViewerProperties, 'Coronal')
 
     def setupUi(self, MainWindow):
         self.buildMainWindow(MainWindow)  # set main window

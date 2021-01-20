@@ -11,9 +11,6 @@ class viewerLogic:
         self.zoomFactor = 1
         self.SliceIDx =[]
 
-        self.CoronalCenterSliceID = None
-        self.AxialCenterSliceID = None
-
         self.AxialViewer = None
         self.CoronalViewer = None
 
@@ -76,21 +73,8 @@ class viewerLogic:
 
             self.CoronalViewer.reslice.Update()
             matrix = self.CoronalViewer.reslice.GetResliceAxes()
-            # center_z = matrix.GetElement(2, 3) + sliceSpacing * deltaY
             center = (matrix.GetElement(0, 3), matrix.GetElement(1, 3), center_z, 1)
-            # sliceIdx = int(round((center[2] - self.CoronalData.origin[2]) / self.CoronalVTKSpacing[2] + 0.5))
-
             self.CoronalViewer.UpdateViewerMatrixCenter(center, newSliceIDx)
-
-            # # update coronal slice when cursor changes
-            # deltaY =  np.int32(self.CoronalSliceID - np.round((self.CoronalDimensions[2]-1) *
-            #                                                   picking_idx_image[1]/(self.AxialDimensions[1]-1)))
-            # sliceSpacing = self.CoronalViewer.reslice.GetOutput().GetSpacing()[2]
-            # matrix = self.CoronalViewer.reslice.GetResliceAxes()
-            # center = matrix.MultiplyPoint((0, 0, sliceSpacing * deltaY, 1))
-            # sliceIdx = int((center[2] - self.CoronalViewer.viewerLogic.CoronalData.origin[2]) /
-            #                self.CoronalViewer.viewerLogic.CoronalVTKspacing[2])+1
-            # self.CoronalViewer.UpdateViewerMatrixCenter(center, sliceIdx)
 
         elif ViewMode == "Coronal":
             self.CoronalViewer.Cursor.SetFocalPoint(PickerCursorCords)
@@ -110,7 +94,6 @@ class ImageProperties:
         self.origin = origin
         center_z = origin[2] + spacing[2] * 0.5 * (extent[4] + extent[5])
         self.sliceID = math.ceil((center_z-origin[2]) / spacing[2])
-        self.centerSliceID = self.sliceID
         nn = pointData.GetArray(0)
         self.dicomArray = numpy_support.vtk_to_numpy(nn)
         self.dicomArray = self.dicomArray.reshape(dimensions, order='F')
