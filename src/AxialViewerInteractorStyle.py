@@ -162,7 +162,7 @@ class AxialViewerInteractorStyle(vtkInteractorStyleImage):
         (mouseX, mouseY) = self.parent.GetEventPosition()
         if self.pointPicker.Pick(mouseX, mouseY, 0.0, self.baseViewer.renderer):
             cursorPickedCoordinates = self.pointPicker.GetPickPosition()
-            self.baseViewer.viewerLogic.MoveCursor(cursorPickedCoordinates, self.viewMode)
+            self.baseViewer.viewerLogic.moveBullsEye(cursorPickedCoordinates, self.viewMode)
 
     def OnPickingCurserLeftButtonDown(self):
         pass

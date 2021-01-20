@@ -17,7 +17,6 @@ from vtk.qt.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
 from AxialCoronalViewer import PlaneViewerQT
 from MPRWindow import Ui_MPRWindow
 from getMPR import PointsToPlansVectors
-import AxialCoronalViewer
 from ViewerProp import viewerLogic
 
 

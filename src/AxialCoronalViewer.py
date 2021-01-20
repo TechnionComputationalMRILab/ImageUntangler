@@ -12,15 +12,13 @@ class PlaneViewerQT:
     def __init__(self, interactor: QVTKRenderWindowInteractor, viewerLogic: ViewerProp.viewerLogic , ViewMode: str):
         self.viewerLogic = viewerLogic
         self.interactor = interactor
-        # self.visualizationWindow = self.viewerLogic.WindowVal
-        # self.visualizationLevel = self.viewerLogic.LevelVal
         if ViewMode == 'Axial':
             self.imageData = self.viewerLogic.AxialData
             self.viewerLogic.AxialViewer = self
         elif ViewMode == 'Coronal':
             self.imageData = self.viewerLogic.CoronalData
             self.viewerLogic.CoronalViewer = self
-        self.SliceIDx = self.imageData.sliceID
+        self.sliceIdx = self.imageData.sliceIdx
         self.reslice = vtkImageReslice()
         self.actor = vtkImageActor()
         self.renderer = vtkRenderer()
@@ -40,7 +38,7 @@ class PlaneViewerQT:
         self.mprPoints = PointCollection()
         self.lengthPoints = PointCollection()
 
-        self.PresentCurser()
+        self.presentCursor()
         self.window.Render()
 
     def performReslice(self):
@@ -85,7 +83,7 @@ class PlaneViewerQT:
         self.textActorSliceIdx.GetTextProperty().SetFontSize(14)
         self.textActorSliceIdx.GetTextProperty().SetColor(51 / 255, 51 / 255, 1)
         self.textActorSliceIdx.SetDisplayPosition(0, 2)
-        self.textActorSliceIdx.SetInput("SliceIdx: " + str(self.SliceIDx))
+        self.textActorSliceIdx.SetInput("SliceIdx: " + str(self.sliceIdx))
         self.renderer.AddActor(self.textActorSliceIdx)
 
     def setWindowText(self):
@@ -113,8 +111,8 @@ class PlaneViewerQT:
         matrix.SetElement(2, 3, center[2])
         self.textActorSliceIdx.SetInput("SliceIdx: " + str(sliceIdx))
         self.window.Render()
-        self.SliceIDx = sliceIdx
-        self.imageData.sliceID = sliceIdx
+        self.sliceIdx = sliceIdx
+        self.imageData.sliceIdx = sliceIdx
         self.presentPoints(self.mprPoints, sliceIdx)
 
     def updateWindowAndLevel(self):
@@ -125,11 +123,11 @@ class PlaneViewerQT:
         self.window.Render()
 
     def processNewPoint(self, pointCollection, pickingCoordinates):
-        PointIdImage = np.array([pickingCoordinates[0], pickingCoordinates[1], pickingCoordinates[2], self.SliceIDx])  # x,y,z,sliceID
+        PointIdImage = np.array([pickingCoordinates[0], pickingCoordinates[1], pickingCoordinates[2], self.sliceIdx])  # x,y,z,sliceIdx
         if pointCollection.addPoint(PointIdImage):
             currentPolygonActor = pointCollection.addPolygon(pickingCoordinates)
             self.renderer.AddActor(currentPolygonActor)
-        self.presentPoints(pointCollection, self.SliceIDx)
+        self.presentPoints(pointCollection, self.sliceIdx)
 
     def addPoint(self, pointType, PickingCoords):
         if pointType == "MPR":
@@ -147,15 +145,8 @@ class PlaneViewerQT:
                 polygon.GeneratePolygonOn()
             self.window.Render()
 
-    def PresentCurser(self):
-        start_idx_image = np.zeros(3)
-
-        start_idx_image[2] = self.SliceIDx
-        start_idx_image[0] = 0
-        start_idx_image[1] = 0
-
+    def presentCursor(self):
         self.Cursor.SetModelBounds(-10000, 10000, -10000, 10000, 0, 0)
-
         self.Cursor.SetFocalPoint(0, 0, 0)
         self.Cursor.AxesOn()
         self.Cursor.TranslationModeOn()
@@ -177,7 +168,7 @@ class PointCollection:
         self.points: List[float] = []
         self.polygons = []
 
-    def findImage(self, PointIdImage: np.array) -> int:
+    def findImageIndex(self, PointIdImage: np.array) -> int:
         PointIdImage = PointIdImage.tolist()
         if PointIdImage in self.points:
             return self.points.index(PointIdImage)
@@ -186,7 +177,7 @@ class PointCollection:
 
     def addPoint(self, PointIdImage: np.array) -> bool:
         # returns whether Point was added
-        imageIndex = self.findImage(PointIdImage)
+        imageIndex = self.findImageIndex(PointIdImage)
         if imageIndex == -1:
             self.points.append(PointIdImage.tolist())
             return True
