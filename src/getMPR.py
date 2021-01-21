@@ -2,6 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.interpolate import RegularGridInterpolator, splprep,splev
 from typing import List
+from icecream import ic
 from AxialCoronalViewer import PlaneViewerQT
 import ViewerProp
 
@@ -23,6 +24,7 @@ class PointsToPlansVectors:
             self.x = np.linspace(-V_dim[0] * V_spacing[0] / 2, (V_dim[0] ) * V_spacing[0]/2, V_dim[0])
             self.y = np.linspace(-V_dim[1] * V_spacing[1] / 2, (V_dim[1] ) * V_spacing[1]/2, V_dim[1])
             self.z = np.linspace(-V_dim[2] * V_spacing[2] / 2, (V_dim[2] ) * V_spacing[2]/2, V_dim[2])
+            ic(self.x, self.y, self.z)
 
         self.delta = V_spacing[0]
 

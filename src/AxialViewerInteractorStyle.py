@@ -83,15 +83,6 @@ class AxialViewerInteractorStyle(vtkInteractorStyleImage):
             elif self.actions["PickingLength"] == 1:
                 AxialViewerInteractorStyle.pickPoint(self, "Length", mouseX, mouseY)
 
-    def adjustSliceIdx(self, transformZ: int):
-        """ adjusts the slice of the MRI that is being viewed"""
-        matrix: vtkMatrix4x4 = self.baseViewer.reslice.GetResliceAxes()
-        center = matrix.MultiplyPoint((0, 0, transformZ, 1))
-        sliceIdx = int((center[2] - self.baseViewer.imageData.origin[2]) /
-                       self.baseViewer.imageData.spacing[2] - 0.5)  # z - z_orig/(z_spacing - .5). slice idx is z coordinate of slice of image
-        if 0 <= sliceIdx <= self.baseViewer.imageData.extent[5]:
-            self.baseViewer.UpdateViewerMatrixCenter(center, sliceIdx)
-
     def MouseMoveCallback(self, obj, event):
         (lastX, lastY) = self.parent.GetLastEventPosition()
         (mouseX, mouseY) = self.parent.GetEventPosition()
@@ -136,17 +127,6 @@ class AxialViewerInteractorStyle(vtkInteractorStyleImage):
             sliceSpacing = self.baseViewer.reslice.GetOutput().GetSpacing()[2]
             self.adjustSliceIdx(-1*sliceSpacing)
 
-    def pickPoint(self, pointType: str, mouseX, mouseY):
-        if self.pointPicker.Pick(mouseX, mouseY, 0.0, self.baseViewer.renderer):
-            pickedCoordinates = self.pointPicker.GetPickPosition()
-            matrix = self.baseViewer.reslice.GetResliceAxes()
-            center = matrix.MultiplyPoint((0, 0, 0, 1))
-            zCoordinate = (center[2] - self.baseViewer.viewerLogic.CoronalData.origin[2]) - self.baseViewer.viewerLogic.CoronalData.dimensions[2]\
-                             * self.baseViewer.viewerLogic.CoronalData.spacing[2] / 2
-            pickedCoordinates = (pickedCoordinates[0], pickedCoordinates[1], zCoordinate)
-            self.pickedCoordinates = pickedCoordinates
-            self.baseViewer.addPoint(pointType, self.pickedCoordinates)
-
     def cursorInBullsEye(self) -> int:
         (mouseX, mouseY) = self.parent.GetEventPosition()
         if self.pointPicker.Pick(mouseX, mouseY, 0.0, self.baseViewer.renderer):
@@ -157,6 +137,27 @@ class AxialViewerInteractorStyle(vtkInteractorStyleImage):
                 return 1
             else:
                 return 0
+
+    def adjustSliceIdx(self, transformZ: int):
+        """ adjusts the slice of the MRI that is being viewed"""
+        matrix: vtkMatrix4x4 = self.baseViewer.reslice.GetResliceAxes()
+        center = matrix.MultiplyPoint((0, 0, transformZ, 1))
+        sliceIdx = int((center[2] - self.baseViewer.imageData.origin[2]) /
+                       self.baseViewer.imageData.spacing[2] - 0.5)  # z - z_orig/(z_spacing - .5). slice idx is z coordinate of slice of image
+        if 0 <= sliceIdx <= self.baseViewer.imageData.extent[5]:
+            self.baseViewer.UpdateViewerMatrixCenter(center, sliceIdx)
+
+
+    def pickPoint(self, pointType: str, mouseX, mouseY):
+        if self.pointPicker.Pick(mouseX, mouseY, 0.0, self.baseViewer.renderer):
+            pickedCoordinates = self.pointPicker.GetPickPosition()
+            matrix = self.baseViewer.reslice.GetResliceAxes()
+            center = matrix.MultiplyPoint((0, 0, 0, 1))
+            zCoordinate = (center[2] - self.baseViewer.viewerLogic.CoronalData.origin[2]) - self.baseViewer.viewerLogic.CoronalData.dimensions[2]\
+                             * self.baseViewer.viewerLogic.CoronalData.spacing[2] / 2
+            pickedCoordinates = (pickedCoordinates[0], pickedCoordinates[1], zCoordinate)
+            self.pickedCoordinates = pickedCoordinates
+            self.baseViewer.addPoint(pointType, self.pickedCoordinates)
 
     def OnPickingCursorLeftButtonUp(self):
         (mouseX, mouseY) = self.parent.GetEventPosition()

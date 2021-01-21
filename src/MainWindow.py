@@ -24,9 +24,8 @@ class Ui_MainWindow:
     #default init
     def buildMainWindow(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
-        # MainWindow.showFullScreen()
         MainWindow.showMaximized()
-        MainWindow.setStyleSheet("background-color: rgb(171, 216, 255);\n"
+        MainWindow.setStyleSheet("background-color: rgb(68, 71, 79);\n"
                                  "border-color: rgb(0, 0, 0);")
         self.mainWindowWidget = QWidget(MainWindow)
         self.mainWindowWidget.setObjectName("mainWindowWidget")
@@ -292,10 +291,10 @@ class Ui_MainWindow:
     def pickMPRpointsStatus(self):
         if self.CoronalViewer.interactorStyle.actions["PickingMPR"] == 0:
             self.CoronalViewer.interactorStyle.actions["PickingMPR"] = 1
-            self.putMPRDotsButton.setStyleSheet("QPushButton { background-color: rgb(0,76,153); }")
+            self.putMPRDotsButton.setStyleSheet("QPushButton { background-color: rgb(255, 255, 255); }")
         else:
             self.CoronalViewer.interactorStyle.actions["PickingMPR"] = 0
-            self.putMPRDotsButton.setStyleSheet("QPushButton { background-color: rgb(171, 216, 255); }")
+            self.putMPRDotsButton.setStyleSheet("QPushButton { background-color: rgb(255, 255, 255); }")
 
     def pickLengthPointsStatus(self):
         # print("PushButten clicked")

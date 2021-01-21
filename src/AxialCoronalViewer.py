@@ -67,7 +67,7 @@ class PlaneViewerQT:
         self.actor.GetProperty().SetColorLevel(self.viewerLogic.LevelVal)
 
     def renderImage(self):
-        self.renderer.SetBackground(171 / 255, 216 / 255, 1)
+        self.renderer.SetBackground(68 / 255, 71 / 255, 79 / 255)
         self.renderer.AddActor(self.actor)
         self.window = self.interactor.GetRenderWindow()
         self.window.AddRenderer(self.renderer)
