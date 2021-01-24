@@ -81,7 +81,7 @@ class PlaneViewerQT:
     def setIdxText(self):
         self.textActorSliceIdx = vtkTextActor()
         self.textActorSliceIdx.GetTextProperty().SetFontSize(14)
-        self.textActorSliceIdx.GetTextProperty().SetColor(51 / 255, 51 / 255, 1)
+        self.textActorSliceIdx.GetTextProperty().SetColor(1, 250/255, 250/255)
         self.textActorSliceIdx.SetDisplayPosition(0, 2)
         self.textActorSliceIdx.SetInput("SliceIdx: " + str(self.sliceIdx))
         self.renderer.AddActor(self.textActorSliceIdx)
@@ -89,7 +89,7 @@ class PlaneViewerQT:
     def setWindowText(self):
         self.textActorWindow = vtkTextActor()
         self.textActorWindow.GetTextProperty().SetFontSize(14)
-        self.textActorWindow.GetTextProperty().SetColor(51/255, 51/255, 1)
+        self.textActorWindow.GetTextProperty().SetColor(1, 250/255, 250/255)
         self.textActorWindow.SetDisplayPosition(0, 17)
         self.textActorWindow.SetInput("Window: " + str(self.viewerLogic.WindowVal))
         self.renderer.AddActor(self.textActorWindow)
@@ -97,7 +97,7 @@ class PlaneViewerQT:
     def setLevelText(self):
         self.textActorLevel = vtkTextActor()
         self.textActorLevel.GetTextProperty().SetFontSize(14)
-        self.textActorLevel.GetTextProperty().SetColor(51 / 255, 51 / 255, 1)
+        self.textActorLevel.GetTextProperty().SetColor(1, 250/255, 250/255)
         self.textActorLevel.SetDisplayPosition(0, 32)
         self.textActorLevel.SetInput("Level: " + str(self.viewerLogic.LevelVal))
         self.renderer.AddActor(self.textActorLevel)

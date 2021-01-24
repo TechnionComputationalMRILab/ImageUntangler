@@ -127,7 +127,7 @@ class View():
                                              viewAngle=angle, Plot=plot)
         self.MPRViewerProperties.MPR_M = GetMPR.MPR_M
         self.MPRViewerProperties.delta = GetMPR.delta
-        self.MPRViewerProperties.MPRPosiotion = GetMPR.MPR_indexs_np
+        self.MPRViewerProperties.MPRposition = GetMPR.MPR_indexs_np
 
         # MPRWindow.Ui_MPRWindow.spinBox.setValue(angle)
 

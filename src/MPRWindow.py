@@ -3,6 +3,7 @@
 # generator was by: PyQt5 UI code generator 5.13.0
 
 
+from PyQt5.QtCore import QRect, QSize, QCoreApplication, QMetaObject
 from PyQt5 import QtCore
 from PyQt5.QtGui import QFont
 from PyQt5.QtWidgets import QWidget, QGridLayout, QGroupBox, QSizePolicy, QVBoxLayout, QPushButton, QLabel,QDoubleSpinBox, \
@@ -20,9 +21,17 @@ class Ui_MPRWindow:
     def buildMainWindow(self, MPRWindow):
         MPRWindow.setObjectName("MainWindow")
         MPRWindow.resize(990, 797)
-        MPRWindow.setMaximumSize(QtCore.QSize(990, 16777215))
+        MPRWindow.setMaximumSize(QSize(990, 16777215))
         self.centralwidget = QWidget(MPRWindow)
         self.centralwidget.setObjectName("centralwidget")
+        MPRWindow.setCentralWidget(self.centralwidget)
+        self.menubar = QMenuBar(MPRWindow)
+        self.menubar.setGeometry(QRect(0, 0, 990, 22))
+        self.menubar.setObjectName("menubar")
+        MPRWindow.setMenuBar(self.menubar)
+        self.statusbar = QStatusBar(MPRWindow)
+        self.statusbar.setObjectName("statusbar")
+        MPRWindow.setStatusBar(self.statusbar)
 
     def _buildCommonSizePolicy(self, heightDependsOnWidth: bool):
         sizePolicy = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Expanding)
@@ -100,7 +109,7 @@ class Ui_MPRWindow:
         self.mainViewerBox.setSizePolicy(self._buildCommonSizePolicy(self.mainViewerBox.sizePolicy().hasHeightForWidth()))
         self.mainViewerBox.setFlat(False)
         self.mainViewerBox.setCheckable(False)
-        self.mainViewerBox.setObjectName("groupBox")
+        self.mainViewerBox.setObjectName("mainViewerBox")
         self.mainLayout.addWidget(self.mainViewerBox, 0, 0, 1, 3)
 
     def buildMainLayout(self):
@@ -112,132 +121,8 @@ class Ui_MPRWindow:
         self.mainLayout.setRowStretch(0, 4)
         self.mainLayout.setRowStretch(1, 1)
 
-        
-    def setupUi(self, MPRWindow, MPR_M, delta, MPRPosiotion, ConvViewerProperties, ListOfPoints, ConvViewMode):
-        self.buildMainWindow(MPRWindow)
-
-        self.buildMainLayout()
-        self.buildLengthCalcBox()
-        self.buildLengthResultsBox()
-        self.buildSizeSettingsBox()
-        self.buildMainViewerBox()
-
-
-
-        MPRWindow.setCentralWidget(self.centralwidget)
-        self.menubar = QMenuBar(MPRWindow)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 990, 22))
-        self.menubar.setObjectName("menubar")
-        MPRWindow.setMenuBar(self.menubar)
-        self.statusbar = QStatusBar(MPRWindow)
-        self.statusbar.setObjectName("statusbar")
-        MPRWindow.setStatusBar(self.statusbar)
-
-        self.retranslateUi(MPRWindow)
-        QtCore.QMetaObject.connectSlotsByName(MPRWindow)
-
-
-        # self.Visualize_MPR(MPR_M,delta)
-
-
-        Height = self.heightSetter.value()
-        angle = self.angleSetter.value()
-
-        self.LoadViewer(MPR_M, delta,MPRPosiotion, ListOfPoints, ConvViewerProperties,Height, angle,ConvViewMode)
-
-
-        self.updateButton.clicked.connect(lambda: self.HeightChanged())
-        self.saveButton.clicked.connect(lambda: self.SaveFile())
-        self.setPointsButton.clicked.connect(lambda: self.setPointsButtonClick())
-        self.calcLengthButton.clicked.connect(lambda: self.CalculateDis())
-
-
-
-    def LoadViewer(self, MPR_M, delta,MPRPosiotion, ListOfPoints, ConvViewerProperties, Height, angle,ConvViewMode):
-
-        # self.ViewerProperties = ViewerProp.viewerLogic(self.FolderPath,str(self.UpLowBox.currentText()),str(self.AxialSeqBox.currentText()),
-        #                                                str(self.CoronalSeqBox.currentText()), self.angleSetterWindow.value(), self.angleSetterLevel.value())
-
-        # AxialVTKQidget = QVTKRenderWindowInteractor(self.mainViewerBox)
-        # self.mainLayout_3.addWidget(AxialVTKQidget, 1, 5, 1, 1)
-        # self.AxialViewer = AxialCoronalViewer.PlaneViewerQT(AxialVTKQidget, self.ViewerProperties, 'Axial')
-        self.MPRViewerProperties = MPRViwerProp.viewerLogic(MPR_M, delta,MPRPosiotion, ListOfPoints, Height, angle, ConvViewerProperties, ConvViewMode)
-        self.interactor = QVTKRenderWindowInteractor(self.mainViewerBox)
-        self.mainLayout.addWidget(self.interactor, 0, 0, 1, 3)
-        self.MPR_Viewer = MPRViewer.View(self.interactor,self.MPRViewerProperties)
-
-
-    def HeightChanged(self):
-        self.MPRViewerProperties.MPRHeight = self.heightSetter.value()
-        self.MPRViewerProperties.Angle = self.angleSetter.value()
-        plot = 0
-        self.GetMPR = getMPR.PointsToPlansVectors(self.MPRViewerProperties.ConvViewerProperties, self.MPRViewerProperties.ListOfPoints_Original, self.MPRViewerProperties.ConvViewMode, Height=self.MPRViewerProperties.MPRHeight,
-                                             viewAngle=self.MPRViewerProperties.Angle, Plot=plot)
-        self.MPRViewerProperties.MPR_M = self.GetMPR.MPR_M
-        self.MPRViewerProperties.delta = self.GetMPR.delta
-        self.MPRViewerProperties.MPRPosiotion = self.GetMPR.MPR_indexs_np
-        self.MPR_Viewer.Visualize_MPR()
-
-    # def AngleChangeByIneractor(self,angle):
-    #     self.Hegith = self.heightSetter.value()
-    #     self.Angle = angle
-    #     plot = 0
-    #     GetMPR = getMPR.PointsToPlansVectors(self.ViewerProperties, self.ListOfPoints, self.ViewMode, Heigth=self.Hegith,
-    #                                          viewAngle=self.Angle, Plot=plot)
-    #     MPR_M = GetMPR.MPR_M
-    #     delta = GetMPR.delta
-    #     self.angleSetter.setValue(angle)
-    #     self.MPR_Viewer.Visualize_MPR(MPR_M, delta)
-
-
-    def setPointsButtonClick(self):
-        if self.MPR_Viewer.interactorStyle.actions["Picking"] == 0:
-            self.MPR_Viewer.interactorStyle.actions["Picking"] = 1
-            self.setPointsButton.setStyleSheet("QPushButton { background-color: rgb(0,76,153); }")
-        else:
-            self.MPR_Viewer.interactorStyle.actions["Picking"] = 0
-            self.setPointsButton.setStyleSheet("QPushButton { background-color: rgb(171, 216, 255); }")
-    def CalculateDis(self):
-        self.MPRViewerProperties.DistancePickingIndexs = self.MPR_Viewer.PickingPointsIndex
-        Indexs = self.MPRViewerProperties.DistancePickingIndexs
-        MPR_Position =self.MPRViewerProperties.MPRPosiotion
-        Points_Position = []
-        for i in range(len(Indexs)):
-            Point = MPR_Position[Indexs[i][0],Indexs[i][1],:]
-            Points_Position.append(Point)
-        Points_Position = np.asarray(Points_Position)
-        self.MPRViewerProperties.PointsForDisCalPosition = Points_Position
-
-        Alldis = []
-        for j in range(len(Points_Position)-1):
-           dis = np.linalg.norm(Points_Position[j,:] - Points_Position[j+1,:])
-           Alldis.append(dis)
-        Alldis = np.asarray(Alldis)
-        self.MPRViewerProperties.DisCalculate = Alldis
-
-        TotlalD = np.sum(Alldis)
-        strdis = ["{0:.2f}".format(Alldis[i]) for i in range(len(Alldis))]
-        self.lengthResultsLabel.setText("The lengths [mm] are:\n\n {0} \n\nThe total length:\n\n {1}".format(' , '.join(strdis),"{0:.2f}".format(TotlalD)))
-        # self.GetMPR.PlotSelectedPointsForDis(Points_Position)
-        self.lengthResultsLabel.adjustSize()
-
-    def SaveFile(self):
-        options = QFileDialog.Options()
-        options |= QFileDialog.DontUseNativeDialog
-        fileName, _ = QFileDialog.getSaveFileName(self.mainViewerBox, "QFileDialog.getSaveFileName()", "", options=options)
-        # if fileName:
-        #     print(fileName+'.txt')
-        # print(self.MPRViewerProperties.ListOfPoints_Original)
-        # name1 = fileName+'.txt'
-        outfile = open(fileName, 'wb')
-        # np.savetxt(name1, self.MPRViewerProperties.ListOfPoints_Original,header=self.MPRViewerProperties.ConvViewerProperties.CorPath)
-        pickle.dump([self.MPRViewerProperties.ListOfPoints_Original, self.MPRViewerProperties.ConvViewerProperties.CoronalArrayDicom,
-                     self.MPRViewerProperties.DistancePickingIndexs, self.MPRViewerProperties.ConvViewerProperties.CorPath], outfile)
-        outfile.close()
-        # np.save(name, self.ListOfPoints)
-
     def retranslateUi(self, MainWindow):
-        _translate = QtCore.QCoreApplication.translate
+        _translate = QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
         self.lengthCalcBox.setTitle(_translate("MainWindow", "Calculate Distance"))
         self.setPointsButton.setText(_translate("MainWindow", "Set Points"))
@@ -252,6 +137,72 @@ class Ui_MPRWindow:
         self.updateButton.setText(_translate("MainWindow", "Update"))
         self.mainViewerBox.setTitle(_translate("MainWindow", "MPR"))
 
+
+    
+    def LoadViewer(self, MPR_M, delta,MPRposition, points, ConvViewerProperties, Height, angle,ConvViewMode):
+        self.MPRViewerProperties = MPRViwerProp.viewerLogic(MPR_M, delta, MPRposition, points, Height, angle, ConvViewerProperties, ConvViewMode)
+        self.interactor = QVTKRenderWindowInteractor(self.mainViewerBox)
+        self.mainLayout.addWidget(self.interactor, 0, 0, 1, 3)
+        self.MPR_Viewer = MPRViewer.View(self.interactor,self.MPRViewerProperties)
+
+    def setupUi(self, MPRWindow, MPR_M, delta, MPRposition, ConvViewerProperties, points, ConvViewMode):
+        self.buildMainWindow(MPRWindow) # build widgets and qualities of MPR window
+        self.buildMainLayout() # set basic dimensions of MPR window
+        self.buildLengthCalcBox() # build box in lower center with length calculating options
+        self.buildLengthResultsBox() # builds box in lower right that holds the results of the length calculations
+        self.buildSizeSettingsBox() # builds box with resizin options
+        self.buildMainViewerBox() # builds holder for MPR image
+        self.retranslateUi(MPRWindow) # add text to all widgets
+        QMetaObject.connectSlotsByName(MPRWindow)
+        self.LoadViewer(MPR_M, delta,MPRposition, points, ConvViewerProperties, self.heightSetter.value(), self.angleSetter.value(), ConvViewMode) # builds MPR viewer
+        self.connectButtons() # connects all buttons to their relevant functions
+
+
+    def HeightChanged(self):
+        self.MPRViewerProperties.MPRHeight = self.heightSetter.value()
+        self.MPRViewerProperties.Angle = self.angleSetter.value()
+        self.GetMPR = getMPR.PointsToPlansVectors(self.MPRViewerProperties.ConvViewerProperties, self.MPRViewerProperties.originalPoints, self.MPRViewerProperties.ConvViewMode, Height=self.MPRViewerProperties.MPRHeight,
+                                             viewAngle=self.MPRViewerProperties.Angle, Plot=0)
+        self.MPRViewerProperties.MPR_M = self.GetMPR.MPR_M
+        self.MPRViewerProperties.delta = self.GetMPR.delta
+        self.MPRViewerProperties.MPRposition = self.GetMPR.MPR_indexs_np
+        self.MPR_Viewer.Visualize_MPR()
+    
+    def SaveFile(self):
+        options = QFileDialog.Options()
+        options |= QFileDialog.DontUseNativeDialog
+        fileName, _ = QFileDialog.getSaveFileName(self.mainViewerBox, "QFileDialog.getSaveFileName()", "", options=options)
+        outfile = open(fileName, 'wb')
+        pickle.dump([self.MPRViewerProperties.originalPoints, self.MPRViewerProperties.ConvViewerProperties.CoronalArrayDicom,
+                     self.MPRViewerProperties.DistancePickingindices, self.MPRViewerProperties.ConvViewerProperties.CorPath], outfile)
+        outfile.close()
+
+    def setPointsButtonClick(self):
+        if self.MPR_Viewer.interactorStyle.actions["Picking"] == 0:
+            self.MPR_Viewer.interactorStyle.actions["Picking"] = 1
+            self.setPointsButton.setStyleSheet("QPushButton { background-color: rgb(0,76,153); }")
+        else:
+            self.MPR_Viewer.interactorStyle.actions["Picking"] = 0
+            self.setPointsButton.setStyleSheet("QPushButton { background-color: rgb(171, 216, 255); }")
+    
+    def calculateDistance(self):
+        # calculate and output distance of length points in MPR Viewer
+        self.MPRViewerProperties.DistancePickingIndexs = self.MPR_Viewer.PickingPointsIndex
+        indices = self.MPRViewerProperties.DistancePickingIndexs
+        MPR_Position = self.MPRViewerProperties.MPRposition
+        pointsPositions = [ MPR_Position[indices[i][0],indices[i][1],:] for i in range(len(indices))]
+        pointsPositions = np.asarray(pointsPositions)
+        allLengths = [np.linalg.norm(pointsPositions[j,:] - pointsPositions[j+1,:]) for j in range(len(pointsPositions)-1)]
+        totalDistance = np.sum(allLengths)
+        strdis = ["{0:.2f}".format(allLengths[i]) for i in range(len(allLengths))]
+        self.lengthResultsLabel.setText("The lengths [mm] are:\n\n {0} \n\nThe total length:\n\n {1}".format(' , '.join(strdis),"{0:.2f}".format(totalDistance)))
+        self.lengthResultsLabel.adjustSize()
+
+    def connectButtons(self):
+        self.updateButton.clicked.connect(lambda: self.HeightChanged())
+        self.saveButton.clicked.connect(lambda: self.SaveFile())
+        self.setPointsButton.clicked.connect(lambda: self.setPointsButtonClick())
+        self.calcLengthButton.clicked.connect(lambda: self.calculateDistance())
 
 
 if __name__ == "__main__":

@@ -216,7 +216,7 @@ class Ui_MainWindow:
         self.calcLengthButton.setObjectName("calcLengthButton")
         self.actionsLayout.addWidget(self.calcLengthButton, 6, 2, 1, 1)
         self.lengthAnswerTag = QtWidgets.QLabel(self.dotCalculatingBox)
-        self.lengthAnswerTag.setObjectName("label_5")
+        self.lengthAnswerTag.setObjectName("lengthAnswerTag")
         self.actionsLayout.addWidget(self.lengthAnswerTag, 8, 2, 1, 1)
         self.addSpacers()
 
