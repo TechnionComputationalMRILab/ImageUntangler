@@ -156,8 +156,8 @@ class AxialViewerInteractorStyle(vtkInteractorStyleImage):
             zCoordinate = (center[2] - self.baseViewer.viewerLogic.CoronalData.origin[2]) - self.baseViewer.viewerLogic.CoronalData.dimensions[2]\
                              * self.baseViewer.viewerLogic.CoronalData.spacing[2] / 2
             pickedCoordinates = (pickedCoordinates[0], pickedCoordinates[1], zCoordinate)
-            self.pickedCoordinates = pickedCoordinates
-            self.baseViewer.addPoint(pointType, self.pickedCoordinates)
+            #self.pickedCoordinates = pickedCoordinates
+            self.baseViewer.addPoint(pointType, pickedCoordinates)
 
     def OnPickingCursorLeftButtonUp(self):
         (mouseX, mouseY) = self.parent.GetEventPosition()

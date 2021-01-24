@@ -15,8 +15,6 @@ class MPRInteractorStyle(vtk.vtkInteractorStyleImage):
         self.AddObserver("RightButtonPressEvent", self.ButtonCallback)
         self.AddObserver("RightButtonReleaseEvent", self.ButtonCallback)
 
-        #
-        #
         ## Create callbacks for slicing the image
         self.actions = {}
         self.actions["Rotating"] = 0
@@ -26,8 +24,6 @@ class MPRInteractorStyle(vtk.vtkInteractorStyleImage):
         self.actions["Picking"] = 0
 
         self.picker = vtk.vtkPointPicker()
-
-        # self.viewMode = 'MPR'
 
     def ButtonCallback(self, obj, event):
         Shift = self.parent.GetShiftKey()
@@ -60,13 +56,6 @@ class MPRInteractorStyle(vtk.vtkInteractorStyleImage):
             else:
                 self.OnPickingLeftButtonUp(mouseX, mouseY)
 
-        # if event == "LeftButtonPressEvent":
-        #     self.actions["Windowing"] = 1
-        #     vtk.vtkInteractorStyleImage.OnLeftButtonDown(self)
-        # elif event == "LeftButtonReleaseEvent":
-        #     self.actions["Windowing"] = 0
-        #     vtk.vtkInteractorStyleImage.OnLeftButtonUp(self)
-
         if event == "RightButtonPressEvent":
             self.actions["Zooming"] = 1
             vtk.vtkInteractorStyleImage.OnRightButtonDown(self)
@@ -77,7 +66,6 @@ class MPRInteractorStyle(vtk.vtkInteractorStyleImage):
 
 
     def MouseMoveCallback(self, obj, event):
-
         (lastX, lastY) = self.parent.GetLastEventPosition()
         (mouseX, mouseY) = self.parent.GetEventPosition()
         center = self.MPRWindow.renderWindow.GetSize()
@@ -85,12 +73,10 @@ class MPRInteractorStyle(vtk.vtkInteractorStyleImage):
         centerY = center[1] / 2.0
 
         if self.actions["Rotating"] == 1:
-
             screenSize = self.parent.GetRenderWindow().GetSize()
-
             angle = np.int32(np.round(180.0 * mouseY / screenSize[1]))
             # print(angle)
-            self.MPRWindow.AngleChangeByIneractor(angle)
+            self.MPRWindow.changeAngle(angle)
             # self.MPRWindow.Angle.setValue(angle)
             # self.baseViewer.generateSMPR(viewAngle=angle)
             # self.baseViewer.updateSMPRVisualization()
@@ -132,8 +118,9 @@ class MPRInteractorStyle(vtk.vtkInteractorStyleImage):
     def OnPickingLeftButtonUp(self,mouseX,mouseY):
         # print((mouseX, mouseY))
         if self.picker.Pick(mouseX, mouseY, 0.0, self.MPRWindow.renderer):
-            PickingCoords = self.picker.GetPickPosition()
-            self.MPRWindow.AddToPickingList(PickingCoords)
+            pickedCoordinates = self.picker.GetPickPosition()
+            print(type(self.MPRWindow))
+            self.MPRWindow.processNewPoint(pickedCoordinates)
 
 
 

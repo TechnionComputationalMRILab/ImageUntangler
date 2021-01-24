@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 from scipy.interpolate import RegularGridInterpolator, splprep,splev
 from typing import List
 from icecream import ic
-from AxialCoronalViewer import PlaneViewerQT
+from MRISequenceViewer import PlaneViewerQT
 import ViewerProp
 
 

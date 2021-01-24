@@ -1,18 +1,20 @@
 import vtk
 import MPRInteractor
 import numpy as np
+from vtk import vtkImageData
 from vtk.util import numpy_support
 import getMPR
-import MPRWindow
+from MRISequenceViewer import PlaneViewerQT
+from MPRViwerProp import viewerLogic
+from PointCollection import PointCollection
 
-class View():
 
-    # ZminVTK: object
-
-    def __init__(self, interactor,MPRViewerProperties):
+class View:
+    def __init__(self, interactor, MPRViewerProperties: viewerLogic):
         self.interactor = interactor
         self.MPRViewerProperties = MPRViewerProperties
-        self.PickingPointsIm = []
+        #self.PickingPointsIm = []
+        self.lengthPoints = PointCollection()
         self.polygonList = []
         self.polygonActorList = []
         self.PickingPointsIndex =[]
@@ -23,10 +25,9 @@ class View():
         delta = self.MPRViewerProperties.delta
         n = MPR_M.shape[0]
         m = MPR_M.shape[1]
-        MPR_vtk = vtk.vtkImageData()
+        MPR_vtk = vtkImageData()
         MPR_vtk.SetDimensions(n, m,1)
-        origin=[0,0,0]
-        MPR_vtk.SetOrigin(origin)
+        MPR_vtk.SetOrigin([0, 0, 0])
         # MPR_vtk.SetSpacing([1,1,1])
         MPR_vtk.SetSpacing([delta,delta,delta])
         # MPR_vtk.SetExtent(0, MPR_M.shape[1] - 1, 0, MPR_M.shape[0] - 1, 0, 0)
@@ -108,7 +109,7 @@ class View():
         self.renderWindow.Render()
         # self.interactor.Start()
 
-    def window_label_update(self):
+    def updateWindowAndLevel(self):
         self.MPRViewerProperties.window = self.actor.GetProperty().GetColorWindow()
         self.MPRViewerProperties.level = self.actor.GetProperty().GetColorLevel()
         self.textActorWindow.SetInput("Window: " + str(np.int32(self.MPRViewerProperties.window)))
@@ -116,15 +117,11 @@ class View():
         self.textActorAngle.SetInput("Angle: " + str(np.int32(self.MPRViewerProperties.angle)))
         self.renderWindow.Render()
 
-    def AngleChangeByIneractor(self,angle):
+    def changeAngle(self, angle):
         Height = self.MPRViewerProperties.Height
         self.MPRViewerProperties.angle = angle
-        plot = 0
-        GetMPR = getMPR.PointsToPlansVectors(self.MPRViewerProperties.ConvViewerProperties, self.MPRViewerProperties.ListOfPoints_Original,
-                                             self.MPRViewerProperties.ConvViewMode, Height=Height,
-
-
-                                             viewAngle=angle, Plot=plot)
+        GetMPR = getMPR.PointsToPlansVectors(self.MPRViewerProperties.ConvViewerProperties, self.MPRViewerProperties.originalPoints,
+                                             self.MPRViewerProperties.ConvViewMode, Height=Height, viewAngle=angle, Plot=0)
         self.MPRViewerProperties.MPR_M = GetMPR.MPR_M
         self.MPRViewerProperties.delta = GetMPR.delta
         self.MPRViewerProperties.MPRposition = GetMPR.MPR_indexs_np
@@ -132,18 +129,26 @@ class View():
         # MPRWindow.Ui_MPRWindow.spinBox.setValue(angle)
 
         self.Visualize_MPR()
-        self.window_label_update()
+        self.updateWindowAndLevel()
 
-    def AddToPickingList(self, PickingCoords):
+    def processNewPoint(self, pickedCoordinates):
+        coordinates = [pickedCoordinates[0], pickedCoordinates[1], pickedCoordinates[2], 0] # x,y,z,sliceIdx
+        if self.lengthPoints.addPoint(coordinates): # if did not already exist
+            currentPolygonActor = self.lengthPoints.generatePolygonLastPoint(pickedCoordinates) # generate polygon for the point we just added
+            self.renderer.AddActor(currentPolygonActor)
+        self.presentPoints()
+
+
+        """
         picking_z = 0
-        PointIdImage = np.array([PickingCoords[0],PickingCoords[1],picking_z]) #x,y,z,sliceID
+        PointIdImage = np.array([pickedCoordinates[0],pickedCoordinates[1],picking_z]) #x,y,z,sliceID
         PointIdImage = PointIdImage.tolist()
 
         # extent_x = self.MPRViewerProperties.MPR_M.shape[0]*self.MPRViewerProperties.delta
         # extent_y = self.MPRViewerProperties.MPR_M.shape[1]*self.MPRViewerProperties.delta
         print(self.MPRViewerProperties.MPR_M.shape)
-        x_pixel = np.int(PickingCoords[0]//self.MPRViewerProperties.delta)
-        y_pixel = np.int(PickingCoords[1]//self.MPRViewerProperties.delta)
+        x_pixel = np.int(pickedCoordinates[0]//self.MPRViewerProperties.delta)
+        y_pixel = np.int(pickedCoordinates[1]//self.MPRViewerProperties.delta)
         PointsIndex =  [x_pixel,y_pixel]
         # PointIdImage_Pixel = %[0,0] - left, bottom corner
         if PointIdImage in self.PickingPointsIm:
@@ -163,7 +168,7 @@ class View():
             print(self.PickingPointsIndex)
             # print(self.PickingPointVTK)
             polygon = vtk.vtkRegularPolygonSource()
-            polygon.SetCenter(PickingCoords)
+            polygon.SetCenter(pickedCoordinates)
             polygon.SetRadius(1)
             polygon.SetNumberOfSides(15)
             # polygon.SetNormal(1, 2, 3)
@@ -180,10 +185,10 @@ class View():
             self.polygonList.append(polygon)
             self.renderer.AddActor(polygonActor)
 
-        self.PresentPoint()
-
-    def PresentPoint(self):
-        for i in range(len(self.PickingPointsIm)):
-            polygon = self.polygonList[i]
+        self.presentPoints()
+        """
+    def presentPoints(self):
+        for point in self.lengthPoints.points:
+            polygon = point.polygon
             polygon.GeneratePolygonOn()
             self.renderWindow.Render()

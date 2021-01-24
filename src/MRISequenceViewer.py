@@ -2,10 +2,11 @@ import numpy as np
 from typing import List
 from icecream import ic
 from vtk.qt.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
-from vtk import vtkImageActor, vtkImageReslice, vtkMatrix4x4, vtkRenderer, vtkTextActor, vtkRegularPolygonSource, \
-    vtkPolyDataMapper, vtkActor, vtkCursor2D
+from vtk import vtkImageActor, vtkImageReslice, vtkMatrix4x4, vtkRenderer, vtkTextActor,  vtkPolyDataMapper,\
+    vtkActor, vtkCursor2D
 import ViewerProp
 from AxialViewerInteractorStyle import AxialViewerInteractorStyle
+from PointCollection import PointCollection
 
 
 class PlaneViewerQT:
@@ -122,24 +123,24 @@ class PlaneViewerQT:
         self.textActorLevel.SetInput("Level: " + str(np.int32(self.viewerLogic.LevelVal)))
         self.window.Render()
 
-    def processNewPoint(self, pointCollection, pickingCoordinates):
-        PointIdImage = np.array([pickingCoordinates[0], pickingCoordinates[1], pickingCoordinates[2], self.sliceIdx])  # x,y,z,sliceIdx
-        if pointCollection.addPoint(PointIdImage):
-            currentPolygonActor = pointCollection.addPolygon(pickingCoordinates)
+    def processNewPoint(self, pointCollection, pickedCoordinates, color=(1, 0, 0)):
+        pointLocation = [pickedCoordinates[0], pickedCoordinates[1], pickedCoordinates[2], self.sliceIdx]  # x,y,z,sliceIdx
+        if pointCollection.addPoint(pointLocation):
+            currentPolygonActor = pointCollection.generatePolygonLastPoint(color)
             self.renderer.AddActor(currentPolygonActor)
         self.presentPoints(pointCollection, self.sliceIdx)
 
-    def addPoint(self, pointType, PickingCoords):
+    def addPoint(self, pointType, pickedCoordinates):
         if pointType == "MPR":
-            self.processNewPoint(self.mprPoints, PickingCoords)
+            self.processNewPoint(self.mprPoints, pickedCoordinates, color=(1, 0, 0))
         elif pointType.upper() == "LENGTH":
-            self.processNewPoint(self.lengthPoints, PickingCoords)
+            self.processNewPoint(self.lengthPoints, pickedCoordinates, color=(55/255, 230/255, 128/255))
+
 
     def presentPoints(self, pointCollection, sliceIdx) -> None:
-        for i in range(len(pointCollection.points)):
-            point = pointCollection.points[i]
-            polygon = pointCollection.polygons[i]
-            if point[3] != sliceIdx: # unclear what case this is
+        for point in pointCollection.points:
+            polygon = point.polygon
+            if point.coordinates[3] != sliceIdx:  # dots were placed on different slices
                 polygon.GeneratePolygonOff()
             else:
                 polygon.GeneratePolygonOn()
@@ -161,43 +162,4 @@ class PlaneViewerQT:
     def Start(self):
         self.interactor.Initialize()
         self.interactor.Start()
-
-
-class PointCollection:
-    def __init__(self):
-        self.points: List[float] = []
-        self.polygons = []
-
-    def findImageIndex(self, PointIdImage: np.array) -> int:
-        PointIdImage = PointIdImage.tolist()
-        if PointIdImage in self.points:
-            return self.points.index(PointIdImage)
-        else:
-            return -1
-
-    def addPoint(self, PointIdImage: np.array) -> bool:
-        # returns whether Point was added
-        imageIndex = self.findImageIndex(PointIdImage)
-        if imageIndex == -1:
-            self.points.append(PointIdImage.tolist())
-            return True
-        else:
-            return False
-
-    def addPolygon(self, selectedCoordinates, color=(1, 0, 0)) -> vtkActor:
-        # returns PolygonActor from generated Polygon. Is assumed that appropiate point already exists
-        polygon = vtkRegularPolygonSource()
-        polygon.SetCenter((selectedCoordinates[0], selectedCoordinates[1], 0))
-        polygon.SetRadius(1)
-        polygon.SetNumberOfSides(15)
-        polygon.GeneratePolylineOff()
-        polygon.GeneratePolygonOn()
-        polygonMapper = vtkPolyDataMapper()
-        polygonMapper.SetInputConnection(polygon.GetOutputPort())
-        polygonActor = vtkActor()
-        polygonActor.SetMapper(polygonMapper)
-        polygonActor.GetProperty().SetColor(color)
-        polygonActor.GetProperty().SetAmbient(1)
-        self.polygons.append(polygon)
-        return polygonActor
 

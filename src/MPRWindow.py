@@ -9,15 +9,18 @@ from PyQt5.QtGui import QFont
 from PyQt5.QtWidgets import QWidget, QGridLayout, QGroupBox, QSizePolicy, QVBoxLayout, QPushButton, QLabel,QDoubleSpinBox, \
     QMenuBar, QSpinBox, QStatusBar, QFileDialog, QMainWindow, QApplication
 import numpy as np
+from collections import namedtuple
 from vtk.qt.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
 import getMPR
 import MPRViewer
 import MPRViwerProp
 import pickle, sys
+from typing import List
+from icecream import ic
 
+LengthResults = namedtuple("LengthResults", "totalDistance allDistances")
 
 class Ui_MPRWindow:
-
     def buildMainWindow(self, MPRWindow):
         MPRWindow.setObjectName("MainWindow")
         MPRWindow.resize(990, 797)
@@ -139,13 +142,14 @@ class Ui_MPRWindow:
 
 
     
-    def LoadViewer(self, MPR_M, delta,MPRposition, points, ConvViewerProperties, Height, angle,ConvViewMode):
+    def LoadViewer(self, MPR_M, delta, MPRposition, points, ConvViewerProperties, Height, angle,ConvViewMode):
         self.MPRViewerProperties = MPRViwerProp.viewerLogic(MPR_M, delta, MPRposition, points, Height, angle, ConvViewerProperties, ConvViewMode)
         self.interactor = QVTKRenderWindowInteractor(self.mainViewerBox)
         self.mainLayout.addWidget(self.interactor, 0, 0, 1, 3)
         self.MPR_Viewer = MPRViewer.View(self.interactor,self.MPRViewerProperties)
 
     def setupUi(self, MPRWindow, MPR_M, delta, MPRposition, ConvViewerProperties, points, ConvViewMode):
+        ic(delta)
         self.buildMainWindow(MPRWindow) # build widgets and qualities of MPR window
         self.buildMainLayout() # set basic dimensions of MPR window
         self.buildLengthCalcBox() # build box in lower center with length calculating options
@@ -184,25 +188,39 @@ class Ui_MPRWindow:
         else:
             self.MPR_Viewer.interactorStyle.actions["Picking"] = 0
             self.setPointsButton.setStyleSheet("QPushButton { background-color: rgb(171, 216, 255); }")
+
+    def generateIndices(self, lengthPoints, delta) -> List[List[int]]:
+        return [[int(point.coordinates[0] // self.MPRViewerProperties.delta), int(point.coordinates[1] // delta)]
+                for point in lengthPoints.points]
     
-    def calculateDistance(self):
+    def outputLengthResults(self, lengthResults: LengthResults):
+        strdis = ["{0:.2f}".format(lengthResults.allDistances[i]) for i in range(len(lengthResults.allDistances))]
+        self.lengthResultsLabel.setText(
+            "The lengths [mm] are:\n\n {0} \n\nThe total length:\n\n {1}".format(' , '.join(strdis),
+                                                                                 "{0:.2f}".format(lengthResults.totalDistance)))
+        self.lengthResultsLabel.adjustSize()
+        
+    def calculateDistances(self) -> None:
         # calculate and output distance of length points in MPR Viewer
-        self.MPRViewerProperties.DistancePickingIndexs = self.MPR_Viewer.PickingPointsIndex
-        indices = self.MPRViewerProperties.DistancePickingIndexs
+        #self.MPRViewerProperties.DistancePickingIndexs = self.MPR_Viewer.lengthPoints.points
+        #indices = self.MPRViewerProperties.DistancePickingIndexs
+        indices = self.generateIndices(self.MPR_Viewer.lengthPoints, self.MPRViewerProperties.delta)
         MPR_Position = self.MPRViewerProperties.MPRposition
-        pointsPositions = [ MPR_Position[indices[i][0],indices[i][1],:] for i in range(len(indices))]
+        ic(indices)
+        pointsPositions = [ MPR_Position[indices[i][0], indices[i][1],:] for i in range(len(indices))]
         pointsPositions = np.asarray(pointsPositions)
         allLengths = [np.linalg.norm(pointsPositions[j,:] - pointsPositions[j+1,:]) for j in range(len(pointsPositions)-1)]
         totalDistance = np.sum(allLengths)
-        strdis = ["{0:.2f}".format(allLengths[i]) for i in range(len(allLengths))]
-        self.lengthResultsLabel.setText("The lengths [mm] are:\n\n {0} \n\nThe total length:\n\n {1}".format(' , '.join(strdis),"{0:.2f}".format(totalDistance)))
-        self.lengthResultsLabel.adjustSize()
+        self.outputLengthResults(LengthResults(totalDistance=totalDistance, allDistances=allLengths))
+
+        
 
     def connectButtons(self):
         self.updateButton.clicked.connect(lambda: self.HeightChanged())
         self.saveButton.clicked.connect(lambda: self.SaveFile())
         self.setPointsButton.clicked.connect(lambda: self.setPointsButtonClick())
-        self.calcLengthButton.clicked.connect(lambda: self.calculateDistance())
+        self.calcLengthButton.clicked.connect(lambda: self.calculateDistances())
+
 
 
 if __name__ == "__main__":

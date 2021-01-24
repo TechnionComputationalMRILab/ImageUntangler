@@ -14,7 +14,7 @@ from PyQt5.QtWidgets import QWidget, QGridLayout, QLabel, QGroupBox, QComboBox, 
 from vtk.qt.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
 
 
-from AxialCoronalViewer import PlaneViewerQT
+from MRISequenceViewer import PlaneViewerQT
 from MPRWindow import Ui_MPRWindow
 from getMPR import PointsToPlansVectors
 from ViewerProp import viewerLogic
@@ -312,7 +312,7 @@ class Ui_MainWindow:
         self.window.show()
 
     def calculateMPR(self):
-        points = self.CoronalViewer.mprPoints.points
+        points = self.CoronalViewer.mprPoints.pointCoordinatesAsList
         ViewMode = 'Coronal'
         print(points)
         GetMPR = PointsToPlansVectors(self.ViewerProperties, points, ViewMode, Plot = False, Height = 40, viewAngle = 180)
