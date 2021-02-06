@@ -4,19 +4,16 @@ import numpy as np
 from vtk import vtkImageData
 from vtk.util import numpy_support
 import getMPR
-from MPRViwerProp import viewerLogic
+from MPRViewerProperties import viewerLogic
 from PointCollection import PointCollection
+from vtk.qt.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
 
 
 class View:
-    def __init__(self, interactor, MPRViewerProperties: viewerLogic):
+    def __init__(self, interactor: QVTKRenderWindowInteractor, MPRViewerProperties: viewerLogic):
         self.interactor = interactor
         self.MPRViewerProperties = MPRViewerProperties
-        #self.PickingPointsIm = []
         self.lengthPoints = PointCollection()
-        self.polygonList = []
-        self.polygonActorList = []
-        self.PickingPointsIndex =[]
         self.Visualize_MPR()
 
     def Visualize_MPR(self):
@@ -25,14 +22,10 @@ class View:
         n = MPR_M.shape[0]
         m = MPR_M.shape[1]
         MPR_vtk = vtkImageData()
-        MPR_vtk.SetDimensions(n, m,1)
+        MPR_vtk.SetDimensions(n, m, 1)
         MPR_vtk.SetOrigin([0, 0, 0])
-        # MPR_vtk.SetSpacing([1,1,1])
-        MPR_vtk.SetSpacing([delta,delta,delta])
-        # MPR_vtk.SetExtent(0, MPR_M.shape[1] - 1, 0, MPR_M.shape[0] - 1, 0, 0)
-        # nPoints = plane.GetOutput().GetNumberOfPoints()
-        # assert (nPoints == MPR_M.size)
-        #
+        MPR_vtk.SetSpacing([delta, delta, delta])
+
         vtk_type_by_numpy_type = {
             np.uint8: vtk.VTK_UNSIGNED_CHAR,
             np.uint16: vtk.VTK_UNSIGNED_SHORT,
@@ -45,6 +38,7 @@ class View:
             np.float32: vtk.VTK_FLOAT,
             np.float64: vtk.VTK_DOUBLE
         }
+
         vtk_datatype = vtk_type_by_numpy_type[MPR_M.dtype.type]
         MPR_M = np.transpose(MPR_M)
         scalars = numpy_support.numpy_to_vtk(num_array=MPR_M.ravel(), deep=True, array_type=vtk_datatype)
@@ -120,7 +114,7 @@ class View:
         Height = self.MPRViewerProperties.Height
         self.MPRViewerProperties.angle = angle
         GetMPR = getMPR.PointsToPlansVectors(self.MPRViewerProperties.ConvViewerProperties, self.MPRViewerProperties.originalPoints,
-                                             self.MPRViewerProperties.ConvViewMode, Height=Height, viewAngle=angle, Plot=0)
+                                             self.MPRViewerProperties.ConvViewMode, height=Height, viewAngle=angle, Plot=0)
         self.MPRViewerProperties.MPR_M = GetMPR.MPR_M
         self.MPRViewerProperties.delta = GetMPR.delta
         self.MPRViewerProperties.MPRposition = GetMPR.MPR_indexs_np

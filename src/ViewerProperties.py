@@ -62,6 +62,7 @@ class ImageProperties:
         center_z = origin[2] + spacing[2] * 0.5 * (extent[4] + extent[5])
         self.sliceIdx = math.ceil((center_z-origin[2]) / spacing[2])
         nn = pointData.GetArray(0)
+        ic(type(nn))
         self.dicomArray = numpy_support.vtk_to_numpy(nn)
         self.dicomArray = self.dicomArray.reshape(dimensions, order='F')
 

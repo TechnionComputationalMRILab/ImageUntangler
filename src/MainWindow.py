@@ -12,13 +12,15 @@ from PyQt5.QtGui import QFont
 from PyQt5.QtWidgets import QWidget, QGridLayout, QLabel, QGroupBox, QComboBox, QSizePolicy, QFrame, \
     QPushButton, QFormLayout, QSpinBox, QSpacerItem, QMenuBar, QMenu, QAction, QStatusBar, QFileDialog, QMainWindow
 from vtk.qt.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
+from icecream import ic
 
 
 from MRISequenceViewer import PlaneViewerQT
 from MPRWindow import Ui_MPRWindow
 from getMPR import PointsToPlansVectors
-from ViewerProp import viewerLogic
+from ViewerProperties import viewerLogic
 
+ic.configureOutput(includeContext=True)
 
 class Ui_MainWindow:
     #default init
@@ -308,14 +310,14 @@ class Ui_MainWindow:
     def openMPRWindow(self, MPR_M, delta, MPRposition, ListOfPoints,ViewMode):
         self.window = QMainWindow()
         self.ui = Ui_MPRWindow()
-        self.ui.setupUi(self.window, MPR_M, delta,MPRposition,self.ViewerProperties,ListOfPoints,ViewMode)
+        self.ui.setupUi(self.window, MPR_M, delta, MPRposition, self.ViewerProperties, ListOfPoints, ViewMode)
         self.window.show()
 
     def calculateMPR(self):
         points = self.CoronalViewer.mprPoints.pointCoordinatesAsList
         ViewMode = 'Coronal'
-        print(points)
-        GetMPR = PointsToPlansVectors(self.ViewerProperties, points, ViewMode, Plot = False, Height = 40, viewAngle = 180)
+        ic(points)
+        GetMPR = PointsToPlansVectors(self.ViewerProperties, points, ViewMode, Plot = False, height= 40, viewAngle = 180)
         MPR_M = GetMPR.MPR_M
         delta = GetMPR.delta
         MPRposition = GetMPR.MPR_indexs_np
@@ -361,11 +363,14 @@ class Ui_MainWindow:
         self.levelSizeButton.setValue(self.ViewerProperties.LevelVal)
 
     def combineFormats(self, images: List[str]):
+        hasNRRD = False
+        hasDICOM = False
         for i in range(len(images)-1):
-            if images[i][-4:]!=images[i+1][-4:]:
-                print(images)
-                return True
-        return False
+            if images[i][-4:].upper()=="NRRD":
+                hasNRRD = True
+            elif self.isValidDicom(images[i]):
+                hasDICOM = True
+        return (hasNRRD and hasDICOM)
 
     def isValidDicom(self, filename: str):
         return filename[-3:].upper()=="DCM" or filename[-5:].upper() == "DICOM"

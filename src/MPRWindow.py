@@ -13,12 +13,13 @@ from collections import namedtuple
 from vtk.qt.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
 import getMPR
 import MPRViewer
-import MPRViwerProp
+import MPRViewerProperties
 import pickle, sys
 from typing import List
 from icecream import ic
 
 LengthResults = namedtuple("LengthResults", "totalDistance allDistances")
+
 
 class Ui_MPRWindow:
     def buildMainWindow(self, MPRWindow):
@@ -143,10 +144,10 @@ class Ui_MPRWindow:
 
     
     def LoadViewer(self, MPR_M, delta, MPRposition, points, ConvViewerProperties, Height, angle,ConvViewMode):
-        self.MPRViewerProperties = MPRViwerProp.viewerLogic(MPR_M, delta, MPRposition, points, Height, angle, ConvViewerProperties, ConvViewMode)
+        self.MPRViewerProperties = MPRViewerProperties.viewerLogic(MPR_M, delta, MPRposition, points, Height, angle, ConvViewerProperties, ConvViewMode)
         self.interactor = QVTKRenderWindowInteractor(self.mainViewerBox)
         self.mainLayout.addWidget(self.interactor, 0, 0, 1, 3)
-        self.MPR_Viewer = MPRViewer.View(self.interactor,self.MPRViewerProperties)
+        self.MPR_Viewer = MPRViewer.View(self.interactor, self.MPRViewerProperties)
 
     def setupUi(self, MPRWindow, MPR_M, delta, MPRposition, ConvViewerProperties, points, ConvViewMode):
         ic(delta)
@@ -165,8 +166,8 @@ class Ui_MPRWindow:
     def HeightChanged(self):
         self.MPRViewerProperties.MPRHeight = self.heightSetter.value()
         self.MPRViewerProperties.Angle = self.angleSetter.value()
-        self.GetMPR = getMPR.PointsToPlansVectors(self.MPRViewerProperties.ConvViewerProperties, self.MPRViewerProperties.originalPoints, self.MPRViewerProperties.ConvViewMode, Height=self.MPRViewerProperties.MPRHeight,
-                                             viewAngle=self.MPRViewerProperties.Angle, Plot=0)
+        self.GetMPR = getMPR.PointsToPlansVectors(self.MPRViewerProperties.ConvViewerProperties, self.MPRViewerProperties.originalPoints, self.MPRViewerProperties.ConvViewMode, height=self.MPRViewerProperties.MPRHeight,
+                                                  viewAngle=self.MPRViewerProperties.Angle, Plot=0)
         self.MPRViewerProperties.MPR_M = self.GetMPR.MPR_M
         self.MPRViewerProperties.delta = self.GetMPR.delta
         self.MPRViewerProperties.MPRposition = self.GetMPR.MPR_indexs_np

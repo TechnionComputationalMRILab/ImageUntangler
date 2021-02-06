@@ -4,13 +4,13 @@ from icecream import ic
 from vtk.qt.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
 from vtk import vtkImageActor, vtkImageReslice, vtkMatrix4x4, vtkRenderer, vtkTextActor,  vtkPolyDataMapper,\
     vtkActor, vtkCursor2D
-import ViewerProp
+import ViewerProperties
 from AxialViewerInteractorStyle import AxialViewerInteractorStyle
 from PointCollection import PointCollection
 
 
 class PlaneViewerQT:
-    def __init__(self, interactor: QVTKRenderWindowInteractor, viewerLogic: ViewerProp.viewerLogic , ViewMode: str):
+    def __init__(self, interactor: QVTKRenderWindowInteractor, viewerLogic: ViewerProperties.viewerLogic, ViewMode: str):
         self.viewerLogic = viewerLogic
         self.interactor = interactor
         if ViewMode == 'Axial':
@@ -23,7 +23,7 @@ class PlaneViewerQT:
         self.reslice = vtkImageReslice()
         self.actor = vtkImageActor()
         self.renderer = vtkRenderer()
-        self.window: QVTKRenderWindowInteractor = None # intialized in setVtkVols()
+        self.window: QVTKRenderWindowInteractor = None
         self.interactorStyle = AxialViewerInteractorStyle(parent=self.interactor, baseViewer=self, viewMode=ViewMode)
 
         self.Cursor = vtkCursor2D()
