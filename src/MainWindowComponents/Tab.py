@@ -1,7 +1,6 @@
-import os, pickle, numpy as np
-from typing import List
+import os, pickle, sip, numpy as np
 from PyQt5 import QtCore, QtWidgets
-from PyQt5.QtCore import QMetaObject, QCoreApplication
+from PyQt5.QtCore import QMetaObject, QCoreApplication, QRect
 from PyQt5.QtGui import QFont
 from PyQt5.QtWidgets import QWidget, QGridLayout, QLabel, QGroupBox, QComboBox, QSizePolicy, QFrame, \
     QPushButton, QFormLayout, QSpinBox, QSpacerItem, QFileDialog, QTabWidget
@@ -12,7 +11,9 @@ from MRISequenceViewer import PlaneViewerQT
 from MPRWindow import Ui_MPRWindow
 from getMPR import PointsToPlansVectors
 from ViewerProperties import viewerLogic
-from util import config_data
+from util import config_data, MRI_files
+
+from MainWindowComponents.MessageBoxes import invalidDirectoryMessage
 
 ic.configureOutput(includeContext=True)
 
@@ -21,19 +22,17 @@ class Tab(QWidget):
 
     def __init__(self, parent):
         super(QWidget, self).__init__(parent)
+        self.Tab_Bar = parent
         self.name = "New Tab"
-        self.setupUi(self)
+        self.buildNewTab()
 
     def getName(self):
-        return (self.name+' '*11)[:11]
-
-    def setTabColor(self, Tab):
-        Tab.setStyleSheet("background-color: rgb(68, 71, 79);\n"
-                                 "border-color: rgb(0, 0, 0);")
-
-    def buildMainLayoutManager(self):
-        self.mainLayout = QGridLayout(self)
-        #?self.mainLayout.setContentsMargins(0, 0, 0, 0)
+        # returns stylized form of name
+        if len(self.name) >= 16:
+            return self.name[:16]
+        else:
+            padding = len(self.name) - 16
+            return "{0}{1}{2}".format(' ' * int(padding/2), self.name, ' ' * int((padding/2) + 0.51))
 
     def _getCommonFont(self) -> QFont:
         font = QFont()
@@ -116,6 +115,13 @@ class Tab(QWidget):
         sizePolicy.setHeightForWidth(titleBox.sizePolicy().hasHeightForWidth())
         return sizePolicy
 
+    def _addMRIimages(self):
+        for i in range(len(self.MRIimages)):
+            basename = os.path.basename(self.MRIimages[i])
+            basename = basename[:basename.rfind(".")]
+            self.AxialImagesList.addItem(basename)
+            self.CoronalImagesList.addItem(basename)
+
     def _buildImageLists(self):
         self.AxialImagesList = QComboBox(self.settingsBox)
         self.AxialImagesList.setSizePolicy(self._buildSizePolicy(self.AxialImagesList))
@@ -123,6 +129,8 @@ class Tab(QWidget):
         self.CoronalImagesList = QComboBox(self.settingsBox)
         self.CoronalImagesList.setSizePolicy(self._buildSizePolicy(self.CoronalImagesList))
         self.settingsLayout.addWidget(self.CoronalImagesList, 2, 1, 1, 1)
+        self._addMRIimages()
+
 
     def buildSettingsLayoutManager(self):
         self.settingsLayout = QGridLayout(self.settingsBox)
@@ -185,11 +193,15 @@ class Tab(QWidget):
 
     def buildTabDivider(self):
         self.tabDivider = self._buildDivider()
-        self.mainLayout.addWidget(self.tabDivider, 1, 3, 1, 3)
+        self.mainLayout.addWidget(self.tabDivider, 1, 1, 2, 2)
 
     def buildImageDivider(self):
         self.imageDivider = self._buildDivider()
         self.mainLayout.addWidget(self.imageDivider, 1, 3, 1, 1)
+
+    def buildDividers(self):
+        self.buildTabDivider()
+        self.buildImageDivider()
 
     def addSpacers(self):
         spacerLeft = QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
@@ -332,51 +344,45 @@ class Tab(QWidget):
         self.windowSizeButton.setValue(self.ViewerProperties.WindowVal)
         self.levelSizeButton.setValue(self.ViewerProperties.LevelVal)
 
-    def combineFormats(self, images: List[str]):
-        hasNRRD = False
-        hasDICOM = False
-        for i in range(len(images) - 1):
-            if images[i][-4:].upper() == "NRRD":
-                hasNRRD = True
-            elif self.isValidDicom(images[i]):
-                hasDICOM = True
-        return (hasNRRD and hasDICOM)
-
-    def isValidDicom(self, filename: str):
-        return filename[-3:].upper() == "DCM" or filename[-5:].upper() == "DICOM"
-
-    def getMRIimages(self, directory: str):
-        # returns list of all .nrrd files in directories/subdirectories
-        allFiles = os.listdir(directory)
-        MRIimages = list()
-        for entry in allFiles:
-            fullPath = os.path.join(directory, entry)
-            if os.path.isdir(fullPath):
-                MRIimages = MRIimages + self.getMRIimages(fullPath)
-            else:
-                if fullPath[-4:] == "nrrd":
-                    MRIimages.append(fullPath)
-                elif self.isValidDicom(fullPath):
-                    MRIimages.append(fullPath)
-        if self.combineFormats(MRIimages):
-            raise ValueError("DO NOT COMBINE DICOM AND NRRD FILES FOR A SINGLE PATIENT")
-        return MRIimages
-
     def loadImages(self):
         fileExplorer = QFileDialog(
             directory=config_data.get_config_value("DefaultFolder"))  # opens location to default location
         folderPath = str(fileExplorer.getExistingDirectory())
-        self.FilesList = self.getMRIimages(folderPath)
-        for i in range(len(self.FilesList)):
-            basename = os.path.basename(self.FilesList[i])
-            basename = basename[:basename.rfind(".")]
-            self.AxialImagesList.addItem(basename)
-            self.CoronalImagesList.addItem(basename)
+        self.name = folderPath[folderPath.rfind(os.path.sep)+1:]
+        self.MRIimages = MRI_files.getMRIimages(folderPath) # so can be loaded by the viewers
+
+    def clearDefault(self):
+        self.mainLayout.removeWidget(self.defaultTabMainWidget)
+        sip.delete(self.defaultTabMainWidget)
+        self.defaultTabMainWidget = None
+
+    def loadRegularTab(self):
+        self.loadImages()
+        if len(self.MRIimages) < 1:  # open file explorer and load selected NRRD images
+            invalidDirectoryMessage()
+            return -1
+        self.Tab_Bar.change_tab_name(self)
+        self.clearDefault()
+        self.buildSettingsBox()  # builds components for 'settings' in the bottom left
+        self.buildCoronalImageFrame()  # builds frame containing coronal image
+        self.buildAxialImageFrame()  # builds frame containing axial image
+        self.loadImageViewers()  # load viewer for scan images
+        self.setWindowValues()  # set window size values based on opening
+        self.connectAllButtons()  # connect all buttons to the functions called when they are clicked, updated
+        self.buildImageBoundaries()  # Sets L/R marking on sides of NRRM images
+
+
+        self.buildDividers()  # creates line seperating axial and coronal images
+        self.buildUnderBoundaries()  # builds P and I captions to image frames
+        self.retranslateUi(self)  # adds text to all widgets
+        QMetaObject.connectSlotsByName(self)  # connect all components to Tab
+        # self.buildDotCalculatingBox()  # builds box containing buttons for dot-putting calculations
+
 
     def loadImageViewers(self):
-        self.ViewerProperties = viewerLogic(self.FilesList, str(self.AxialImagesList.currentIndex()),
+        self.ViewerProperties = viewerLogic(self.MRIimages, str(self.AxialImagesList.currentIndex()),
                                             str(self.CoronalImagesList.currentIndex()),
-                                            self.FilesList[0][-4:] != "nrrd")
+                                            self.MRIimages[0][-4:] != "nrrd")
 
         # display axial viewer
         AxialVTKQidget = QVTKRenderWindowInteractor(self.axialImageFrame)
@@ -388,21 +394,24 @@ class Tab(QWidget):
         self.mainLayout.addWidget(CoronalVTKQidget, 1, 1, 1, 1)
         self.CoronalViewer = PlaneViewerQT(CoronalVTKQidget, self.ViewerProperties, 'Coronal')
 
-    def setupUi(self, Tab):
-        self.setTabColor(Tab)  # set main window
+    def setTabColor(self):
+        self.setStyleSheet("background-color: rgb(68, 71, 79);\n"
+                                 "border-color: rgb(0, 0, 0);")
+
+    def buildMainLayoutManager(self):
+        self.mainLayout = QGridLayout(self)
+
+    def buildDefaultTab(self) -> QWidget:
+        self.defaultTabMainWidget = QWidget()
+        addFilesButton = QPushButton(self.defaultTabMainWidget)
+        addFilesButton.setText(QCoreApplication.translate("Tab", "Add MRI Images"))
+        addFilesButton.setGeometry(QRect(375, 290, 960, 231)) #EMPHASIS# should be made more portable
+        addFilesButton.clicked.connect(self.loadRegularTab) # loads MRI viewer
+        self.mainLayout.addWidget(self.defaultTabMainWidget)
+
+    def buildNewTab(self):
+        self.setTabColor()
         self.buildMainLayoutManager()
-        self.buildImageBoundaries()  # Sets L/R marking on sides of NRRM images
-        self.buildSettingsBox()  # builds components for 'settings' in the bottom left
-        self.buildCoronalImageFrame()  # builds frame containing coronal image
-        self.buildAxialImageFrame()  # builds frame containing axial image
-        self.buildImageDivider()  # creates line seperating axial and coronal images
-        self.buildUnderBoundaries()  # builds P and I captions to image frames
-        # self.buildDotCalculatingBox()  # builds box containing buttons for dot-putting calculations
-        self.retranslateUi(Tab)  # adds text to all widgets
+        self.buildDefaultTab() # builds default tab until user adds regular MRI files
 
-        QMetaObject.connectSlotsByName(Tab)  # connect all components to Tab
 
-        self.loadImages()  # open file explorer and load selected NRRD images
-        self.loadImageViewers()  # load viewer for scan images
-        self.setWindowValues()  # set window size values based on opening
-        self.connectAllButtons()  # connect all buttons to the functions called when they are clicked, updated
