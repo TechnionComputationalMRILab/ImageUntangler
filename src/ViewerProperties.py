@@ -1,4 +1,3 @@
-import numpy as np
 import math
 from typing import List
 from icecream import ic

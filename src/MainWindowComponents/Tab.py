@@ -1,43 +1,39 @@
-# -*- coding: utf-8 -*-
-# refactored code of generated code from ui file 'window1.6.ui'
-# generator was by: PyQt5 UI code generator 5.13.0
-
-__author__ = "Yael Zaffrani and Avraham Kahan"
-
-import os, pickle, sys, numpy as np
-from typing import List, Tuple
+import os, pickle, numpy as np
+from typing import List
 from PyQt5 import QtCore, QtWidgets
 from PyQt5.QtCore import QMetaObject, QCoreApplication
-from PyQt5.QtGui import QFont, QIcon, QPixmap
+from PyQt5.QtGui import QFont
 from PyQt5.QtWidgets import QWidget, QGridLayout, QLabel, QGroupBox, QComboBox, QSizePolicy, QFrame, \
-    QPushButton, QFormLayout, QSpinBox, QSpacerItem, QMenuBar, QMenu, QAction, QStatusBar, QFileDialog, QMainWindow
+    QPushButton, QFormLayout, QSpinBox, QSpacerItem, QFileDialog, QTabWidget
 from vtk.qt.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
 from icecream import ic
-
 
 from MRISequenceViewer import PlaneViewerQT
 from MPRWindow import Ui_MPRWindow
 from getMPR import PointsToPlansVectors
 from ViewerProperties import viewerLogic
-from MainWindowComponents import MenuBar
 from util import config_data
 
 ic.configureOutput(includeContext=True)
 
 
-class Ui_MainWindow:
-    #default init
-    def buildMainWindow(self, MainWindow):
-        MainWindow.setWindowTitle("MRI Untangler")
-        MainWindow.showMaximized()
-        MainWindow.setStyleSheet("background-color: rgb(68, 71, 79);\n"
+class Tab(QWidget):
+
+    def __init__(self, parent):
+        super(QWidget, self).__init__(parent)
+        self.name = "New Tab"
+        self.setupUi(self)
+
+    def getName(self):
+        return (self.name+' '*11)[:11]
+
+    def setTabColor(self, Tab):
+        Tab.setStyleSheet("background-color: rgb(68, 71, 79);\n"
                                  "border-color: rgb(0, 0, 0);")
-        self.mainWindowWidget = QWidget(MainWindow)
 
     def buildMainLayoutManager(self):
-        self.mainLayout = QGridLayout(self.mainWindowWidget)
-        self.mainLayout.setObjectName("mainLayout")
-        self.mainLayout.setContentsMargins(0, 0, 0, 0)
+        self.mainLayout = QGridLayout(self)
+        #?self.mainLayout.setContentsMargins(0, 0, 0, 0)
 
     def _getCommonFont(self) -> QFont:
         font = QFont()
@@ -45,9 +41,8 @@ class Ui_MainWindow:
         font.setBold(True)
         return font
 
-    def _buildCommonLabel(self, cur_label: QLabel, obj_name: str, font: QFont, alignment=None) -> QLabel:
-        #Shortens process of creating new label with central widget as its parent
-        cur_label.setObjectName(obj_name)
+    def _buildCommonLabel(self, cur_label: QLabel, font: QFont, alignment=None) -> QLabel:
+        # Shortens process of creating new label with central widget as its parent
         if font is not None:
             cur_label.setFont(font)
         if alignment is not None:
@@ -55,11 +50,11 @@ class Ui_MainWindow:
         return cur_label
 
     def buildImageBoundaries(self):
-        self.leftLeftBoundary, self.leftRightBoundary, self.rightLeftBoundary, self.rightRightBoundary = QLabel(), QLabel(), QLabel(), QLabel()
-        boundaries: List[Tuple[QLabel, str]] = [(self.leftLeftBoundary, "leftLeftBoundary"), (self.leftRightBoundary, "leftRightBoundary"),
-                      (self.rightLeftBoundary, "rightLeftBoundary"), (self.rightRightBoundary, "rightLeftBoundary")]
+        self.leftLeftBoundary, self.leftRightBoundary, self.rightLeftBoundary, self.rightRightBoundary, self.topBoundary = QLabel(self), QLabel(self), QLabel(self), QLabel(self), QLabel(self)
+        boundaries = [self.leftLeftBoundary, self.leftRightBoundary, self.rightLeftBoundary, self.rightRightBoundary, self.topBoundary]
         for boundary in boundaries:
-            self._buildCommonLabel(boundary[0] ,boundary[1], self._getCommonFont())
+            self._buildCommonLabel(boundary, self._getCommonFont())
+        #self.mainLayout.addWidget(self.topBoundary, 0, 0, 6, 6)
         self.mainLayout.addWidget(self.leftLeftBoundary, 1, 0, 1, 1)
         self.mainLayout.addWidget(self.leftRightBoundary, 1, 2, 1, 1)
         self.mainLayout.addWidget(self.rightLeftBoundary, 1, 4, 1, 1)
@@ -67,9 +62,7 @@ class Ui_MainWindow:
 
     def buildSizeSettings(self):
         self.sizeSettingBox = QFormLayout()
-        self.sizeSettingBox.setObjectName("sizeSettingBox")
         self.windowSizeCaption = QLabel(self.settingsBox)
-        self.windowSizeCaption.setObjectName("windowSizeCaption")
         self.sizeSettingBox.setWidget(0, QFormLayout.LabelRole, self.windowSizeCaption)
         self.levelSizeCaption = QLabel(self.settingsBox)
         self.levelSizeCaption.setObjectName("levelSizeCaption")
@@ -80,21 +73,20 @@ class Ui_MainWindow:
         self.windowSizeButton.setProperty("value", 1600)
         self.windowSizeButton.setObjectName("windowSizeButton")
         self.sizeSettingBox.setWidget(0, QFormLayout.FieldRole, self.windowSizeButton)
-        #self.windowSizeButton.setValue(self.ViewerProperties.WindowVal)
+        # self.windowSizeButton.setValue(self.ViewerProperties.WindowVal)
         self.levelSizeButton = QSpinBox(self.settingsBox)
         self.levelSizeButton.setMinimum(-9999)
         self.levelSizeButton.setMaximum(9999)
         self.levelSizeButton.setProperty("value", 800)
         self.levelSizeButton.setObjectName("levelSizeButton")
         self.sizeSettingBox.setWidget(1, QFormLayout.FieldRole, self.levelSizeButton)
-        #self.levelSizeButton.setValue(self.ViewerProperties.LevelVal)
-
+        # self.levelSizeButton.setValue(self.ViewerProperties.LevelVal)
 
     def _buildImageListTitles(self):
         """ builds Axial/Coronal title to scrollable image lists"""
-        self.Axiallabel = self._buildCommonLabel(QLabel(), "Axiallabel", self._getCommonFont())
+        self.Axiallabel = self._buildCommonLabel(QLabel(), self._getCommonFont())
         self.settingsLayout.addWidget(self.Axiallabel, 1, 0, 1, 1)
-        self.Coronallabel = self._buildCommonLabel(QLabel(), "Coronallabel", self._getCommonFont())
+        self.Coronallabel = self._buildCommonLabel(QLabel(), self._getCommonFont())
         self.settingsLayout.addWidget(self.Coronallabel, 2, 0, 1, 1)
 
     def _buildFrame(self, obj_name):
@@ -117,7 +109,6 @@ class Ui_MainWindow:
         self.updateButton.setObjectName("updateButton")
         self.settingsLayout.addWidget(self.updateButton, 3, 1, 1, 1)
 
-
     def _buildSizePolicy(self, titleBox: QComboBox):
         sizePolicy = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
         sizePolicy.setHorizontalStretch(0)
@@ -127,39 +118,39 @@ class Ui_MainWindow:
 
     def _buildImageLists(self):
         self.AxialImagesList = QComboBox(self.settingsBox)
-        self.AxialImagesList.setObjectName("AxialImagesList")
         self.AxialImagesList.setSizePolicy(self._buildSizePolicy(self.AxialImagesList))
         self.settingsLayout.addWidget(self.AxialImagesList, 1, 1, 1, 1)
         self.CoronalImagesList = QComboBox(self.settingsBox)
-        self.CoronalImagesList.setObjectName("CoronalImagesList")
         self.CoronalImagesList.setSizePolicy(self._buildSizePolicy(self.CoronalImagesList))
         self.settingsLayout.addWidget(self.CoronalImagesList, 2, 1, 1, 1)
 
     def buildSettingsLayoutManager(self):
         self.settingsLayout = QGridLayout(self.settingsBox)
         self.settingsLayout.setObjectName("settingsLayout")
-        self._buildImageListTitles() # builds Axial/Coronal title to scrollable image lists
+        self._buildImageListTitles()  # builds Axial/Coronal title to scrollable image lists
         self._buildSettingsFrame()
         self._buildUpdateButton()
         self._buildImageLists()
 
     def buildSettingsBox(self):
-        self.settingsBox = QGroupBox(self.mainWindowWidget)
+        self.settingsBox = QGroupBox(self)
         self.settingsBox.showMaximized()
         self.settingsBox.setObjectName("settingsBox")
         self.buildSizeSettings()  # builds the Window and Level size components
         self.buildSettingsLayoutManager()  # builds layout manager for most of the box
-        self.settingsLayout.addLayout(self.sizeSettingBox, 5, 1, 1, 1)  # adds box containing Window/level size spin buttons
-        self.mainLayout.addWidget(self.settingsBox, 3, 1, 1, 1)  # adds layout containing Setting components to MainWindow
+        self.settingsLayout.addLayout(self.sizeSettingBox, 5, 1, 1,
+                                      1)  # adds box containing Window/level size spin buttons
+        self.mainLayout.addWidget(self.settingsBox, 3, 1, 1,
+                                  1)  # adds layout containing Setting components to Tab
 
     def buildUnderBoundaries(self):
-        self.pLabel = self._buildCommonLabel(QLabel(), "pLabel", self._getCommonFont(), QtCore.Qt.AlignCenter)
+        self.pLabel = self._buildCommonLabel(QLabel(), self._getCommonFont(), QtCore.Qt.AlignCenter)
         self.mainLayout.addWidget(self.pLabel, 2, 5, 1, 1)
-        self.iLabel = self._buildCommonLabel(QLabel(), "iLabel", self._getCommonFont(), QtCore.Qt.AlignCenter)
+        self.iLabel = self._buildCommonLabel(QLabel(), self._getCommonFont(), QtCore.Qt.AlignCenter)
         self.mainLayout.addWidget(self.iLabel, 2, 1, 1, 1)
 
     def buildCoronalTitle(self):
-        self.coronalImageTitle = QLabel(self.mainWindowWidget)
+        self.coronalImageTitle = QLabel(self)
         font = self._getCommonFont()
         self.coronalImageTitle.setFont(font)
         self.coronalImageTitle.setAlignment(QtCore.Qt.AlignCenter)
@@ -167,35 +158,37 @@ class Ui_MainWindow:
         self.mainLayout.addWidget(self.coronalImageTitle, 0, 1, 1, 1)
 
     def buildCoronalImageFrame(self):
-        self.CoronalImageFrame = QGroupBox(self.mainWindowWidget)
-        self.CoronalImageFrame.setObjectName("CoronalImageFrame")
+        self.CoronalImageFrame = QGroupBox(self)
         self.CoronalImageFrame.showMaximized()
         self.mainLayout.addWidget(self.CoronalImageFrame, 1, 1, 1, 1)
-        self.buildCoronalTitle() # add S (Coronal) title
-
+        self.buildCoronalTitle()  # add S (Coronal) title
 
     def buildAxialTitle(self):
-        self.axialTitle = QtWidgets.QLabel(self.mainWindowWidget)
+        self.axialTitle = QtWidgets.QLabel(self)
         font = self._getCommonFont()
         self.coronalImageTitle.setFont(font)
         self.axialTitle.setAutoFillBackground(False)
         self.axialTitle.setAlignment(QtCore.Qt.AlignCenter)
-        self.axialTitle.setObjectName("axialTitle")
         self.mainLayout.addWidget(self.axialTitle, 0, 5, 1, 1)
 
     def buildAxialImageFrame(self):
-        self.axialImageFrame = QGroupBox(self.mainWindowWidget)
+        self.axialImageFrame = QGroupBox(self)
         self.axialImageFrame.showMaximized()
-        self.axialImageFrame.setObjectName("axialImageFrame")
         self.buildAxialTitle()
-        self.mainLayout.addWidget(self.axialImageFrame, 1, 5, 1, 1) #? why is this cut out
+        self.mainLayout.addWidget(self.axialImageFrame, 1, 5, 1, 1)  # ? why is this cut out
 
+    def _buildDivider(self):
+        divider = QFrame(self)
+        divider.setFrameShape(QFrame.VLine)
+        divider.setFrameShadow(QFrame.Sunken)
+        return divider
+
+    def buildTabDivider(self):
+        self.tabDivider = self._buildDivider()
+        self.mainLayout.addWidget(self.tabDivider, 1, 3, 1, 3)
 
     def buildImageDivider(self):
-        self.imageDivider = QFrame(self.mainWindowWidget)
-        self.imageDivider.setFrameShape(QFrame.VLine)
-        self.imageDivider.setFrameShadow(QFrame.Sunken)
-        self.imageDivider.setObjectName("imageDivider")
+        self.imageDivider = self._buildDivider()
         self.mainLayout.addWidget(self.imageDivider, 1, 3, 1, 1)
 
     def addSpacers(self):
@@ -225,51 +218,39 @@ class Ui_MainWindow:
         self.addSpacers()
 
     def buildDotCalculatingBox(self):
-        self.dotCalculatingBox = QGroupBox(self.mainWindowWidget)
+        self.dotCalculatingBox = QGroupBox(self)
         self.dotCalculatingBox.setTitle("")
         self.dotCalculatingBox.setObjectName("dotCalculatingBox")
         self.buildActionsBox()
         self.mainLayout.addWidget(self.dotCalculatingBox, 3, 5, 1, 1)
-    
-    def buildStatusBar(self):
-        self.statusbar = QStatusBar(MainWindow)
-        self.statusbar.setObjectName("statusbar")
-        MainWindow.setStatusBar(self.statusbar)
-
-    def buildMenuBar(self):
-        MainWindow.setCentralWidget(self.mainWindowWidget)
-        self.menuBar = MenuBar.getMenuBar()
-        self.menuBar.setParent(MainWindow)
-        MainWindow.setMenuBar(self.menuBar)
 
 
-
-    def retranslateUi(self, MainWindow):
+    def retranslateUi(self, Tab):
         _translate = QCoreApplication.translate
-        MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
+        Tab.setWindowTitle(_translate("Tab", "Tab"))
         # set text to widgets in the center near the images
-        self.coronalImageTitle.setText(_translate("MainWindow", "S (Coronal)"))
-        self.axialTitle.setText(_translate("MainWindow", "A (Axial)"))
-        self.rightLeftBoundary.setText(_translate("MainWindow", "R"))
-        self.rightRightBoundary.setText(_translate("MainWindow", "L"))
-        self.leftLeftBoundary.setText(_translate("MainWindow", "L"))
-        self.leftRightBoundary.setText(_translate("MainWindow", "R"))
-        self.pLabel.setText(_translate("MainWindow", "P"))
-        self.iLabel.setText(_translate("MainWindow", "I"))
+        self.coronalImageTitle.setText(_translate("Tab", "S (Coronal)"))
+        self.axialTitle.setText(_translate("Tab", "A (Axial)"))
+        self.rightLeftBoundary.setText(_translate("Tab", "R"))
+        self.rightRightBoundary.setText(_translate("Tab", "L"))
+        self.leftLeftBoundary.setText(_translate("Tab", "L"))
+        self.leftRightBoundary.setText(_translate("Tab", "R"))
+        self.pLabel.setText(_translate("Tab", "P"))
+        self.iLabel.setText(_translate("Tab", "I"))
         # set text to widgets in the settings box
-        self.settingsBox.setTitle(_translate("MainWindow", "Settings"))
-        self.Axiallabel.setText(_translate("MainWindow", "Axial"))
-        self.Coronallabel.setText(_translate("MainWindow", "Coronal"))
-        self.levelSizeCaption.setText(_translate("MainWindow", "Level"))
-        self.windowSizeCaption.setText(_translate("MainWindow", "Window"))
-        self.updateButton.setText(_translate("MainWindow", "Update"))
+        self.settingsBox.setTitle(_translate("Tab", "Settings"))
+        self.Axiallabel.setText(_translate("Tab", "Axial"))
+        self.Coronallabel.setText(_translate("Tab", "Coronal"))
+        self.levelSizeCaption.setText(_translate("Tab", "Level"))
+        self.windowSizeCaption.setText(_translate("Tab", "Window"))
+        self.updateButton.setText(_translate("Tab", "Update"))
         # set text to widgets in actions box
-        #self.putMPRDotsButton.setText(_translate("MainWindow", "Set Points - Calculate MPR"))
-        #self.calcLengthButton.setText(_translate("MainWindow", "Calculate Length"))
-        #self.putLengthDotsButton.setText(_translate("MainWindow", "Set Points - Calculate Length"))
+        # self.putMPRDotsButton.setText(_translate("Tab", "Set Points - Calculate MPR"))
+        # self.calcLengthButton.setText(_translate("Tab", "Calculate Length"))
+        # self.putLengthDotsButton.setText(_translate("Tab", "Set Points - Calculate Length"))
         # set text to widgets in Menu bar
 
-    #def updateWindow
+    # def updateWindow
     def WindowLevelUpdate(self):
         self.AxialViewer.adjustWindow(self.windowSizeButton.value())
         self.AxialViewer.adjustLevel(self.levelSizeButton.value())
@@ -294,9 +275,9 @@ class Ui_MainWindow:
         else:
             self.CoronalViewer.interactorStyle.actions["PickingLength"] = 0
             self.putLengthDotsButton.setStyleSheet("QPushButton { background-color: rgb(171, 216, 255); }")
-            
-    def openMPRWindow(self, MPR_M, delta, MPRposition, ListOfPoints,ViewMode):
-        self.window = QMainWindow()
+
+    def openMPRWindow(self, MPR_M, delta, MPRposition, ListOfPoints, ViewMode):
+        self.window = QTabWidget()
         self.ui = Ui_MPRWindow()
         self.ui.setupUi(self.window, MPR_M, delta, MPRposition, self.ViewerProperties, ListOfPoints, ViewMode)
         self.window.show()
@@ -305,18 +286,18 @@ class Ui_MainWindow:
         points = self.CoronalViewer.mprPoints.pointCoordinatesAsList
         ViewMode = 'Coronal'
         ic(points)
-        GetMPR = PointsToPlansVectors(self.ViewerProperties, points, ViewMode, Plot = False, height= 40, viewAngle = 180)
+        GetMPR = PointsToPlansVectors(self.ViewerProperties, points, ViewMode, Plot=False, height=40, viewAngle=180)
         MPR_M = GetMPR.MPR_M
         delta = GetMPR.delta
         MPRposition = GetMPR.MPR_indexs_np
         self.openMPRWindow(MPR_M, delta, MPRposition, points, ViewMode)
-    
+
     def pickleDistances(self, DistancePickingIndexs, allDistances):
 
         options = QFileDialog.Options()
         options |= QFileDialog.DontUseNativeDialog
         fileName, _ = QFileDialog.getSaveFileName(self.settingsBox, "QFileDialog.getSaveFileName()", "",
-                                                             options=options)
+                                                  options=options)
         print(fileName)
         if fileName != "":
             outfile = open(fileName, 'wb')
@@ -327,7 +308,8 @@ class Ui_MainWindow:
         """ Calculates distances between set points and outputs reselt to GUI"""
         DistancePickingIndexs = self.CoronalViewer.lengthPoints.points
         DistancePickingIndexs = np.asarray(DistancePickingIndexs)
-        allDistances = [np.linalg.norm(DistancePickingIndexs[j + 1, 0:3] - DistancePickingIndexs[j, 0:3]) for j in range(len(DistancePickingIndexs) - 1)]
+        allDistances = [np.linalg.norm(DistancePickingIndexs[j + 1, 0:3] - DistancePickingIndexs[j, 0:3]) for j in
+                        range(len(DistancePickingIndexs) - 1)]
         allDistances = np.asarray(allDistances)
         totalDistance = np.sum(allDistances)
         strDistances = ["{0:.2f}".format(allDistances[i]) for i in range(len(allDistances))]
@@ -341,10 +323,10 @@ class Ui_MainWindow:
         self.updateButton.clicked.connect(lambda: self.loadImageViewers())
         self.windowSizeButton.valueChanged.connect(lambda: self.WindowLevelUpdate())
         self.levelSizeButton.valueChanged.connect(lambda: self.WindowLevelUpdate())
-        #self.putMPRDotsButton.clicked.connect(lambda: self.pickMPRpointsStatus())
-        #self.putLengthDotsButton.clicked.connect(lambda: self.pickLengthPointsStatus())
-        #self.calcMPRButton.clicked.connect(lambda: self.calculateMPR())
-        #self.calcLengthButton.clicked.connect(lambda: self.calculateDistances())
+        # self.putMPRDotsButton.clicked.connect(lambda: self.pickMPRpointsStatus())
+        # self.putLengthDotsButton.clicked.connect(lambda: self.pickLengthPointsStatus())
+        # self.calcMPRButton.clicked.connect(lambda: self.calculateMPR())
+        # self.calcLengthButton.clicked.connect(lambda: self.calculateDistances())
 
     def setWindowValues(self):
         self.windowSizeButton.setValue(self.ViewerProperties.WindowVal)
@@ -353,15 +335,15 @@ class Ui_MainWindow:
     def combineFormats(self, images: List[str]):
         hasNRRD = False
         hasDICOM = False
-        for i in range(len(images)-1):
-            if images[i][-4:].upper()=="NRRD":
+        for i in range(len(images) - 1):
+            if images[i][-4:].upper() == "NRRD":
                 hasNRRD = True
             elif self.isValidDicom(images[i]):
                 hasDICOM = True
         return (hasNRRD and hasDICOM)
 
     def isValidDicom(self, filename: str):
-        return filename[-3:].upper()=="DCM" or filename[-5:].upper() == "DICOM"
+        return filename[-3:].upper() == "DCM" or filename[-5:].upper() == "DICOM"
 
     def getMRIimages(self, directory: str):
         # returns list of all .nrrd files in directories/subdirectories
@@ -381,7 +363,8 @@ class Ui_MainWindow:
         return MRIimages
 
     def loadImages(self):
-        fileExplorer = QFileDialog(directory=config_data.get_config_value("DefaultFolder")) # opens location to default location
+        fileExplorer = QFileDialog(
+            directory=config_data.get_config_value("DefaultFolder"))  # opens location to default location
         folderPath = str(fileExplorer.getExistingDirectory())
         self.FilesList = self.getMRIimages(folderPath)
         for i in range(len(self.FilesList)):
@@ -392,7 +375,8 @@ class Ui_MainWindow:
 
     def loadImageViewers(self):
         self.ViewerProperties = viewerLogic(self.FilesList, str(self.AxialImagesList.currentIndex()),
-                                                       str(self.CoronalImagesList.currentIndex()), self.FilesList[0][-4:]!="nrrd")
+                                            str(self.CoronalImagesList.currentIndex()),
+                                            self.FilesList[0][-4:] != "nrrd")
 
         # display axial viewer
         AxialVTKQidget = QVTKRenderWindowInteractor(self.axialImageFrame)
@@ -404,13 +388,8 @@ class Ui_MainWindow:
         self.mainLayout.addWidget(CoronalVTKQidget, 1, 1, 1, 1)
         self.CoronalViewer = PlaneViewerQT(CoronalVTKQidget, self.ViewerProperties, 'Coronal')
 
-    def setIcon(self, MainWindow):
-        scriptDir = os.path.dirname(os.path.realpath(__file__))
-        MainWindow.setWindowIcon(QIcon(scriptDir + os.path.sep + '..' + os.path.sep + 'config' + os.path.sep + 'icon.jpeg'))
-
-    def setupUi(self, MainWindow):
-        self.setIcon(MainWindow) # sets icon
-        self.buildMainWindow(MainWindow)  # set main window
+    def setupUi(self, Tab):
+        self.setTabColor(Tab)  # set main window
         self.buildMainLayoutManager()
         self.buildImageBoundaries()  # Sets L/R marking on sides of NRRM images
         self.buildSettingsBox()  # builds components for 'settings' in the bottom left
@@ -418,23 +397,12 @@ class Ui_MainWindow:
         self.buildAxialImageFrame()  # builds frame containing axial image
         self.buildImageDivider()  # creates line seperating axial and coronal images
         self.buildUnderBoundaries()  # builds P and I captions to image frames
-        #self.buildDotCalculatingBox()  # builds box containing buttons for dot-putting calculations
-        self.buildStatusBar() # add a status bar at the bottom
-        self.buildMenuBar()  # add menu at top of screen
-        self.retranslateUi(MainWindow)  # adds text to all widgets
+        # self.buildDotCalculatingBox()  # builds box containing buttons for dot-putting calculations
+        self.retranslateUi(Tab)  # adds text to all widgets
 
-        QMetaObject.connectSlotsByName(MainWindow) # connect all components to MainWindow
+        QMetaObject.connectSlotsByName(Tab)  # connect all components to Tab
 
-        self.loadImages() # open file explorer and load selected NRRD images
+        self.loadImages()  # open file explorer and load selected NRRD images
         self.loadImageViewers()  # load viewer for scan images
         self.setWindowValues()  # set window size values based on opening
         self.connectAllButtons()  # connect all buttons to the functions called when they are clicked, updated
-
-if __name__ == "__main__":
-    app = QtWidgets.QApplication([])
-    MainWindow = QtWidgets.QMainWindow()
-    ui = Ui_MainWindow()
-    ui.setupUi(MainWindow)
-
-    MainWindow.show()
-    sys.exit(app.exec_())

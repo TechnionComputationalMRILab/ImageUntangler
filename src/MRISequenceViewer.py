@@ -116,7 +116,15 @@ class PlaneViewerQT:
         self.imageData.sliceIdx = sliceIdx
         self.presentPoints(self.mprPoints, sliceIdx)
 
-    def updateWindowAndLevel(self):
+    def adjustWindow(self, window: int):
+        self.actor.GetProperty().SetColorWindow(window)
+        self.updateWindowLevelLabels()
+
+    def adjustLevel(self, level: int):
+        self.actor.GetProperty().SetColorLevel(level)
+        self.updateWindowLevelLabels()
+
+    def updateWindowLevelLabels(self):
         self.viewerLogic.WindowVal = self.actor.GetProperty().GetColorWindow()
         self.viewerLogic.LevelVal = self.actor.GetProperty().GetColorLevel()
         self.textActorWindow.SetInput("Window: " + str(np.int32(self.viewerLogic.WindowVal)))

@@ -95,7 +95,7 @@ class AxialViewerInteractorStyle(vtkInteractorStyleImage):
 
         elif self.actions["Windowing"] == 1:
             vtkInteractorStyleImage.OnMouseMove(self)
-            self.baseViewer.updateWindowAndLevel()
+            self.baseViewer.updateWindowLevelLabels()
 
         elif self.actions["Zooming"] == 1:
             vtkInteractorStyleImage.OnMouseMove(self)
