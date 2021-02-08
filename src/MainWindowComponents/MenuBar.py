@@ -35,7 +35,7 @@ def addSettingsTab(menuBar: QMenuBar) -> None:
 
 def buildMenuBar():
     # builds MenuBar
-    menuBar = QMenuBar() # parent will be set in MainWindow.py
+    menuBar = QMenuBar() # parent will be set in OldMainWindow.py
     menuBar.setGeometry(QtCore.QRect(0, 0, 800, 18))
     menuBar.setStyleSheet("""QMenuBar { background-color: rgb(236, 232, 232); }""")
     addSettingsTab(menuBar) # adds setting option in menubar
