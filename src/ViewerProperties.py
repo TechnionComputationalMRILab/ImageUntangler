@@ -7,7 +7,6 @@ from vtk.util import numpy_support
 
 class viewerLogic:
     def __init__(self, mriSeqs: List[str], axialImageIndex: str, coronalImageIndex: str, isDicom=False):
-        self.zoomFactor = 1
 
         self.AxialViewer = None
         self.CoronalViewer = None
@@ -33,12 +32,6 @@ class viewerLogic:
         return ImageProperties(imageData, imageData.GetSpacing(), imageData.GetDimensions(),
                                                imageData.GetExtent(), imageData.GetPointData(), imageData.GetOrigin())
 
-    def updateZoomFactor(self, ZoomFactor):
-        self.zoomFactor = ZoomFactor
-        self.AxialViewer.renderer.GetActiveCamera().SetParallelScale(self.AxialData.getParallelScale() * ZoomFactor)
-        self.AxialViewer.window.Render()
-        self.CoronalViewer.renderer.GetActiveCamera().SetParallelScale(self.CoronalData.getParallelScale() * ZoomFactor)
-        self.CoronalViewer.window.Render()
 
     def moveBullsEye(self, PickerCursorCords, ViewMode: str):
         # called when moving bulls eye

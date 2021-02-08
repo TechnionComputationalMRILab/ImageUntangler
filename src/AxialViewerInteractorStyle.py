@@ -1,5 +1,5 @@
 from icecream import ic
-from vtk import vtkInteractorStyleImage, vtkPropPicker, vtkCellPicker, vtkMatrix4x4
+from vtk import vtkInteractorStyleImage, vtkPropPicker, vtkMatrix4x4
 
 
 class AxialViewerInteractorStyle(vtkInteractorStyleImage):
@@ -101,7 +101,7 @@ class AxialViewerInteractorStyle(vtkInteractorStyleImage):
             vtkInteractorStyleImage.OnMouseMove(self)
             curParallelScale = self.baseViewer.renderer.GetActiveCamera().GetParallelScale()
             zoomFactor = curParallelScale / self.baseViewer.imageData.getParallelScale()
-            self.baseViewer.viewerLogic.updateZoomFactor(zoomFactor)
+            self.baseViewer.updateZoomFactor(zoomFactor)
         else:
             self.OnMouseMove() # call to superclass
 

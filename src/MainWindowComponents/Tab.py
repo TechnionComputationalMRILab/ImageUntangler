@@ -405,13 +405,12 @@ class Tab(QWidget):
         self.oldCoronalIndex = coronalIndex
 
     def loadImageViewers(self):
-        print(int(self.AxialImagesList.currentIndex()))
         try:
             self.ViewerProperties = viewerLogic(self.MRIimages, str(self.AxialImagesList.currentIndex()),
                                                 str(self.CoronalImagesList.currentIndex()),
                                                 self.MRIimages[0][-4:] != "nrrd")
         except AttributeError: # GZIP, unreadable file picked
-            self.show_valid_image(int(self.AxialImagesList.currentIndex()), int(self.CoronalImagesList.currentIndex())) # show any valid MRI image instead of improper image
+            self.show_valid_image(int(self.AxialImagesList.currentIndex()), int(self.CoronalImagesList.currentIndex())) # show any valid MRI image instead of improper image and show Error
 
         self.rememberIndices(int(self.AxialImagesList.currentIndex()), int(self.CoronalImagesList.currentIndex())) # remember that these indices worked
         # display axial viewer

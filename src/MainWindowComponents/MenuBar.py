@@ -24,15 +24,24 @@ def getDefaultFolderAction(settingsTab):
     return defaultFolderAction
 
 
-def addSettingsTab(menuBar: QMenuBar) -> None:
-    settingsTab = QMenu(parent=menuBar)
-    #settingsTab.setStyleSheet("""QMenu { background-color: rgb(236, 232, 232); }""")
-    settingsTab.setStyleSheet(stylesheets.get_sheet_by_name("Menu"))
-    defaultFolderAction = getDefaultFolderAction(settingsTab)
-    settingsTab.addAction(defaultFolderAction)
-    menuBar.addAction(settingsTab.menuAction())
-    settingsTab.setTitle(QCoreApplication.translate("MainWindow", "Settings"))
+def addSettingsMenu(menuBar: QMenuBar) -> None:
+    settingsMenu = QMenu(parent=menuBar)
+    #settingsMenu.setStyleSheet("""QMenu { background-color: rgb(236, 232, 232); }""")
+    settingsMenu.setStyleSheet(stylesheets.get_sheet_by_name("Menu"))
+    defaultFolderAction = getDefaultFolderAction(settingsMenu)
+    settingsMenu.addAction(defaultFolderAction)
+    menuBar.addAction(settingsMenu.menuAction())
+    settingsMenu.setTitle(QCoreApplication.translate("MainWindow", "Settings"))
 
+def addDotActions():
+    pass
+
+def addDotMenu(menuBar: QMenuBar) -> None:
+    dotMenu = QMenu(parent=menuBar)
+    dotMenu.setStyleSheet(stylesheets.get_sheet_by_name("Menu"))
+    addDotActions(dotMenu)
+    menuBar.addActions(dotMenu.menuAction())
+    dotMenu.setTitle(QCoreApplication.translate("MainWindow", "Set Dots"))
 
 def buildMenuBar():
     # builds MenuBar
@@ -40,5 +49,5 @@ def buildMenuBar():
     menuBar.setGeometry(QtCore.QRect(0, 0, 800, 18))
     #menuBar.setStyleSheet("""QMenuBar { background-color: rgb(236, 232, 232); }""")
     menuBar.setStyleSheet(stylesheets.get_sheet_by_name("Menu"))
-    addSettingsTab(menuBar) # adds setting option in menubar
+    addSettingsMenu(menuBar) # adds setting option in menubar
     return menuBar

@@ -171,3 +171,5 @@ class PlaneViewerQT:
         self.interactor.Initialize()
         self.interactor.Start()
 
+    def updateZoomFactor(self, newZoomFactor):
+        self.renderer.GetActiveCamera().SetParallelScale(self.imageData.getParallelScale() * newZoomFactor)
