@@ -4,21 +4,18 @@ from icecream import ic
 from vtk.qt.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
 from vtk import vtkImageActor, vtkImageReslice, vtkMatrix4x4, vtkRenderer, vtkTextActor,  vtkPolyDataMapper,\
     vtkActor, vtkCursor2D
-import ViewerProperties
+from ImageProperties import ImageProperties
+import ImageProperties
 from AxialViewerInteractorStyle import AxialViewerInteractorStyle
 from PointCollection import PointCollection
 
 
 class PlaneViewerQT:
-    def __init__(self, interactor: QVTKRenderWindowInteractor, viewerLogic: ViewerProperties.viewerLogic, ViewMode: str):
-        self.viewerLogic = viewerLogic
+    def __init__(self, interactor: QVTKRenderWindowInteractor, imagePath: str, ViewMode: str, isDicom = False):
         self.interactor = interactor
-        if ViewMode == 'Axial':
-            self.imageData = self.viewerLogic.AxialData
-            self.viewerLogic.AxialViewer = self
-        elif ViewMode == 'Coronal':
-            self.imageData = self.viewerLogic.CoronalData
-            self.viewerLogic.CoronalViewer = self
+        self.imageData = ImageProperties.getImageData(imagePath, isDicom)
+        self.LevelVal = (self.imageData.dicomArray.max()+self.imageData.dicomArray.min())/2
+        self.WindowVal = self.imageData.dicomArray.max()-self.imageData.dicomArray.min()
         self.sliceIdx = self.imageData.sliceIdx
         self.reslice = vtkImageReslice()
         self.actor = vtkImageActor()
@@ -64,8 +61,8 @@ class PlaneViewerQT:
 
     def connectActor(self):
         self.actor.GetMapper().SetInputConnection(self.reslice.GetOutputPort())
-        self.actor.GetProperty().SetColorWindow(self.viewerLogic.WindowVal)
-        self.actor.GetProperty().SetColorLevel(self.viewerLogic.LevelVal)
+        self.actor.GetProperty().SetColorWindow(self.WindowVal)
+        self.actor.GetProperty().SetColorLevel(self.LevelVal)
 
     def renderImage(self):
         self.renderer.SetBackground(68 / 255, 71 / 255, 79 / 255)
@@ -92,7 +89,7 @@ class PlaneViewerQT:
         self.textActorWindow.GetTextProperty().SetFontSize(14)
         self.textActorWindow.GetTextProperty().SetColor(1, 250/255, 250/255)
         self.textActorWindow.SetDisplayPosition(0, 17)
-        self.textActorWindow.SetInput("Window: " + str(self.viewerLogic.WindowVal))
+        self.textActorWindow.SetInput("Window: " + str(self.WindowVal))
         self.renderer.AddActor(self.textActorWindow)
 
     def setLevelText(self):
@@ -100,7 +97,7 @@ class PlaneViewerQT:
         self.textActorLevel.GetTextProperty().SetFontSize(14)
         self.textActorLevel.GetTextProperty().SetColor(1, 250/255, 250/255)
         self.textActorLevel.SetDisplayPosition(0, 32)
-        self.textActorLevel.SetInput("Level: " + str(self.viewerLogic.LevelVal))
+        self.textActorLevel.SetInput("Level: " + str(self.LevelVal))
         self.renderer.AddActor(self.textActorLevel)
         self.window.Render()
 
@@ -125,10 +122,10 @@ class PlaneViewerQT:
         self.updateWindowLevelLabels()
 
     def updateWindowLevelLabels(self):
-        self.viewerLogic.WindowVal = self.actor.GetProperty().GetColorWindow()
-        self.viewerLogic.LevelVal = self.actor.GetProperty().GetColorLevel()
-        self.textActorWindow.SetInput("Window: " + str(np.int32(self.viewerLogic.WindowVal)))
-        self.textActorLevel.SetInput("Level: " + str(np.int32(self.viewerLogic.LevelVal)))
+        self.WindowVal = self.actor.GetProperty().GetColorWindow()
+        self.LevelVal = self.actor.GetProperty().GetColorLevel()
+        self.textActorWindow.SetInput("Window: " + str(np.int32(self.WindowVal)))
+        self.textActorLevel.SetInput("Level: " + str(np.int32(self.LevelVal)))
         self.window.Render()
 
     def processNewPoint(self, pointCollection, pickedCoordinates, color=(1, 0, 0)):
@@ -173,3 +170,8 @@ class PlaneViewerQT:
 
     def updateZoomFactor(self, newZoomFactor):
         self.renderer.GetActiveCamera().SetParallelScale(self.imageData.getParallelScale() * newZoomFactor)
+        self.window.Render()
+
+    def moveBullsEye(self, newCoordinates):
+        self.Cursor.SetFocalPoint(newCoordinates)
+        self.window.Render()

@@ -10,7 +10,6 @@ from icecream import ic
 from MRISequenceViewer import PlaneViewerQT
 from MPRWindow import Ui_MPRWindow
 from getMPR import PointsToPlansVectors
-from ViewerProperties import viewerLogic
 from util import config_data, MRI_files
 
 from MainWindowComponents.MessageBoxes import invalidDirectoryMessage, gzipFileMessage, noGoodFiles
@@ -74,14 +73,12 @@ class Tab(QWidget):
         self.windowSizeButton.setProperty("value", 1600)
         self.windowSizeButton.setObjectName("windowSizeButton")
         self.sizeSettingBox.setWidget(0, QFormLayout.FieldRole, self.windowSizeButton)
-        # self.windowSizeButton.setValue(self.ViewerProperties.WindowVal)
         self.levelSizeButton = QSpinBox(self.settingsBox)
         self.levelSizeButton.setMinimum(-9999)
         self.levelSizeButton.setMaximum(9999)
         self.levelSizeButton.setProperty("value", 800)
         self.levelSizeButton.setObjectName("levelSizeButton")
         self.sizeSettingBox.setWidget(1, QFormLayout.FieldRole, self.levelSizeButton)
-        # self.levelSizeButton.setValue(self.ViewerProperties.LevelVal)
 
     def _buildImageListTitles(self):
         """ builds Axial/Coronal title to scrollable image lists"""
@@ -343,8 +340,8 @@ class Tab(QWidget):
         # self.calcLengthButton.clicked.connect(lambda: self.calculateDistances())
 
     def setWindowValues(self):
-        self.windowSizeButton.setValue(self.ViewerProperties.WindowVal)
-        self.levelSizeButton.setValue(self.ViewerProperties.LevelVal)
+        self.windowSizeButton.setValue(self.CoronalViewer.WindowVal)
+        self.levelSizeButton.setValue(self.CoronalViewer.LevelVal)
 
     def loadImages(self):
         fileExplorer = QFileDialog(
@@ -405,23 +402,22 @@ class Tab(QWidget):
         self.oldCoronalIndex = coronalIndex
 
     def loadImageViewers(self):
+        AxialVTKQidget = QVTKRenderWindowInteractor(self.axialImageFrame)
+        self.mainLayout.addWidget(AxialVTKQidget, 1, 5, 1, 1)
+        CoronalVTKQidget = QVTKRenderWindowInteractor(self.CoronalImageFrame)
+        self.mainLayout.addWidget(CoronalVTKQidget, 1, 1, 1, 1)
+
         try:
-            self.ViewerProperties = viewerLogic(self.MRIimages, str(self.AxialImagesList.currentIndex()),
-                                                str(self.CoronalImagesList.currentIndex()),
-                                                self.MRIimages[0][-4:] != "nrrd")
+            self.AxialViewer = PlaneViewerQT(AxialVTKQidget, self.MRIimages[int(self.AxialImagesList.currentIndex())],
+                                             'Axial', self.MRIimages[0][-4:] != "nrrd")
+            self.CoronalViewer = PlaneViewerQT(CoronalVTKQidget, self.MRIimages[int(self.CoronalImagesList.currentIndex())],
+                                             'Coronal', self.MRIimages[0][-4:] != "nrrd")
+
         except AttributeError: # GZIP, unreadable file picked
             self.show_valid_image(int(self.AxialImagesList.currentIndex()), int(self.CoronalImagesList.currentIndex())) # show any valid MRI image instead of improper image and show Error
 
         self.rememberIndices(int(self.AxialImagesList.currentIndex()), int(self.CoronalImagesList.currentIndex())) # remember that these indices worked
-        # display axial viewer
-        AxialVTKQidget = QVTKRenderWindowInteractor(self.axialImageFrame)
-        self.mainLayout.addWidget(AxialVTKQidget, 1, 5, 1, 1)
-        self.AxialViewer = PlaneViewerQT(AxialVTKQidget, self.ViewerProperties, 'Axial')
 
-        # display coronal viewer
-        CoronalVTKQidget = QVTKRenderWindowInteractor(self.CoronalImageFrame)
-        self.mainLayout.addWidget(CoronalVTKQidget, 1, 1, 1, 1)
-        self.CoronalViewer = PlaneViewerQT(CoronalVTKQidget, self.ViewerProperties, 'Coronal')
 
     def setTabColor(self):
         self.setStyleSheet("background-color: rgb(68, 71, 79);\n"

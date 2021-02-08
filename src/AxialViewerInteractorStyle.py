@@ -153,8 +153,8 @@ class AxialViewerInteractorStyle(vtkInteractorStyleImage):
             pickedCoordinates = self.pointPicker.GetPickPosition()
             matrix = self.baseViewer.reslice.GetResliceAxes()
             center = matrix.MultiplyPoint((0, 0, 0, 1))
-            zCoordinate = (center[2] - self.baseViewer.viewerLogic.CoronalData.origin[2]) - self.baseViewer.viewerLogic.CoronalData.dimensions[2]\
-                             * self.baseViewer.viewerLogic.CoronalData.spacing[2] / 2
+            zCoordinate = (center[2] - self.baseViewer.imageData.origin[2]) - self.baseViewer.imageData.dimensions[2]\
+                             * self.baseViewer.imageData.spacing[2] / 2
             pickedCoordinates = (pickedCoordinates[0], pickedCoordinates[1], zCoordinate)
             #self.pickedCoordinates = pickedCoordinates
             self.baseViewer.addPoint(pointType, pickedCoordinates)
@@ -163,7 +163,7 @@ class AxialViewerInteractorStyle(vtkInteractorStyleImage):
         (mouseX, mouseY) = self.parent.GetEventPosition()
         if self.pointPicker.Pick(mouseX, mouseY, 0.0, self.baseViewer.renderer):
             cursorPickedCoordinates = self.pointPicker.GetPickPosition()
-            self.baseViewer.viewerLogic.moveBullsEye(cursorPickedCoordinates, self.viewMode)
+            self.baseViewer.moveBullsEye(cursorPickedCoordinates)
 
     def OnPickingCurserLeftButtonDown(self):
         pass

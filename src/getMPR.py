@@ -3,13 +3,13 @@ import matplotlib.pyplot as plt
 from scipy.interpolate import RegularGridInterpolator, splprep,splev
 from typing import List
 from icecream import ic
-import ViewerProperties
+import ImageProperties
 
 ic.configureOutput(includeContext=True)
 
 
 class PointsToPlansVectors:
-    def __init__(self, viewerLogic: ViewerProperties.viewerLogic, allPoints: List[np.array], ViewMode: str, height = 10, viewAngle = 0, Plot = False):
+    def __init__(self, viewerLogic, allPoints: List[np.array], ViewMode: str, height = 10, viewAngle = 0, Plot = False):
         self.Plot = Plot
         self.Height = height
 
