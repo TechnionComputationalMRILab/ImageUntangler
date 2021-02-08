@@ -1,4 +1,4 @@
-import os, pickle, sip, numpy as np
+import os, pickle, sys, sip, numpy as np
 from PyQt5 import QtCore, QtWidgets
 from PyQt5.QtCore import QMetaObject, QCoreApplication, QRect
 from PyQt5.QtGui import QFont
@@ -13,7 +13,7 @@ from getMPR import PointsToPlansVectors
 from ViewerProperties import viewerLogic
 from util import config_data, MRI_files
 
-from MainWindowComponents.MessageBoxes import invalidDirectoryMessage
+from MainWindowComponents.MessageBoxes import invalidDirectoryMessage, gzipFileMessage, noGoodFiles
 
 ic.configureOutput(includeContext=True)
 
@@ -25,6 +25,8 @@ class Tab(QWidget):
         self.Tab_Bar = parent
         self.name = "New Tab"
         self.buildNewTab()
+        self.oldCoronalIndex = -1 # these are in case image cannot be rendered, return to previous
+        self.oldAxialIndex = -1
 
     def getName(self):
         # returns stylized form of name
@@ -348,8 +350,9 @@ class Tab(QWidget):
         fileExplorer = QFileDialog(
             directory=config_data.get_config_value("DefaultFolder"))  # opens location to default location
         folderPath = str(fileExplorer.getExistingDirectory())
-        self.name = folderPath[folderPath.rfind(os.path.sep)+1:]
         self.MRIimages = MRI_files.getMRIimages(folderPath) # so can be loaded by the viewers
+        # this must be set after MRIimages or else tab will be renamed to blank if user X-es out file explorer since error is thrown there
+        self.name = folderPath[folderPath.rfind(os.path.sep) + 1:]
 
     def clearDefault(self):
         self.mainLayout.removeWidget(self.defaultTabMainWidget)
@@ -357,7 +360,10 @@ class Tab(QWidget):
         self.defaultTabMainWidget = None
 
     def loadRegularTab(self):
-        self.loadImages()
+        try:
+            self.loadImages()
+        except FileNotFoundError: # user X-ed out file explorer
+            return -1
         if len(self.MRIimages) < 1:  # open file explorer and load selected NRRD images
             invalidDirectoryMessage()
             return -1
@@ -378,12 +384,36 @@ class Tab(QWidget):
         QMetaObject.connectSlotsByName(self)  # connect all components to Tab
         # self.buildDotCalculatingBox()  # builds box containing buttons for dot-putting calculations
 
+    def show_valid_image(self, currentAxialIndex, currentCoronalIndex):
+        if self.oldCoronalIndex == -1: # first image is being loaded
+            if currentAxialIndex == len(self.MRIimages)-1:
+                noGoodFiles()
+            else:
+                self.CoronalImagesList.setCurrentIndex(currentCoronalIndex+1)
+                self.AxialImagesList.setCurrentIndex(currentAxialIndex+1)
+                self.loadImageViewers()
+        else:
+            if currentCoronalIndex != self.oldCoronalIndex:
+                self.CoronalImagesList.setCurrentIndex(self.oldCoronalIndex)
+            if currentAxialIndex != self.oldAxialIndex:
+                self.AxialImagesList.setCurrentIndex(self.oldAxialIndex)
+            gzipFileMessage()
+            self.loadImageViewers()
+
+    def rememberIndices(self, axialIndex: int, coronalIndex: int):
+        self.oldAxialIndex = axialIndex
+        self.oldCoronalIndex = coronalIndex
 
     def loadImageViewers(self):
-        self.ViewerProperties = viewerLogic(self.MRIimages, str(self.AxialImagesList.currentIndex()),
-                                            str(self.CoronalImagesList.currentIndex()),
-                                            self.MRIimages[0][-4:] != "nrrd")
+        print(int(self.AxialImagesList.currentIndex()))
+        try:
+            self.ViewerProperties = viewerLogic(self.MRIimages, str(self.AxialImagesList.currentIndex()),
+                                                str(self.CoronalImagesList.currentIndex()),
+                                                self.MRIimages[0][-4:] != "nrrd")
+        except AttributeError: # GZIP, unreadable file picked
+            self.show_valid_image(int(self.AxialImagesList.currentIndex()), int(self.CoronalImagesList.currentIndex())) # show any valid MRI image instead of improper image
 
+        self.rememberIndices(int(self.AxialImagesList.currentIndex()), int(self.CoronalImagesList.currentIndex())) # remember that these indices worked
         # display axial viewer
         AxialVTKQidget = QVTKRenderWindowInteractor(self.axialImageFrame)
         self.mainLayout.addWidget(AxialVTKQidget, 1, 5, 1, 1)
