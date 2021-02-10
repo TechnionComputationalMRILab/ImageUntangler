@@ -2,6 +2,7 @@ import sys
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QTabWidget, QTabBar
 
 from MainWindowComponents.Tab import Tab
+from util import stylesheets
 
 
 class TabManager(QWidget):
@@ -12,8 +13,7 @@ class TabManager(QWidget):
         # Initialize tab screen
         self.tabs = Tabs_Bar(self)
         self.tabs.resize(300, 200)
-        self.setStyleSheet("background-color: rgb(68, 71, 79);\n"
-                           "border-color: rgb(0, 0, 0);")
+        self.setStyleSheet(stylesheets.get_sheet_by_name("TabManager"))
         self.layout.addWidget(self.tabs)
 
 

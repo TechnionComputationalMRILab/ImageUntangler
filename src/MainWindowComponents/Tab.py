@@ -10,7 +10,7 @@ from icecream import ic
 from MRISequenceViewer import PlaneViewerQT
 from MPRWindow import Ui_MPRWindow
 from getMPR import PointsToPlansVectors
-from util import config_data, MRI_files
+from util import config_data, MRI_files, stylesheets
 
 from MainWindowComponents.MessageBoxes import invalidDirectoryMessage, gzipFileMessage, noGoodFiles
 
@@ -32,7 +32,7 @@ class Tab(QWidget):
         if len(self.name) >= 16:
             return self.name[:16]
         else:
-            padding = len(self.name) - 16
+            padding = 16 - len(self.name)
             return "{0}{1}{2}".format(' ' * int(padding/2), self.name, ' ' * int((padding/2) + 0.51))
 
     def _getCommonFont(self) -> QFont:
@@ -418,10 +418,8 @@ class Tab(QWidget):
 
         self.rememberIndices(int(self.AxialImagesList.currentIndex()), int(self.CoronalImagesList.currentIndex())) # remember that these indices worked
 
-
     def setTabColor(self):
-        self.setStyleSheet("background-color: rgb(68, 71, 79);\n"
-                                 "border-color: rgb(0, 0, 0);")
+        self.setStyleSheet(stylesheets.get_sheet_by_name("Tab"))
 
     def buildMainLayoutManager(self):
         self.mainLayout = QGridLayout(self)
@@ -430,6 +428,7 @@ class Tab(QWidget):
         self.defaultTabMainWidget = QWidget()
         addFilesButton = QPushButton(self.defaultTabMainWidget)
         addFilesButton.setText(QCoreApplication.translate("Tab", "Add MRI Images"))
+        addFilesButton.setStyleSheet(stylesheets.get_sheet_by_name("AddFiles"))
         addFilesButton.setGeometry(QRect(375, 290, 960, 231)) #EMPHASIS# should be made more portable
         addFilesButton.clicked.connect(self.loadRegularTab) # loads MRI viewer
         self.mainLayout.addWidget(self.defaultTabMainWidget)

@@ -3,7 +3,10 @@ import os
 
 stylesheet_names = {"ErrorMessage": "AlertMessage.css",
                     "Default": "DefaultBackground.css",
-                    "Menu": "MenuBar.css"}
+                    "Menu": "MenuBar.css",
+                    "AddFiles": "AddFilesButton.css",
+                    "Tab": "Tab.css",
+                    "TabManager": "TabManager.css"}
 
 
 def get_sheet_by_name(name: str):
