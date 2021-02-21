@@ -3,7 +3,7 @@ from vtk import vtkInteractorStyleImage, vtkPropPicker, vtkMatrix4x4
 
 
 class AxialViewerInteractorStyle(vtkInteractorStyleImage):
-    def __init__(self, parent, baseViewer, viewMode: str):
+    def __init__(self, parent, baseViewer):
         self.baseViewer = baseViewer
         self.parent = parent
         self.AddObserver("MouseMoveEvent", self.MouseMoveCallback)
@@ -30,7 +30,6 @@ class AxialViewerInteractorStyle(vtkInteractorStyleImage):
 
         self.pointPicker = vtkPropPicker()
 
-        self.viewMode = viewMode
         self.startPickingEvent = False
         self.ShowCursor = True
 
@@ -95,7 +94,7 @@ class AxialViewerInteractorStyle(vtkInteractorStyleImage):
 
         elif self.actions["Windowing"] == 1:
             vtkInteractorStyleImage.OnMouseMove(self)
-            self.baseViewer.updateWindowLevelLabels()
+            self.baseViewer.updateWindowLevel()
 
         elif self.actions["Zooming"] == 1:
             vtkInteractorStyleImage.OnMouseMove(self)

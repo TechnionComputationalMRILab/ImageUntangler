@@ -1,7 +1,7 @@
 import sys
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QTabWidget, QTabBar
 
-from MainWindowComponents.Tab import Tab
+from View.Tab import Tab
 from util import stylesheets
 
 
@@ -34,7 +34,7 @@ class Tabs_Bar(QTabWidget):
         self.removeTab(tab_index)
 
     def tab_addition(self, tab_index):
-        if tab_index == self.count()-1: # last tab clicked
+        if tab_index == self.count()-1: # '+' button clicked
             new_tab = Tab(parent=self)
             self.insertTab(tab_index, new_tab, new_tab.getName())
             self.setCurrentIndex(tab_index)

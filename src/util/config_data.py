@@ -38,7 +38,7 @@ def update_config_value(value_name: str, value: str):
     write_config_file(json_data)
 
 
-def get_config_value(value_name: str) -> str:
+def get_config_value(value_name: str):
     # returns config value for value name
     json_data = get_config_data()
     try:

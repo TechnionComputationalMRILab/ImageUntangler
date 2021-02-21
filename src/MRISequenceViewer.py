@@ -4,14 +4,15 @@ from icecream import ic
 from vtk.qt.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
 from vtk import vtkImageActor, vtkImageReslice, vtkMatrix4x4, vtkRenderer, vtkTextActor,  vtkPolyDataMapper,\
     vtkActor, vtkCursor2D
-from ImageProperties import ImageProperties
 import ImageProperties
-from AxialViewerInteractorStyle import AxialViewerInteractorStyle
+
+from Control.AxialViewerInteractorStyle import AxialViewerInteractorStyle
 from PointCollection import PointCollection
 
 
 class PlaneViewerQT:
-    def __init__(self, interactor: QVTKRenderWindowInteractor, imagePath: str, ViewMode: str, isDicom = False):
+    def __init__(self, manager, interactor: QVTKRenderWindowInteractor, imagePath: str, isDicom = False):
+        self.manager = manager
         self.interactor = interactor
         self.imageData = ImageProperties.getImageData(imagePath, isDicom)
         self.LevelVal = (self.imageData.dicomArray.max()+self.imageData.dicomArray.min())/2
@@ -20,8 +21,8 @@ class PlaneViewerQT:
         self.reslice = vtkImageReslice()
         self.actor = vtkImageActor()
         self.renderer = vtkRenderer()
-        self.window: QVTKRenderWindowInteractor = None
-        self.interactorStyle = AxialViewerInteractorStyle(parent=self.interactor, baseViewer=self, viewMode=ViewMode)
+        self.window: QVTKRenderWindowInteractor = interactor
+        self.interactorStyle = AxialViewerInteractorStyle(parent=self.interactor, baseViewer=self)
 
         self.Cursor = vtkCursor2D()
 
@@ -115,18 +116,21 @@ class PlaneViewerQT:
 
     def adjustWindow(self, window: int):
         self.actor.GetProperty().SetColorWindow(window)
-        self.updateWindowLevelLabels()
+        self.WindowVal = window
+        self.textActorWindow.SetInput("Window: " + str(np.int32(self.WindowVal)))
+        self.window.Render()
 
     def adjustLevel(self, level: int):
         self.actor.GetProperty().SetColorLevel(level)
-        self.updateWindowLevelLabels()
-
-    def updateWindowLevelLabels(self):
-        self.WindowVal = self.actor.GetProperty().GetColorWindow()
-        self.LevelVal = self.actor.GetProperty().GetColorLevel()
-        self.textActorWindow.SetInput("Window: " + str(np.int32(self.WindowVal)))
+        self.LevelVal = level
         self.textActorLevel.SetInput("Level: " + str(np.int32(self.LevelVal)))
         self.window.Render()
+
+
+    def updateWindowLevel(self):
+        self.manager.changeWindow(self.actor.GetProperty().GetColorWindow())
+        self.manager.changeLevel(self.actor.GetProperty().GetColorLevel())
+
 
     def processNewPoint(self, pointCollection, pickedCoordinates, color=(1, 0, 0)):
         pointLocation = [pickedCoordinates[0], pickedCoordinates[1], pickedCoordinates[2], self.sliceIdx]  # x,y,z,sliceIdx

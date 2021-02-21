@@ -1,13 +1,12 @@
 __author__ = "Yael Zaffrani and Avraham Kahan"
 
-import os, pickle, sys, numpy as np
-from typing import List, Tuple
-from PyQt5 import QtCore, QtWidgets
+import sys
+from PyQt5 import QtWidgets
 from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import QMainWindow
 from MainWindowComponents import MenuBar
 from MainWindowComponents.TabManager import TabManager
-from util import config_data
+from util import config_data, stylesheets
 
 from icecream import ic
 
@@ -22,14 +21,13 @@ class App(QMainWindow):
         self.showMaximized()
         self.tabManager = TabManager(parent=self)
         self.setCentralWidget(self.tabManager)
-        self.setStyleSheet("background-color: rgb(68, 71, 79);\n"
-                           "border-color: rgb(0, 0, 0);")
+        self.setStyleSheet(stylesheets.get_sheet_by_name("Default"))
         self.buildMenuBar()
 
     def buildMenuBar(self):
-        self.menuBar = MenuBar.getMenuBar()
-        self.menuBar.setParent(self)
-        self.setMenuBar(self.menuBar)
+        menuBar = MenuBar.getMenuBar()
+        menuBar.setParent(self)
+        self.setMenuBar(menuBar)
 
     def setTitle(self):
         self.setWindowTitle(config_data.get_config_value("AppName"))
