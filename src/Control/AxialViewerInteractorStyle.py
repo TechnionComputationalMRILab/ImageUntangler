@@ -1,4 +1,3 @@
-from icecream import ic
 from vtk import vtkInteractorStyleImage, vtkPropPicker, vtkMatrix4x4
 
 
@@ -78,7 +77,7 @@ class AxialViewerInteractorStyle(vtkInteractorStyleImage):
                 self.actions["Cursor"] = 0
                 AxialViewerInteractorStyle.OnPickingCursorLeftButtonUp(self)
             elif self.actions["PickingMPR"] == 1:
-                AxialViewerInteractorStyle.pickPoint(self, "MPR", mouseX, mouseY)
+                AxialViewerInteractorStyle.pickPoint(self, "MPRwindow", mouseX, mouseY)
             elif self.actions["PickingLength"] == 1:
                 AxialViewerInteractorStyle.pickPoint(self, "Length", mouseX, mouseY)
 

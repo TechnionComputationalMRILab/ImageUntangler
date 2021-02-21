@@ -24,9 +24,9 @@ def getDefaultFolderAction(settingsTab):
     return defaultFolderAction
 
 
+
 def addSettingsMenu(menuBar: QMenuBar) -> None:
     settingsMenu = QMenu(parent=menuBar)
-    #settingsMenu.setStyleSheet("""QMenu { background-color: rgb(236, 232, 232); }""")
     settingsMenu.setStyleSheet(stylesheets.get_sheet_by_name("Menu"))
     defaultFolderAction = getDefaultFolderAction(settingsMenu)
     settingsMenu.addAction(defaultFolderAction)
@@ -45,9 +45,8 @@ def addDotMenu(menuBar: QMenuBar) -> None:
 
 def buildMenuBar():
     # builds MenuBar
-    menuBar = QMenuBar() # parent will be set in OldMainWindow.py
+    menuBar = QMenuBar() # parent will be set in MainWindow.py
     menuBar.setGeometry(QtCore.QRect(0, 0, 800, 18))
-    #menuBar.setStyleSheet("""QMenuBar { background-color: rgb(236, 232, 232); }""")
     menuBar.setStyleSheet(stylesheets.get_sheet_by_name("Menu"))
     addSettingsMenu(menuBar) # adds setting option in menubar
     return menuBar

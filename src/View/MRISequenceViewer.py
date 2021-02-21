@@ -4,10 +4,10 @@ from icecream import ic
 from vtk.qt.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
 from vtk import vtkImageActor, vtkImageReslice, vtkMatrix4x4, vtkRenderer, vtkTextActor,  vtkPolyDataMapper,\
     vtkActor, vtkCursor2D
-import ImageProperties
+from Model import ImageProperties
 
 from Control.AxialViewerInteractorStyle import AxialViewerInteractorStyle
-from PointCollection import PointCollection
+from Model.PointCollection import PointCollection
 
 
 class PlaneViewerQT:
@@ -112,6 +112,7 @@ class PlaneViewerQT:
         self.window.Render()
         self.sliceIdx = sliceIdx
         self.imageData.sliceIdx = sliceIdx
+        self.manager.updateSliderIndex(self.sliceIdx)
         self.presentPoints(self.mprPoints, sliceIdx)
 
     def adjustWindow(self, window: int):
@@ -140,11 +141,10 @@ class PlaneViewerQT:
         self.presentPoints(pointCollection, self.sliceIdx)
 
     def addPoint(self, pointType, pickedCoordinates):
-        if pointType == "MPR":
+        if pointType == "MPRwindow":
             self.processNewPoint(self.mprPoints, pickedCoordinates, color=(1, 0, 0))
         elif pointType.upper() == "LENGTH":
             self.processNewPoint(self.lengthPoints, pickedCoordinates, color=(55/255, 230/255, 128/255))
-
 
     def presentPoints(self, pointCollection, sliceIdx) -> None:
         for point in pointCollection.points:

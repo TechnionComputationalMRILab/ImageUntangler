@@ -11,9 +11,8 @@ from PyQt5.QtWidgets import QWidget, QGridLayout, QGroupBox, QSizePolicy, QVBoxL
 import numpy as np
 from collections import namedtuple
 from vtk.qt.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
-import getMPR
-import MPRViewer
-import MPRViewerProperties
+from Model import getMPR
+from MPRwindow import MPRViewer, MPRViewerProperties
 import pickle, sys
 from typing import List
 from icecream import ic
@@ -139,7 +138,7 @@ class Ui_MPRWindow:
         self.unitsLabel.setText(_translate("MainWindow", "[mm]"))
         self.degreeLabel.setText(_translate("MainWindow", "deg"))
         self.updateButton.setText(_translate("MainWindow", "Update"))
-        self.mainViewerBox.setTitle(_translate("MainWindow", "MPR"))
+        self.mainViewerBox.setTitle(_translate("MainWindow", "MPRwindow"))
 
 
     
@@ -151,15 +150,15 @@ class Ui_MPRWindow:
 
     def setupUi(self, MPRWindow, MPR_M, delta, MPRposition, ConvViewerProperties, points, ConvViewMode):
         ic(delta)
-        self.buildMainWindow(MPRWindow) # build widgets and qualities of MPR window
-        self.buildMainLayout() # set basic dimensions of MPR window
+        self.buildMainWindow(MPRWindow) # build widgets and qualities of MPRwindow window
+        self.buildMainLayout() # set basic dimensions of MPRwindow window
         self.buildLengthCalcBox() # build box in lower center with length calculating options
         self.buildLengthResultsBox() # builds box in lower right that holds the results of the length calculations
         self.buildSizeSettingsBox() # builds box with resizin options
-        self.buildMainViewerBox() # builds holder for MPR image
+        self.buildMainViewerBox() # builds holder for MPRwindow image
         self.retranslateUi(MPRWindow) # add text to all widgets
         QMetaObject.connectSlotsByName(MPRWindow)
-        self.LoadViewer(MPR_M, delta,MPRposition, points, ConvViewerProperties, self.heightSetter.value(), self.angleSetter.value(), ConvViewMode) # builds MPR viewer
+        self.LoadViewer(MPR_M, delta,MPRposition, points, ConvViewerProperties, self.heightSetter.value(), self.angleSetter.value(), ConvViewMode) # builds MPRwindow viewer
         self.connectButtons() # connects all buttons to their relevant functions
 
 
@@ -202,7 +201,7 @@ class Ui_MPRWindow:
         self.lengthResultsLabel.adjustSize()
         
     def calculateDistances(self) -> None:
-        # calculate and output distance of length points in MPR Viewer
+        # calculate and output distance of length points in MPRwindow Viewer
         #self.MPRViewerProperties.DistancePickingIndexs = self.MPR_Viewer.lengthPoints.points
         #indices = self.MPRViewerProperties.DistancePickingIndexs
         indices = self.generateIndices(self.MPR_Viewer.lengthPoints, self.MPRViewerProperties.delta)

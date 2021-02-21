@@ -1,11 +1,11 @@
 import vtk
-import MPRInteractor
+from MPRwindow import MPRInteractor
 import numpy as np
 from vtk import vtkImageData
 from vtk.util import numpy_support
-import getMPR
-from MPRViewerProperties import viewerLogic
-from PointCollection import PointCollection
+from Model import getMPR
+from MPRwindow.MPRViewerProperties import viewerLogic
+from Model.PointCollection import PointCollection
 from vtk.qt.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
 
 

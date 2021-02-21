@@ -3,7 +3,6 @@ import matplotlib.pyplot as plt
 from scipy.interpolate import RegularGridInterpolator, splprep,splev
 from typing import List
 from icecream import ic
-import ImageProperties
 
 ic.configureOutput(includeContext=True)
 

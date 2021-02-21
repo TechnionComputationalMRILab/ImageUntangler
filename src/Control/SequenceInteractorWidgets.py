@@ -1,12 +1,14 @@
 import os
+from typing import List
+
 from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QSlider, QComboBox, QSizePolicy, QWidget
+from PyQt5.QtWidgets import QSlider, QComboBox, QSizePolicy
 
 from Interfaces import SequenceViewerInterface
 
 
 class SequenceInteractorWidgets:
-    def __init__(self, MRIimages, parent: SequenceViewerInterface):
+    def __init__(self, MRIimages: List[str], parent: SequenceViewerInterface):
         self.manager = parent
         self.sequenceList = self.addSequenceList(MRIimages, parent)
         self.indexSlider = QSlider(Qt.Horizontal, parent=parent)
@@ -37,12 +39,12 @@ class SequenceInteractorWidgets:
         self.indexSlider.sliderMoved.connect(self.manager.changeIndex)
         self.windowSlider.sliderMoved.connect(self.manager.changeWindow)
         self.levelSlider.sliderMoved.connect(self.manager.changeLevel)
-        self.sequenceList.currentIndexChanged.connect(self.manager.changeIndex)
+        self.sequenceList.currentIndexChanged.connect(self.manager.changeSequence)
 
-    def setValues(self, sliceIdx: int, windowValue: int, levelValue: int) -> None:
+    def setValues(self, sliceIdx: int, maxSlice: int, windowValue: int, levelValue: int) -> None:
+        self.indexSlider.setMinimum(0) # not sure why order matters here, but setValue() must be last
+        self.indexSlider.setMaximum(maxSlice)
         self.indexSlider.setValue(sliceIdx)
-        self.indexSlider.setMinimum(0)
-        self.indexSlider.setMaximum(64)
         self.windowSlider.setMaximum(int(2.5 * windowValue))
         self.windowSlider.setMinimum(windowValue - 800)
         self.windowSlider.setValue(windowValue)
