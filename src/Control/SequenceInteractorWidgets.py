@@ -8,12 +8,12 @@ from Interfaces import SequenceViewerInterface
 
 
 class SequenceInteractorWidgets:
-    def __init__(self, MRIimages: List[str], parent: SequenceViewerInterface):
-        self.manager = parent
-        self.sequenceList = self.addSequenceList(MRIimages, parent)
-        self.indexSlider = QSlider(Qt.Horizontal, parent=parent)
-        self.windowSlider = QSlider(Qt.Horizontal, parent=parent)
-        self.levelSlider = QSlider(Qt.Horizontal, parent=parent)
+    def __init__(self, MRIimages: List[str], interface: SequenceViewerInterface):
+        self.interface = interface
+        self.sequenceList = self.addSequenceList(MRIimages, interface)
+        self.indexSlider = QSlider(Qt.Horizontal, parent=interface)
+        self.windowSlider = QSlider(Qt.Horizontal, parent=interface)
+        self.levelSlider = QSlider(Qt.Horizontal, parent=interface)
         self.addActions()
 
     def _buildSizePolicy(self, sequenceListBox: QComboBox) -> QSizePolicy:
@@ -36,10 +36,10 @@ class SequenceInteractorWidgets:
         return sequenceList
 
     def addActions(self):
-        self.indexSlider.sliderMoved.connect(self.manager.changeIndex)
-        self.windowSlider.sliderMoved.connect(self.manager.changeWindow)
-        self.levelSlider.sliderMoved.connect(self.manager.changeLevel)
-        self.sequenceList.currentIndexChanged.connect(self.manager.changeSequence)
+        self.indexSlider.sliderMoved.connect(self.interface.setIndex)
+        self.windowSlider.sliderMoved.connect(self.interface.changeWindow)
+        self.levelSlider.sliderMoved.connect(self.interface.changeLevel)
+        self.sequenceList.currentIndexChanged.connect(self.interface.changeSequence)
 
     def setValues(self, sliceIdx: int, maxSlice: int, windowValue: int, levelValue: int) -> None:
         self.indexSlider.setMinimum(0) # not sure why order matters here, but setValue() must be last

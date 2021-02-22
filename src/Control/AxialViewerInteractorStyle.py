@@ -1,9 +1,9 @@
-from vtk import vtkInteractorStyleImage, vtkPropPicker, vtkMatrix4x4
+from vtk import vtkInteractorStyleImage, vtkPropPicker
 
 
 class AxialViewerInteractorStyle(vtkInteractorStyleImage):
-    def __init__(self, parent, baseViewer):
-        self.baseViewer = baseViewer
+    def __init__(self, parent, interface):
+        self.interface = interface
         self.parent = parent
         self.AddObserver("MouseMoveEvent", self.MouseMoveCallback)
         self.AddObserver("MiddleButtonPressEvent", self.ButtonCallback)
@@ -87,19 +87,15 @@ class AxialViewerInteractorStyle(vtkInteractorStyleImage):
 
         if self.actions["Slicing"] == 1:
             deltaY = mouseY - lastY
-            self.baseViewer.reslice.Update()
-            sliceSpacing = self.baseViewer.reslice.GetOutput().GetSpacing()[2]
-            self.adjustSliceIdx(sliceSpacing * deltaY)
+            self.interface.changeSliceIndex(deltaY)
 
         elif self.actions["Windowing"] == 1:
             vtkInteractorStyleImage.OnMouseMove(self)
-            self.baseViewer.updateWindowLevel()
+            self.interface.updateWindowLevel()
 
         elif self.actions["Zooming"] == 1:
             vtkInteractorStyleImage.OnMouseMove(self)
-            curParallelScale = self.baseViewer.renderer.GetActiveCamera().GetParallelScale()
-            zoomFactor = curParallelScale / self.baseViewer.imageData.getParallelScale()
-            self.baseViewer.updateZoomFactor(zoomFactor)
+            self.interface.updateZoomFactor()
         else:
             self.OnMouseMove() # call to superclass
 
@@ -107,61 +103,46 @@ class AxialViewerInteractorStyle(vtkInteractorStyleImage):
         if self.parent.GetKeyCode() == 'C' or self.parent.GetKeyCode() == 'c':
             if self.ShowCursor:
                 self.ShowCursor = False
-                self.baseViewer.Cursor.AllOff()
-                self.baseViewer.window.Render()
+                self.interface.clearCursor()
+
             else:
                 self.ShowCursor = True
-                self.baseViewer.Cursor.AllOff()
-                self.baseViewer.Cursor.AxesOn()
-                self.baseViewer.window.Render()
+                self.interface.addCursor()
 
         elif self.parent.GetKeySym() == 'Up':
-            self.baseViewer.reslice.Update()
-            sliceSpacing = self.baseViewer.reslice.GetOutput().GetSpacing()[2]
-            self.adjustSliceIdx(sliceSpacing)
+            self.interface.changeSliceIndex(increment=True)
 
         elif self.parent.GetKeySym() == 'Down':
-            self.baseViewer.reslice.Update()
-            sliceSpacing = self.baseViewer.reslice.GetOutput().GetSpacing()[2]
-            self.adjustSliceIdx(-1*sliceSpacing)
+            self.interface.changeSliceIndex(increment=False)
 
     def cursorInBullsEye(self) -> int:
         (mouseX, mouseY) = self.parent.GetEventPosition()
-        if self.pointPicker.Pick(mouseX, mouseY, 0.0, self.baseViewer.renderer):
+        if self.pointPicker.Pick(mouseX, mouseY, 0.0, self.interface.view.renderer): #REMOVE
             StartCursorPickedCoordinates = self.pointPicker.GetPickPosition()
-            cursorFocalPoint = self.baseViewer.Cursor.GetFocalPoint()
-            if (abs(StartCursorPickedCoordinates[0]-cursorFocalPoint[0]) <= 3*self.baseViewer.Cursor.GetRadius())\
-                    and (abs(StartCursorPickedCoordinates[1]-cursorFocalPoint[1]) <= self.baseViewer.Cursor.GetRadius()):
+            cursorFocalPoint = self.interface.view.Cursor.GetFocalPoint()
+            if (abs(StartCursorPickedCoordinates[0]-cursorFocalPoint[0]) <= 3*self.interface.view.Cursor.GetRadius())\
+                    and (abs(StartCursorPickedCoordinates[1]-cursorFocalPoint[1]) <= self.interface.view.Cursor.GetRadius()):
                 return 1
             else:
                 return 0
 
-    def adjustSliceIdx(self, transformZ: int):
-        """ adjusts the slice of the MRI that is being viewed"""
-        matrix: vtkMatrix4x4 = self.baseViewer.reslice.GetResliceAxes()
-        center = matrix.MultiplyPoint((0, 0, transformZ, 1))
-        sliceIdx = int((center[2] - self.baseViewer.imageData.origin[2]) /
-                       self.baseViewer.imageData.spacing[2] - 0.5)  # z - z_orig/(z_spacing - .5). slice idx is z coordinate of slice of image
-        if 0 <= sliceIdx <= self.baseViewer.imageData.extent[5]:
-            self.baseViewer.UpdateViewerMatrixCenter(center, sliceIdx)
-
 
     def pickPoint(self, pointType: str, mouseX, mouseY):
-        if self.pointPicker.Pick(mouseX, mouseY, 0.0, self.baseViewer.renderer):
+        if self.pointPicker.Pick(mouseX, mouseY, 0.0, self.interface.view.renderer):
             pickedCoordinates = self.pointPicker.GetPickPosition()
-            matrix = self.baseViewer.reslice.GetResliceAxes()
+            matrix = self.interface.view.reslice.GetResliceAxes()
             center = matrix.MultiplyPoint((0, 0, 0, 1))
-            zCoordinate = (center[2] - self.baseViewer.imageData.origin[2]) - self.baseViewer.imageData.dimensions[2]\
-                             * self.baseViewer.imageData.spacing[2] / 2
+            zCoordinate = (center[2] - self.interface.view.imageData.origin[2]) - self.interface.view.imageData.dimensions[2]\
+                             * self.interface.view.imageData.spacing[2] / 2
             pickedCoordinates = (pickedCoordinates[0], pickedCoordinates[1], zCoordinate)
-            #self.pickedCoordinates = pickedCoordinates
-            self.baseViewer.addPoint(pointType, pickedCoordinates)
+
+            self.interface.view.addPoint(pointType, pickedCoordinates)
 
     def OnPickingCursorLeftButtonUp(self):
         (mouseX, mouseY) = self.parent.GetEventPosition()
-        if self.pointPicker.Pick(mouseX, mouseY, 0.0, self.baseViewer.renderer):
+        if self.pointPicker.Pick(mouseX, mouseY, 0.0, self.interface.view.renderer):
             cursorPickedCoordinates = self.pointPicker.GetPickPosition()
-            self.baseViewer.moveBullsEye(cursorPickedCoordinates)
+            self.interface.moveBullsEye(cursorPickedCoordinates)
 
     def OnPickingCurserLeftButtonDown(self):
         pass

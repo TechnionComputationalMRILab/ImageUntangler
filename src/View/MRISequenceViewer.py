@@ -11,18 +11,19 @@ from Model.PointCollection import PointCollection
 
 
 class PlaneViewerQT:
-    def __init__(self, manager, interactor: QVTKRenderWindowInteractor, imagePath: str, isDicom = False):
+    def __init__(self, manager, interactor: QVTKRenderWindowInteractor, interactorStyle: AxialViewerInteractorStyle, imagePath: str, isDicom = False):
         self.manager = manager
         self.interactor = interactor
         self.imageData = ImageProperties.getImageData(imagePath, isDicom)
         self.LevelVal = (self.imageData.dicomArray.max()+self.imageData.dicomArray.min())/2
         self.WindowVal = self.imageData.dicomArray.max()-self.imageData.dicomArray.min()
         self.sliceIdx = self.imageData.sliceIdx
+        self.pastIndex = self.sliceIdx
         self.reslice = vtkImageReslice()
         self.actor = vtkImageActor()
         self.renderer = vtkRenderer()
         self.window: QVTKRenderWindowInteractor = interactor
-        self.interactorStyle = AxialViewerInteractorStyle(parent=self.interactor, baseViewer=self)
+        self.interactorStyle = interactorStyle
 
         self.Cursor = vtkCursor2D()
 
@@ -102,18 +103,6 @@ class PlaneViewerQT:
         self.renderer.AddActor(self.textActorLevel)
         self.window.Render()
 
-    def UpdateViewerMatrixCenter(self, center: List[int], sliceIdx):
-        ic(sliceIdx)
-        matrix = self.reslice.GetResliceAxes()
-        matrix.SetElement(0, 3, center[0])
-        matrix.SetElement(1, 3, center[1])
-        matrix.SetElement(2, 3, center[2])
-        self.textActorSliceIdx.SetInput("SliceIdx: " + str(sliceIdx))
-        self.window.Render()
-        self.sliceIdx = sliceIdx
-        self.imageData.sliceIdx = sliceIdx
-        self.manager.updateSliderIndex(self.sliceIdx)
-        self.presentPoints(self.mprPoints, sliceIdx)
 
     def adjustWindow(self, window: int):
         self.actor.GetProperty().SetColorWindow(window)
@@ -172,9 +161,48 @@ class PlaneViewerQT:
         self.interactor.Initialize()
         self.interactor.Start()
 
-    def updateZoomFactor(self, newZoomFactor):
+    def updateZoomFactor(self):
+        curParallelScale = self.renderer.GetActiveCamera().GetParallelScale()
+        newZoomFactor = curParallelScale / self.imageData.getParallelScale()
         self.renderer.GetActiveCamera().SetParallelScale(self.imageData.getParallelScale() * newZoomFactor)
         self.window.Render()
+
+    def UpdateViewerMatrixCenter(self, center: List[int], sliceIdx):
+        matrix = self.reslice.GetResliceAxes()
+        matrix.SetElement(0, 3, center[0])
+        matrix.SetElement(1, 3, center[1])
+        matrix.SetElement(2, 3, center[2])
+        self.textActorSliceIdx.SetInput("SliceIdx: " + str(sliceIdx))
+        self.window.Render()
+        self.sliceIdx = sliceIdx
+        self.imageData.sliceIdx = sliceIdx
+        self.manager.updateSliderIndex(self.sliceIdx)
+        self.presentPoints(self.mprPoints, sliceIdx)
+
+    def setSliceIndex(self, index: int):
+        self.reslice.Update()
+        sliceSpacing = self.reslice.GetOutput().GetSpacing()[2]
+        matrix: vtkMatrix4x4 = self.reslice.GetResliceAxes()
+        center = matrix.MultiplyPoint((0, 0, (index-self.pastIndex)*sliceSpacing, 1))
+        if 0 <= index <= self.imageData.extent[5]:
+            self.pastIndex = index
+            self.UpdateViewerMatrixCenter(center, index)
+        else:
+            ic(self.reslice.GetOutput().GetSpacing()[2])
+            ic(index)
+            ic(self.imageData.extent[5])
+
+    def adjustSliceIdx(self, changeFactor: int):
+        # changeFactor determines by how much to change the index
+        self.reslice.Update()
+        sliceSpacing = self.reslice.GetOutput().GetSpacing()[2]
+        matrix: vtkMatrix4x4 = self.reslice.GetResliceAxes()
+        center = matrix.MultiplyPoint((0, 0, changeFactor*sliceSpacing, 1))
+        sliceIdx = int((center[2] - self.imageData.origin[2]) /
+                       self.imageData.spacing[2] - 0.5)  # z - z_orig/(z_spacing - .5). slice idx is z coordinate of slice of image
+        if 0 <= sliceIdx <= self.imageData.extent[5]:
+            self.pastIndex = sliceIdx
+            self.UpdateViewerMatrixCenter(center, sliceIdx)
 
     def moveBullsEye(self, newCoordinates):
         self.Cursor.SetFocalPoint(newCoordinates)
