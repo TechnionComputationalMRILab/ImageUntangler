@@ -85,7 +85,7 @@ class MPRInteractorStyle(vtk.vtkInteractorStyleImage):
         elif self.actions["Windowing"] == 1:
 
             vtk.vtkInteractorStyleImage.OnMouseMove(self)
-            self.MPRWindow.window_label_update()
+            self.MPRWindow.updateWindowAndLevel()
 
         #
         elif self.actions["Zooming"] == 1:

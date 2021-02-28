@@ -1,5 +1,6 @@
 import vtk
 from MPRwindow import MPRInteractor
+from util import stylesheets
 import numpy as np
 from vtk import vtkImageData
 from vtk.util import numpy_support
@@ -52,7 +53,7 @@ class View:
         #Renderer
         self.renderer = vtk.vtkRenderer()
         self.renderer.AddActor(self.actor)
-        self.renderer.SetBackground(171/255,216/255,1)
+        self.renderer.SetBackground(68/255, 71/255, 79/255)
         self.renderer.ResetCamera()
 
         # self.interactor = QVTKRenderWindowInteractor(self.groupBox)
@@ -74,8 +75,8 @@ class View:
         self.interactor.Initialize()
         #interactor.Start()
 
-        # self.MPRViewerProperties.window = self.actor.GetProperty().GetColorWindow()
-        # self.MPRViewerProperties.level = self.actor.GetProperty().GetColorLevel()
+        self.MPRViewerProperties.window = self.actor.GetProperty().GetColorWindow()
+        self.MPRViewerProperties.level = self.actor.GetProperty().GetColorLevel()
 
         self.textActorWindow = vtk.vtkTextActor()
         self.textActorWindow.GetTextProperty().SetFontSize(14)

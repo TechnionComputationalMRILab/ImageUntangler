@@ -6,6 +6,7 @@ from vtk.qt.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
 
 from MPRwindow.MPRWindow import Ui_MPRWindow
 
+from util import stylesheets
 from View.SlidersLayout import SlidersLayout
 from View.Toolbar import Toolbar
 from Model.ViewerManager import ViewerManager
@@ -123,4 +124,5 @@ class SequenceViewerInterface(QWidget):
         ui = Ui_MPRWindow()
         ui.setupUi(window, MPR_M, delta, MPRposition, points)
         ic(window)
+        window.setStyleSheet(stylesheets.get_sheet_by_name("Default"))
         window.show()
