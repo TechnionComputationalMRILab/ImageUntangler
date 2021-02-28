@@ -1,13 +1,17 @@
-from typing import List
-from PyQt5.QtWidgets import QVBoxLayout, QGroupBox, QWidget
+from typing import List, Tuple
+from icecream import ic
+from PyQt5.QtCore import QRect
+from PyQt5.QtWidgets import QVBoxLayout, QGroupBox, QWidget, QMainWindow
+from vtk.qt.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
 
-from vtk import vtkMatrix4x4
+from MPRwindow.MPRWindow import Ui_MPRWindow
 
 from View.SlidersLayout import SlidersLayout
+from View.Toolbar import Toolbar
 from Model.ViewerManager import ViewerManager
-from vtk.qt.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
+from Model.getMPR import PointsToPlaneVectors
 from Control.SequenceInteractorWidgets import SequenceInteractorWidgets
-from Control.AxialViewerInteractorStyle import AxialViewerInteractorStyle
+from Control.SequenceViewerInteractorStyle import SequenceViewerInteractorStyle
 
 
 class SequenceViewerInterface(QWidget):
@@ -15,18 +19,33 @@ class SequenceViewerInterface(QWidget):
         super().__init__()
         self.layout = QVBoxLayout(self)
         frame = self.buildFrame()
+        self.toolbar = Toolbar(parent=self, manager=self)
+        self.toolbar.setGeometry(QRect(0, 0, 500, 22))
         self.interactor = QVTKRenderWindowInteractor(frame)
-        self.interactorStyle = AxialViewerInteractorStyle(parent=self.interactor, interface=self)
+        self.interactorStyle = SequenceViewerInteractorStyle(parent=self.interactor, interface=self)
         self.widgets = SequenceInteractorWidgets(MRIimages, self)
         self.model = ViewerManager(self,  MRIimages)
         self.view = self.model.loadSequence(0, self.interactor, self.interactorStyle)
-        slidersLayout = SlidersLayout(sequenceList=self.widgets.sequenceList,  windowSlider=self.widgets.windowSlider, levelSlider=self.widgets.levelSlider, indexSlider=self.widgets.indexSlider)
+        slidersLayout = SlidersLayout(sequenceList=self.widgets.sequenceList,  windowSlider=self.widgets.windowSlider,
+                                      levelSlider=self.widgets.levelSlider, indexSlider=self.widgets.indexSlider)
         self.initializeSliderValues()
+        self.layout.addWidget(self.toolbar)
         self.layout.addWidget(self.interactor)
         self.layout.addLayout(slidersLayout)
+        self.pickingLengthPoints = False
+        self.pickingMPRpoints = False
+
+#_________________________________________Constructor functions_____________________________________
+    @staticmethod
+    def buildFrame():
+        frame = QGroupBox()
+        frame.showMaximized()
+        return frame
 
     def initializeSliderValues(self):
         self.widgets.setValues(sliceIdx=int(self.view.sliceIdx), maxSlice = self.view.imageData.extent[5], windowValue=int(self.view.WindowVal), levelValue=int(self.view.LevelVal))
+
+#_____________________________________________Interface to Widgets______________________________________________________________
 
     def changeSequence(self, sequenceIndex: int):
         self.view = self.model.loadSequence(sequenceIndex, self.interactor, self.interactorStyle)
@@ -51,7 +70,10 @@ class SequenceViewerInterface(QWidget):
         self.widgets.indexSlider.setValue(index)
 
 
-    #__________________________________________ InteractorStyle interface to view ________________________________
+    #__________________________________________ Interface to InteractorStyle ________________________________
+
+    def moveBullsEye(self, coordinates: Tuple[int]):
+        self.view.moveBullsEye(coordinates)
 
     def updateWindowLevel(self):
         self.view.updateWindowLevel()
@@ -72,12 +94,33 @@ class SequenceViewerInterface(QWidget):
         self.view.adjustSliceIdx(changeFactor)
         self.widgets.indexSlider.setValue(self.view.sliceIdx)
 
+    def addPoint(self, pointType: str, pickedCoordinates: Tuple[int]):
+        self.view.addPoint(pointType, pickedCoordinates)
 
-    def moveBullsEye(self, mouseCoordinates):
-        self.interface.moveBullsEye(mouseCoordinates)
+#________________________________________Interface to Toolbar_____________________________________
+    def reverseMPRpointsStatus(self):
 
-    @staticmethod
-    def buildFrame():
-        frame = QGroupBox()
-        frame.showMaximized()
-        return frame
+        self.interactorStyle.actions["PickingMPR"] = int(not self.interactorStyle.actions["PickingMPR"])
+
+    def reverseLengthPointsStatus(self):
+        self.interactorStyle.actions["PickingLength"] = int(not self.interactorStyle.actions["PickingLength"])
+
+    def calculateLengths(self):
+        pass
+
+    def calculateMPR(self):
+        ic(self.view.MPRpoints)
+        ic(len(self.view.MPRpoints))
+        MPRproperties = PointsToPlaneVectors(self.view.MPRpoints.getCoordinatesArray(), self.view.imageData, Plot=0, height=40, viewAngle=180)
+
+        MPR_M = MPRproperties.MPR_M
+        delta = MPRproperties.delta
+        MPRposition = MPRproperties.MPR_indexs_np
+        self.openMPRWindow(MPR_M, delta, MPRposition, self.view.MPRpoints.getCoordinatesArray())
+
+    def openMPRWindow(self, MPR_M, delta, MPRposition, points):
+        window = QMainWindow()
+        ui = Ui_MPRWindow()
+        ui.setupUi(window, MPR_M, delta, MPRposition, points)
+        ic(window)
+        window.show()

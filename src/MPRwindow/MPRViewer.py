@@ -81,14 +81,14 @@ class View:
         self.textActorWindow.GetTextProperty().SetFontSize(14)
         self.textActorWindow.GetTextProperty().SetColor(51/255, 51/255, 1)
         self.textActorWindow.SetDisplayPosition(0, 17)
-        self.textActorWindow.SetInput("Window: " + str(self.MPRViewerProperties.window))
+        self.textActorWindow.SetInput("Window: 525")#?#
         self.renderer.AddActor(self.textActorWindow)
 
         self.textActorLevel = vtk.vtkTextActor()
         self.textActorLevel.GetTextProperty().SetFontSize(14)
         self.textActorLevel.GetTextProperty().SetColor(51/255, 51/255, 1)
         self.textActorLevel.SetDisplayPosition(0, 32)
-        self.textActorLevel.SetInput("Level: " + str(self.MPRViewerProperties.level))
+        self.textActorLevel.SetInput("Level: 1051") #?#)
         self.renderer.AddActor(self.textActorLevel)
 
         self.textActorAngle = vtk.vtkTextActor()
@@ -113,7 +113,7 @@ class View:
     def changeAngle(self, angle):
         Height = self.MPRViewerProperties.Height
         self.MPRViewerProperties.angle = angle
-        GetMPR = getMPR.PointsToPlansVectors(self.MPRViewerProperties.ConvViewerProperties, self.MPRViewerProperties.originalPoints,
+        GetMPR = getMPR.PointsToPlaneVectors(self.MPRViewerProperties.ConvViewerProperties, self.MPRViewerProperties.originalPoints,
                                              self.MPRViewerProperties.ConvViewMode, height=Height, viewAngle=angle, Plot=0)
         self.MPRViewerProperties.MPR_M = GetMPR.MPR_M
         self.MPRViewerProperties.delta = GetMPR.delta

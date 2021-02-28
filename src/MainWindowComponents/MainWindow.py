@@ -25,7 +25,7 @@ class App(QMainWindow):
         self.buildMenuBar()
 
     def buildMenuBar(self):
-        menuBar = MenuBar.getMenuBar()
+        menuBar = MenuBar.buildMenuBar()
         menuBar.setParent(self)
         self.setMenuBar(menuBar)
 

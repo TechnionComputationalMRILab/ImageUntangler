@@ -1,17 +1,26 @@
 import os, json
 
 
-def get_icon_file_path() -> str:
+def get_config_dir() -> str:
     script_dir = os.path.dirname(os.path.realpath(__file__))
-    config_file_path = script_dir + os.path.sep + '..' + os.path.sep + '..' + os.path.sep + 'config/labIcon.png'
+    config_file_path = script_dir + os.path.sep + '..' + os.path.sep + '..' + os.path.sep + 'config/'
     return os.path.abspath(config_file_path)
+
+
+def get_icon_file_path() -> str:
+    return os.path.abspath(get_config_dir() + "/labIcon.png")
+
+
+def get_mpr_image_path() -> str:
+    return os.path.abspath(get_config_dir() + "/mprImage.jpg")
+
+
+def get_length_image_path() -> str:
+    return os.path.abspath(get_config_dir()+'/lengthDots.jpg')
 
 
 def get_config_file_path() -> str:
-    # return absolute path of config file
-    script_dir = os.path.dirname(os.path.realpath(__file__))
-    config_file_path = script_dir + os.path.sep + '..' + os.path.sep + '..' + os.path.sep + 'config/config.json'
-    return os.path.abspath(config_file_path)
+    return os.path.abspath(get_config_dir()+'/config.json')
 
 
 def get_config_data() -> dict:

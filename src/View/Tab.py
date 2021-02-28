@@ -1,4 +1,6 @@
-import os, sip, sys
+import os
+from typing import List
+from icecream import ic
 
 from PyQt5.QtCore import QMetaObject, QCoreApplication, QRect
 from PyQt5.QtWidgets import QWidget, QHBoxLayout, QPushButton, QFileDialog
@@ -7,8 +9,6 @@ from util import config_data, MRI_files, stylesheets
 from MainWindowComponents.MessageBoxes import invalidDirectoryMessage
 from Interfaces.SequenceViewerInterface import SequenceViewerInterface
 
-from typing import List
-from icecream import ic
 
 ic.configureOutput(includeContext=True)
 
@@ -50,6 +50,7 @@ class Tab(QWidget):
         for _ in range(numViewers):
             self.viewerInterfaces.append(SequenceViewerInterface(self.MRIimages))
             self.mainLayout.addWidget(self.viewerInterfaces[-1])
+
 
     def loadRegularTab(self):
         # open file explorer and load selected NRRD images

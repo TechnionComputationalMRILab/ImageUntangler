@@ -22,18 +22,14 @@ LengthResults = namedtuple("LengthResults", "totalDistance allDistances")
 
 class Ui_MPRWindow:
     def buildMainWindow(self, MPRWindow):
-        MPRWindow.setObjectName("MainWindow")
         MPRWindow.resize(990, 797)
         MPRWindow.setMaximumSize(QSize(990, 16777215))
         self.centralwidget = QWidget(MPRWindow)
-        self.centralwidget.setObjectName("centralwidget")
         MPRWindow.setCentralWidget(self.centralwidget)
         self.menubar = QMenuBar(MPRWindow)
         self.menubar.setGeometry(QRect(0, 0, 990, 22))
-        self.menubar.setObjectName("menubar")
         MPRWindow.setMenuBar(self.menubar)
         self.statusbar = QStatusBar(MPRWindow)
-        self.statusbar.setObjectName("statusbar")
         MPRWindow.setStatusBar(self.statusbar)
 
     def _buildCommonSizePolicy(self, heightDependsOnWidth: bool):
@@ -48,15 +44,11 @@ class Ui_MPRWindow:
         self.lengthCalcBox.setSizePolicy(self._buildCommonSizePolicy(self.lengthCalcBox.sizePolicy().hasHeightForWidth()))
         self.lengthCalcBox.setObjectName("lengthCalcBox")
         self.verticalLayout = QVBoxLayout(self.lengthCalcBox)
-        self.verticalLayout.setObjectName("verticalLayout")
         self.setPointsButton = QPushButton(self.lengthCalcBox)
-        self.setPointsButton.setObjectName("setPointsButton")
         self.verticalLayout.addWidget(self.setPointsButton, 0, QtCore.Qt.AlignHCenter)
         self.calcLengthButton = QPushButton(self.lengthCalcBox)
-        self.calcLengthButton.setObjectName("calcLengthButton")
         self.verticalLayout.addWidget(self.calcLengthButton, 0, QtCore.Qt.AlignHCenter)
         self.saveButton = QPushButton(self.lengthCalcBox)
-        self.saveButton.setObjectName("saveButton")
         self.verticalLayout.addWidget(self.saveButton, 0, QtCore.Qt.AlignHCenter)
         self.mainLayout.addWidget(self.lengthCalcBox, 1, 1, 1, 1)
     
@@ -64,46 +56,34 @@ class Ui_MPRWindow:
         self.lengthResultsBox = QGroupBox(self.centralwidget)
         self.lengthResultsBox.setSizePolicy(
             self._buildCommonSizePolicy(self.lengthResultsBox.sizePolicy().hasHeightForWidth()))
-        self.lengthResultsBox.setObjectName("lengthResultsBox")
         self.lengthResultsLayout = QVBoxLayout(self.lengthResultsBox)
-        self.lengthResultsLayout.setObjectName("lengthResultsLayout")
         self.lengthResultsLabel = QLabel(self.lengthResultsBox)
         font = QFont()
         font.setBold(True)
         font.setWeight(75)
         self.lengthResultsLabel.setFont(font)
-        self.lengthResultsLabel.setObjectName("lengthResultsLabel")
         self.lengthResultsLayout.addWidget(self.lengthResultsLabel, 0, QtCore.Qt.AlignHCenter | QtCore.Qt.AlignVCenter)
         self.mainLayout.addWidget(self.lengthResultsBox, 1, 2, 1, 1)
     
     def buildSizeSettingsBox(self):
         self.sizeSettingBox = QGroupBox(self.centralwidget)
-        self.sizeSettingBox.setObjectName("sizeSettingBox")
         self.settingsBoxLayout = QGridLayout(self.sizeSettingBox)
-        self.settingsBoxLayout.setObjectName("settingsBoxLayout")
         self.angleLabel = QLabel(self.sizeSettingBox)
-        self.angleLabel.setObjectName("angleLabel")
         self.settingsBoxLayout.addWidget(self.angleLabel, 1, 0, 1, 1)
         self.heightSetter = QDoubleSpinBox(self.sizeSettingBox)
         self.heightSetter.setMaximum(5000.0)
         self.heightSetter.setProperty("value", 20.0)
-        self.heightSetter.setObjectName("heightSetter")
         self.settingsBoxLayout.addWidget(self.heightSetter, 0, 1, 1, 1)
         self.label = QLabel(self.sizeSettingBox)
-        self.label.setObjectName("label")
         self.settingsBoxLayout.addWidget(self.label, 0, 0, 1, 1)
         self.unitsLabel = QLabel(self.sizeSettingBox)
-        self.unitsLabel.setObjectName("unitsLabel")
         self.settingsBoxLayout.addWidget(self.unitsLabel, 0, 2, 1, 1)
         self.degreeLabel = QLabel(self.sizeSettingBox)
-        self.degreeLabel.setObjectName("degreeLabel")
         self.settingsBoxLayout.addWidget(self.degreeLabel, 1, 2, 1, 1)
         self.updateButton = QPushButton(self.sizeSettingBox)
-        self.updateButton.setObjectName("updateButton")
         self.settingsBoxLayout.addWidget(self.updateButton, 2, 1, 1, 1)
         self.angleSetter = QSpinBox(self.sizeSettingBox)
         self.angleSetter.setMaximum(180)
-        self.angleSetter.setObjectName("angleSetter")
         self.settingsBoxLayout.addWidget(self.angleSetter, 1, 1, 1, 1)
         self.mainLayout.addWidget(self.sizeSettingBox, 1, 0, 1, 1)
     
@@ -112,12 +92,10 @@ class Ui_MPRWindow:
         self.mainViewerBox.setSizePolicy(self._buildCommonSizePolicy(self.mainViewerBox.sizePolicy().hasHeightForWidth()))
         self.mainViewerBox.setFlat(False)
         self.mainViewerBox.setCheckable(False)
-        self.mainViewerBox.setObjectName("mainViewerBox")
         self.mainLayout.addWidget(self.mainViewerBox, 0, 0, 1, 3)
 
     def buildMainLayout(self):
         self.mainLayout = QGridLayout(self.centralwidget)
-        self.mainLayout.setObjectName("mainLayout")
         self.mainLayout.setColumnStretch(0, 1)
         self.mainLayout.setColumnStretch(1, 1)
         self.mainLayout.setColumnStretch(2, 2)
@@ -140,15 +118,13 @@ class Ui_MPRWindow:
         self.updateButton.setText(_translate("MainWindow", "Update"))
         self.mainViewerBox.setTitle(_translate("MainWindow", "MPRwindow"))
 
-
-    
-    def LoadViewer(self, MPR_M, delta, MPRposition, points, ConvViewerProperties, Height, angle,ConvViewMode):
-        self.MPRViewerProperties = MPRViewerProperties.viewerLogic(MPR_M, delta, MPRposition, points, Height, angle, ConvViewerProperties, ConvViewMode)
+    def LoadViewer(self, MPR_M, delta, MPRposition, points, Height, angle):
+        self.MPRViewerProperties = MPRViewerProperties.viewerLogic(MPR_M, delta, MPRposition, points, Height, angle)
         self.interactor = QVTKRenderWindowInteractor(self.mainViewerBox)
         self.mainLayout.addWidget(self.interactor, 0, 0, 1, 3)
         self.MPR_Viewer = MPRViewer.View(self.interactor, self.MPRViewerProperties)
 
-    def setupUi(self, MPRWindow, MPR_M, delta, MPRposition, ConvViewerProperties, points, ConvViewMode):
+    def setupUi(self, MPRWindow, MPR_M, delta, MPRposition, points):
         ic(delta)
         self.buildMainWindow(MPRWindow) # build widgets and qualities of MPRwindow window
         self.buildMainLayout() # set basic dimensions of MPRwindow window
@@ -158,14 +134,13 @@ class Ui_MPRWindow:
         self.buildMainViewerBox() # builds holder for MPRwindow image
         self.retranslateUi(MPRWindow) # add text to all widgets
         QMetaObject.connectSlotsByName(MPRWindow)
-        self.LoadViewer(MPR_M, delta,MPRposition, points, ConvViewerProperties, self.heightSetter.value(), self.angleSetter.value(), ConvViewMode) # builds MPRwindow viewer
+        self.LoadViewer(MPR_M, delta, MPRposition, points, self.heightSetter.value(), self.angleSetter.value()) # builds MPRwindow viewer
         self.connectButtons() # connects all buttons to their relevant functions
-
 
     def HeightChanged(self):
         self.MPRViewerProperties.MPRHeight = self.heightSetter.value()
         self.MPRViewerProperties.Angle = self.angleSetter.value()
-        self.GetMPR = getMPR.PointsToPlansVectors(self.MPRViewerProperties.ConvViewerProperties, self.MPRViewerProperties.originalPoints, self.MPRViewerProperties.ConvViewMode, height=self.MPRViewerProperties.MPRHeight,
+        self.GetMPR = getMPR.PointsToPlaneVectors(self.MPRViewerProperties.ConvViewerProperties, self.MPRViewerProperties.originalPoints, self.MPRViewerProperties.ConvViewMode, height=self.MPRViewerProperties.MPRHeight,
                                                   viewAngle=self.MPRViewerProperties.Angle, Plot=0)
         self.MPRViewerProperties.MPR_M = self.GetMPR.MPR_M
         self.MPRViewerProperties.delta = self.GetMPR.delta
@@ -213,14 +188,11 @@ class Ui_MPRWindow:
         totalDistance = np.sum(allLengths)
         self.outputLengthResults(LengthResults(totalDistance=totalDistance, allDistances=allLengths))
 
-        
-
     def connectButtons(self):
         self.updateButton.clicked.connect(lambda: self.HeightChanged())
         self.saveButton.clicked.connect(lambda: self.SaveFile())
         self.setPointsButton.clicked.connect(lambda: self.setPointsButtonClick())
         self.calcLengthButton.clicked.connect(lambda: self.calculateDistances())
-
 
 
 if __name__ == "__main__":

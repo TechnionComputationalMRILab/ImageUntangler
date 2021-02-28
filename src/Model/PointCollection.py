@@ -2,8 +2,9 @@ import numpy as np
 from typing import List
 from vtk import vtkRegularPolygonSource, vtkPolyDataMapper, vtkActor
 
-
 #"""
+
+
 class Point:
     def __init__(self, coordinates: np.array, polygon: vtkRegularPolygonSource = None):
         self.coordinates = coordinates
@@ -50,8 +51,10 @@ class PointCollection:
         self.points[-1].addPolygon(polygon)
         return polygonActor
 
-    @property
-    def pointCoordinatesAsList(self):
+    def __len__(self):
+        return len(self.points)
+
+    def getCoordinatesArray(self) -> np.array:
         return np.asarray([point.coordinates for point in self.points])
 
 

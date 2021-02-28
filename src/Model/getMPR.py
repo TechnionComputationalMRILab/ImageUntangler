@@ -7,19 +7,13 @@ from icecream import ic
 ic.configureOutput(includeContext=True)
 
 
-class PointsToPlansVectors:
-    def __init__(self, viewerLogic, allPoints: List[np.array], ViewMode: str, height = 10, viewAngle = 0, Plot = False):
+class PointsToPlaneVectors:
+    def __init__(self, allPoints: List[np.array], imageData, height = 10, viewAngle = 0, Plot = False):
         self.Plot = Plot
         self.Height = height
 
-        if ViewMode == 'Coronal':
-            imageData = viewerLogic.CoronalData
-        else:
-            imageData = viewerLogic.AxialData
-            
         self.V = np.asarray(imageData.dicomArray)
-        ic(self.V)
-        ic(self.V.shape)
+
 
         V_spacing = np.asarray(imageData.spacing)
         V_dim = np.asarray(imageData.dimensions)

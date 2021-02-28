@@ -2,7 +2,7 @@ from View.MRISequenceViewer import PlaneViewerQT
 from MainWindowComponents.MessageBoxes import gzipFileMessage, noGoodFiles
 from vtk.qt.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
 from typing import List
-
+import sys
 
 class ViewerManager:
     def __init__(self, interface, MRIimages: List[str]):

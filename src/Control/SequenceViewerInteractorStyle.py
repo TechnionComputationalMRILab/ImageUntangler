@@ -1,7 +1,7 @@
 from vtk import vtkInteractorStyleImage, vtkPropPicker
 
 
-class AxialViewerInteractorStyle(vtkInteractorStyleImage):
+class SequenceViewerInteractorStyle(vtkInteractorStyleImage):
     def __init__(self, parent, interface):
         self.interface = interface
         self.parent = parent
@@ -62,11 +62,9 @@ class AxialViewerInteractorStyle(vtkInteractorStyleImage):
                 self.actions["Windowing"] = 1
                 vtkInteractorStyleImage.OnLeftButtonDown(self)
             elif self.actions["PickingMPR"] == 0 and self.actions["PickingLength"] == 0 and self.actions["Cursor"] == 1:
-                AxialViewerInteractorStyle.OnPickingCurserLeftButtonDown(self)
-            elif self.actions["PickingMPR"] == 1:
-                AxialViewerInteractorStyle.OnPickingLeftButtonDown(self)
-            elif self.actions["PickingLength"] == 1:
-                AxialViewerInteractorStyle.OnPickingLeftButtonDown(self)
+                SequenceViewerInteractorStyle.OnPickingCurserLeftButtonDown(self)
+            elif self.actions["PickingMPR"] == 1 or self.actions["PickingLength"] == 1:
+                SequenceViewerInteractorStyle.OnPickingLeftButtonDown(self)
 
         elif event == "LeftButtonReleaseEvent":
             (mouseX, mouseY) = self.parent.GetEventPosition()
@@ -75,11 +73,11 @@ class AxialViewerInteractorStyle(vtkInteractorStyleImage):
                 vtkInteractorStyleImage.OnLeftButtonUp(self)
             elif self.actions["PickingMPR"] == 0 and self.actions["PickingLength"] == 0 and self.actions["Cursor"] == 1:
                 self.actions["Cursor"] = 0
-                AxialViewerInteractorStyle.OnPickingCursorLeftButtonUp(self)
+                SequenceViewerInteractorStyle.OnPickingCursorLeftButtonUp(self)
             elif self.actions["PickingMPR"] == 1:
-                AxialViewerInteractorStyle.pickPoint(self, "MPRwindow", mouseX, mouseY)
+                SequenceViewerInteractorStyle.pickPoint(self, "MPR", mouseX, mouseY)
             elif self.actions["PickingLength"] == 1:
-                AxialViewerInteractorStyle.pickPoint(self, "Length", mouseX, mouseY)
+                SequenceViewerInteractorStyle.pickPoint(self, "Length", mouseX, mouseY)
 
     def MouseMoveCallback(self, obj, event):
         (lastX, lastY) = self.parent.GetLastEventPosition()
@@ -126,17 +124,15 @@ class AxialViewerInteractorStyle(vtkInteractorStyleImage):
             else:
                 return 0
 
-
     def pickPoint(self, pointType: str, mouseX, mouseY):
         if self.pointPicker.Pick(mouseX, mouseY, 0.0, self.interface.view.renderer):
-            pickedCoordinates = self.pointPicker.GetPickPosition()
+            pickPosition = self.pointPicker.GetPickPosition()
             matrix = self.interface.view.reslice.GetResliceAxes()
             center = matrix.MultiplyPoint((0, 0, 0, 1))
             zCoordinate = (center[2] - self.interface.view.imageData.origin[2]) - self.interface.view.imageData.dimensions[2]\
                              * self.interface.view.imageData.spacing[2] / 2
-            pickedCoordinates = (pickedCoordinates[0], pickedCoordinates[1], zCoordinate)
-
-            self.interface.view.addPoint(pointType, pickedCoordinates)
+            pickedCoordinates = (pickPosition[0], pickPosition[1], zCoordinate)
+            self.interface.addPoint(pointType, pickedCoordinates)
 
     def OnPickingCursorLeftButtonUp(self):
         (mouseX, mouseY) = self.parent.GetEventPosition()

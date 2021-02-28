@@ -4,14 +4,14 @@ from icecream import ic
 from vtk.qt.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
 from vtk import vtkImageActor, vtkImageReslice, vtkMatrix4x4, vtkRenderer, vtkTextActor,  vtkPolyDataMapper,\
     vtkActor, vtkCursor2D
-from Model import ImageProperties
 
-from Control.AxialViewerInteractorStyle import AxialViewerInteractorStyle
+from Model import ImageProperties
+from Control.SequenceViewerInteractorStyle import SequenceViewerInteractorStyle
 from Model.PointCollection import PointCollection
 
 
 class PlaneViewerQT:
-    def __init__(self, manager, interactor: QVTKRenderWindowInteractor, interactorStyle: AxialViewerInteractorStyle, imagePath: str, isDicom = False):
+    def __init__(self, manager, interactor: QVTKRenderWindowInteractor, interactorStyle: SequenceViewerInteractorStyle, imagePath: str, isDicom = False):
         self.manager = manager
         self.interactor = interactor
         self.imageData = ImageProperties.getImageData(imagePath, isDicom)
@@ -34,8 +34,7 @@ class PlaneViewerQT:
         self.setWindowText()
         self.setLevelText()
 
-
-        self.mprPoints = PointCollection()
+        self.MPRpoints = PointCollection()
         self.lengthPoints = PointCollection()
 
         self.presentCursor()
@@ -116,11 +115,9 @@ class PlaneViewerQT:
         self.textActorLevel.SetInput("Level: " + str(np.int32(self.LevelVal)))
         self.window.Render()
 
-
     def updateWindowLevel(self):
         self.manager.changeWindow(self.actor.GetProperty().GetColorWindow())
         self.manager.changeLevel(self.actor.GetProperty().GetColorLevel())
-
 
     def processNewPoint(self, pointCollection, pickedCoordinates, color=(1, 0, 0)):
         pointLocation = [pickedCoordinates[0], pickedCoordinates[1], pickedCoordinates[2], self.sliceIdx]  # x,y,z,sliceIdx
@@ -130,8 +127,8 @@ class PlaneViewerQT:
         self.presentPoints(pointCollection, self.sliceIdx)
 
     def addPoint(self, pointType, pickedCoordinates):
-        if pointType == "MPRwindow":
-            self.processNewPoint(self.mprPoints, pickedCoordinates, color=(1, 0, 0))
+        if pointType.upper() == "MPR":
+            self.processNewPoint(self.MPRpoints, pickedCoordinates, color=(1, 0, 0))
         elif pointType.upper() == "LENGTH":
             self.processNewPoint(self.lengthPoints, pickedCoordinates, color=(55/255, 230/255, 128/255))
 
@@ -177,7 +174,7 @@ class PlaneViewerQT:
         self.sliceIdx = sliceIdx
         self.imageData.sliceIdx = sliceIdx
         self.manager.updateSliderIndex(self.sliceIdx)
-        self.presentPoints(self.mprPoints, sliceIdx)
+        self.presentPoints(self.MPRpoints, sliceIdx)
 
     def setSliceIndex(self, index: int):
         self.reslice.Update()
