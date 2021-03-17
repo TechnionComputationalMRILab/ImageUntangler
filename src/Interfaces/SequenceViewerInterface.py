@@ -13,6 +13,7 @@ from Model.ViewerManager import ViewerManager
 from Model.getMPR import PointsToPlaneVectors
 from Control.SequenceInteractorWidgets import SequenceInteractorWidgets
 from Control.SequenceViewerInteractorStyle import SequenceViewerInteractorStyle
+from MPRWindow2.MPRWindow import MPRWindow
 
 
 class SequenceViewerInterface(QWidget):
@@ -120,9 +121,6 @@ class SequenceViewerInterface(QWidget):
         self.openMPRWindow(MPR_M, delta, MPRposition, self.view.MPRpoints.getCoordinatesArray())
 
     def openMPRWindow(self, MPR_M, delta, MPRposition, points):
-        window = QMainWindow()
-        ui = Ui_MPRWindow()
-        ui.setupUi(window, MPR_M, delta, MPRposition, points)
-        ic(window)
-        window.setStyleSheet(stylesheets.get_sheet_by_name("Default"))
-        window.show()
+        # window = QMainWindow()
+        MPRWindow(MPR_M, delta, MPRposition, points)
+        # ui.show()

@@ -1,1 +1,6 @@
-{"AppName": "MRI Untangler", "DefaultFolder": "/home/avraham/freimanLab/MRIflattener/data/Case007/NRRDS", "NumViewers": 2, "MainViewer": 0}
+{
+   "AppName":"MRI Untangler",
+   "DefaultFolder":"/mnt/ssd/TCML/Case007/NRRDS",
+   "NumViewers":2,
+   "MainViewer":0
+}

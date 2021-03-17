@@ -10,7 +10,8 @@ class viewerLogic:
         self.MPRposition = MPRposition
         self.DistancePickingIndexs =[]
 
-
+        self.ConvViewerProperties = None
+        self.ConvViewMode = None
 
 
 

@@ -140,8 +140,10 @@ class Ui_MPRWindow:
     def HeightChanged(self):
         self.MPRViewerProperties.MPRHeight = self.heightSetter.value()
         self.MPRViewerProperties.Angle = self.angleSetter.value()
-        self.GetMPR = getMPR.PointsToPlaneVectors(self.MPRViewerProperties.ConvViewerProperties, self.MPRViewerProperties.originalPoints, self.MPRViewerProperties.ConvViewMode, height=self.MPRViewerProperties.MPRHeight,
+        self.GetMPR = getMPR.PointsToPlaneVectors(self.MPRViewerProperties.originalPoints, self.MPRViewerProperties.ConvViewMode, height=self.MPRViewerProperties.MPRHeight,
                                                   viewAngle=self.MPRViewerProperties.Angle, Plot=0)
+        # self.GetMPR = getMPR.PointsToPlaneVectors(self.MPRViewerProperties.ConvViewerProperties, self.MPRViewerProperties.originalPoints, self.MPRViewerProperties.ConvViewMode, height=self.MPRViewerProperties.MPRHeight,
+        #                                           viewAngle=self.MPRViewerProperties.Angle, Plot=0)
         self.MPRViewerProperties.MPR_M = self.GetMPR.MPR_M
         self.MPRViewerProperties.delta = self.GetMPR.delta
         self.MPRViewerProperties.MPRposition = self.GetMPR.MPR_indexs_np
