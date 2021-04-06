@@ -46,5 +46,8 @@ the error raised is
 * You can't close a tab you're currently on
 * MPR window has no title and icon
 * There should be a way to turn off "add ____ points" and return to the level/window scrolling
+
+  (this seems to work in Windows but not in Ubuntu)
+
 * Confirmation when closing a tab would probably be useful?
 * Having similar window/level sliders on the MPR window for the sake of similarity might be nice

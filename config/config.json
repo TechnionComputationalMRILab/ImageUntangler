@@ -1,6 +1,1 @@
-{
-   "AppName":"MRI Untangler",
-   "DefaultFolder":"/mnt/ssd/TCML/Case007/NRRDS",
-   "NumViewers":2,
-   "MainViewer":0
-}
+{"AppName": "MRI Untangler", "DefaultFolder": "C:\\Users\\ang.a\\OneDrive - Technion\\Documents\\MRI_Data\\Case005\\Case006\\NRRDS", "NumViewers": 2, "MainViewer": 0}

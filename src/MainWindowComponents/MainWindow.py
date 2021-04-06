@@ -3,6 +3,7 @@ __author__ = "Yael Zaffrani and Avraham Kahan"
 import sys
 from PyQt5 import QtWidgets
 from PyQt5.QtGui import QIcon
+from PyQt5.QtCore import QSize
 from PyQt5.QtWidgets import QMainWindow
 from MainWindowComponents import MenuBar
 from MainWindowComponents.TabManager import TabManager
@@ -18,7 +19,9 @@ class App(QMainWindow):
         super().__init__()
         self.setIcon()
         self.setTitle()
-        self.showMaximized()
+        # self.showMaximized()
+        self.setMinimumSize(QSize(config_data.get_default_width(), config_data.get_default_height()))
+
         self.tabManager = TabManager(parent=self)
         self.setCentralWidget(self.tabManager)
         self.setStyleSheet(stylesheets.get_sheet_by_name("Default"))

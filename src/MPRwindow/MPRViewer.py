@@ -49,7 +49,6 @@ class View:
         self.actor = vtk.vtkImageActor()
         self.actor.GetMapper().SetInputData(MPR_vtk)
 
-
         #Renderer
         self.renderer = vtk.vtkRenderer()
         self.renderer.AddActor(self.actor)
@@ -65,7 +64,6 @@ class View:
         self.interactorStyle.SetInteractor(self.interactor)
         self.interactor.SetInteractorStyle(self.interactorStyle)
         self.renderWindow.SetInteractor(self.interactor)
-
 
         #renderWindowInteractor = vtk.vtkRenderWindowInteractor()
 
@@ -98,7 +96,6 @@ class View:
         self.textActorAngle.SetDisplayPosition(0, 47)
         self.textActorAngle.SetInput("Angle: " + str(self.MPRViewerProperties.angle))
         self.renderer.AddActor(self.textActorAngle)
-
 
         self.renderWindow.Render()
         # self.interactor.Start()

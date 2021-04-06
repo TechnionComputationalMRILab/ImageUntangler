@@ -1,76 +1,149 @@
 from PyQt5.QtCore import *
 from PyQt5.Qt import *
 from PyQt5.QtWidgets import *
+from MPRWindow2.Control.MPRW_Control import MPRW_Control
+from MPRWindow2.Model.MPRW_Model import MPRW_Model
+from vtk.qt.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
+import vtk
+import sys
+import os
+
+sys.path.append(os.path.abspath(os.path.join('..', 'util')))
+from util import config_data, stylesheets
 
 
 class MPRW_Widget(QWidget):
-    def __init__(self, parent=None):
-        super().__init__(parent=parent)
+    def __init__(self, input_data: MPRW_Control):
+        super().__init__()
+        # self.model = input_model
 
-        _layout = QVBoxLayout(self)
+        self._top_layout = QHBoxLayout(self)
 
-        _test_label = QLabel("top box goes here")
+        self._top_layout.addWidget(TestVTKinQFrame().frame, stretch=85)
+        self._top_layout.addWidget(MPRWindowBottom(), stretch=15)
 
-        _layout.addWidget(_test_label)
+        self.setLayout(self._top_layout)
 
-        # TODO: check if this is needed...
-        # _menubar = QToolBar()
-        # _menubar.setGeometry(QRect(0, 0, 990, 22))
-        # _layout.addWidget(_menubar)
-        #
-        # _statusbar = QStatusBar()
-        # _layout.addWidget(_statusbar)
 
-        self._bottom_layout = QHBoxLayout()
-        _layout.addLayout(self._bottom_layout)
+class MPRWindowBottom(QWidget):
+    def __init__(self):
+        super().__init__()
+        _bottom_layout = QVBoxLayout(self)
 
-        self.set_height_angle()
-        self.buildLengthCalcBox()
+        _bottom_layout.addWidget(HeightAngleSetter())
+        _bottom_layout.addWidget(LengthCalculator())
+        _bottom_layout.addWidget(LengthResultBox())
 
-        self._bottom_layout.addWidget(QLabel("2 bottom box here"))
 
-        self.setLayout(_layout)
+class HeightAngleSetter(QWidget):
+    def __init__(self):
+        super().__init__()
 
-    def set_height_angle(self):
         _size_set_groupbox = QGroupBox(self)
-
+        _size_set_groupbox.setFlat(True)
+        _size_set_groupbox.setTitle("Set height/angle")
         self.settingsBoxLayout = QVBoxLayout(_size_set_groupbox)
 
         # height
         _height_label = QLabel("Height")
-        self.settingsBoxLayout.addWidget(_height_label, Qt.AlignHCenter)
+        self.settingsBoxLayout.addWidget(_height_label)
         self.heightSetter = QDoubleSpinBox(_size_set_groupbox)
         self.heightSetter.setMaximum(5000.0)
         self.heightSetter.setProperty("value", 20.0)
         self.heightSetter.setSuffix(" mm")
-        self.settingsBoxLayout.addWidget(self.heightSetter, Qt.AlignHCenter)
+        self.settingsBoxLayout.addWidget(self.heightSetter)
 
         # angle
         _angle_label = QLabel("Angle")
-        self.settingsBoxLayout.addWidget(_angle_label, Qt.AlignHCenter)
+        self.settingsBoxLayout.addWidget(_angle_label)
         self.angleSetter = QSpinBox(_size_set_groupbox)
         self.angleSetter.setSuffix(" °")
         self.angleSetter.setMaximum(180)
-        self.settingsBoxLayout.addWidget(self.angleSetter, Qt.AlignHCenter)
+        self.settingsBoxLayout.addWidget(self.angleSetter)
 
         # update button
         self.updateButton = QPushButton(_size_set_groupbox)
-        self.settingsBoxLayout.addWidget(self.updateButton, Qt.AlignHCenter)
+        self.updateButton.setText("Update")
+        self.settingsBoxLayout.addWidget(self.updateButton)
 
-        self._bottom_layout.addWidget(_size_set_groupbox)
+        self.settingsBoxLayout.addSpacerItem(QSpacerItem(150, 10, QSizePolicy.Expanding))
 
-    def buildLengthCalcBox(self):
+class LengthCalculator(QWidget):
+    def __init__(self):
+        super().__init__()
 
-        # self.lengthCalcBox = QGroupBox(self)
-        # self.lengthCalcBox.setSizePolicy(self._buildCommonSizePolicy(self.lengthCalcBox.sizePolicy().hasHeightForWidth()))
-        # self.lengthCalcBox.setObjectName("lengthCalcBox")
+        _calc_length_groupbox = QGroupBox(self)
+        _calc_length_groupbox.setTitle("Length calculator")
+        _calc_length_groupbox.setFlat(True)
 
-        self.verticalLayout = QVBoxLayout(self)
+        self.verticalLayout = QVBoxLayout(_calc_length_groupbox)
 
-        self.setPointsButton = QPushButton("Set Points")
-        self.verticalLayout.addWidget(self.setPointsButton, 0, Qt.AlignHCenter)
-        self.calcLengthButton = QPushButton("Calculate Length")
-        self.verticalLayout.addWidget(self.calcLengthButton, 0, Qt.AlignHCenter)
-        self.saveButton = QPushButton("Save")
-        self.verticalLayout.addWidget(self.saveButton, 0, Qt.AlignHCenter)
-        self._bottom_layout.addWidget(self.verticalLayout)
+        self.setPointsButton = QPushButton(_calc_length_groupbox)
+        self.setPointsButton.setText("Set points")
+        self.verticalLayout.addWidget(self.setPointsButton)
+
+        self.calcLengthButton = QPushButton(_calc_length_groupbox)
+        self.calcLengthButton.setText("Calculate")
+        self.verticalLayout.addWidget(self.calcLengthButton)
+
+        self.saveButton = QPushButton(_calc_length_groupbox)
+        self.saveButton.setText("Save to file")
+        self.verticalLayout.addWidget(self.saveButton)
+
+
+class LengthResultBox(QWidget):
+    def __init__(self):
+        super().__init__()
+
+        _length_result_groupbox = QGroupBox(self)
+        _length_result_groupbox.setTitle("Calculated Length")
+        _length_result_groupbox.setFlat(True)
+
+        self.lengthResultsLayout = QVBoxLayout(_length_result_groupbox)
+        self.lengthResultsLabel = QLabel("textttttttttttttttttttttt")
+
+        font = QFont()
+        font.setBold(True)
+        font.setWeight(75)
+
+        self.lengthResultsLayout.addWidget(self.lengthResultsLabel)
+
+
+class TestVTKinQFrame:
+    def __init__(self):
+        self.frame = QFrame()
+
+        self.vl = QVBoxLayout()
+        self.groupbox = QGroupBox()
+        self.groupbox.setFlat(True)
+        self.groupbox.setCheckable(False)
+        self.vl.addWidget(self.groupbox)
+
+        self.frame.setLayout(self.vl)
+
+        self.vtkWidget = QVTKRenderWindowInteractor(self.groupbox)
+        self.vl.addWidget(self.vtkWidget)
+
+        self.ren = vtk.vtkRenderer()
+        self.vtkWidget.GetRenderWindow().AddRenderer(self.ren)
+        self.iren = self.vtkWidget.GetRenderWindow().GetInteractor()
+
+        # Create source
+        source = vtk.vtkSphereSource()
+        source.SetCenter(0, 0, 0)
+        source.SetRadius(5.0)
+
+        # Create a mapper
+        mapper = vtk.vtkPolyDataMapper()
+        mapper.SetInputConnection(source.GetOutputPort())
+
+        # Create an actor
+        actor = vtk.vtkActor()
+        actor.SetMapper(mapper)
+
+        self.ren.AddActor(actor)
+
+        self.ren.ResetCamera()
+
+        self.iren.Initialize()
+        self.iren.Start()
