@@ -1,5 +1,4 @@
 import math
-from icecream import ic
 from vtk import vtkNrrdReader, vtkDICOMImageReader
 from vtk.vtkCommonDataModel import vtkImageData
 from vtk.util import numpy_support

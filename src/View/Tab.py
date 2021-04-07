@@ -1,13 +1,13 @@
 import os
 from typing import List
 from icecream import ic
-
 from PyQt5.QtCore import QMetaObject, QCoreApplication, QRect
 from PyQt5.QtWidgets import QWidget, QHBoxLayout, QPushButton, QFileDialog
 
 from util import config_data, MRI_files, stylesheets
 from MainWindowComponents.MessageBoxes import invalidDirectoryMessage
-from Interfaces.SequenceViewerInterface import SequenceViewerInterface
+from Model.NRRDModel import NRRDViewerModel
+from Model.DICOMModel import DICOMViewerModel
 
 
 ic.configureOutput(includeContext=True)
@@ -19,7 +19,7 @@ class Tab(QWidget):
         super(QWidget, self).__init__(parent)
         self.Tab_Bar = parent
         self.name = "New Tab"
-        self.viewerInterfaces: List[SequenceViewerInterface] = []
+        self.viewerInterfaces: List[NRRDViewerModel] = []
         self.buildNewTab()
 
     def getName(self):
@@ -44,13 +44,17 @@ class Tab(QWidget):
             if child.widget():
                 child.widget().deleteLater()
 
+    def get_viewer(self):
+        if MRI_files.isValidDicom(self.MRIimages[0]):
+            return DICOMViewerModel(self.MRIimages)
+        else:
+            return NRRDViewerModel(self.MRIimages)
 
     def addViewers(self):
         numViewers = config_data.get_config_value("NumViewers")
         for _ in range(numViewers):
-            self.viewerInterfaces.append(SequenceViewerInterface(self.MRIimages))
+            self.viewerInterfaces.append(self.get_viewer())
             self.mainLayout.addWidget(self.viewerInterfaces[-1])
-
 
     def loadRegularTab(self):
         # open file explorer and load selected NRRD images
@@ -65,7 +69,6 @@ class Tab(QWidget):
         self.Tab_Bar.change_tab_name(self)
         self.addViewers()
         QMetaObject.connectSlotsByName(self)  # connect all components to Tab
-
 
     def setTabProperties(self):
         self.setStyleSheet(stylesheets.get_sheet_by_name("Tab"))

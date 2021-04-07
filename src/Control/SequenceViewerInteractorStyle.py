@@ -2,8 +2,8 @@ from vtk import vtkInteractorStyleImage, vtkPropPicker
 
 
 class SequenceViewerInteractorStyle(vtkInteractorStyleImage):
-    def __init__(self, parent, interface):
-        self.interface = interface
+    def __init__(self, parent, model):
+        self.interface = model
         self.parent = parent
         self.AddObserver("MouseMoveEvent", self.MouseMoveCallback)
         self.AddObserver("MiddleButtonPressEvent", self.ButtonCallback)
@@ -108,10 +108,10 @@ class SequenceViewerInteractorStyle(vtkInteractorStyleImage):
                 self.interface.addCursor()
 
         elif self.parent.GetKeySym() == 'Up':
-            self.interface.changeSliceIndex(increment=True)
+            self.interface.changeSliceIndex(1)
 
         elif self.parent.GetKeySym() == 'Down':
-            self.interface.changeSliceIndex(increment=False)
+            self.interface.changeSliceIndex(-1)
 
     def cursorInBullsEye(self) -> int:
         (mouseX, mouseY) = self.parent.GetEventPosition()

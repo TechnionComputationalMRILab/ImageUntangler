@@ -2,6 +2,10 @@ from typing import List
 import os
 
 
+def get_directory(path: str) -> str:
+    return path[:path.rfind(os.path.sep)]
+
+
 def combineFormats(images: List[str]) -> bool:
     hasNRRD = False
     hasDICOM = False

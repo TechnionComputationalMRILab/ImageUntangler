@@ -1,19 +1,16 @@
 import os
-from typing import List
 
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QSlider, QComboBox, QSizePolicy
 
-from Interfaces import SequenceViewerInterface
-
 
 class SequenceInteractorWidgets:
-    def __init__(self, MRIimages: List[str], interface: SequenceViewerInterface):
-        self.interface = interface
-        self.sequenceList = self.addSequenceList(MRIimages, interface)
-        self.indexSlider = QSlider(Qt.Horizontal, parent=interface)
-        self.windowSlider = QSlider(Qt.Horizontal, parent=interface)
-        self.levelSlider = QSlider(Qt.Horizontal, parent=interface)
+    def __init__(self, MRISequences: list, model):
+        self.model = model
+        self.sequenceList = self.addSequenceList(MRISequences, model)
+        self.indexSlider = QSlider(Qt.Horizontal, parent=model)
+        self.windowSlider = QSlider(Qt.Horizontal, parent=model)
+        self.levelSlider = QSlider(Qt.Horizontal, parent=model)
         self.addActions()
 
     def _buildSizePolicy(self, sequenceListBox: QComboBox) -> QSizePolicy:
@@ -26,7 +23,9 @@ class SequenceInteractorWidgets:
     def addImages(self, sequenceList, MRIimages):
         for i in range(len(MRIimages)):
             basename = os.path.basename(MRIimages[i])
-            basename = basename[:basename.rfind(".")]
+            suffix_index = basename.rfind(".")
+            if suffix_index != -1:
+                basename = basename[:suffix_index]
             sequenceList.addItem(basename)
 
     def addSequenceList(self, MRIimages, parent) -> QComboBox:
@@ -36,18 +35,26 @@ class SequenceInteractorWidgets:
         return sequenceList
 
     def addActions(self):
-        self.indexSlider.sliderMoved.connect(self.interface.setIndex)
-        self.windowSlider.sliderMoved.connect(self.interface.changeWindow)
-        self.levelSlider.sliderMoved.connect(self.interface.changeLevel)
-        self.sequenceList.currentIndexChanged.connect(self.interface.changeSequence)
+        self.indexSlider.sliderMoved.connect(self.model.setIndex)
+        self.windowSlider.sliderMoved.connect(self.model.changeWindow)
+        self.levelSlider.sliderMoved.connect(self.model.changeLevel)
+        self.sequenceList.currentIndexChanged.connect(self.model.changeSequence)
 
     def setValues(self, sliceIdx: int, maxSlice: int, windowValue: int, levelValue: int) -> None:
-        self.indexSlider.setMinimum(0) # not sure why order matters here, but setValue() must be last
+        self.indexSlider.setMinimum(0) # setValue() must be last
         self.indexSlider.setMaximum(maxSlice)
         self.indexSlider.setValue(sliceIdx)
         self.windowSlider.setMaximum(int(2.5 * windowValue))
         self.windowSlider.setMinimum(windowValue - 800)
         self.windowSlider.setValue(windowValue)
-        self.levelSlider.setMinimum(levelValue - 500)
+        self.levelSlider.setMinimum(max(levelValue - 400, 0))
+        self.levelSlider.setMaximum(int(levelValue*2.5))
+        self.levelSlider.setValue(levelValue)
+
+    def resetSliders(self, windowValue: int, levelValue: int):
+        self.windowSlider.setMaximum(int(2.5 * windowValue))
+        self.windowSlider.setMinimum(windowValue - 800)
+        self.windowSlider.setValue(windowValue)
+        self.levelSlider.setMinimum(max(levelValue - 400, 0))
         self.levelSlider.setMaximum(int(levelValue*2.5))
         self.levelSlider.setValue(levelValue)
