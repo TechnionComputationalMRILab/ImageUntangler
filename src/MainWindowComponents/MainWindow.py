@@ -8,7 +8,7 @@ from PyQt5.QtWidgets import QMainWindow
 from MainWindowComponents import MenuBar
 from MainWindowComponents.TabManager import TabManager
 from util import config_data, stylesheets
-
+import vtkmodules.all as vtk
 from icecream import ic
 
 ic.configureOutput(includeContext=True)
@@ -21,6 +21,9 @@ class App(QMainWindow):
         self.setTitle()
         # self.showMaximized()
         self.setMinimumSize(QSize(config_data.get_default_width(), config_data.get_default_height()))
+
+        vtk_out = vtk.vtkOutputWindow()
+        vtk_out.SetInstance(vtk_out)
 
         self.tabManager = TabManager(parent=self)
         self.setCentralWidget(self.tabManager)

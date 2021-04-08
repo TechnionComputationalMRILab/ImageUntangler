@@ -1,13 +1,14 @@
-from View.MRISequenceViewer import PlaneViewerQT
-from MainWindowComponents.MessageBoxes import gzipFileMessage, noGoodFiles
 from vtk.qt.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
 from typing import List
-import sys
 
-class ViewerManager:
-    def __init__(self, interface, MRIimages: List[str]):
-        self.goodIndex = -1 # index of image that is properly encoded
-        self.manager = interface
+from View.NRRDSequenceViewer import NRRDSequenceViewer
+from Model.BaseViewerManager import BaseViewerManager
+from MainWindowComponents.MessageBoxes import noGoodFiles, gzipFileMessage
+
+
+class NRRDViewerManager(BaseViewerManager):
+    def __init__(self, model, MRIimages: List[str]):
+        super().__init__(model)
         self.MRIimages = MRIimages
 
     def showValidImage(self, sequenceIndex: int, VTKinteractor: QVTKRenderWindowInteractor, interactorStyle):
@@ -22,7 +23,7 @@ class ViewerManager:
 
     def loadSequence(self, sequenceIndex: int, VTKinteractor: QVTKRenderWindowInteractor, interactorStyle):
         try:
-            sequenceViewer = PlaneViewerQT(self, VTKinteractor, interactorStyle, self.MRIimages[sequenceIndex],
+            sequenceViewer = NRRDSequenceViewer(self, VTKinteractor, interactorStyle, self.MRIimages[sequenceIndex],
                                                 self.MRIimages[0][-4:] != "nrrd")
             _ = sequenceViewer.sliceIdx # test if image was loaded properly
             self.goodIndex = sequenceIndex
@@ -31,11 +32,3 @@ class ViewerManager:
         except AttributeError:
             return self.showValidImage(sequenceIndex, VTKinteractor, interactorStyle)
 
-    def changeWindow(self, window):
-        self.manager.changeWindow(window)
-
-    def changeLevel(self, level):
-        self.manager.changeLevel(level)
-
-    def updateSliderIndex(self, index):
-        self.manager.updateSliderIndex(index)

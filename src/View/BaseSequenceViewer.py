@@ -10,35 +10,28 @@ from Control.SequenceViewerInteractorStyle import SequenceViewerInteractorStyle
 from Model.PointCollection import PointCollection
 
 
-class PlaneViewerQT:
+class BaseSequenceViewer:
     def __init__(self, manager, interactor: QVTKRenderWindowInteractor, interactorStyle: SequenceViewerInteractorStyle, imagePath: str, isDicom = False):
         self.manager = manager
         self.interactor = interactor
         self.imageData = ImageProperties.getImageData(imagePath, isDicom)
         self.LevelVal = (self.imageData.dicomArray.max()+self.imageData.dicomArray.min())/2
         self.WindowVal = self.imageData.dicomArray.max()-self.imageData.dicomArray.min()
-        self.sliceIdx = self.imageData.sliceIdx
-        self.pastIndex = self.sliceIdx
-        self.reslice = vtkImageReslice()
         self.actor = vtkImageActor()
         self.renderer = vtkRenderer()
         self.window: QVTKRenderWindowInteractor = interactor
         self.interactorStyle = interactorStyle
+        self.reslice = vtkImageReslice()
 
         self.Cursor = vtkCursor2D()
-
         self.performReslice()
         self.connectActor()
         self.renderImage()
-        self.setIdxText()
-        self.setWindowText()
-        self.setLevelText()
 
         self.MPRpoints = PointCollection()
         self.lengthPoints = PointCollection()
 
         self.presentCursor()
-        self.window.Render()
 
     def performReslice(self):
         # Extract a slice in the desired orientation
@@ -100,8 +93,6 @@ class PlaneViewerQT:
         self.textActorLevel.SetDisplayPosition(0, 32)
         self.textActorLevel.SetInput("Level: " + str(self.LevelVal))
         self.renderer.AddActor(self.textActorLevel)
-        self.window.Render()
-
 
     def adjustWindow(self, window: int):
         self.actor.GetProperty().SetColorWindow(window)
@@ -120,26 +111,10 @@ class PlaneViewerQT:
         self.manager.changeLevel(self.actor.GetProperty().GetColorLevel())
 
     def processNewPoint(self, pointCollection, pickedCoordinates, color=(1, 0, 0)):
-        pointLocation = [pickedCoordinates[0], pickedCoordinates[1], pickedCoordinates[2], self.sliceIdx]  # x,y,z,sliceIdx
-        if pointCollection.addPoint(pointLocation):
-            currentPolygonActor = pointCollection.generatePolygonLastPoint(color)
-            self.renderer.AddActor(currentPolygonActor)
-        self.presentPoints(pointCollection, self.sliceIdx)
+        raise NotImplementedError
 
     def addPoint(self, pointType, pickedCoordinates):
-        if pointType.upper() == "MPR":
-            self.processNewPoint(self.MPRpoints, pickedCoordinates, color=(1, 0, 0))
-        elif pointType.upper() == "LENGTH":
-            self.processNewPoint(self.lengthPoints, pickedCoordinates, color=(55/255, 230/255, 128/255))
-
-    def presentPoints(self, pointCollection, sliceIdx) -> None:
-        for point in pointCollection.points:
-            polygon = point.polygon
-            if point.coordinates[3] != sliceIdx:  # dots were placed on different slices
-                polygon.GeneratePolygonOff()
-            else:
-                polygon.GeneratePolygonOn()
-            self.window.Render()
+        raise NotImplementedError
 
     def presentCursor(self):
         self.Cursor.SetModelBounds(-10000, 10000, -10000, 10000, 0, 0)
@@ -176,31 +151,12 @@ class PlaneViewerQT:
         self.manager.updateSliderIndex(self.sliceIdx)
         self.presentPoints(self.MPRpoints, sliceIdx)
 
-    def setSliceIndex(self, index: int):
-        self.reslice.Update()
-        sliceSpacing = self.reslice.GetOutput().GetSpacing()[2]
-        matrix: vtkMatrix4x4 = self.reslice.GetResliceAxes()
-        center = matrix.MultiplyPoint((0, 0, (index-self.pastIndex)*sliceSpacing, 1))
-        if 0 <= index <= self.imageData.extent[5]:
-            self.pastIndex = index
-            self.UpdateViewerMatrixCenter(center, index)
-        else:
-            ic(self.reslice.GetOutput().GetSpacing()[2])
-            ic(index)
-            ic(self.imageData.extent[5])
-
-    def adjustSliceIdx(self, changeFactor: int):
-        # changeFactor determines by how much to change the index
-        self.reslice.Update()
-        sliceSpacing = self.reslice.GetOutput().GetSpacing()[2]
-        matrix: vtkMatrix4x4 = self.reslice.GetResliceAxes()
-        center = matrix.MultiplyPoint((0, 0, changeFactor*sliceSpacing, 1))
-        sliceIdx = int((center[2] - self.imageData.origin[2]) /
-                       self.imageData.spacing[2] - 0.5)  # z - z_orig/(z_spacing - .5). slice idx is z coordinate of slice of image
-        if 0 <= sliceIdx <= self.imageData.extent[5]:
-            self.pastIndex = sliceIdx
-            self.UpdateViewerMatrixCenter(center, sliceIdx)
-
     def moveBullsEye(self, newCoordinates):
         self.Cursor.SetFocalPoint(newCoordinates)
         self.window.Render()
+
+    def addPoint(self, pointType, pickedCoordinates):
+        if pointType.upper() == "MPR":
+            self.processNewPoint(self.MPRpoints, pickedCoordinates, color=(1, 0, 0))
+        elif pointType.upper() == "LENGTH":
+            self.processNewPoint(self.lengthPoints, pickedCoordinates, color=(55/255, 230/255, 128/255))
