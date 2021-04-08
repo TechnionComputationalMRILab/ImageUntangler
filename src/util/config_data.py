@@ -54,3 +54,11 @@ def get_config_value(value_name: str):
         return json_data[value_name]
     except KeyError:
         return -1
+
+
+def get_default_width() -> int:
+    return 1920
+
+
+def get_default_height() -> int:
+    return 1080

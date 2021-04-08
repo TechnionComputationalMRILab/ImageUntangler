@@ -1,1 +1,10 @@
+<<<<<<< HEAD
 {"AppName": "MRI Untangler", "DefaultFolder": "/home/avraham/FreimanLab/data", "NumViewers": 2, "MainViewer": 0}
+=======
+{
+   "AppName":"MRI Untangler",
+   "DefaultFolder":"C:\\Users\\ang.a\\OneDrive - Technion\\Documents\\MRI_Data\\Case005\\Case007\\NRRDS",
+   "NumViewers":2,
+   "MainViewer":0
+}
+>>>>>>> f780cc7... dialog box working mostly

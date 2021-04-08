@@ -12,6 +12,8 @@ from Model.getMPR import PointsToPlaneVectors
 from Control.SequenceInteractorWidgets import SequenceInteractorWidgets
 from Control.SequenceViewerInteractorStyle import SequenceViewerInteractorStyle
 
+from MPRWindow2.MPRWindow import MPRWindow
+from MPRWindow2.MPRW_Control import MPRW_Control
 
 class BaseModel(QWidget):
     def __init__(self):
@@ -105,6 +107,7 @@ class BaseModel(QWidget):
         pass
 
     def calculateMPR(self):
+<<<<<<< HEAD:src/Model/BaseModel.py
         MPRproperties = PointsToPlaneVectors(self.view.MPRpoints.getCoordinatesArray(), self.view.imageData, Plot=0, height=40, viewAngle=180)
         MPR_M = MPRproperties.MPR_M
         delta = MPRproperties.delta
@@ -117,3 +120,14 @@ class BaseModel(QWidget):
         ui.setupUi(window, MPR_M, delta, MPRposition, points)
         window.setStyleSheet(stylesheets.get_sheet_by_name("Default"))
         window.show()
+=======
+        _points = self.view.MPRpoints.getCoordinatesArray()
+        _image_data = self.view.imageData
+
+        _control = MPRW_Control(_points, _image_data)
+
+        _dlg = MPRWindow()
+        _dlg.set_control(_control)
+        ic(_dlg)
+        _dlg.open_()
+>>>>>>> f780cc7... dialog box working mostly:src/Interfaces/SequenceViewerInterface.py
