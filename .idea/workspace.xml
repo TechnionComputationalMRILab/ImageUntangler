@@ -2,30 +2,10 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="0587727a-1c50-4cf9-a62c-07297f1600a8" name="Default Changelist" comment="squash! dialog box working mostly">
-      <change afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/MPRWindow2/MPRInteractor.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/MPRWindow2/MPRW_Control.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/MPRWindow2/MPRW_Model.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/MPRWindow2/MPRW_View.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/Model/BaseViewerManager.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/Model/DICOMModel.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/Model/DICOMSequence.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/Model/DICOMViewerManager.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/Model/NRRDModel.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/View/DICOMSliceViewer.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/View/NRRDSequenceViewer.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/config/config.json" beforeDir="false" afterPath="$PROJECT_DIR$/config/config.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Control/SequenceInteractorWidgets.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/Control/SequenceInteractorWidgets.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Control/SequenceViewerInteractorStyle.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/Control/SequenceViewerInteractorStyle.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Interfaces/SequenceViewerInterface.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/Model/BaseModel.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Interfaces/__init__.py" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/src/MPRWindow2/MPRWindow.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/MPRWindow2/MPRWindow.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/MainWindowComponents/MainWindow.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/MainWindowComponents/MainWindow.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Model/ImageProperties.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/Model/ImageProperties.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Model/ViewerManager.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/Model/NRRDViewerManager.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/View/MRISequenceViewer.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/View/BaseSequenceViewer.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/View/Tab.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/View/Tab.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/util/MRI_files.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/util/MRI_files.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Model/BaseModel.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/Model/BaseModel.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 from PyQt5.QtCore import *
 from PyQt5 import *
 from PyQt5.Qt import *
@@ -13,40 +12,16 @@ from MPRWindow2.Model.MPRW_Model import MPRW_Model
 import vtk
 import sys
 import os
-=======
-import os
-import sys
-from PyQt5.QtWidgets import *
+
 from PyQt5.Qt import *
 from MPRWindow2.MPRW_Control import MPRW_Control
 from MPRWindow2.MPRW_View import MPRW_View
 
->>>>>>> x
-
 sys.path.append(os.path.abspath(os.path.join('..', 'util')))
 from util import config_data, stylesheets
 
-
 class MPRWindow(QDialog):
-<<<<<<< HEAD
     """ dialog box for the mpr window """
-    def __init__(self, input_data: MPRW_Control):
-        super().__init__()
-
-        # self.set_icon()
-        # self.set_title()
-
-        # self.setStyleSheet(stylesheets.get_sheet_by_name("Default"))
-        # self.setMinimumSize(QSize(config_data.get_default_width(), config_data.get_default_height()))
-
-        _layout = QVBoxLayout()
-
-        # _mprw_widget = MPRW_Widget(input_data)
-        _layout.addWidget(QLabel("aaaaaaaaaaaa"))
-
-        self.setLayout(_layout)
-        self.show()
-=======
     def __init__(self, parent=None):
         super().__init__(parent=parent)
 
@@ -82,7 +57,6 @@ class MPRWindow(QDialog):
         self.layout.addWidget(self.buttonBox)
         self.setLayout(self.layout)
         self.exec()
->>>>>>> x
 
     def set_title(self):
         self.setWindowTitle(config_data.get_config_value("AppName") + ': MPR Window')
@@ -90,27 +64,6 @@ class MPRWindow(QDialog):
     def set_icon(self):
         self.setWindowIcon(QIcon(config_data.get_icon_file_path()))
 
-<<<<<<< HEAD
-
-class CustomDialog(QDialog):
-    def __init__(self):
-        super().__init__()
-
-        # self.setWindowTitle("HELLO!")
-
-        # QBtn = QDialogButtonBox.Ok | QDialogButtonBox.Cancel
-        #
-        # self.buttonBox = QDialogButtonBox(QBtn)
-        #
-        # self.layout = QVBoxLayout()
-        # message = QLabel("Something happened, is that OK?")
-        # # self.layout.addWidget(TestVTKinQFrame().frame)
-        # self.layout.addWidget(message)
-        # self.layout.addWidget(self.buttonBox)
-        # self.setLayout(self.layout)
-        # self.show()
-        pass
-=======
     def _close_button(self):
         print("close clicked")
         pass
@@ -118,4 +71,3 @@ class CustomDialog(QDialog):
     def _help_button(self):
         print("aaa")
         pass
->>>>>>> x

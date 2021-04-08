@@ -2,7 +2,7 @@ from typing import List, Tuple
 from PyQt5.QtCore import QRect
 from PyQt5.QtWidgets import QVBoxLayout, QGroupBox, QWidget, QMainWindow
 
-from MPRwindow.MPRWindow import Ui_MPRWindow
+# from MPRwindow.MPRWindow import Ui_MPRWindow
 
 from util import stylesheets
 from View.SlidersLayout import SlidersLayout
@@ -11,12 +11,14 @@ from Model.NRRDViewerManager import NRRDViewerManager
 from Model.getMPR import PointsToPlaneVectors
 from Control.SequenceInteractorWidgets import SequenceInteractorWidgets
 from Control.SequenceViewerInteractorStyle import SequenceViewerInteractorStyle
-from MPRWindow2.MPRWindow import MPRWindow, CustomDialog
+
+from MPRWindow2.MPRWindow import MPRWindow
 from MPRWindow2.Control.MPRW_Control import MPRW_Control
 from MPRWindow2.Model.MPRW_Model import MPRW_Model
 
 from MPRWindow2.MPRWindow import MPRWindow
 from MPRWindow2.MPRW_Control import MPRW_Control
+
 
 class BaseModel(QWidget):
     def __init__(self):
@@ -110,32 +112,10 @@ class BaseModel(QWidget):
         pass
 
     def calculateMPR(self):
-        # TODO
-        MPRproperties = PointsToPlaneVectors(self.view.MPRpoints.getCoordinatesArray(), self.view.imageData, Plot=0, height=40, viewAngle=180)
-        MPR_M = MPRproperties.MPR_M
-        delta = MPRproperties.delta
-        MPRposition = MPRproperties.MPR_indexs_np
-        self.openMPRWindow(MPR_M, delta, MPRposition, self.view.MPRpoints.getCoordinatesArray())
+        _points = self.view.MPRpoints.getCoordinatesArray()
+        _image_data = self.view.imageData
 
-    def openMPRWindow(self, MPR_M, delta, MPRposition, points):
-        print("attempting to open mpr window")
-        # _control = MPRW_Control(MPR_M, delta, MPRposition, points)
-        # # _dialog_box = MPRWindow(_control)
-        # _dialog_box = CustomDialog()
-        # _dialog_box.show()
-        #
-        # window = QMainWindow()
-        # ui = Ui_MPRWindow()
-        # ui.setupUi(window, MPR_M, delta, MPRposition, points)
-        # window.setStyleSheet(stylesheets.get_sheet_by_name("Default"))
-        # window.show()
-        #
-        # _points = self.view.MPRpoints.getCoordinatesArray()
-        # _image_data = self.view.imageData
-        #
-        # _control = MPRW_Control(_points, _image_data)
-        #
-        # _dlg = MPRWindow()
-        # _dlg.set_control(_control)
-        # ic(_dlg)
-        # _dlg.open_()
+        _control = MPRW_Control(_points, _image_data)
+        _dlg = MPRWindow()
+        _dlg.set_control(_control)
+        _dlg.open_()
