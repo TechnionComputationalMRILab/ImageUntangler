@@ -5,12 +5,8 @@ from PyQt5.QtWidgets import QVBoxLayout, QGroupBox, QWidget, QMainWindow
 from MPRwindow.MPRWindow import Ui_MPRWindow
 
 from util import stylesheets
-from View.SlidersLayout import SlidersLayout
 from View.Toolbar import Toolbar
-from Model.NRRDViewerManager import NRRDViewerManager
 from Model.getMPR import PointsToPlaneVectors
-from Control.SequenceInteractorWidgets import SequenceInteractorWidgets
-from Control.SequenceViewerInteractorStyle import SequenceViewerInteractorStyle
 
 
 class BaseModel(QWidget):
@@ -22,21 +18,6 @@ class BaseModel(QWidget):
         #self.interactor = QVTKRenderWindowInteractor(frame)
         self.pickingLengthPoints = False
         self.pickingMPRpoints = False
-        #------------------------------
-        """
-        self.interactorStyle = SequenceViewerInteractorStyle(parent=self.interactor, model=self)
-        self.widgets = SequenceInteractorWidgets(MRIimages, self)
-        self.sequenceManager = ViewerManager(self,  MRIimages)
-        self.view = self.sequenceManager.loadSequence(0, self.interactor, self.interactorStyle)
-        slidersLayout = SlidersLayout(sequenceList=self.widgets.sequenceList,  windowSlider=self.widgets.windowSlider,
-                                      levelSlider=self.widgets.levelSlider, indexSlider=self.widgets.indexSlider)
-        self.initializeSliderValues()
-        self.layout.addWidget(self.toolbar)
-        self.layout.addWidget(self.interactor)
-        self.layout.addLayout(slidersLayout)
-        """
-#_________________________________________Constructor functions_____________________________________
-
 
 #_________________________________________Constructor functions_____________________________________
     @staticmethod

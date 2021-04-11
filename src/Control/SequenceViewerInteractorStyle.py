@@ -3,7 +3,7 @@ from vtk import vtkInteractorStyleImage, vtkPropPicker
 
 class SequenceViewerInteractorStyle(vtkInteractorStyleImage):
     def __init__(self, parent, model):
-        self.interface = model
+        self.model = model
         self.parent = parent
         self.AddObserver("MouseMoveEvent", self.MouseMoveCallback)
         self.AddObserver("MiddleButtonPressEvent", self.ButtonCallback)
@@ -85,15 +85,15 @@ class SequenceViewerInteractorStyle(vtkInteractorStyleImage):
 
         if self.actions["Slicing"] == 1:
             deltaY = mouseY - lastY
-            self.interface.changeSliceIndex(deltaY)
+            self.model.changeSliceIndex(deltaY)
 
         elif self.actions["Windowing"] == 1:
             vtkInteractorStyleImage.OnMouseMove(self)
-            self.interface.updateWindowLevel()
+            self.model.updateWindowLevel()
 
         elif self.actions["Zooming"] == 1:
             vtkInteractorStyleImage.OnMouseMove(self)
-            self.interface.updateZoomFactor()
+            self.model.updateZoomFactor()
         else:
             self.OnMouseMove() # call to superclass
 
@@ -101,44 +101,44 @@ class SequenceViewerInteractorStyle(vtkInteractorStyleImage):
         if self.parent.GetKeyCode() == 'C' or self.parent.GetKeyCode() == 'c':
             if self.ShowCursor:
                 self.ShowCursor = False
-                self.interface.clearCursor()
+                self.model.clearCursor()
 
             else:
                 self.ShowCursor = True
-                self.interface.addCursor()
+                self.model.addCursor()
 
         elif self.parent.GetKeySym() == 'Up':
-            self.interface.changeSliceIndex(1)
+            self.model.changeSliceIndex(1)
 
         elif self.parent.GetKeySym() == 'Down':
-            self.interface.changeSliceIndex(-1)
+            self.model.changeSliceIndex(-1)
 
     def cursorInBullsEye(self) -> int:
         (mouseX, mouseY) = self.parent.GetEventPosition()
-        if self.pointPicker.Pick(mouseX, mouseY, 0.0, self.interface.view.renderer): #REMOVE
+        if self.pointPicker.Pick(mouseX, mouseY, 0.0, self.model.view.renderer): #REMOVE
             StartCursorPickedCoordinates = self.pointPicker.GetPickPosition()
-            cursorFocalPoint = self.interface.view.Cursor.GetFocalPoint()
-            if (abs(StartCursorPickedCoordinates[0]-cursorFocalPoint[0]) <= 3*self.interface.view.Cursor.GetRadius())\
-                    and (abs(StartCursorPickedCoordinates[1]-cursorFocalPoint[1]) <= self.interface.view.Cursor.GetRadius()):
+            cursorFocalPoint = self.model.view.Cursor.GetFocalPoint()
+            if (abs(StartCursorPickedCoordinates[0]-cursorFocalPoint[0]) <= 3*self.model.view.Cursor.GetRadius())\
+                    and (abs(StartCursorPickedCoordinates[1]-cursorFocalPoint[1]) <= self.model.view.Cursor.GetRadius()):
                 return 1
             else:
                 return 0
 
     def pickPoint(self, pointType: str, mouseX, mouseY):
-        if self.pointPicker.Pick(mouseX, mouseY, 0.0, self.interface.view.renderer):
+        if self.pointPicker.Pick(mouseX, mouseY, 0.0, self.model.view.renderer):
             pickPosition = self.pointPicker.GetPickPosition()
-            matrix = self.interface.view.reslice.GetResliceAxes()
+            matrix = self.model.view.reslice.GetResliceAxes()
             center = matrix.MultiplyPoint((0, 0, 0, 1))
-            zCoordinate = (center[2] - self.interface.view.imageData.origin[2]) - self.interface.view.imageData.dimensions[2]\
-                             * self.interface.view.imageData.spacing[2] / 2
+            zCoordinate = (center[2] - self.model.view.imageData.origin[2]) - self.model.view.imageData.dimensions[2]\
+                             * self.model.view.imageData.spacing[2] / 2
             pickedCoordinates = (pickPosition[0], pickPosition[1], zCoordinate)
-            self.interface.addPoint(pointType, pickedCoordinates)
+            self.model.addPoint(pointType, pickedCoordinates)
 
     def OnPickingCursorLeftButtonUp(self):
         (mouseX, mouseY) = self.parent.GetEventPosition()
-        if self.pointPicker.Pick(mouseX, mouseY, 0.0, self.interface.view.renderer):
+        if self.pointPicker.Pick(mouseX, mouseY, 0.0, self.model.view.renderer):
             cursorPickedCoordinates = self.pointPicker.GetPickPosition()
-            self.interface.moveBullsEye(cursorPickedCoordinates)
+            self.model.moveBullsEye(cursorPickedCoordinates)
 
     def OnPickingCurserLeftButtonDown(self):
         pass
