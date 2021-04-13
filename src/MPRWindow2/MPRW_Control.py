@@ -14,13 +14,6 @@ class MPRW_Control:
         _mpr_properties = PointsToPlaneVectors(self.points, self.image_data, Plot=0,
                                                height=self.height, viewAngle=self.viewAngle)
         return _mpr_properties
-        # _mpr_m = _mpr_properties.MPR_M
-        # _delta = _mpr_properties.delta
-        # _mpr_position = _mpr_properties.MPR_indexs_np
 
-    def set_height(self, height):
-        self.height = height
-
-    def self_angle(self, angle):
-        self.viewAngle = angle
-
+    def __repr__(self):
+        return str(f'height: {self.height}, angle: {self.viewAngle}')

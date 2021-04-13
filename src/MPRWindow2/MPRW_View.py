@@ -9,6 +9,7 @@ from vtk.qt.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
 from MPRWindow2.MPRW_Model import MPRW_Model
 from MPRWindow2.MPRInteractor import MPRInteractorStyle
 from ast import literal_eval as make_tuple
+from icecream import ic
 
 sys.path.append(os.path.abspath(os.path.join('..', 'util')))
 from util import config_data, stylesheets
@@ -20,14 +21,36 @@ class MPRW_View(QWidget):
         self.control = control
         self.model = MPRW_Model(self.control)
 
-        self.MPRW_Top = MPRW_MainQFrame(self.model.calculate_input_data()).frame
-        self.MPRW_Bottom = MPRW_Controls()
+        self.MainQFrame = MPRW_MainQFrame(self.model.calculate_input_data())
+        self.MainQFrame.calculate()
+
+        self.MPRW_Top = self.MainQFrame.frame
+        self.MPRW_Bottom = MPRW_BottomControls(parent=self)
+
+    def refresh_top_frame(self):
+        self.MainQFrame.recalculate()
 
 
 class MPRW_MainQFrame:
     def __init__(self, input_data):
         self.frame = QFrame()
+        self.input = input_data
 
+    def calculate(self):
+        self._initialize()
+
+        self.actor.GetMapper().SetInputData(self.input)
+
+        self.renderer.AddActor(self.actor)
+        self.renderWindow.AddRenderer(self.renderer)
+
+        # self.renderer.GetActiveCamera().ParallelProjectionOn()
+        self.renderWindow.Render()
+        self.renderer.ResetCamera()
+        self.iren.Initialize()
+        self.iren.Start()
+
+    def _initialize(self):
         self.vl = QVBoxLayout()
         self.groupbox = QGroupBox()
         self.groupbox.setFlat(True)
@@ -41,45 +64,32 @@ class MPRW_MainQFrame:
 
         self.renderer = vtk.vtkRenderer()
         self.vtkWidget.GetRenderWindow().AddRenderer(self.renderer)
-        self.iren = self.vtkWidget.GetRenderWindow().GetInteractor()
-
-        self.actor = vtk.vtkImageActor()
-        self.actor.GetMapper().SetInputData(input_data)
-        print(self.actor.GetProperty().GetColorWindow(), self.actor.GetProperty().GetColorLevel())
-
-        self.set_text_actors()
-        self.renderer.AddActor(self.actor)
-
         _bg_colors = self.get_background_from_stylesheet()
         self.renderer.SetBackground(_bg_colors[0]/255, _bg_colors[1]/255, _bg_colors[2]/255)
         self.renderer.ResetCamera()
 
-        self.renderWindow = self.iren.GetRenderWindow()
-        self.renderWindow.AddRenderer(self.renderer)
+        self.iren = self.vtkWidget.GetRenderWindow().GetInteractor()
 
+        self.actor = vtk.vtkImageActor()
+        self.set_text_actors()
+
+        self.renderWindow = self.iren.GetRenderWindow()
         self.interactorStyle = MPRInteractorStyle(parent=self.iren, MPRWindow=self)
         self.interactorStyle.SetInteractor(self.iren)
         self.iren.SetInteractorStyle(self.interactorStyle)
         self.renderWindow.SetInteractor(self.iren)
 
-        self.renderWindow.SetInteractor(self.iren)
+    def recalculate(self):
+        self.actor.GetMapper().SetInputData(self.input)
 
-        self.renderer.GetActiveCamera().ParallelProjectionOn()
-
-        self.renderWindow.Render()
-
-        self.renderer.ResetCamera()
-        self.iren.Initialize()
-
-        self.iren.Start()
+        self.iren.ReInitialize()
 
     def updateWindowAndLevel(self):
         _window = self.actor.GetProperty().GetColorWindow()
         _level = self.actor.GetProperty().GetColorLevel()
         self.textActorWindow.SetInput("Window: " + str(np.int32(_window)))
         self.textActorLevel.SetInput("Level: " + str(np.int32(_level)))
-
-        # self.textActorAngle.SetInput("Angle: " + str(np.int32(self.MPRViewerProperties.angle)))
+        # self.textActorAngle.SetInput("Angle: " + str(np.int32(self.input.viewAngle)))
 
     def set_text_actors(self):
         self.textActorWindow = vtk.vtkTextActor()
@@ -100,7 +110,7 @@ class MPRW_MainQFrame:
         # self.textActorAngle.GetTextProperty().SetFontSize(14)
         # self.textActorAngle.GetTextProperty().SetColor(51/255, 51/255, 1)
         # self.textActorAngle.SetDisplayPosition(0, 47)
-        # self.textActorAngle.SetInput("Angle: " + str(angle))
+        # self.textActorAngle.SetInput("Angle: " + str(self.input.viewAngle))
         # self.renderer.AddActor(self.textActorAngle)
 
     @staticmethod
@@ -110,7 +120,7 @@ class MPRW_MainQFrame:
         return make_tuple(d["background-color"].strip('rgb'))
 
 
-class MPRW_Controls(QWidget):
+class MPRW_BottomControls(QWidget):
     """ handles the creation of the buttons and boxes"""
     def __init__(self, parent=None):
         super().__init__(parent=parent)
@@ -132,26 +142,32 @@ class MPRW_Controls(QWidget):
         _height_label = QLabel("Height")
         _set_height_angle_layout.addWidget(_height_label)
 
-        _height_set_box = QDoubleSpinBox(_size_set_groupbox)
-        _height_set_box.setMaximum(5000.0)
-        _height_set_box.setProperty("value", 20.0)
-        _height_set_box.setSuffix(" mm")
-        _set_height_angle_layout.addWidget(_height_set_box)
+        self._height_set_box = QDoubleSpinBox(_size_set_groupbox)
+        self._height_set_box.setMaximum(5000.0)
+        self._height_set_box.setProperty("value", 20.0)
+        self._height_set_box.setSuffix(" mm")
+        _set_height_angle_layout.addWidget(self._height_set_box)
 
         # angle
         _angle_label = QLabel("Angle")
         _set_height_angle_layout.addWidget(_angle_label)
-        _angle_set_box = QSpinBox(_size_set_groupbox)
-        _angle_set_box.setSuffix(" °")
-        _angle_set_box.setMaximum(180)
-        _set_height_angle_layout.addWidget(_angle_set_box)
+        self._angle_set_box = QSpinBox(_size_set_groupbox)
+        self._angle_set_box.setSuffix(" °")
+        self._angle_set_box.setMaximum(180)
+        _set_height_angle_layout.addWidget(self._angle_set_box)
 
         # update button
         _update_button = QPushButton(_size_set_groupbox)
         _update_button.setText("Update")
         _set_height_angle_layout.addWidget(_update_button)
+        _update_button.clicked.connect(self._update_height_angle)
 
         self._bottom_layout.addWidget(_size_set_groupbox)
+
+    def _update_height_angle(self):
+        _height = self._height_set_box.value()
+        _angle = self._angle_set_box.value()
+        self.parent().update_height_and_angle(_height, _angle)
 
     def _build_length_calc_box(self):
         _length_calc_groupbox = QGroupBox(self)

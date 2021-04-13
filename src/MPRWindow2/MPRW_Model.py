@@ -14,12 +14,17 @@ class MPRW_Model:
     def __init__(self, control):
         self.control = control
 
-    # these two functions need to talk to SequenceViewerInterface to change the arguments passed in calculateMPR
     def set_angle(self, angle):
         self.control.set_angle(angle)
 
-    def set_height(self):
-        pass
+    def set_height(self, height):
+        self.control.set_angle(height)
+
+    def get_angle(self):
+        return self.control.viewAngle
+
+    def get_height(self):
+        return self.control.height
 
     def calculate_input_data(self):
         _mpr_properties = self.control.calculate()

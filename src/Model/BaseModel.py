@@ -13,10 +13,6 @@ from Control.SequenceInteractorWidgets import SequenceInteractorWidgets
 from Control.SequenceViewerInteractorStyle import SequenceViewerInteractorStyle
 
 from MPRWindow2.MPRWindow import MPRWindow
-from MPRWindow2.Control.MPRW_Control import MPRW_Control
-from MPRWindow2.Model.MPRW_Model import MPRW_Model
-
-from MPRWindow2.MPRWindow import MPRWindow
 from MPRWindow2.MPRW_Control import MPRW_Control
 
 
@@ -42,8 +38,6 @@ class BaseModel(QWidget):
         self.layout.addWidget(self.interactor)
         self.layout.addLayout(slidersLayout)
         """
-#_________________________________________Constructor functions_____________________________________
-
 
 #_________________________________________Constructor functions_____________________________________
     @staticmethod
@@ -52,7 +46,7 @@ class BaseModel(QWidget):
         frame.showMaximized()
         return frame
 
-#_____________________________________________Interface to Widgets______________________________________________________________
+#_____________________________________________Interface to Widgets_____________________________________________________
 
     def changeSequence(self, sequenceIndex: int):
         raise NotImplementedError
@@ -115,7 +109,10 @@ class BaseModel(QWidget):
         _points = self.view.MPRpoints.getCoordinatesArray()
         _image_data = self.view.imageData
 
-        _control = MPRW_Control(_points, _image_data)
-        _dlg = MPRWindow()
-        _dlg.set_control(_control)
-        _dlg.open_()
+        if _points.size == 0:
+            print("user clicked calculate mpr without any points onscreen. print error message here")  # TODO
+        else:
+            _control = MPRW_Control(_points, _image_data)
+            _dlg = MPRWindow()
+            _dlg.set_control(_control)
+            _dlg.open_()

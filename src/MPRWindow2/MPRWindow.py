@@ -6,19 +6,17 @@ from PyQt5.QtWidgets import *
 import numpy as np
 from collections import namedtuple
 from vtk.qt.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
-from MPRWindow2.Viewer.MPRW_Widget import MPRW_Widget
-from MPRWindow2.Control.MPRW_Control import MPRW_Control
-from MPRWindow2.Model.MPRW_Model import MPRW_Model
 import vtk
 import sys
 import os
-
+from icecream import ic
 from PyQt5.Qt import *
 from MPRWindow2.MPRW_Control import MPRW_Control
 from MPRWindow2.MPRW_View import MPRW_View
 
 sys.path.append(os.path.abspath(os.path.join('..', 'util')))
 from util import config_data, stylesheets
+
 
 class MPRWindow(QDialog):
     """ dialog box for the mpr window """
@@ -48,7 +46,7 @@ class MPRWindow(QDialog):
         QBtn = QDialogButtonBox.Help | QDialogButtonBox.Close
 
         self.buttonBox = QDialogButtonBox(QBtn)
-        self.buttonBox.helpRequested.connect(lambda: self._help_button())
+        self.buttonBox.helpRequested.connect(lambda: self._help_button("aaa"))
         self.buttonBox.rejected.connect(lambda: self._close_button())
 
         self.layout = QVBoxLayout()
@@ -68,6 +66,12 @@ class MPRWindow(QDialog):
         print("close clicked")
         pass
 
-    def _help_button(self):
-        print("aaa")
+    def _help_button(self, t):
+        print(t)
         pass
+
+    def update_height_and_angle(self, height, angle):
+        print(self.control)
+
+        # self.view = MPRW_View(self.control)
+        # self.view.refresh_top_frame()

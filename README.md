@@ -9,6 +9,8 @@ Currently under development in TCML under Professor Moti Freiman. Current Develo
 
 ### Somewhat major
 
+* Initalizing the program is very slow. sometimes
+  
 * Crashes without warning if no points are selected when Calculate MPR is clicked
   
 error raised:
@@ -28,26 +30,33 @@ error raised:
 
 the error raised is 
   
-      QXcbConnection: XCB error: 3 (BadWindow), sequence: 670, resource id: 18921706, major code: 40 (TranslateCoords), minor code: 0
+    QXcbConnection: XCB error: 3 (BadWindow), sequence: 670, resource id: 18921706, major code: 40 (TranslateCoords), minor code: 0
 
-* For DICOM images: the images work, but slice index does not.
+* For DICOM images: fixed, but there's an odd slider on top that is not present when opening NRRD
 
 * MPR window: changing the height/angle and clicking save file makes the program crash
+* Need to rebuild the calculate length functionality in the MPR Window
 
-        Traceback (most recent call last):
-          File "/mnt/ssd/TCML/ImageUntangler/src/MPRwindow/MPRWindow.py", line 192, in <lambda>
-            self.updateButton.clicked.connect(lambda: self.HeightChanged())
-          File "/mnt/ssd/TCML/ImageUntangler/src/MPRwindow/MPRWindow.py", line 143, in HeightChanged
-            self.GetMPR = getMPR.PointsToPlaneVectors(self.MPRViewerProperties.ConvViewerProperties, self.MPRViewerProperties.originalPoints, self.MPRViewerProperties.ConvViewMode, height=self.MPRViewerProperties.MPRHeight,
-        AttributeError: 'viewerLogic' object has no attribute 'ConvViewerProperties'
+### Proposed features
+
+* Move MPR window to a panel
+* Link the level/window in the main panel to the MPR window
 
 ### Minor
 
 * You can't close a tab you're currently on
-* MPR window has no title and icon
 * There should be a way to turn off "add ____ points" and return to the level/window scrolling
 
   (this seems to work in Windows but not in Ubuntu)
 
 * Confirmation when closing a tab would probably be useful?
 * Having similar window/level sliders on the MPR window for the sake of similarity might be nice
+
+* error when closing the Window:
+
+      ERROR: In ..\Rendering\OpenGL2\vtkWin32OpenGLRenderWindow.cxx, line 228
+      vtkWin32OpenGLRenderWindow (000001DDB9A81DE0): wglMakeCurrent failed in MakeCurrent(), error: The handle is invalid.
+    
+      ERROR: In ..\Rendering\OpenGL2\vtkWin32OpenGLRenderWindow.cxx, line 88
+      vtkWin32OpenGLRenderWindow (000001DDB9A81DE0): wglMakeCurrent failed in Clean(), error: 6
+

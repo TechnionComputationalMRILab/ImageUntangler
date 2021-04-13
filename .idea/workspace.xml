@@ -1,10 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="0587727a-1c50-4cf9-a62c-07297f1600a8" name="Default Changelist" comment="squash! dialog box working mostly">
+    <list default="true" id="0587727a-1c50-4cf9-a62c-07297f1600a8" name="Default Changelist" comment="changes to calculate mpr function">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/config/config.json" beforeDir="false" afterPath="$PROJECT_DIR$/config/config.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/MPRWindow2/Control/MPRInteractor.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/MPRWindow2/Control/MPRW_Control.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/MPRWindow2/Control/__init__.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/MPRWindow2/MPRW_Control.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/MPRWindow2/MPRW_Control.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/MPRWindow2/MPRW_Model.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/MPRWindow2/MPRW_Model.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/MPRWindow2/MPRW_View.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/MPRWindow2/MPRW_View.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/MPRWindow2/MPRWindow.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/MPRWindow2/MPRWindow.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/MPRWindow2/Model/MPRW_Model.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/MPRWindow2/Model/__init__.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/MPRWindow2/Viewer/MPRW_Widget.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/MPRWindow2/Viewer/__init__.py" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Model/BaseModel.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/Model/BaseModel.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -193,7 +203,14 @@
       <option name="project" value="LOCAL" />
       <updated>1617867909140</updated>
     </task>
-    <option name="localTasksCounter" value="3" />
+    <task id="LOCAL-00003" summary="changes to calculate mpr function">
+      <created>1617873748854</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1617873748854</updated>
+    </task>
+    <option name="localTasksCounter" value="4" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -226,6 +243,7 @@
   <component name="VcsManagerConfiguration">
     <MESSAGE value="*" />
     <MESSAGE value="dialog box working mostly" />
-    <option name="LAST_COMMIT_MESSAGE" value="dialog box working mostly" />
+    <MESSAGE value="changes to calculate mpr function" />
+    <option name="LAST_COMMIT_MESSAGE" value="changes to calculate mpr function" />
   </component>
 </project>
