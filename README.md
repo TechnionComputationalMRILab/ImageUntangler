@@ -1,62 +1,21 @@
 # ImageUntangler
-Project to aid Gastroenterologists and biologists to analyze MRI images of the Small Bowel.
-The main benefit the project hopes to add is MPR for Small Bowel MRI images
-Currently under development in TCML under Professor Moti Freiman. Current Developer: Avraham Kahan, Angeleene Ang. Project Founder: Yael Zaffrani
 
-----
+Project to aid Gastroenterologists and biologists to analyze MRI images of the Small Bowel. The main benefit the project hopes to add is MPR for Small Bowel MRI images
 
-## Current issues:
+Currently under development in [TCML](https://tcml-bme.github.io/) under Professor Moti Freiman.  
+Current Developers: Avraham Kahan, Angeleene Ang.  
+Project Founder: Yael Zaffrani
 
-### Somewhat major
+## Installation
 
-* Initalizing the program is very slow. sometimes
-  
-* Crashes without warning if no points are selected when Calculate MPR is clicked
-  
-error raised:
+See requirements.txt for dependencies.
 
-    Traceback (most recent call last):
-      File "/mnt/ssd/TCML/ImageUntangler/src/Interfaces/SequenceViewerInterface.py", line 115, in calculateMPR
-        MPRproperties = PointsToPlaneVectors(self.view.MPRpoints.getCoordinatesArray(), self.view.imageData, Plot=0, height=40, viewAngle=180)
-      File "/mnt/ssd/TCML/ImageUntangler/src/Model/getMPR.py", line 28, in __init__
-        allPoints = self.Org_points[:, 0:3] # should be replaceable by [:, :]
-    IndexError: too many indices for array: array is 1-dimensional, but 2 were indexed
-    
-    Process finished with exit code 134 (interrupted by signal 6: SIGABRT)
+Run `MainWindow.py` in `MainWindowComponents`
 
-* Adding MPR points randomly sometimes raises "TypeError: m > k must hold"
-* Calculate Length in the main window doesn't seem to do anything?
-* If there's one tab, closing the tab causes the program to crash. Ideally, it should pop you back to the "Add images" screen
+## Screenshot
 
-the error raised is 
-  
-    QXcbConnection: XCB error: 3 (BadWindow), sequence: 670, resource id: 18921706, major code: 40 (TranslateCoords), minor code: 0
+![screenshot](screenshot.PNG)
 
-* For DICOM images: fixed, but there's an odd slider on top that is not present when opening NRRD
+## Roadmap
 
-* MPR window: changing the height/angle and clicking save file makes the program crash
-* Need to rebuild the calculate length functionality in the MPR Window
-
-### Proposed features
-
-* Move MPR window to a panel
-* Link the level/window in the main panel to the MPR window
-
-### Minor
-
-* You can't close a tab you're currently on
-* There should be a way to turn off "add ____ points" and return to the level/window scrolling
-
-  (this seems to work in Windows but not in Ubuntu)
-
-* Confirmation when closing a tab would probably be useful?
-* Having similar window/level sliders on the MPR window for the sake of similarity might be nice
-
-* error when closing the Window:
-
-      ERROR: In ..\Rendering\OpenGL2\vtkWin32OpenGLRenderWindow.cxx, line 228
-      vtkWin32OpenGLRenderWindow (000001DDB9A81DE0): wglMakeCurrent failed in MakeCurrent(), error: The handle is invalid.
-    
-      ERROR: In ..\Rendering\OpenGL2\vtkWin32OpenGLRenderWindow.cxx, line 88
-      vtkWin32OpenGLRenderWindow (000001DDB9A81DE0): wglMakeCurrent failed in Clean(), error: 6
-
+[See the project board](https://github.com/TechnionComputationalMRILab/ImageUntangler/projects/1)

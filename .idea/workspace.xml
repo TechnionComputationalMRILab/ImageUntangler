@@ -3,8 +3,9 @@
   <component name="ChangeListManager">
     <list default="true" id="0587727a-1c50-4cf9-a62c-07297f1600a8" name="Default Changelist" comment="2021 apr 13">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/MPRWindow/MPRWindow.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/MPRWindow/MPRWindow.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/MainWindowComponents/TabManager.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/MainWindowComponents/TabManager.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/MPRWindow/MPRW_View.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/MPRWindow/MPRW_View.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/util/mpr_window_config.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/util/mpr_window_config.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -42,6 +43,7 @@
     <option name="showLibraryContents" value="true" />
   </component>
   <component name="PropertiesComponent">
+    <property name="ASKED_ADD_EXTERNAL_FILES" value="true" />
     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$/src/MPRWindow2" />
@@ -51,6 +53,9 @@
     <key name="CopyFile.RECENT_KEYS">
       <recent name="C:\Users\ang.a\OneDrive - Technion\Documents\GitHub\ImageUntangler\src\MPRWindow2" />
       <recent name="C:\Users\ang.a\Documents\GitHub\ImageUntangler\src\MPRWindow2\Control" />
+    </key>
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\ang.a\OneDrive - Technion\Documents\GitHub\ImageUntangler" />
     </key>
   </component>
   <component name="RunManager" selected="Python.MainWindow">
@@ -220,7 +225,14 @@
       <option name="project" value="LOCAL" />
       <updated>1618745467665</updated>
     </task>
-    <option name="localTasksCounter" value="7" />
+    <task id="LOCAL-00007" summary="pushing for linux testing">
+      <created>1618747393659</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1618747393659</updated>
+    </task>
+    <option name="localTasksCounter" value="8" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -257,6 +269,7 @@
     <MESSAGE value="2021 apr 13" />
     <MESSAGE value="almost working" />
     <MESSAGE value="change angle/height works, cleaned up old mpr window files" />
-    <option name="LAST_COMMIT_MESSAGE" value="change angle/height works, cleaned up old mpr window files" />
+    <MESSAGE value="pushing for linux testing" />
+    <option name="LAST_COMMIT_MESSAGE" value="pushing for linux testing" />
   </component>
 </project>

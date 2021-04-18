@@ -11,14 +11,14 @@ from MPRWindow.MPRInteractor import MPRInteractorStyle
 from ast import literal_eval as make_tuple
 from icecream import ic
 from typing import List
-from collections import namedtuple
+# from collections import namedtuple
 from Model.PointCollection import PointCollection
 
 
 sys.path.append(os.path.abspath(os.path.join('..', 'util')))
 from util import config_data, stylesheets, mpr_window_config
 
-LengthResults = namedtuple("LengthResults", "totalDistance allDistances")
+# LengthResults = namedtuple("LengthResults", "totalDistance allDistances")
 
 
 class MPRW_View(QWidget):
@@ -191,14 +191,14 @@ class MPRW_View(QWidget):
 
         _length_results_layout = QVBoxLayout(_length_results_group_box)
 
-        _length_results_label = QLabel("Calculated Length")
+        self._length_results_label = QLabel("Calculated Length")
 
         _font = QFont()
         _font.setBold(True)
         _font.setWeight(75)
-        _length_results_label.setFont(_font)
+        self._length_results_label.setFont(_font)
 
-        _length_results_layout.addWidget(_length_results_label)
+        _length_results_layout.addWidget(self._length_results_label)
 
         return _length_results_group_box
 
@@ -226,19 +226,13 @@ class MPRW_View(QWidget):
             allLengths = [np.linalg.norm(pointsPositions[j, :] - pointsPositions[j + 1, :]) for j in
                           range(len(pointsPositions) - 1)]
             totalDistance = np.sum(allLengths)
-            ic(totalDistance)
-            ic(allLengths)
-            # self.outputLengthResults(LengthResults(totalDistance=totalDistance, allDistances=allLengths))
+            self.outputLengthResults(totalDistance, allLengths)
         else:
             print("error!")
 
-    def outputLengthResults(self, lengthResults: LengthResults):
-        strdis = ["{0:.2f}".format(lengthResults.allDistances[i]) for i in range(len(lengthResults.allDistances))]
-        self.lengthResultsLabel.setText(
-            "The lengths [mm] are:\n\n {0} \n\nThe total length:\n\n {1}".format(' , '.join(strdis),
-                                                                                 "{0:.2f}".format(
-                                                                                     lengthResults.totalDistance)))
-        self.lengthResultsLabel.adjustSize()
+    def outputLengthResults(self, total_distance, all_lengths):
+        strdis = ["{0:.2f}".format(all_lengths[i]) for i in range(len(all_lengths))]
+        self._length_results_label.setText("The lengths [mm] are:\n\n {0} \n\nThe total length:\n\n {1}".format(' , '.join(strdis),"{0:.2f}".format(total_distance)))
 
     def processNewPoint(self, pickedCoordinates):
         coordinates = [pickedCoordinates[0], pickedCoordinates[1], pickedCoordinates[2], 0] # x,y,z,sliceIdx
