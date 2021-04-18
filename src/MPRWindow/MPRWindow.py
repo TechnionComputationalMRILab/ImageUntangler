@@ -19,9 +19,8 @@ class MPRWindow(QDialog):
 
         self.model = MPRW_Model(points, image_data)
 
-        self.buttonBox = QDialogButtonBox(QDialogButtonBox.Help | QDialogButtonBox.Close)
+        self.buttonBox = QDialogButtonBox(QDialogButtonBox.Help)
         self.buttonBox.helpRequested.connect(lambda: self.model.view.help_button("some help text here"))
-        self.buttonBox.rejected.connect(self.close_button)
 
         self.layout = QVBoxLayout()
         self.layout.addWidget(self.model.view)
@@ -35,5 +34,5 @@ class MPRWindow(QDialog):
     def set_icon(self):
         self.setWindowIcon(QIcon(config_data.get_icon_file_path()))
 
-    def close_button(self):
-        self.done(1)
+    def closeEvent(self, event) -> None:
+        print("close event")
