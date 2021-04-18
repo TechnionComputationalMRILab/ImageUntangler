@@ -9,7 +9,7 @@ from Model.getMPR import PointsToPlaneVectors
 from Control.SequenceInteractorWidgets import SequenceInteractorWidgets
 from Control.SequenceViewerInteractorStyle import SequenceViewerInteractorStyle
 
-from MPRWindow2.MPRWindow import MPRWindow
+from MPRWindow.MPRWindow import MPRWindow
 
 
 class BaseModel(QWidget):

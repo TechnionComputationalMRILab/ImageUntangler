@@ -1,7 +1,7 @@
 import sys
 import os
 from PyQt5.Qt import *
-from MPRWindow2.MPRW_Model import MPRW_Model
+from MPRWindow.MPRW_Model import MPRW_Model
 
 sys.path.append(os.path.abspath(os.path.join('..', 'util')))
 from util import config_data, stylesheets
@@ -20,12 +20,11 @@ class MPRWindow(QDialog):
         self.model = MPRW_Model(points, image_data)
 
         self.buttonBox = QDialogButtonBox(QDialogButtonBox.Help | QDialogButtonBox.Close)
-        self.buttonBox.helpRequested.connect(lambda: self.model.view.help_button("sample output text"))
+        self.buttonBox.helpRequested.connect(lambda: self.model.view.help_button("some help text here"))
         self.buttonBox.rejected.connect(self.close_button)
 
         self.layout = QVBoxLayout()
-        self.layout.addWidget(self.model.view.MPRW_Top)
-        self.layout.addWidget(self.model.view.MPRW_Bottom)
+        self.layout.addWidget(self.model.view)
         self.layout.addWidget(self.buttonBox)
         self.setLayout(self.layout)
         self.show()

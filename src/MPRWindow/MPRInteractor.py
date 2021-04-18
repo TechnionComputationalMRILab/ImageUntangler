@@ -118,7 +118,6 @@ class MPRInteractorStyle(vtk.vtkInteractorStyleImage):
     def OnPickingLeftButtonUp(self,mouseX,mouseY):
         if self.picker.Pick(mouseX, mouseY, 0.0, self.MPRWindow.renderer):
             pickedCoordinates = self.picker.GetPickPosition()
-            print(type(self.MPRWindow))
             self.MPRWindow.processNewPoint(pickedCoordinates)
 
 

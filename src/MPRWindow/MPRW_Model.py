@@ -1,5 +1,5 @@
-from MPRWindow2.MPRW_Control import MPRW_Control
-from MPRWindow2.MPRW_View import MPRW_View
+from MPRWindow.MPRW_Control import MPRW_Control
+from MPRWindow.MPRW_View import MPRW_View
 from Model.getMPR import PointsToPlaneVectors
 import numpy as np
 from typing import List
@@ -7,14 +7,18 @@ import vtkmodules.all as vtk
 from vtk import vtkImageData
 from vtk.util import numpy_support
 from icecream import ic
+import sys
+import os
+sys.path.append(os.path.abspath(os.path.join('..', 'util')))
+from util import config_data, stylesheets, mpr_window_config
 
 
 class MPRW_Model:
     def __init__(self, points, image_data):
         self.points = points
         self.image_data = image_data
-        self.height = 40
-        self.angle = 180
+        self.height = mpr_window_config.default_initial_height()
+        self.angle = mpr_window_config.default_initial_angle()
 
         self.control = MPRW_Control(model=self)
         self.view = MPRW_View(model=self, control=self.control)
@@ -25,11 +29,14 @@ class MPRW_Model:
     def set_angle(self, angle):
         self.angle = angle
 
-    def calculate_input_data(self):
-        print("calculating input")
-
+    def get_mpr_properties(self):
         _mpr_properties = PointsToPlaneVectors(self.points, self.image_data, Plot=0,
                                                height=self.height, viewAngle=self.angle)
+
+        return _mpr_properties
+
+    def calculate_input_data(self):
+        _mpr_properties = self.get_mpr_properties()
 
         _mpr_m = _mpr_properties.MPR_M
         _delta = _mpr_properties.delta
