@@ -1,42 +1,44 @@
-import vtkmodules.all as vtk
-from MPRwindow import MPRInteractor
-from util import stylesheets
+from MPRWindow2.MPRW_Control import MPRW_Control
+from MPRWindow2.MPRW_View import MPRW_View
+from Model.getMPR import PointsToPlaneVectors
 import numpy as np
+from typing import List
+import vtkmodules.all as vtk
 from vtk import vtkImageData
 from vtk.util import numpy_support
-from Model import getMPR
-from Model.PointCollection import PointCollection
-from vtk.qt.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
-# from MPRWindow2.MPRW_View import MPRW_View
+from icecream import ic
 
 
 class MPRW_Model:
-    def __init__(self, control):
-        self.control = control
+    def __init__(self, points, image_data):
+        self.points = points
+        self.image_data = image_data
+        self.height = 40
+        self.angle = 180
 
-    def set_angle(self, angle):
-        self.control.set_angle(angle)
+        self.control = MPRW_Control(model=self)
+        self.view = MPRW_View(model=self, control=self.control)
 
     def set_height(self, height):
-        self.control.set_angle(height)
+        self.height = height
 
-    def get_angle(self):
-        return self.control.viewAngle
-
-    def get_height(self):
-        return self.control.height
+    def set_angle(self, angle):
+        self.angle = angle
 
     def calculate_input_data(self):
-        _mpr_properties = self.control.calculate()
+        print("calculating input")
+
+        _mpr_properties = PointsToPlaneVectors(self.points, self.image_data, Plot=0,
+                                               height=self.height, viewAngle=self.angle)
 
         _mpr_m = _mpr_properties.MPR_M
         _delta = _mpr_properties.delta
         n = _mpr_m.shape[0]
         m = _mpr_m.shape[1]
-        _mpr_vtk = vtkImageData()
-        _mpr_vtk.SetDimensions(n, m, 1)
-        _mpr_vtk.SetOrigin([0, 0, 0])
-        _mpr_vtk.SetSpacing([_delta, _delta, _delta])
+        _image_data = vtkImageData()
+        _image_data.SetDimensions(n, m, 1)
+        _image_data.SetOrigin([0, 0, 0])
+        _image_data.SetSpacing([_delta, _delta, _delta])
 
         vtk_type_by_numpy_type = {
             np.uint8: vtk.VTK_UNSIGNED_CHAR,
@@ -55,7 +57,7 @@ class MPRW_Model:
         _mpr_m = np.transpose(_mpr_m)
         scalars = numpy_support.numpy_to_vtk(num_array=_mpr_m.ravel(), deep=True, array_type=vtk_datatype)
 
-        _mpr_vtk.GetPointData().SetScalars(scalars)
-        _mpr_vtk.Modified()
+        _image_data.GetPointData().SetScalars(scalars)
+        _image_data.Modified()
 
-        return _mpr_vtk
+        return _image_data

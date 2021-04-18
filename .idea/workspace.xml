@@ -1,20 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="0587727a-1c50-4cf9-a62c-07297f1600a8" name="Default Changelist" comment="changes to calculate mpr function">
+    <list default="true" id="0587727a-1c50-4cf9-a62c-07297f1600a8" name="Default Changelist" comment="2021 apr 13">
+      <change afterPath="$PROJECT_DIR$/src/MPRWindow2/MPRW_BottomControls.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/MPRWindow2/MPRW_ViewerWidget.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/util/mpr_window_config.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/MPRWindow2/Control/MPRInteractor.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/MPRWindow2/Control/MPRW_Control.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/MPRWindow2/Control/__init__.py" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/src/MPRWindow2/MPRW_Control.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/MPRWindow2/MPRW_Control.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/MPRWindow2/MPRW_Model.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/MPRWindow2/MPRW_Model.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/MPRWindow2/MPRW_View.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/MPRWindow2/MPRW_View.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/MPRWindow2/MPRWindow.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/MPRWindow2/MPRWindow.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/MPRWindow2/Model/MPRW_Model.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/MPRWindow2/Model/__init__.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/MPRWindow2/Viewer/MPRW_Widget.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/MPRWindow2/Viewer/__init__.py" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Model/BaseModel.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/Model/BaseModel.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -86,6 +81,27 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
+    <configuration name="MPRW_ViewerWidget" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="ImageUntangler" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/src/MPRWindow2" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/src/MPRWindow2/MPRW_ViewerWidget.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
     <configuration name="MPRW_Widget" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="ImageUntangler" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -149,34 +165,13 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="SequenceViewerInterface" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
-      <module name="ImageUntangler" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/src/Interfaces" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/src/Interfaces/SequenceViewerInterface.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
     <recent_temporary>
       <list>
         <item itemvalue="Python.MainWindow" />
+        <item itemvalue="Python.MPRW_ViewerWidget" />
         <item itemvalue="Python.MPRW_View" />
         <item itemvalue="Python.MPRWindow" />
         <item itemvalue="Python.MPRW_Widget" />
-        <item itemvalue="Python.SequenceViewerInterface" />
       </list>
     </recent_temporary>
   </component>
@@ -210,7 +205,14 @@
       <option name="project" value="LOCAL" />
       <updated>1617873748854</updated>
     </task>
-    <option name="localTasksCounter" value="4" />
+    <task id="LOCAL-00004" summary="2021 apr 13">
+      <created>1618310174932</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1618310174932</updated>
+    </task>
+    <option name="localTasksCounter" value="5" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -244,6 +246,7 @@
     <MESSAGE value="*" />
     <MESSAGE value="dialog box working mostly" />
     <MESSAGE value="changes to calculate mpr function" />
-    <option name="LAST_COMMIT_MESSAGE" value="changes to calculate mpr function" />
+    <MESSAGE value="2021 apr 13" />
+    <option name="LAST_COMMIT_MESSAGE" value="2021 apr 13" />
   </component>
 </project>

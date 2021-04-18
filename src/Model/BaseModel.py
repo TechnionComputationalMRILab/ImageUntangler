@@ -2,9 +2,6 @@ from typing import List, Tuple
 from PyQt5.QtCore import QRect
 from PyQt5.QtWidgets import QVBoxLayout, QGroupBox, QWidget, QMainWindow
 
-# from MPRwindow.MPRWindow import Ui_MPRWindow
-
-from util import stylesheets
 from View.SlidersLayout import SlidersLayout
 from View.Toolbar import Toolbar
 from Model.NRRDViewerManager import NRRDViewerManager
@@ -13,7 +10,6 @@ from Control.SequenceInteractorWidgets import SequenceInteractorWidgets
 from Control.SequenceViewerInteractorStyle import SequenceViewerInteractorStyle
 
 from MPRWindow2.MPRWindow import MPRWindow
-from MPRWindow2.MPRW_Control import MPRW_Control
 
 
 class BaseModel(QWidget):
@@ -110,9 +106,6 @@ class BaseModel(QWidget):
         _image_data = self.view.imageData
 
         if _points.size == 0:
-            print("user clicked calculate mpr without any points onscreen. print error message here")  # TODO
+            print("user clicked calculate mpr without any points onscreen. print error message here")
         else:
-            _control = MPRW_Control(_points, _image_data)
-            _dlg = MPRWindow()
-            _dlg.set_control(_control)
-            _dlg.open_()
+            MPRWindow(_points, _image_data)
