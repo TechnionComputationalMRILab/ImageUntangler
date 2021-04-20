@@ -8,6 +8,7 @@ from vtk import vtkImageActor, vtkImageReslice, vtkMatrix4x4, vtkRenderer, vtkTe
 from Model import ImageProperties
 from Control.SequenceViewerInteractorStyle import SequenceViewerInteractorStyle
 from Model.PointCollection import PointCollection
+from MPRWindow.MPRWindow import MPRWindow
 
 
 class BaseSequenceViewer:
@@ -160,3 +161,24 @@ class BaseSequenceViewer:
             self.processNewPoint(self.MPRpoints, pickedCoordinates, color=(1, 0, 0))
         elif pointType.upper() == "LENGTH":
             self.processNewPoint(self.lengthPoints, pickedCoordinates, color=(55/255, 230/255, 128/255))
+
+    def calculateLengths(self):
+        print("calculating length")
+        if len(self.lengthPoints) >= 2:
+            pointsPositions = np.asarray(self.lengthPoints.getCoordinatesArray())
+            allLengths = [np.linalg.norm(pointsPositions[j, :] - pointsPositions[j + 1, :]) for j in
+                          range(len(pointsPositions) - 1)]
+            totalDistance = np.sum(allLengths)
+            print(totalDistance)
+            print(allLengths)
+        else:
+            print("error!")
+
+    def calculateMPR(self):
+        _points = self.MPRpoints.getCoordinatesArray()
+        _image_data = self.imageData
+
+        if _points.shape[0] <= 3: #TODO: how many points should I limit the user?
+            print("user clicked calculate mpr without any points onscreen. print error message here")
+        else:
+            MPRWindow(_points, _image_data)

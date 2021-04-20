@@ -80,6 +80,7 @@ class Tab(QWidget):
         addFilesButton.setStyleSheet(stylesheets.get_sheet_by_name("AddFiles"))
         addFilesButton.setGeometry(QRect(375, 290, 960, 231)) #EMPHASIS# should be made more portable
         addFilesButton.clicked.connect(self.loadRegularTab) # loads MRI viewer
+
         self.mainLayout.addWidget(self.defaultTabMainWidget)
 
     def buildNewTab(self):

@@ -11,14 +11,10 @@ from MPRWindow.MPRInteractor import MPRInteractorStyle
 from ast import literal_eval as make_tuple
 from icecream import ic
 from typing import List
-# from collections import namedtuple
 from Model.PointCollection import PointCollection
-
 
 sys.path.append(os.path.abspath(os.path.join('..', 'util')))
 from util import config_data, stylesheets, mpr_window_config
-
-# LengthResults = namedtuple("LengthResults", "totalDistance allDistances")
 
 
 class MPRW_View(QWidget):

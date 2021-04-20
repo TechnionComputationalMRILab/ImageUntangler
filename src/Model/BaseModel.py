@@ -1,15 +1,7 @@
-from typing import List, Tuple
+from typing import Tuple
 from PyQt5.QtCore import QRect
-from PyQt5.QtWidgets import QVBoxLayout, QGroupBox, QWidget, QMainWindow
-
-from View.SlidersLayout import SlidersLayout
+from PyQt5.QtWidgets import QVBoxLayout, QGroupBox, QWidget
 from View.Toolbar import Toolbar
-from Model.NRRDViewerManager import NRRDViewerManager
-from Model.getMPR import PointsToPlaneVectors
-from Control.SequenceInteractorWidgets import SequenceInteractorWidgets
-from Control.SequenceViewerInteractorStyle import SequenceViewerInteractorStyle
-
-from MPRWindow.MPRWindow import MPRWindow
 
 
 class BaseModel(QWidget):
@@ -18,22 +10,8 @@ class BaseModel(QWidget):
         self.layout = QVBoxLayout(self)
         self.toolbar = Toolbar(parent=self, manager=self)
         self.toolbar.setGeometry(QRect(0, 0, 500, 22))
-        #self.interactor = QVTKRenderWindowInteractor(frame)
         self.pickingLengthPoints = False
         self.pickingMPRpoints = False
-        #------------------------------
-        """
-        self.interactorStyle = SequenceViewerInteractorStyle(parent=self.interactor, model=self)
-        self.widgets = SequenceInteractorWidgets(MRIimages, self)
-        self.sequenceManager = ViewerManager(self,  MRIimages)
-        self.view = self.sequenceManager.loadSequence(0, self.interactor, self.interactorStyle)
-        slidersLayout = SlidersLayout(sequenceList=self.widgets.sequenceList,  windowSlider=self.widgets.windowSlider,
-                                      levelSlider=self.widgets.levelSlider, indexSlider=self.widgets.indexSlider)
-        self.initializeSliderValues()
-        self.layout.addWidget(self.toolbar)
-        self.layout.addWidget(self.interactor)
-        self.layout.addLayout(slidersLayout)
-        """
 
 #_________________________________________Constructor functions_____________________________________
     @staticmethod
@@ -99,13 +77,7 @@ class BaseModel(QWidget):
         self.interactorStyle.actions["PickingLength"] = int(not self.interactorStyle.actions["PickingLength"])
 
     def calculateLengths(self):
-        pass
+        self.view.calculateLengths()
 
     def calculateMPR(self):
-        _points = self.view.MPRpoints.getCoordinatesArray()
-        _image_data = self.view.imageData
-
-        if _points.size == 0:
-            print("user clicked calculate mpr without any points onscreen. print error message here")
-        else:
-            MPRWindow(_points, _image_data)
+        self.view.calculateMPR()

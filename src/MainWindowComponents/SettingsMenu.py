@@ -1,6 +1,7 @@
 import os
 from PyQt5.QtWidgets import QMenuBar, QMenu, QAction, QFileDialog
 from util import config_data, stylesheets
+from Control.PanelNumberDialog import PanelNumberDialog
 
 
 class SettingsMenu(QMenu):
@@ -16,14 +17,28 @@ class SettingsMenu(QMenu):
         if os.path.exists(folderPath):  # if user picked a directory, ie did not X-out the window
             config_data.update_config_value("DefaultFolder", folderPath)
 
+    @staticmethod
+    def setPanelNumber():
+        _panel_dialog = PanelNumberDialog()
+        _panel_dialog.exec()
+        config_data.update_config_value("NumViewers", _panel_dialog.panel_number[0])
+
     def getDefaultFolderAction(self):
         defaultFolderAction = QAction(parent=self)
         defaultFolderAction.triggered.connect(self.setDefaultFolder)
         defaultFolderAction.setText("Select Default Folder")
         return defaultFolderAction
 
+    def getPanelNumberAction(self):
+        defaultPanelNumberAction = QAction(parent=self)
+        defaultPanelNumberAction.triggered.connect(self.setPanelNumber)
+        defaultPanelNumberAction.setText("Set Number of Panels")
+        return defaultPanelNumberAction
+
     def addDefaultFileOption(self):
         defaultFolderAction: QAction = self.getDefaultFolderAction()
         self.addAction(defaultFolderAction)
-        #self.parent().addAction(self.menuAction())
+
+        defaultPanelAction: QAction = self.getPanelNumberAction()
+        self.addAction(defaultPanelAction)
         self.setTitle("Settings")
