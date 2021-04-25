@@ -5,7 +5,7 @@ from PyQt5 import QtWidgets
 from PyQt5.QtGui import QIcon
 from PyQt5.QtCore import QSize
 from PyQt5.QtWidgets import QMainWindow
-from MainWindowComponents import MenuBar
+from MainWindowComponents import InitialMenuBar
 from MainWindowComponents.TabManager import TabManager
 from util import config_data, stylesheets
 import vtkmodules.all as vtk
@@ -28,10 +28,10 @@ class App(QMainWindow):
         self.tabManager = TabManager(parent=self)
         self.setCentralWidget(self.tabManager)
         self.setStyleSheet(stylesheets.get_sheet_by_name("Default"))
-        self.buildMenuBar()
+        self.buildInitialMenuBar()
 
-    def buildMenuBar(self):
-        menuBar = MenuBar.buildMenuBar()
+    def buildInitialMenuBar(self):
+        menuBar = InitialMenuBar.buildInitialMenuBar()
         menuBar.setParent(self)
         self.setMenuBar(menuBar)
 

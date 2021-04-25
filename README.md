@@ -19,3 +19,9 @@ Run `MainWindow.py` in `MainWindowComponents`
 ## Roadmap
 
 [See the project board](https://github.com/TechnionComputationalMRILab/ImageUntangler/projects/1)
+
+## Usage / Shortcuts
+
+### Keyboard shortcuts
+
+`c` - Disable bullseye

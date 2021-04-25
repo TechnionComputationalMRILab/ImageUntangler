@@ -2,8 +2,6 @@ import numpy as np
 from typing import List
 from vtk import vtkRegularPolygonSource, vtkPolyDataMapper, vtkActor
 
-#"""
-
 
 class Point:
     def __init__(self, coordinates: np.array, polygon: vtkRegularPolygonSource = None):
@@ -56,47 +54,3 @@ class PointCollection:
 
     def getCoordinatesArray(self) -> np.array:
         return np.asarray([point.coordinates for point in self.points])
-
-
-#"""
-
-"""
-class PointCollection:
-    def __init__(self):
-        self.points: List[float] = []
-        self.polygons = []
-
-    def findImageIndex(self, PointIdImage: np.array) -> int:
-        PointIdImage = PointIdImage.tolist()
-        print(PointIdImage)
-        if PointIdImage in self.points:
-            return self.points.index(PointIdImage)
-        else:
-            return -1
-
-    def addPoint(self, PointIdImage: np.array) -> bool:
-        # returns whether Point was added
-        imageIndex = self.findImageIndex(PointIdImage)
-        if imageIndex == -1:
-            self.points.append(PointIdImage.tolist())
-            return True
-        else:
-            return False
-
-    def addPolygon(self, selectedCoordinates, color=(1, 0, 0)) -> vtkActor:
-        # returns PolygonActor from generated Polygon. Is assumed that appropiate point already exists
-        polygon = vtkRegularPolygonSource()
-        polygon.SetCenter((selectedCoordinates[0], selectedCoordinates[1], 0))
-        polygon.SetRadius(1)
-        polygon.SetNumberOfSides(15)
-        polygon.GeneratePolylineOff()
-        polygon.GeneratePolygonOn()
-        polygonMapper = vtkPolyDataMapper()
-        polygonMapper.SetInputConnection(polygon.GetOutputPort())
-        polygonActor = vtkActor()
-        polygonActor.SetMapper(polygonMapper)
-        polygonActor.GetProperty().SetColor(color)
-        polygonActor.GetProperty().SetAmbient(1)
-        self.polygons.append(polygon)
-        return polygonActor
-"""

@@ -9,6 +9,11 @@ from Model import ImageProperties
 from Control.SequenceViewerInteractorStyle import SequenceViewerInteractorStyle
 from Model.PointCollection import PointCollection
 from MPRWindow.MPRWindow import MPRWindow
+from MainWindowComponents import MessageBoxes
+
+from PyQt5.QtWidgets import *
+from util import config_data
+
 
 
 class BaseSequenceViewer:
@@ -114,8 +119,8 @@ class BaseSequenceViewer:
     def processNewPoint(self, pointCollection, pickedCoordinates, color=(1, 0, 0)):
         raise NotImplementedError
 
-    def addPoint(self, pointType, pickedCoordinates):
-        raise NotImplementedError
+    # def addPoint(self, pointType, pickedCoordinates):
+    #     raise NotImplementedError
 
     def presentCursor(self):
         self.Cursor.SetModelBounds(-10000, 10000, -10000, 10000, 0, 0)
@@ -172,13 +177,19 @@ class BaseSequenceViewer:
             print(totalDistance)
             print(allLengths)
         else:
-            print("error!")
+            MessageBoxes.notEnoughPointsClicked("length")
 
     def calculateMPR(self):
         _points = self.MPRpoints.getCoordinatesArray()
         _image_data = self.imageData
 
-        if _points.shape[0] <= 3: #TODO: how many points should I limit the user?
-            print("user clicked calculate mpr without any points onscreen. print error message here")
+        if _points.shape[0] <= 3:
+            MessageBoxes.notEnoughPointsClicked("MPR")
         else:
             MPRWindow(_points, _image_data)
+
+    def saveLengths(self):
+        self.manager.saveLengths()
+
+    def saveMPRPoints(self):
+        self.manager.saveMPRPoints()

@@ -1,7 +1,10 @@
 from typing import Tuple
 from PyQt5.QtCore import QRect
-from PyQt5.QtWidgets import QVBoxLayout, QGroupBox, QWidget
+from PyQt5.QtWidgets import QVBoxLayout, QGroupBox, QWidget, QFileDialog
 from View.Toolbar import Toolbar
+
+from PyQt5.QtWidgets import *
+from util import config_data
 
 
 class BaseModel(QWidget):
@@ -81,3 +84,15 @@ class BaseModel(QWidget):
 
     def calculateMPR(self):
         self.view.calculateMPR()
+
+    def saveLengths(self):
+        fileName, _ = QFileDialog.getSaveFileName(self, "Save As", config_data.get_config_value("DefaultFolder"),
+                "%s Files (*.%s)" % ("json".upper(), "json"))
+
+    def saveMPRPoints(self):
+        fileName, _ = QFileDialog.getSaveFileName(self, "Save As", config_data.get_config_value("DefaultFolder"),
+                "%s Files (*.%s);;All Files (*)" % ("json".upper(), "json"))
+
+    def disablePointPicker(self):
+        self.interactorStyle.actions["PickingMPR"] = 0
+        self.interactorStyle.actions["PickingLength"] = 0

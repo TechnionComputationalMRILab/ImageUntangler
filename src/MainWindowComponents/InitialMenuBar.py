@@ -5,7 +5,7 @@ from MainWindowComponents.SettingsMenu import SettingsMenu
 from MainWindowComponents.HelpMenu import HelpMenu
 
 
-def buildMenuBar():
+def buildInitialMenuBar():
     # builds MenuBar
     menuBar = QMenuBar() # parent will be set in MainWindow.py
     menuBar.setGeometry(QtCore.QRect(0, 0, 800, 18))  #?# possible portability issue

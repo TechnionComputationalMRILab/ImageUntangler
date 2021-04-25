@@ -3,6 +3,7 @@ from PyQt5.QtWidgets import QWidget, QVBoxLayout, QTabWidget, QTabBar, QMessageB
 
 from View.Tab import Tab
 from util import stylesheets
+from icecream import ic
 
 
 class TabManager(QWidget):

@@ -12,6 +12,7 @@ from ast import literal_eval as make_tuple
 from icecream import ic
 from typing import List
 from Model.PointCollection import PointCollection
+from MainWindowComponents import MessageBoxes
 
 sys.path.append(os.path.abspath(os.path.join('..', 'util')))
 from util import config_data, stylesheets, mpr_window_config
@@ -224,7 +225,7 @@ class MPRW_View(QWidget):
             totalDistance = np.sum(allLengths)
             self.outputLengthResults(totalDistance, allLengths)
         else:
-            print("error!")
+            MessageBoxes.notEnoughPointsClicked("length")
 
     def outputLengthResults(self, total_distance, all_lengths):
         strdis = ["{0:.2f}".format(all_lengths[i]) for i in range(len(all_lengths))]
