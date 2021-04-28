@@ -1,1 +1,4 @@
 .idea/*
+dist/*
+build/*
+src/*/__pycache__/*

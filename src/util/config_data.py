@@ -3,7 +3,7 @@ import os, json
 
 def get_config_dir() -> str:
     script_dir = os.path.dirname(os.path.realpath(__file__))
-    config_file_path = script_dir + os.path.sep + '..' + os.path.sep + '..' + os.path.sep + 'config/'
+    config_file_path = script_dir + os.path.sep + '..' + os.path.sep + 'config/'
     return os.path.abspath(config_file_path)
 
 

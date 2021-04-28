@@ -3,7 +3,7 @@ import os
 from PyQt5.Qt import *
 from MPRWindow.Model import MPRW_Model
 
-sys.path.append(os.path.abspath(os.path.join('..', 'util')))
+# sys.path.append(os.path.abspath(os.path.join('..', 'util')))
 from util import config_data, stylesheets
 
 

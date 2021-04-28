@@ -1,6 +1,6 @@
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import QFont
-from icecream import ic
+# from icecream import ic
 
 
 class Toolbar(QToolBar):
@@ -15,6 +15,7 @@ class Toolbar(QToolBar):
     def addLengthPointsAction(self):
         lengthPointAction = QAction("Add Length Points", self)
         lengthPointAction.setStatusTip("Set Length Points")
+        lengthPointAction.triggered.connect(self.manager.disablePointPicker)
         lengthPointAction.triggered.connect(self.manager.reverseLengthPointsStatus)
         lengthPointAction.triggered.connect(lambda: self.changePickerStatus("length"))
         # self.addAction(lengthPointAction)
@@ -46,6 +47,7 @@ class Toolbar(QToolBar):
     def addMPRpointsAction(self):
         MPRpointsAction = QAction("Add MPR Points", self)
         MPRpointsAction.setStatusTip("Set MPR Points")
+        MPRpointsAction.triggered.connect(self.manager.disablePointPicker)
         MPRpointsAction.triggered.connect(self.manager.reverseMPRpointsStatus)
         MPRpointsAction.triggered.connect(lambda: self.changePickerStatus("MPR"))
         # self.addAction(MPRpointsAction)

@@ -6,10 +6,10 @@ from typing import List
 import vtkmodules.all as vtk
 from vtk import vtkImageData
 from vtk.util import numpy_support
-from icecream import ic
+# from icecream import ic
 import sys
 import os
-sys.path.append(os.path.abspath(os.path.join('..', 'util')))
+# sys.path.append(os.path.abspath(os.path.join('..', 'util')))
 from util import config_data, stylesheets, mpr_window_config
 from Control.SaveFormatter import SaveFormatter
 

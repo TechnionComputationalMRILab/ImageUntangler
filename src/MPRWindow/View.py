@@ -9,7 +9,7 @@ import vtkmodules.all as vtk
 from vtk.qt.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
 from MPRWindow.MPRInteractor import MPRInteractorStyle
 from ast import literal_eval as make_tuple
-from icecream import ic
+# from icecream import ic
 from typing import List
 from Model.PointCollection import PointCollection
 from MainWindowComponents import MessageBoxes
@@ -32,17 +32,14 @@ class MPRW_View(QWidget):
         self._initialize_bottom()
 
     def help_button(self, t):
-        self.msg = QMessageBox()
-        self.msg.setIcon(QMessageBox.Information)
-        self.msg.setText(t)
-        self.msg.setInformativeText("more info")
-        self.msg.setWindowTitle("help text")
-        self.msg.setStandardButtons(QMessageBox.Ok)
-        self.msg.buttonClicked.connect(self.help_close)
-        self.msg.exec()
-
-    def help_close(self):
-        self.msg.close()
+        _msg = QMessageBox(self)
+        _msg.setIcon(QMessageBox.Information)
+        _msg.setText(t)
+        _msg.setInformativeText("more info")
+        _msg.setWindowTitle("help text")
+        _msg.setStandardButtons(QMessageBox.Ok)
+        _msg.buttonClicked.connect(lambda: _msg.close())
+        _msg.exec()
 
     def _initialize_top(self):
         self.vtkWidget = QVTKRenderWindowInteractor(self)

@@ -1,5 +1,5 @@
 from typing import List
-from icecream import ic
+# from icecream import ic
 from vtk.qt.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
 from vtk import vtkImageActor, vtkImageReslice, vtkMatrix4x4, vtkRenderer, vtkTextActor,  vtkPolyDataMapper,\
     vtkActor, vtkCursor2D

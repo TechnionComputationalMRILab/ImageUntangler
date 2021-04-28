@@ -9,9 +9,9 @@ from MainWindowComponents import InitialMenuBar
 from MainWindowComponents.TabManager import TabManager
 from util import config_data, stylesheets
 import vtkmodules.all as vtk
-from icecream import ic
+# from icecream import ic
 
-ic.configureOutput(includeContext=True)
+#ic.configureOutput(includeContext=True)
 
 
 class App(QMainWindow):
@@ -36,7 +36,7 @@ class App(QMainWindow):
         self.setMenuBar(menuBar)
 
     def setTitle(self):
-        self.setWindowTitle(config_data.get_config_value("AppName"))
+        self.setWindowTitle(config_data.get_config_value("AppName") + " v" + config_data.get_config_value("VersionNumber"))
 
     def setIcon(self):
         self.setWindowIcon(QIcon(config_data.get_icon_file_path()))
