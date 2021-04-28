@@ -1,43 +1,35 @@
-import nrrd
-import pydicom as dicom
 import json
-
+import numpy as np
+from Model.ImageProperties import ImageProperties
+from Model.PointCollection import PointCollection
 
 ACCEPTABLE_FILE_TYPES = ['csv', 'json', 'sqllite', 'mysql', 'hdf5']
 NOT_IMPLEMENTED = ['csv', 'sqllite', 'mysql', 'hdf5']
 
 
 class SaveFormatter:
-    def __init__(self, input_file, data_to_save, output_file):
-        self.in_file = input_file
-        self.data = data_to_save
-        self.out_type = output_file
+    """ handles the formatting and saving of the files """
+    def __init__(self, filename, imagedata: ImageProperties):
+        self.filename = filename
+        self.header = dict(imagedata.header)
+        self.output_data = self.header
 
-        if self.out_type.lower() in NOT_IMPLEMENTED:
-            raise NotImplementedError(f"Output to format {self.out_type} will be implemented in a future release")
-        elif self.out_type.lower() not in ACCEPTABLE_FILE_TYPES:
-            raise NotImplementedError(f'There are currently no plans to support {self.out_type} type output')
-        else:
-            self.header = self.read_input_file()
+    def add_pointcollection_data(self, key: str, value: PointCollection):
+        _points = value.getCoordinatesArray()[:, 0:3]
 
-    def read_input_file(self):
-        try:
-            # try opening the file as a NRRD file
-            with open(self.in_file, 'rb') as infile:
-                header = nrrd.read_header(infile)
-        except nrrd.errors.NRRDError:
-            raise NotImplementedError
+        self.output_data[key] = _points
 
-        return header
-
-    def save_header(self):
-        pass
+    def add_generic_data(self, key: str, value):
+        """ works for anything except for point collections"""
+        self.output_data[key] = value
 
     def save_data(self):
-        if self.out_type.lower() == 'json':
-            pass
-        elif self.out_type.lower() == "csv":
-            # do something else
-            raise NotImplementedError
-        else:
-            raise NotImplementedError
+        self._clean_data()
+        with open(self.filename, 'w') as f:
+            json.dump(self.output_data, f,
+                      indent=4)
+
+    def _clean_data(self):
+        for i in self.output_data:
+            if type(self.output_data[i]) is np.ndarray:
+                self.output_data[i] = self.output_data[i].tolist()

@@ -4,7 +4,7 @@ import numpy as np
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from PyQt5.Qt import *
-from MPRWindow.MPRW_Control import MPRW_Control
+from MPRWindow.Control import MPRW_Control
 import vtkmodules.all as vtk
 from vtk.qt.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
 from MPRWindow.MPRInteractor import MPRInteractorStyle
@@ -245,12 +245,8 @@ class MPRW_View(QWidget):
                 self.renderWindow.Render()
 
     def _save_file(self):
-        print('save file')
-        pass
-        # options = QFileDialog.Options()
-        # options |= QFileDialog.DontUseNativeDialog
-        # fileName, _ = QFileDialog.getSaveFileName(self.mainViewerBox, "QFileDialog.getSaveFileName()", "", options=options)
-        # outfile = open(fileName, 'wb')
-        # pickle.dump([self.MPRViewerProperties.originalPoints, self.MPRViewerProperties.ConvViewerProperties.CoronalArrayDicom,
-        #              self.MPRViewerProperties.DistancePickingindices, self.MPRViewerProperties.ConvViewerProperties.CorPath], outfile)
-        # outfile.close()
+        fileName, _ = QFileDialog.getSaveFileName(self, "Save Length Points As", config_data.get_config_value("DefaultFolder"),
+                "%s Files (*.%s)" % ("json".upper(), "json"))
+
+        if fileName:
+            self.model.saveLengths(fileName, self.lengthPoints)

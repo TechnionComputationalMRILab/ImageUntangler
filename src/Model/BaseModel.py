@@ -3,7 +3,6 @@ from PyQt5.QtCore import QRect
 from PyQt5.QtWidgets import QVBoxLayout, QGroupBox, QWidget, QFileDialog
 from View.Toolbar import Toolbar
 
-from PyQt5.QtWidgets import *
 from util import config_data
 
 
@@ -74,10 +73,12 @@ class BaseModel(QWidget):
 
 #________________________________________Interface to Toolbar_____________________________________
     def reverseMPRpointsStatus(self):
-        self.interactorStyle.actions["PickingMPR"] = int(not self.interactorStyle.actions["PickingMPR"])
+        # self.interactorStyle.actions["PickingMPR"] = int(not self.interactorStyle.actions["PickingMPR"])
+        self.interactorStyle.actions["PickingMPR"] = 1
 
     def reverseLengthPointsStatus(self):
-        self.interactorStyle.actions["PickingLength"] = int(not self.interactorStyle.actions["PickingLength"])
+        # self.interactorStyle.actions["PickingLength"] = int(not self.interactorStyle.actions["PickingLength"])
+        self.interactorStyle.actions["PickingLength"] = 1
 
     def calculateLengths(self):
         self.view.calculateLengths()
@@ -86,13 +87,23 @@ class BaseModel(QWidget):
         self.view.calculateMPR()
 
     def saveLengths(self):
-        fileName, _ = QFileDialog.getSaveFileName(self, "Save As", config_data.get_config_value("DefaultFolder"),
+        # first argument of qfiledialog needs to be the qwidget itself
+        fileName, _ = QFileDialog.getSaveFileName(self, "Save Length Points As", config_data.get_config_value("DefaultFolder"),
                 "%s Files (*.%s)" % ("json".upper(), "json"))
 
+        if fileName:
+            self.view.saveLengths(fileName)
+
     def saveMPRPoints(self):
-        fileName, _ = QFileDialog.getSaveFileName(self, "Save As", config_data.get_config_value("DefaultFolder"),
+        fileName, _ = QFileDialog.getSaveFileName(self, "Save MPR Points As", config_data.get_config_value("DefaultFolder"),
                 "%s Files (*.%s);;All Files (*)" % ("json".upper(), "json"))
+
+        if fileName:
+            self.view.saveMPRPoints(fileName)
 
     def disablePointPicker(self):
         self.interactorStyle.actions["PickingMPR"] = 0
         self.interactorStyle.actions["PickingLength"] = 0
+
+    def drawLengthLines(self):
+        self.view.drawLengthLines()

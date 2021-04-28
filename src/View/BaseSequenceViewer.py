@@ -1,6 +1,5 @@
 import numpy as np
 from typing import List
-from icecream import ic
 from vtk.qt.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
 from vtk import vtkImageActor, vtkImageReslice, vtkMatrix4x4, vtkRenderer, vtkTextActor,  vtkPolyDataMapper,\
     vtkActor, vtkCursor2D
@@ -10,9 +9,7 @@ from Control.SequenceViewerInteractorStyle import SequenceViewerInteractorStyle
 from Model.PointCollection import PointCollection
 from MPRWindow.MPRWindow import MPRWindow
 from MainWindowComponents import MessageBoxes
-
-from PyQt5.QtWidgets import *
-from util import config_data
+from Control.SaveFormatter import SaveFormatter
 
 
 
@@ -188,8 +185,22 @@ class BaseSequenceViewer:
         else:
             MPRWindow(_points, _image_data)
 
-    def saveLengths(self):
-        self.manager.saveLengths()
+    def saveLengths(self, filename):
+        _save_formatter = SaveFormatter(filename, self.imageData)
+        _save_formatter.add_pointcollection_data('length points', self.lengthPoints)
+        _save_formatter.save_data()
 
-    def saveMPRPoints(self):
-        self.manager.saveMPRPoints()
+    def saveMPRPoints(self, filename):
+        _save_formatter = SaveFormatter(filename, self.imageData)
+        _save_formatter.add_pointcollection_data("MPR points", self.MPRpoints)
+        _save_formatter.save_data()
+
+    def drawLengthLines(self):
+        _actor = self.lengthPoints.generateLineActor()
+
+        _renderer = vtkRenderer()
+        _renderer.AddActor(_actor)
+
+        self.renderer.AddActor(_actor)
+        # self.window.AddRenderer(_renderer)
+        self.window.Render()

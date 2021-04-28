@@ -1,6 +1,7 @@
 import numpy as np
 from typing import List
-from vtk import vtkRegularPolygonSource, vtkPolyDataMapper, vtkActor
+from vtk import vtkRegularPolygonSource, vtkPolyDataMapper, vtkActor, vtkPoints, vtkPolyData, vtkCellArray, vtkLine, \
+    vtkRenderer, vtkParametricFunctionSource, vtkParametricSpline
 
 
 class Point:
@@ -54,3 +55,55 @@ class PointCollection:
 
     def getCoordinatesArray(self) -> np.array:
         return np.asarray([point.coordinates for point in self.points])
+
+    def generateLineActor(self, color=(0, 1, 0), width=4):
+        points = self.getCoordinatesArray()[:, 0:3].tolist()
+
+        pts = vtkPoints()
+        [pts.InsertNextPoint(i) for i in points]
+
+        linesPolyData = vtkPolyData()
+        linesPolyData.SetPoints(pts)
+
+        lineArray = []
+
+        for i in range(len(points)):
+            for j in range(len(points)):
+                line = vtkLine()
+                line.GetPointIds().SetId(0, i)
+                line.GetPointIds().SetId(1, j)
+                lineArray.append(line)
+
+        lines = vtkCellArray()
+        [lines.InsertNextCell(i) for i in lineArray]
+        linesPolyData.SetLines(lines)
+
+        mapper = vtkPolyDataMapper()
+        mapper.SetInputData(linesPolyData)
+
+        actor = vtkActor()
+        actor.SetMapper(mapper)
+        actor.GetProperty().SetColor(color)
+        actor.GetProperty().SetLineWidth(width)
+
+        return actor
+
+    def generateSplineActor(self, color=(0, 1, 0), width=4):
+        points = self.getCoordinatesArray()[:, 0:3].tolist()
+
+        pts = vtkPoints()
+        [pts.InsertNextPoint(i) for i in points]
+
+        outSpline = vtkParametricSpline()
+        outSpline.SetPoints(pts)
+
+        functionSource = vtkParametricFunctionSource()
+        functionSource.SetParametricFunction(outSpline)
+
+        spline_mapper = vtkPolyDataMapper()
+        spline_mapper.SetInputConnection(functionSource.GetOutputPort())
+
+        spline_actor = vtkActor()
+        spline_actor.SetMapper(spline_mapper)
+
+        return spline_actor

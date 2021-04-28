@@ -1,5 +1,5 @@
-from MPRWindow.MPRW_Control import MPRW_Control
-from MPRWindow.MPRW_View import MPRW_View
+from MPRWindow.Control import MPRW_Control
+from MPRWindow.View import MPRW_View
 from Model.getMPR import PointsToPlaneVectors
 import numpy as np
 from typing import List
@@ -11,6 +11,7 @@ import sys
 import os
 sys.path.append(os.path.abspath(os.path.join('..', 'util')))
 from util import config_data, stylesheets, mpr_window_config
+from Control.SaveFormatter import SaveFormatter
 
 
 class MPRW_Model:
@@ -68,3 +69,9 @@ class MPRW_Model:
         _image_data.Modified()
 
         return _image_data
+
+    def saveLengths(self, filename, length_points):
+        _save_formatter = SaveFormatter(filename, self.image_data)
+        _save_formatter.add_pointcollection_data('length in mpr points', length_points)
+        _save_formatter.add_generic_data("mpr points", self.points)
+        _save_formatter.save_data()
