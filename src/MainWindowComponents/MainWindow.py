@@ -1,4 +1,4 @@
-__author__ = "Yael Zaffrani and Avraham Kahan"
+__author__ = "Yael Zaffrani and Avraham Kahan and Angeleene Ang"
 
 import sys
 from PyQt5 import QtWidgets
