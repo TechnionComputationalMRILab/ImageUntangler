@@ -1,8 +1,9 @@
 import sys
-from PyQt5.QtWidgets import QWidget, QVBoxLayout, QTabWidget, QTabBar
+from PyQt5.QtWidgets import QWidget, QVBoxLayout, QTabWidget, QTabBar, QMessageBox
 
 from View.Tab import Tab
 from util import stylesheets
+# from icecream import ic
 
 
 class TabManager(QWidget):
@@ -27,7 +28,7 @@ class Tabs_Bar(QTabWidget):
         self.build_initial_tab()
 
     def close_tab(self, tab_index):
-        if self.count() == 2: # closed last tab
+        if self.count() == 1: # closed last tab
             sys.exit(0)
         currentQWidget = self.widget(tab_index)
         currentQWidget.deleteLater()
@@ -50,5 +51,3 @@ class Tabs_Bar(QTabWidget):
     def change_tab_name(self, tab: Tab):
         tab_index = self.indexOf(tab)
         self.setTabText(tab_index, tab.getName())
-
-

@@ -1,8 +1,7 @@
 import numpy as np
 from typing import List
-from vtk import vtkRegularPolygonSource, vtkPolyDataMapper, vtkActor
-
-#"""
+from vtk import vtkRegularPolygonSource, vtkPolyDataMapper, vtkActor, vtkPoints, vtkPolyData, vtkCellArray, vtkLine, \
+    vtkRenderer, vtkParametricFunctionSource, vtkParametricSpline
 
 
 class Point:
@@ -57,46 +56,54 @@ class PointCollection:
     def getCoordinatesArray(self) -> np.array:
         return np.asarray([point.coordinates for point in self.points])
 
+    def generateLineActor(self, color=(0, 1, 0), width=4):
+        points = self.getCoordinatesArray()[:, 0:3].tolist()
 
-#"""
+        pts = vtkPoints()
+        [pts.InsertNextPoint(i) for i in points]
 
-"""
-class PointCollection:
-    def __init__(self):
-        self.points: List[float] = []
-        self.polygons = []
+        linesPolyData = vtkPolyData()
+        linesPolyData.SetPoints(pts)
 
-    def findImageIndex(self, PointIdImage: np.array) -> int:
-        PointIdImage = PointIdImage.tolist()
-        print(PointIdImage)
-        if PointIdImage in self.points:
-            return self.points.index(PointIdImage)
-        else:
-            return -1
+        lineArray = []
 
-    def addPoint(self, PointIdImage: np.array) -> bool:
-        # returns whether Point was added
-        imageIndex = self.findImageIndex(PointIdImage)
-        if imageIndex == -1:
-            self.points.append(PointIdImage.tolist())
-            return True
-        else:
-            return False
+        for i in range(len(points)):
+            for j in range(len(points)):
+                line = vtkLine()
+                line.GetPointIds().SetId(0, i)
+                line.GetPointIds().SetId(1, j)
+                lineArray.append(line)
 
-    def addPolygon(self, selectedCoordinates, color=(1, 0, 0)) -> vtkActor:
-        # returns PolygonActor from generated Polygon. Is assumed that appropiate point already exists
-        polygon = vtkRegularPolygonSource()
-        polygon.SetCenter((selectedCoordinates[0], selectedCoordinates[1], 0))
-        polygon.SetRadius(1)
-        polygon.SetNumberOfSides(15)
-        polygon.GeneratePolylineOff()
-        polygon.GeneratePolygonOn()
-        polygonMapper = vtkPolyDataMapper()
-        polygonMapper.SetInputConnection(polygon.GetOutputPort())
-        polygonActor = vtkActor()
-        polygonActor.SetMapper(polygonMapper)
-        polygonActor.GetProperty().SetColor(color)
-        polygonActor.GetProperty().SetAmbient(1)
-        self.polygons.append(polygon)
-        return polygonActor
-"""
+        lines = vtkCellArray()
+        [lines.InsertNextCell(i) for i in lineArray]
+        linesPolyData.SetLines(lines)
+
+        mapper = vtkPolyDataMapper()
+        mapper.SetInputData(linesPolyData)
+
+        actor = vtkActor()
+        actor.SetMapper(mapper)
+        actor.GetProperty().SetColor(color)
+        actor.GetProperty().SetLineWidth(width)
+
+        return actor
+
+    def generateSplineActor(self, color=(0, 1, 0), width=4):
+        points = self.getCoordinatesArray()[:, 0:3].tolist()
+
+        pts = vtkPoints()
+        [pts.InsertNextPoint(i) for i in points]
+
+        outSpline = vtkParametricSpline()
+        outSpline.SetPoints(pts)
+
+        functionSource = vtkParametricFunctionSource()
+        functionSource.SetParametricFunction(outSpline)
+
+        spline_mapper = vtkPolyDataMapper()
+        spline_mapper.SetInputConnection(functionSource.GetOutputPort())
+
+        spline_actor = vtkActor()
+        spline_actor.SetMapper(spline_mapper)
+
+        return spline_actor

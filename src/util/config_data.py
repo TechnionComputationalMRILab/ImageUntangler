@@ -3,7 +3,7 @@ import os, json
 
 def get_config_dir() -> str:
     script_dir = os.path.dirname(os.path.realpath(__file__))
-    config_file_path = script_dir + os.path.sep + '..' + os.path.sep + '..' + os.path.sep + 'config/'
+    config_file_path = script_dir + os.path.sep + '..' + os.path.sep + 'config/'
     return os.path.abspath(config_file_path)
 
 
@@ -54,3 +54,11 @@ def get_config_value(value_name: str):
         return json_data[value_name]
     except KeyError:
         return -1
+
+
+def get_default_width() -> int:
+    return 1920
+
+
+def get_default_height() -> int:
+    return 1080

@@ -2,9 +2,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.interpolate import RegularGridInterpolator, splprep,splev
 from typing import List
-from icecream import ic
+# from icecream import ic
 
-ic.configureOutput(includeContext=True)
+# ic.configureOutput(includeContext=True)
 
 
 class PointsToPlaneVectors:
@@ -33,7 +33,7 @@ class PointsToPlaneVectors:
             self.plotPoints(x, y, z)
 
         linearVTKlist = self.bspline(allPoints, self.delta, degree=2)  # calculates 2nd degree spline function for all points
-        ic(linearVTKlist)
+        # ic(linearVTKlist)
         self.FindVectors(linearVTKlist, viewAngle)
         self.getStraightMPRVector(self.x, self.y, self.z, self.V, linearVTKlist, viewAngle)
 

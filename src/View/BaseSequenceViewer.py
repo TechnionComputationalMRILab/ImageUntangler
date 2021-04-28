@@ -1,6 +1,5 @@
 import numpy as np
 from typing import List
-from icecream import ic
 from vtk.qt.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
 from vtk import vtkImageActor, vtkImageReslice, vtkMatrix4x4, vtkRenderer, vtkTextActor,  vtkPolyDataMapper,\
     vtkActor, vtkCursor2D
@@ -8,6 +7,10 @@ from vtk import vtkImageActor, vtkImageReslice, vtkMatrix4x4, vtkRenderer, vtkTe
 from Model import ImageProperties
 from Control.SequenceViewerInteractorStyle import SequenceViewerInteractorStyle
 from Model.PointCollection import PointCollection
+from MPRWindow.MPRWindow import MPRWindow
+from MainWindowComponents import MessageBoxes
+from Control.SaveFormatter import SaveFormatter
+
 
 
 class BaseSequenceViewer:
@@ -113,8 +116,8 @@ class BaseSequenceViewer:
     def processNewPoint(self, pointCollection, pickedCoordinates, color=(1, 0, 0)):
         raise NotImplementedError
 
-    def addPoint(self, pointType, pickedCoordinates):
-        raise NotImplementedError
+    # def addPoint(self, pointType, pickedCoordinates):
+    #     raise NotImplementedError
 
     def presentCursor(self):
         self.Cursor.SetModelBounds(-10000, 10000, -10000, 10000, 0, 0)
@@ -160,3 +163,44 @@ class BaseSequenceViewer:
             self.processNewPoint(self.MPRpoints, pickedCoordinates, color=(1, 0, 0))
         elif pointType.upper() == "LENGTH":
             self.processNewPoint(self.lengthPoints, pickedCoordinates, color=(55/255, 230/255, 128/255))
+
+    def calculateLengths(self):
+        print("calculating length")
+        if len(self.lengthPoints) >= 2:
+            pointsPositions = np.asarray(self.lengthPoints.getCoordinatesArray())
+            allLengths = [np.linalg.norm(pointsPositions[j, :] - pointsPositions[j + 1, :]) for j in
+                          range(len(pointsPositions) - 1)]
+            totalDistance = np.sum(allLengths)
+            print(totalDistance)
+            print(allLengths)
+        else:
+            MessageBoxes.notEnoughPointsClicked("length")
+
+    def calculateMPR(self):
+        _points = self.MPRpoints.getCoordinatesArray()
+        _image_data = self.imageData
+
+        if _points.shape[0] <= 3:
+            MessageBoxes.notEnoughPointsClicked("MPR")
+        else:
+            MPRWindow(_points, _image_data)
+
+    def saveLengths(self, filename):
+        _save_formatter = SaveFormatter(filename, self.imageData)
+        _save_formatter.add_pointcollection_data('length points', self.lengthPoints)
+        _save_formatter.save_data()
+
+    def saveMPRPoints(self, filename):
+        _save_formatter = SaveFormatter(filename, self.imageData)
+        _save_formatter.add_pointcollection_data("MPR points", self.MPRpoints)
+        _save_formatter.save_data()
+
+    def drawLengthLines(self):
+        _actor = self.lengthPoints.generateLineActor()
+
+        _renderer = vtkRenderer()
+        _renderer.AddActor(_actor)
+
+        self.renderer.AddActor(_actor)
+        # self.window.AddRenderer(_renderer)
+        self.window.Render()

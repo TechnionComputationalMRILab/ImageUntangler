@@ -36,3 +36,12 @@ def noGoodFiles():
                                  "ERROR: In /work/standalone-x64-build/VTK-source/Common/ExecutionModel/vtkExecutive.cxx\n"
                                  "vtkCompositeDataPipeline: Algorithm vtkNrrdReader returned failure for request: vtkInformation")
     errorMessage.exec_()
+
+
+def notEnoughPointsClicked(function):
+    errorMessage = QMessageBox()
+    errorMessage.setStyleSheet(stylesheets.get_sheet_by_name("ErrorMessage"))
+    errorMessage.setWindowTitle("Not Enough Points")
+    errorMessage.setText(f"Not enough points clicked to calculate {function}!")
+    errorMessage.setIcon(QMessageBox.Critical)
+    errorMessage.exec_()

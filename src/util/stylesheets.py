@@ -21,6 +21,6 @@ def get_sheet__by_path(sheet_path: str):
 
 def get_CSS_directory() -> str:
     script_dir = os.path.dirname(os.path.realpath(__file__))
-    css_path = script_dir + os.path.sep + '..' + os.path.sep + '..' + os.path.sep + 'CSS'
+    css_path = script_dir + os.path.sep + '..' + os.path.sep + 'CSS'
     return os.path.abspath(css_path)
 
