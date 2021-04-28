@@ -23,8 +23,7 @@ class NRRDViewerModel(BaseModel):
         self.layout.addWidget(self.toolbar)
         self.layout.addWidget(self.interactor)
         self.layout.addLayout(slidersLayout)
-        self.pickingLengthPoints = False
-        self.pickingMPRpoints = False
+
 
 #_________________________________________Constructor functions_____________________________________
 

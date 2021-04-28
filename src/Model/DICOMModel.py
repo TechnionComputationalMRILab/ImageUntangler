@@ -24,8 +24,7 @@ class DICOMViewerModel(BaseModel):
         self.layout.addWidget(self.toolbar)
         self.layout.addWidget(self.interactor)
         self.layout.addLayout(slidersLayout)
-        self.pickingLengthPoints = False
-        self.pickingMPRpoints = False
+
 
 #_________________________________________Constructor functions_____________________________________
 
@@ -41,11 +40,18 @@ class DICOMViewerModel(BaseModel):
         self.widgets.setValues(sliceIdx=int(current_sequence.get_index()), maxSlice=current_sequence.max_index(), windowValue=int(self.view.WindowVal), levelValue=int(self.view.LevelVal))
 
     def setIndex(self, index: int):
-        self.view = self.sequenceManager.load_index(index, self.interactor, self.interactorStyle)
+        self.view = self.sequenceManager.loadIndex(index, self.interactor, self.interactorStyle)
         self.widgets.resetSliders(self.view.WindowVal, self.view.LevelVal)
 
 #______________________________________________Interface to interactor style________________________________________________________
 
     def changeSliceIndex(self, changeFactor: int):
-        self.view = self.sequenceManager.loadSequence()
+        """
+        :param changeFactor: increment or decrement sequence
+        """
+        if changeFactor == -1:
+            self.view = self.sequenceManager.decrementIndex(self.interactor, self.interactorStyle)
+        elif changeFactor == 1:
+            self.view = self.sequenceManager.incrementIndex(self.interactor, self.interactorStyle)
         self.widgets.indexSlider.setValue(self.view.sliceIdx)
+

@@ -39,6 +39,9 @@ class DICOMSequence:
     def __str__(self):
         return self.name
 
+    def __len__(self):
+        return len(self.slices)
+
     @staticmethod
     def get_dicom_seqs(all_slices: List[str]):
         """
