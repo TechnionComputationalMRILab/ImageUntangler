@@ -1,7 +1,8 @@
 import os
 from PyQt5.QtWidgets import QMenuBar, QMenu, QAction, QFileDialog
 from util import config_data, stylesheets
-from Control.PanelNumberDialog import PanelNumberDialog
+from View.PanelNumberDialog import PanelNumberDialog
+from View.OptionsDialog import OptionsDialog
 
 
 class SettingsMenu(QMenu):
@@ -23,6 +24,13 @@ class SettingsMenu(QMenu):
         _panel_dialog.exec()
         config_data.update_config_value("NumViewers", _panel_dialog.panel_number[0])
 
+    @staticmethod
+    def openOptionsDialog():
+        _options_dialog = OptionsDialog()
+        _options_dialog.exec()
+
+        config_data.update_config_value("NumViewers", _options_dialog.panel_number[0])
+
     def getDefaultFolderAction(self):
         defaultFolderAction = QAction(parent=self)
         defaultFolderAction.triggered.connect(self.setDefaultFolder)
@@ -35,10 +43,20 @@ class SettingsMenu(QMenu):
         defaultPanelNumberAction.setText("Set Number of Panels")
         return defaultPanelNumberAction
 
+    def getOptions(self):
+        optionsAction = QAction(parent=self)
+        optionsAction.triggered.connect(self.openOptionsDialog)
+        optionsAction.setText("Preferences")
+        return optionsAction
+
     def addDefaultFileOption(self):
         defaultFolderAction: QAction = self.getDefaultFolderAction()
         self.addAction(defaultFolderAction)
 
         defaultPanelAction: QAction = self.getPanelNumberAction()
         self.addAction(defaultPanelAction)
+
+        optionsAction: QAction = self.getOptions()
+        self.addAction(optionsAction)
+
         self.setTitle("Settings")

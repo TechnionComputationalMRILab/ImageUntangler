@@ -107,3 +107,6 @@ class BaseModel(QWidget):
 
     def drawLengthLines(self):
         self.view.drawLengthLines()
+
+    def drawMPRSpline(self):
+        self.view.drawMPRSpline()

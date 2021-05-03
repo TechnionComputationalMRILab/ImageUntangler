@@ -2,6 +2,8 @@ import json
 import numpy as np
 from Model.ImageProperties import ImageProperties
 from Model.PointCollection import PointCollection
+import pydicom
+
 
 ACCEPTABLE_FILE_TYPES = ['csv', 'json', 'sqllite', 'mysql', 'hdf5']
 NOT_IMPLEMENTED = ['csv', 'sqllite', 'mysql', 'hdf5']
@@ -33,3 +35,5 @@ class SaveFormatter:
         for i in self.output_data:
             if type(self.output_data[i]) is np.ndarray:
                 self.output_data[i] = self.output_data[i].tolist()
+            elif type(self.output_data[i]) is pydicom.multival.MultiValue:
+                self.output_data[i] = list(self.output_data[i])

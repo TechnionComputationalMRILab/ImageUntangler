@@ -24,6 +24,7 @@ class Toolbar(QToolBar):
     def addLengthCalculation(self):
         lengthCalculation = QAction("Calculate Length", self)
         lengthCalculation.setStatusTip("Calculate length from available points")
+        lengthCalculation.triggered.connect(self.manager.drawLengthLines)
         lengthCalculation.triggered.connect(self.manager.calculateLengths)
         # self.addAction(lengthCalculation)
         return lengthCalculation
@@ -56,6 +57,7 @@ class Toolbar(QToolBar):
     def addMPRcalculation(self):
         MPRcalculation = QAction("Calculate MPR", self)
         MPRcalculation.setStatusTip("Calculate MPR from available points")
+        MPRcalculation.triggered.connect(self.manager.drawMPRSpline)
         MPRcalculation.triggered.connect(self.manager.calculateMPR)
         # self.addAction(MPRcalculation)
         return MPRcalculation

@@ -105,5 +105,7 @@ class PointCollection:
 
         spline_actor = vtkActor()
         spline_actor.SetMapper(spline_mapper)
+        spline_actor.GetProperty().SetColor(color)
+        spline_actor.GetProperty().SetLineWidth(width)
 
         return spline_actor

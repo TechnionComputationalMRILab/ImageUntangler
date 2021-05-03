@@ -10,6 +10,21 @@ import pydicom as dicom
 def getImageData(imgPath: str, isDicom: bool):
     if isDicom:
         reader = vtkDICOMImageReader()
+
+        with open(imgPath, 'rb') as infile:
+            dcmr = dicom.dcmread(infile)
+
+            header = dict()
+
+            # TODO: CONVERT DICOM HEADER TO DICT
+            # for i in dcmr.dir(""):
+            #     if i == "PixelData":
+            #         # dont really need this in the header
+            #         continue
+            #     else:
+            #         header[i] = dcmr[i].value
+
+        header['file type'] = 'dicom'
     else:
         reader = vtkNrrdReader()
 

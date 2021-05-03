@@ -22,7 +22,8 @@ class BaseSequenceViewer:
         self.WindowVal = self.imageData.dicomArray.max()-self.imageData.dicomArray.min()
         self.actor = vtkImageActor()
         self.renderer = vtkRenderer()
-        self.window: QVTKRenderWindowInteractor = interactor
+        # self.window: QVTKRenderWindowInteractor = interactor
+        self.window = self.interactor.GetRenderWindow()
         self.interactorStyle = interactorStyle
         self.reslice = vtkImageReslice()
 
@@ -64,7 +65,8 @@ class BaseSequenceViewer:
     def renderImage(self):
         self.renderer.SetBackground(68 / 255, 71 / 255, 79 / 255)
         self.renderer.AddActor(self.actor)
-        self.window = self.interactor.GetRenderWindow()
+        self.renderer.SetLayer(0)
+        # self.window = self.interactor.GetRenderWindow()
         self.window.AddRenderer(self.renderer)
         self.interactorStyle.SetInteractor(self.interactor)
         self.interactor.SetInteractorStyle(self.interactorStyle)
@@ -165,7 +167,6 @@ class BaseSequenceViewer:
             self.processNewPoint(self.lengthPoints, pickedCoordinates, color=(55/255, 230/255, 128/255))
 
     def calculateLengths(self):
-        print("calculating length")
         if len(self.lengthPoints) >= 2:
             pointsPositions = np.asarray(self.lengthPoints.getCoordinatesArray())
             allLengths = [np.linalg.norm(pointsPositions[j, :] - pointsPositions[j + 1, :]) for j in
@@ -200,7 +201,23 @@ class BaseSequenceViewer:
 
         _renderer = vtkRenderer()
         _renderer.AddActor(_actor)
+        _renderer.InteractiveOff()
 
-        self.renderer.AddActor(_actor)
-        # self.window.AddRenderer(_renderer)
+        self.window.AddRenderer(_renderer)
+        _renderer.SetLayer(1)
+        self.window.SetNumberOfLayers(2)
+
+        self.window.Render()
+
+    def drawMPRSpline(self):
+        _actor = self.MPRpoints.generateSplineActor()
+
+        _renderer = vtkRenderer()
+        _renderer.AddActor(_actor)
+        _renderer.InteractiveOff()
+
+        self.window.AddRenderer(_renderer)
+        _renderer.SetLayer(1)
+        self.window.SetNumberOfLayers(2)
+
         self.window.Render()
