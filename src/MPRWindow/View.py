@@ -1,21 +1,17 @@
 import sys
 import os
 import numpy as np
-from PyQt5.QtWidgets import *
-from PyQt5.QtCore import *
 from PyQt5.Qt import *
-from MPRWindow.Control import MPRW_Control
 import vtkmodules.all as vtk
 from vtk.qt.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
-from MPRWindow.MPRInteractor import MPRInteractorStyle
 from ast import literal_eval as make_tuple
-# from icecream import ic
 from typing import List
+
+from MPRWindow.MPRInteractor import MPRInteractorStyle
 from Model.PointCollection import PointCollection
 from MainWindowComponents import MessageBoxes
-
-sys.path.append(os.path.abspath(os.path.join('..', 'util')))
-from util import config_data, stylesheets, mpr_window_config
+from util import config_data, stylesheets, mpr_window_config, logger
+logger = logger.get_logger()
 
 
 class MPRW_View(QWidget):
@@ -32,6 +28,7 @@ class MPRW_View(QWidget):
         self._initialize_bottom()
 
     def help_button(self, t):
+        logger.info("MPR Window Help Requested")
         _msg = QMessageBox(self)
         _msg.setIcon(QMessageBox.Information)
         _msg.setText(t)
@@ -42,6 +39,7 @@ class MPRW_View(QWidget):
         _msg.exec()
 
     def _initialize_top(self):
+        logger.debug("Top widget of MPR Window initializing")
         self.vtkWidget = QVTKRenderWindowInteractor(self)
         self.vl.addWidget(self.vtkWidget)
 
@@ -69,6 +67,7 @@ class MPRW_View(QWidget):
         self.renderer.ResetCamera()
         self.iren.Initialize()
         self.iren.Start()
+        logger.debug("Top widget of MPR Window starting")
 
     def updateWindowAndLevel(self):
         _window = self.actor.GetProperty().GetColorWindow()
@@ -78,23 +77,24 @@ class MPRW_View(QWidget):
         self.textActorAngle.SetInput("Angle: " + str(np.int32(self.model.angle)))
 
     def set_text_actors(self):
+        logger.debug("Setting text actors")
         self.textActorWindow = vtk.vtkTextActor()
         self.textActorWindow.GetTextProperty().SetFontSize(14)
-        self.textActorWindow.GetTextProperty().SetColor(1, 1, 1)
+        self.textActorWindow.GetTextProperty().SetColor(0, 34/255, 158/255)
         self.textActorWindow.SetDisplayPosition(0, 17)
         self.textActorWindow.SetInput("Window: 525")#?#
         self.renderer.AddActor(self.textActorWindow)
 
         self.textActorLevel = vtk.vtkTextActor()
         self.textActorLevel.GetTextProperty().SetFontSize(14)
-        self.textActorLevel.GetTextProperty().SetColor(1, 1, 1)
+        self.textActorLevel.GetTextProperty().SetColor(0, 34/255, 158/255)
         self.textActorLevel.SetDisplayPosition(0, 32)
         self.textActorLevel.SetInput("Level: 1051") #?#)
         self.renderer.AddActor(self.textActorLevel)
 
         self.textActorAngle = vtk.vtkTextActor()
         self.textActorAngle.GetTextProperty().SetFontSize(14)
-        self.textActorAngle.GetTextProperty().SetColor(1, 1, 1)
+        self.textActorAngle.GetTextProperty().SetColor(0, 34/255, 158/255)
         self.textActorAngle.SetDisplayPosition(0, 47)
         self.textActorAngle.SetInput("Angle: " + str(self.model.angle))
         self.renderer.AddActor(self.textActorAngle)
@@ -115,6 +115,7 @@ class MPRW_View(QWidget):
         self.vl.addWidget(_bottom_widget)
 
     def _height_angle_groupbox(self) -> QGroupBox:
+        logger.debug("First bottom widget of MPR Window initialized")
         _size_set_groupbox = QGroupBox()
 
         _set_height_angle_layout = QVBoxLayout(_size_set_groupbox)
@@ -148,6 +149,7 @@ class MPRW_View(QWidget):
     def update_height(self):
         _height = self._height_set_box.value()
         self.model.set_height(_height)
+        logger.info(f'Height updated {_height}')
 
         self.actor = self.control.get_actor()
         self.renderer.AddActor(self.actor)
@@ -156,12 +158,14 @@ class MPRW_View(QWidget):
     def update_angle(self):
         _angle = self._angle_set_box.value()
         self.model.set_angle(_angle)
+        logger.info(f'Angle updated {_angle}')
 
         self.actor = self.control.get_actor()
         self.renderer.AddActor(self.actor)
         self.renderWindow.Render()
 
     def _build_length_calc_box(self):
+        logger.debug("Second bottom widget of MPR Window initialized")
         _length_calc_groupbox = QGroupBox(self)
 
         _length_calc_layout = QVBoxLayout(_length_calc_groupbox)
@@ -181,6 +185,7 @@ class MPRW_View(QWidget):
         return _length_calc_groupbox
 
     def _build_length_results_box(self):
+        logger.debug("Third bottom widget of MPR Window initialized")
         _length_results_group_box = QGroupBox(self)
 
         _length_results_layout = QVBoxLayout(_length_results_group_box)
@@ -233,9 +238,7 @@ class MPRW_View(QWidget):
         if self.lengthPoints.addPoint(coordinates): # if did not already exist
             currentPolygonActor = self.lengthPoints.generatePolygonLastPoint(pickedCoordinates) # generate polygon for the point we just added
             self.renderer.AddActor(currentPolygonActor)
-    #     self.presentPoints()
-    #
-    # def presentPoints(self):
+
             for point in self.lengthPoints.points:
                 polygon = point.polygon
                 polygon.GeneratePolygonOn()
@@ -246,4 +249,5 @@ class MPRW_View(QWidget):
                 "%s Files (*.%s)" % ("json".upper(), "json"))
 
         if fileName:
+            logger.info(f'Saving length/MPR points to {fileName}')
             self.model.saveLengths(fileName, self.lengthPoints)

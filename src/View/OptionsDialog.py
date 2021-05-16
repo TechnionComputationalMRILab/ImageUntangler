@@ -10,14 +10,16 @@ class OptionsDialog(QDialog):
 
         self._set_defaults()
         self._set_title()
-        self._set_dialog_boxes()
 
         self.layout = QVBoxLayout()
         self.setLayout(self.layout)
 
         self._default_folder()
+        self._default_save_to_folder()
         self._set_panels()
-        self._add_widgets()
+        self._set_dialog_buttons()
+
+        # self._add_widgets()
 
         self.show()
 
@@ -54,6 +56,7 @@ class OptionsDialog(QDialog):
         self.buttons_layout.addWidget(_open)
 
         self.default_folder_layout.addWidget(self.buttons_widget)
+        self.layout.addWidget(self.folder_groupbox)
 
     @staticmethod
     def _select_working_directory():
@@ -61,6 +64,43 @@ class OptionsDialog(QDialog):
         folderPath = str(fileExplorer.getExistingDirectory())
         if os.path.exists(folderPath):  # if user picked a directory, ie did not X-out the window
             config_data.update_config_value("DefaultFolder", folderPath)
+
+    def _default_save_to_folder(self):
+        self.folder_groupbox = QGroupBox("Set Default directory for saved files")
+
+        self.default_folder_layout = QVBoxLayout()
+        self.folder_groupbox.setLayout(self.default_folder_layout)
+
+        self.folder_textbox = QLineEdit(self)
+        self.default_folder_layout.addWidget(self.folder_textbox)
+
+        self.folder_textbox.setText(config_data.get_config_value('DefaultSaveToFolder'))
+        self.folder_textbox.setReadOnly(True)
+
+        _browse = QPushButton("Select working directory")
+        _open = QPushButton("Open in Explorer")
+
+        _browse.clicked.connect(self._select_working_directory)
+        _browse.clicked.connect(lambda: self.folder_textbox.setText(config_data.get_config_value('DefaultSaveToFolder')))
+
+        _open.clicked.connect(lambda: webbrowser.open(config_data.get_config_value('DefaultSaveToFolder')))
+
+        self.buttons_widget = QWidget()
+        self.buttons_layout = QHBoxLayout()
+
+        self.buttons_widget.setLayout(self.buttons_layout)
+        self.buttons_layout.addWidget(_browse)
+        self.buttons_layout.addWidget(_open)
+
+        self.default_folder_layout.addWidget(self.buttons_widget)
+        self.layout.addWidget(self.folder_groupbox)
+
+    @staticmethod
+    def _select_save_to_directory():
+        fileExplorer = QFileDialog(directory=config_data.get_config_value('DefaultSaveToFolder'))
+        folderPath = str(fileExplorer.getExistingDirectory())
+        if os.path.exists(folderPath):  # if user picked a directory, ie did not X-out the window
+            config_data.update_config_value("DefaultSaveToFolder", folderPath)
 
     def _set_panels(self):
         self.panel_groupbox = QGroupBox("Set number of panels")
@@ -79,6 +119,7 @@ class OptionsDialog(QDialog):
 
         self.panel_groupbox_layout.addWidget(self.panel_horizontal_spinbox, 1, 2)
         self.panel_groupbox_layout.addWidget(self.panel_vertical_spinbox, 2, 2)
+        self.layout.addWidget(self.panel_groupbox)
 
     def _set_defaults(self):
         self.panel_number = 2, 0
@@ -86,12 +127,13 @@ class OptionsDialog(QDialog):
     def _set_title(self):
         self.setWindowTitle("Preferences")
 
-    def _set_dialog_boxes(self):
+    def _set_dialog_buttons(self):
         self._qbtn = QDialogButtonBox.Ok | QDialogButtonBox.Cancel
 
         self.buttonBox = QDialogButtonBox(self._qbtn)
         self.buttonBox.accepted.connect(self.accept)
         self.buttonBox.rejected.connect(self.reject)
+        self.layout.addWidget(self.buttonBox)
 
     def accept(self) -> None:
         if not self._check_panel_count():

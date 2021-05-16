@@ -1,9 +1,11 @@
 import json
 import numpy as np
-from Model.ImageProperties import ImageProperties
-from Model.PointCollection import PointCollection
 import pydicom
 
+from Model.ImageProperties import ImageProperties
+from Model.PointCollection import PointCollection
+from util import logger
+logger = logger.get_logger()
 
 ACCEPTABLE_FILE_TYPES = ['csv', 'json', 'sqllite', 'mysql', 'hdf5']
 NOT_IMPLEMENTED = ['csv', 'sqllite', 'mysql', 'hdf5']
@@ -17,13 +19,19 @@ class SaveFormatter:
         self.output_data = self.header
 
     def add_pointcollection_data(self, key: str, value: PointCollection):
+        logger.info(f"added {len(value)} {key} to saved file")
         _points = value.getCoordinatesArray()[:, 0:3]
 
         self.output_data[key] = _points
 
     def add_generic_data(self, key: str, value):
+        logger.info(f"Adding [{key}]: {value}")
         """ works for anything except for point collections"""
         self.output_data[key] = value
+
+    def add_sliceidx_list(self, key, value):
+        logger.info(f"Adding {len(value)} slice indices to saved file")
+        self.output_data[key + " sliceIdx_list"] = value
 
     def save_data(self):
         self._clean_data()
@@ -35,5 +43,4 @@ class SaveFormatter:
         for i in self.output_data:
             if type(self.output_data[i]) is np.ndarray:
                 self.output_data[i] = self.output_data[i].tolist()
-            elif type(self.output_data[i]) is pydicom.multival.MultiValue:
-                self.output_data[i] = list(self.output_data[i])
+            # elif: TODO DICOM

@@ -1,8 +1,10 @@
 import os
 from PyQt5.QtWidgets import QMenuBar, QMenu, QAction, QFileDialog
-from util import config_data, stylesheets
 from View.PanelNumberDialog import PanelNumberDialog
 from View.OptionsDialog import OptionsDialog
+from util import config_data, stylesheets, logger
+
+logg = logger.get_logger()
 
 
 class SettingsMenu(QMenu):
@@ -17,12 +19,14 @@ class SettingsMenu(QMenu):
         folderPath = str(fileExplorer.getExistingDirectory())
         if os.path.exists(folderPath):  # if user picked a directory, ie did not X-out the window
             config_data.update_config_value("DefaultFolder", folderPath)
+            logg.debug(f"Default folder set to {folderPath}")
 
     @staticmethod
     def setPanelNumber():
         _panel_dialog = PanelNumberDialog()
         _panel_dialog.exec()
         config_data.update_config_value("NumViewers", _panel_dialog.panel_number[0])
+        logg.info(f"Panel count set to {_panel_dialog.panel_number[0]}")
 
     @staticmethod
     def openOptionsDialog():
@@ -50,11 +54,11 @@ class SettingsMenu(QMenu):
         return optionsAction
 
     def addDefaultFileOption(self):
-        defaultFolderAction: QAction = self.getDefaultFolderAction()
-        self.addAction(defaultFolderAction)
+        # defaultFolderAction: QAction = self.getDefaultFolderAction()
+        # self.addAction(defaultFolderAction)
 
-        defaultPanelAction: QAction = self.getPanelNumberAction()
-        self.addAction(defaultPanelAction)
+        # defaultPanelAction: QAction = self.getPanelNumberAction()
+        # self.addAction(defaultPanelAction)
 
         optionsAction: QAction = self.getOptions()
         self.addAction(optionsAction)

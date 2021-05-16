@@ -1,6 +1,9 @@
 from typing import List
 import os
 
+from util import logger
+logger = logger.get_logger()
+
 
 def get_directory(path: str) -> str:
     return path[:path.rfind(os.path.sep)]
@@ -24,9 +27,11 @@ def isValidDicom(filename: str):
 def getMRIimages(directory: str) -> List[str]:
     # returns list of all .nrrd files in directories/subdirectories
     allFiles = os.listdir(directory)
+    logger.info(f"Opening directory: {directory}")
     MRIimages = list()
     for entry in allFiles:
         fullPath = os.path.join(directory, entry)
+        logger.debug(f'Adding to file list: {entry}')
         if os.path.isdir(fullPath):
             MRIimages = MRIimages + getMRIimages(fullPath)
         else:
@@ -36,4 +41,5 @@ def getMRIimages(directory: str) -> List[str]:
                 MRIimages.append(fullPath)
     if combineFormats(MRIimages):
         raise ValueError("DO NOT COMBINE DICOM AND NRRD FILES FOR A SINGLE PATIENT")
+
     return MRIimages

@@ -1,8 +1,9 @@
 import numpy as np
 from typing import List
-from vtk.qt.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
-from vtk import vtkImageActor, vtkImageReslice, vtkMatrix4x4, vtkRenderer, vtkTextActor,  vtkPolyDataMapper,\
+from vtkmodules.qt.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
+from vtkmodules.all import vtkImageActor, vtkImageReslice, vtkMatrix4x4, vtkRenderer, vtkTextActor, vtkPolyDataMapper,\
     vtkActor, vtkCursor2D
+import vtkmodules.all as vtk
 
 from Model import ImageProperties
 from Control.SequenceViewerInteractorStyle import SequenceViewerInteractorStyle
@@ -10,7 +11,10 @@ from Model.PointCollection import PointCollection
 from MPRWindow.MPRWindow import MPRWindow
 from MainWindowComponents import MessageBoxes
 from Control.SaveFormatter import SaveFormatter
+from Control.PointLoader import PointLoader
 
+from util import logger
+logger = logger.get_logger()
 
 
 class BaseSequenceViewer:
@@ -34,6 +38,7 @@ class BaseSequenceViewer:
 
         self.MPRpoints = PointCollection()
         self.lengthPoints = PointCollection()
+        self.index_list = []
 
         self.presentCursor()
 
@@ -63,7 +68,8 @@ class BaseSequenceViewer:
         self.actor.GetProperty().SetColorLevel(self.LevelVal)
 
     def renderImage(self):
-        self.renderer.SetBackground(68 / 255, 71 / 255, 79 / 255)
+        logger.info(f"Rendering Image {self.imageData.header['filename']}")
+        self.renderer.SetBackground(204 / 255, 204 / 255, 204 / 255)
         self.renderer.AddActor(self.actor)
         self.renderer.SetLayer(0)
         # self.window = self.interactor.GetRenderWindow()
@@ -78,7 +84,7 @@ class BaseSequenceViewer:
     def setIdxText(self):
         self.textActorSliceIdx = vtkTextActor()
         self.textActorSliceIdx.GetTextProperty().SetFontSize(14)
-        self.textActorSliceIdx.GetTextProperty().SetColor(1, 250/255, 250/255)
+        self.textActorSliceIdx.GetTextProperty().SetColor(0, 34/255, 158/255)
         self.textActorSliceIdx.SetDisplayPosition(0, 2)
         self.textActorSliceIdx.SetInput("SliceIdx: " + str(self.sliceIdx))
         self.renderer.AddActor(self.textActorSliceIdx)
@@ -86,7 +92,7 @@ class BaseSequenceViewer:
     def setWindowText(self):
         self.textActorWindow = vtkTextActor()
         self.textActorWindow.GetTextProperty().SetFontSize(14)
-        self.textActorWindow.GetTextProperty().SetColor(1, 250/255, 250/255)
+        self.textActorWindow.GetTextProperty().SetColor(0, 34/255, 158/255)
         self.textActorWindow.SetDisplayPosition(0, 17)
         self.textActorWindow.SetInput("Window: " + str(self.WindowVal))
         self.renderer.AddActor(self.textActorWindow)
@@ -94,7 +100,7 @@ class BaseSequenceViewer:
     def setLevelText(self):
         self.textActorLevel = vtkTextActor()
         self.textActorLevel.GetTextProperty().SetFontSize(14)
-        self.textActorLevel.GetTextProperty().SetColor(1, 250/255, 250/255)
+        self.textActorLevel.GetTextProperty().SetColor(0, 34/255, 158/255)
         self.textActorLevel.SetDisplayPosition(0, 32)
         self.textActorLevel.SetInput("Level: " + str(self.LevelVal))
         self.renderer.AddActor(self.textActorLevel)
@@ -112,6 +118,7 @@ class BaseSequenceViewer:
         self.window.Render()
 
     def updateWindowLevel(self):
+        logger.debug(f"Window and Level updated to ({self.actor.GetProperty().GetColorWindow()}, {self.actor.GetProperty().GetColorLevel()})")
         self.manager.changeWindow(self.actor.GetProperty().GetColorWindow())
         self.manager.changeLevel(self.actor.GetProperty().GetColorLevel())
 
@@ -156,6 +163,9 @@ class BaseSequenceViewer:
         self.manager.updateSliderIndex(self.sliceIdx)
         self.presentPoints(self.MPRpoints, sliceIdx)
 
+    def presentPoints(self, pointCollection, sliceIdx) -> None:
+        raise NotImplementedError
+
     def moveBullsEye(self, newCoordinates):
         self.Cursor.SetFocalPoint(newCoordinates)
         self.window.Render()
@@ -178,13 +188,10 @@ class BaseSequenceViewer:
             MessageBoxes.notEnoughPointsClicked("length")
 
     def calculateMPR(self):
-        _points = self.MPRpoints.getCoordinatesArray()
-        _image_data = self.imageData
-
-        if _points.shape[0] <= 3:
+        if self.MPRpoints.getCoordinatesArray().shape[0] <= 3:
             MessageBoxes.notEnoughPointsClicked("MPR")
         else:
-            MPRWindow(_points, _image_data)
+            MPRWindow(self.MPRpoints.getCoordinatesArray(), self.imageData)
 
     def saveLengths(self, filename):
         _save_formatter = SaveFormatter(filename, self.imageData)
@@ -194,30 +201,47 @@ class BaseSequenceViewer:
     def saveMPRPoints(self, filename):
         _save_formatter = SaveFormatter(filename, self.imageData)
         _save_formatter.add_pointcollection_data("MPR points", self.MPRpoints)
+        _save_formatter.add_sliceidx_list("MPR points", self.index_list)
         _save_formatter.save_data()
 
+    def loadMPRPoints(self, filename):
+        logger.info(f"Loading MPR points from {filename}")
+        _mpr_loader = PointLoader(filename, self.imageData)
+        self._loaded_points = _mpr_loader.get_points()
+        self._sliceIdx_list = _mpr_loader.get_slideidx_list()
+
+    def presentLoadedPoints(self, pointCollection, slideIdx):
+        raise NotImplementedError
+
+    def processLoadedPoints(self):
+        raise NotImplementedError
+
     def drawLengthLines(self):
-        _actor = self.lengthPoints.generateLineActor()
+        if len(self.lengthPoints) >= 2:
+            _actor = self.lengthPoints.generateLineActor()
 
-        _renderer = vtkRenderer()
-        _renderer.AddActor(_actor)
-        _renderer.InteractiveOff()
+            _renderer = vtkRenderer()
+            _renderer.AddActor(_actor)
+            print(_actor.GetBounds())
 
-        self.window.AddRenderer(_renderer)
-        _renderer.SetLayer(1)
-        self.window.SetNumberOfLayers(2)
+            _renderer.InteractiveOn() # TODO: IS TEMPORARY
 
-        self.window.Render()
+            self.window.AddRenderer(_renderer)
+            _renderer.SetLayer(1)
+            self.window.SetNumberOfLayers(2)
+
+            self.window.Render()
 
     def drawMPRSpline(self):
-        _actor = self.MPRpoints.generateSplineActor()
+        if self.MPRpoints.getCoordinatesArray().shape[0] >= 3:
+            _actor = self.MPRpoints.generateSplineActor()
 
-        _renderer = vtkRenderer()
-        _renderer.AddActor(_actor)
-        _renderer.InteractiveOff()
+            _renderer = vtkRenderer()
+            _renderer.AddActor(_actor)
+            _renderer.InteractiveOn() # TODO: IS TEMPORARY
 
-        self.window.AddRenderer(_renderer)
-        _renderer.SetLayer(1)
-        self.window.SetNumberOfLayers(2)
+            self.window.AddRenderer(_renderer)
+            _renderer.SetLayer(1)
+            self.window.SetNumberOfLayers(2)
 
-        self.window.Render()
+            self.window.Render()

@@ -4,12 +4,12 @@ from typing import List
 from PyQt5.QtCore import QMetaObject, QCoreApplication, QRect
 from PyQt5.QtWidgets import QWidget, QHBoxLayout, QPushButton, QFileDialog
 
-from util import config_data, MRI_files, stylesheets
+from util import config_data, MRI_files, stylesheets, logger
 from MainWindowComponents.MessageBoxes import invalidDirectoryMessage
 from Model.NRRDModel import NRRDViewerModel
 from Model.DICOMModel import DICOMViewerModel
 
-
+logger = logger.get_logger()
 #ic.configureOutput(includeContext=True)
 
 
@@ -37,6 +37,7 @@ class Tab(QWidget):
         self.MRIimages = MRI_files.getMRIimages(folderPath) # so can be loaded by the viewers
         # this must be set after MRIimages or else tab will be renamed to blank if user X-es out file explorer since error is thrown there
         self.name = folderPath[folderPath.rfind(os.path.sep) + 1:]
+        logger.info(f"Loading {self.name}")
 
     def clearDefault(self):
         while self.mainLayout.count():
@@ -45,10 +46,15 @@ class Tab(QWidget):
                 child.widget().deleteLater()
 
     def get_viewer(self):
-        if MRI_files.isValidDicom(self.MRIimages[0]):
-            return DICOMViewerModel(self.MRIimages)
-        else:
-            return NRRDViewerModel(self.MRIimages)
+        try:
+            if MRI_files.isValidDicom(self.MRIimages[0]):
+                logger.info("Opening a DICOM file")
+                return DICOMViewerModel(self.MRIimages)
+            else:
+                logger.info("Opening a NRRD file")
+                return NRRDViewerModel(self.MRIimages)
+        except:
+            logger.critical("Error in opening file")
 
     def addViewers(self):
         numViewers = config_data.get_config_value("NumViewers")
@@ -84,6 +90,7 @@ class Tab(QWidget):
         self.mainLayout.addWidget(self.defaultTabMainWidget)
 
     def buildNewTab(self):
+        logger.debug("Building a new tab")
         self.setTabProperties()
         self.mainLayout = QHBoxLayout(self) # sets this as layout manager for the tab
         self.buildDefaultTab() # builds default tab until user adds regular MRI files

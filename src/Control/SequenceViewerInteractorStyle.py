@@ -1,4 +1,5 @@
 from vtk import vtkInteractorStyleImage, vtkPropPicker
+from icecream import ic
 
 
 class SequenceViewerInteractorStyle(vtkInteractorStyleImage):
@@ -132,6 +133,7 @@ class SequenceViewerInteractorStyle(vtkInteractorStyleImage):
             zCoordinate = (center[2] - self.model.view.imageData.origin[2]) - self.model.view.imageData.dimensions[2]\
                              * self.model.view.imageData.spacing[2] / 2
             pickedCoordinates = (pickPosition[0], pickPosition[1], zCoordinate)
+
             self.model.addPoint(pointType, pickedCoordinates)
 
     def OnPickingCursorLeftButtonUp(self):

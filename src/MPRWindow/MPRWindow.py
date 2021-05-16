@@ -1,10 +1,8 @@
-import sys
-import os
 from PyQt5.Qt import *
 from MPRWindow.Model import MPRW_Model
 
-# sys.path.append(os.path.abspath(os.path.join('..', 'util')))
-from util import config_data, stylesheets
+from util import config_data, stylesheets, logger
+logger = logger.get_logger()
 
 
 class MPRWindow(QDialog):
@@ -35,4 +33,5 @@ class MPRWindow(QDialog):
         self.setWindowIcon(QIcon(config_data.get_icon_file_path()))
 
     def closeEvent(self, event) -> None:
+        logger.debug("Closing MPR Window Dialogbox")
         print("close event")

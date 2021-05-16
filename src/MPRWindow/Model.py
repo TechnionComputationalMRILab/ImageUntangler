@@ -1,17 +1,14 @@
-from MPRWindow.Control import MPRW_Control
-from MPRWindow.View import MPRW_View
-from Model.getMPR import PointsToPlaneVectors
 import numpy as np
-from typing import List
 import vtkmodules.all as vtk
 from vtk import vtkImageData
 from vtk.util import numpy_support
-# from icecream import ic
-import sys
-import os
-# sys.path.append(os.path.abspath(os.path.join('..', 'util')))
-from util import config_data, stylesheets, mpr_window_config
+
+from MPRWindow.Control import MPRW_Control
+from MPRWindow.View import MPRW_View
+from Model.getMPR import PointsToPlaneVectors
 from Control.SaveFormatter import SaveFormatter
+from util import config_data, stylesheets, mpr_window_config, logger
+logger = logger.get_logger()
 
 
 class MPRW_Model:
@@ -68,10 +65,12 @@ class MPRW_Model:
         _image_data.GetPointData().SetScalars(scalars)
         _image_data.Modified()
 
+        logger.info("MPR Calculation")
         return _image_data
 
     def saveLengths(self, filename, length_points):
-        _save_formatter = SaveFormatter(filename, self.image_data)
-        _save_formatter.add_pointcollection_data('length in mpr points', length_points)
-        _save_formatter.add_generic_data("mpr points", self.points)
-        _save_formatter.save_data()
+        self.control.save_lengths(filename, length_points)
+        # _save_formatter = SaveFormatter(filename, self.image_data)
+        # _save_formatter.add_pointcollection_data('length in mpr points', length_points)
+        # _save_formatter.add_generic_data("mpr points", self.points)
+        # _save_formatter.save_data()

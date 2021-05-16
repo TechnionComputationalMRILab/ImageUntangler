@@ -1,6 +1,9 @@
 import os
 from PyQt5.QtWidgets import QMenuBar, QMenu, QAction
-from util import config_data, stylesheets
+
+from View.DialogLog import DialogLog
+from util import stylesheets, logger
+logger = logger.get_logger()
 
 
 class HelpMenu(QMenu):
@@ -11,13 +14,16 @@ class HelpMenu(QMenu):
         self.set_up_help_menu()
 
     def help(self):
+        logger.debug("Help button clicked")
         print("print help stuff")
 
     def about(self):
-        print('about')
+        logger.debug("About button clicked")
+        print("about")
 
     def log(self):
-        print("log")
+        logger.debug("Log opened")
+        DialogLog()
 
     def open_help(self):
         _help_action = QAction(parent=self)

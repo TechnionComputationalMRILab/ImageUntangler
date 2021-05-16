@@ -7,6 +7,9 @@ from Model.DICOMViewerManager import DICOMViewerManager
 from Control.SequenceInteractorWidgets import SequenceInteractorWidgets
 from Control.SequenceViewerInteractorStyle import SequenceViewerInteractorStyle
 
+from util import logger
+logger = logger.get_logger()
+
 
 class DICOMViewerModel(BaseModel):
     def __init__(self, MRIimages: List[str]):
@@ -14,7 +17,7 @@ class DICOMViewerModel(BaseModel):
         frame = self.buildFrame()
         self.interactor = QVTKRenderWindowInteractor(frame)
         self.interactorStyle = SequenceViewerInteractorStyle(parent=self.interactor, model=self)
-        self.widgets = SequenceInteractorWidgets(MRIimages, self)
+        # self.widgets = SequenceInteractorWidgets(MRIimages, self)  # ???
         self.sequenceManager = DICOMViewerManager(self, MRIimages)
         self.view = self.sequenceManager.loadSequence(0, self.interactor, self.interactorStyle)
         self.widgets = SequenceInteractorWidgets([str(sequence) for sequence in self.sequenceManager.sequences], self)

@@ -45,3 +45,21 @@ def notEnoughPointsClicked(function):
     errorMessage.setText(f"Not enough points clicked to calculate {function}!")
     errorMessage.setIcon(QMessageBox.Critical)
     errorMessage.exec_()
+
+
+def file_mismatch_warning():
+    errorMessage = QMessageBox()
+    errorMessage.setStyleSheet(stylesheets.get_sheet_by_name("ErrorMessage"))
+    errorMessage.setWindowTitle("File mismatch")
+    errorMessage.setText(f"Filename in loaded JSON file does not match currently opened sequence")
+    errorMessage.setIcon(QMessageBox.Warning)
+    errorMessage.exec_()
+
+
+def json_file_wrong_headers():
+    errorMessage = QMessageBox()
+    errorMessage.setStyleSheet(stylesheets.get_sheet_by_name("ErrorMessage"))
+    errorMessage.setWindowTitle("JSON file invalid")
+    errorMessage.setText(f"Invalid JSON file opened")
+    errorMessage.setIcon(QMessageBox.Critical)
+    errorMessage.exec_()

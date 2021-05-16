@@ -7,6 +7,9 @@ from Model.NRRDViewerManager import NRRDViewerManager
 from Control.SequenceInteractorWidgets import SequenceInteractorWidgets
 from Control.SequenceViewerInteractorStyle import SequenceViewerInteractorStyle
 
+from util import logger
+logger = logger.get_logger()
+
 
 class NRRDViewerModel(BaseModel):
     def __init__(self, MRIimages: List[str]):
@@ -28,15 +31,21 @@ class NRRDViewerModel(BaseModel):
 #_________________________________________Constructor functions_____________________________________
 
     def initializeSliderValues(self):
+        logger.info(f"Index value {int(self.view.sliceIdx)}")
         self.widgets.setValues(sliceIdx=int(self.view.sliceIdx), maxSlice = self.view.imageData.extent[5], windowValue=int(self.view.WindowVal), levelValue=int(self.view.LevelVal))
 
 #_____________________________________________Interface to Widgets______________________________________________________________
 
     def changeSequence(self, sequenceIndex: int):
-        self.view = self.sequenceManager.loadSequence(sequenceIndex, self.interactor, self.interactorStyle)
-        self.widgets.setValues(sliceIdx=int(self.view.sliceIdx), maxSlice = self.view.imageData.extent[5], windowValue=int(self.view.WindowVal), levelValue=int(self.view.LevelVal))
+        logger.info(f"Sequence changed {sequenceIndex}")
+        try:
+            self.view = self.sequenceManager.loadSequence(sequenceIndex, self.interactor, self.interactorStyle)
+            self.widgets.setValues(sliceIdx=int(self.view.sliceIdx), maxSlice = self.view.imageData.extent[5], windowValue=int(self.view.WindowVal), levelValue=int(self.view.LevelVal))
+        except Exception as err:
+            logger.critical(f"Error: {err}")
 
     def setIndex(self, index: int):
+        logger.info(f"Set index {int(index)}")
         self.view.setSliceIndex(index)
 #__________________________________________Interface to interactor style_____________________________________________
 

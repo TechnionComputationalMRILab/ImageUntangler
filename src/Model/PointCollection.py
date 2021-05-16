@@ -1,7 +1,7 @@
 import numpy as np
 from typing import List
-from vtk import vtkRegularPolygonSource, vtkPolyDataMapper, vtkActor, vtkPoints, vtkPolyData, vtkCellArray, vtkLine, \
-    vtkRenderer, vtkParametricFunctionSource, vtkParametricSpline
+from vtkmodules.all import vtkRegularPolygonSource, vtkPolyDataMapper, vtkActor, vtkPoints, vtkPolyData, \
+    vtkCellArray, vtkLine, vtkRenderer, vtkParametricFunctionSource, vtkParametricSpline
 
 
 class Point:
@@ -11,6 +11,12 @@ class Point:
     
     def addPolygon(self, polygon):
         self.polygon = polygon
+
+    def __str__(self):
+        return str(self.coordinates)
+
+    def __getitem__(self, item):
+        return self.coordinates[item]
 
 
 class PointCollection:
@@ -52,6 +58,9 @@ class PointCollection:
 
     def __len__(self):
         return len(self.points)
+
+    def __getitem__(self, item):
+        return self.points[item]
 
     def getCoordinatesArray(self) -> np.array:
         return np.asarray([point.coordinates for point in self.points])
@@ -109,3 +118,4 @@ class PointCollection:
         spline_actor.GetProperty().SetLineWidth(width)
 
         return spline_actor
+
