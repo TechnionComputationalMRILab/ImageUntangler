@@ -1,5 +1,5 @@
 # ImageUntangler
-
+ 
 Project to aid Gastroenterologists and biologists to analyze MRI images of the Small Bowel. The main benefit the project hopes to add is MPR for Small Bowel MRI images
 
 Currently under development in [TCML](https://tcml-bme.github.io/) under Professor Moti Freiman.  
