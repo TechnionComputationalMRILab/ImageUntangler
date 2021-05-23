@@ -1,5 +1,6 @@
 import json
 import os
+from icecream import ic
 from MainWindowComponents import MessageBoxes
 from Model.PointCollection import PointCollection
 from util import logger
@@ -10,9 +11,13 @@ class PointLoader:
     def __init__(self, filename, image_data):
         self.filename = filename
         self.image_data = image_data
+        self.slide_indices = []
 
         self.points = PointCollection()
         self._open_file()
+
+    def _calculate_slideIdx(self, point):
+        return self.image_data.convertZCoordsToSlices([point])[0]
 
     def get_points(self): # -> PointCollection:
         logger.debug(f"Getting point data from {self.filename}")
@@ -20,11 +25,10 @@ class PointLoader:
 
         logger.info(f"Loading {len(self.json_data[_point_type])} {_point_type}")
         for i in self.json_data[_point_type]:
+            self.slide_indices.append(self._calculate_slideIdx(i[2]))
+            i.append(self._calculate_slideIdx(i[2]))
             self.points.addPoint(i)
         return self.points
-
-    def get_slideidx_list(self):
-        return self.json_data[self._get_type_of_points() + " sliceIdx_list"]
 
     def _get_type_of_points(self):
         if "length points" in self.json_data.keys():

@@ -12,6 +12,7 @@ from MPRWindow.MPRWindow import MPRWindow
 from MainWindowComponents import MessageBoxes
 from Control.SaveFormatter import SaveFormatter
 from Control.PointLoader import PointLoader
+from icecream import ic
 
 from util import logger
 logger = logger.get_logger()
@@ -201,20 +202,12 @@ class BaseSequenceViewer:
     def saveMPRPoints(self, filename):
         _save_formatter = SaveFormatter(filename, self.imageData)
         _save_formatter.add_pointcollection_data("MPR points", self.MPRpoints)
-        _save_formatter.add_sliceidx_list("MPR points", self.index_list)
         _save_formatter.save_data()
 
     def loadMPRPoints(self, filename):
         logger.info(f"Loading MPR points from {filename}")
         _mpr_loader = PointLoader(filename, self.imageData)
-        self._loaded_points = _mpr_loader.get_points()
-        self._sliceIdx_list = _mpr_loader.get_slideidx_list()
-
-    def presentLoadedPoints(self, pointCollection, slideIdx):
-        raise NotImplementedError
-
-    def processLoadedPoints(self):
-        raise NotImplementedError
+        self.MPRpoints = _mpr_loader.get_points()
 
     def drawLengthLines(self):
         if len(self.lengthPoints) >= 2:

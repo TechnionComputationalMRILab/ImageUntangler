@@ -1,1 +1,28 @@
-{"AppName": "MRI Untangler", "DefaultFolder": "C:/Users/ang.a/OneDrive - Technion/Desktop", "DefaultSaveToFolder": "C:/Users/ang.a/OneDrive - Technion", "DefaultSaveAsFile": "JSON", "NumViewers": 2, "VersionNumber": "1.1.0"}
+{
+    "Defaults":{
+        "AppName":"MRI Untangler",
+        "DefaultFolder":"C:\\Users\\ang.a\\OneDrive - Technion\\Documents\\MRI_Data\\Filename_test",
+        "DefaultSaveToFolder":"C:/Users/ang.a/OneDrive - Technion",
+        "DefaultSaveAsFile":"JSON",
+        "NumViewers":2,
+        "VersionNumber":"1.1.0"
+    },
+    "UseConfig":"config.json",
+    "UseTesting":true,
+    "Display":{
+        "Length":{
+            "color":"blue",
+            "size":5,
+            "line-thickness":5,
+            "line-style":"dotted",
+            "measurement-style":"overlay"
+        },
+        "MPR":{
+            "color":"red",
+            "size":5,
+            "line-thickness":5,
+            "line-style":"dashed",
+            "measurement-style":"none"
+        }
+    }
+}

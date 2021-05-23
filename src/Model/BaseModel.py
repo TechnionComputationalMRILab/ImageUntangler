@@ -119,6 +119,3 @@ class BaseModel(QWidget):
 
     def drawMPRSpline(self):
         self.view.drawMPRSpline()
-
-    def processLoadedPoints(self):
-        self.view.processLoadedPoints()

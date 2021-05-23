@@ -72,7 +72,7 @@ class Toolbar(QToolBar):
         MPRLoad = QAction("Load MPR Points from file", self)
         MPRLoad.setStatusTip("Load the MPR points from file")
         MPRLoad.triggered.connect(self.manager.loadMPRPoints)
-        MPRLoad.triggered.connect(self.manager.processLoadedPoints)
+        MPRLoad.triggered.connect(self.manager.calculateMPR)
         return MPRLoad
 
     def addMPRMenu(self):

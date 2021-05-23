@@ -5,6 +5,8 @@ from vtk.util import numpy_support
 
 import nrrd
 import pydicom as dicom
+from icecream import ic
+import numpy as np
 
 
 def getImageData(imgPath: str, isDicom: bool):
@@ -55,7 +57,18 @@ class ImageProperties: # class makes operations more efficient by caching image 
 
         self.header = header
 
+        min_z = round(center_z - (self.origin[2] + self.spacing[2] * (self.dimensions[2])), 1)
+        max_z = math.floor((self.dimensions[2] * self.spacing[2]) + min_z)
+        self.slice_list = dict(zip(np.arange(self.dimensions[2]), np.arange(min_z, max_z, self.spacing[2])))
+
     def getParallelScale(self):
         return 0.5 * self.spacing[0] * (self.extent[1] - self.extent[0])
 
+    def convertZCoordsToSlices(self, z_coords: list):
+        _slice_list = []
+        for i in z_coords:
+            for k, v in self.slice_list.items():
+                if np.isclose(i, v):
+                    _slice_list.append(k)
 
+        return _slice_list

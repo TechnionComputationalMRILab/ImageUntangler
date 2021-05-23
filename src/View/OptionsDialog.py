@@ -8,31 +8,49 @@ class OptionsDialog(QDialog):
     def __init__(self, parent=None):
         super().__init__(parent=parent)
 
-        self._set_defaults()
-        self._set_title()
-
         self.layout = QVBoxLayout()
         self.setLayout(self.layout)
+
+        self._set_defaults()
+        self._set_title()
 
         self._default_folder()
         self._default_save_to_folder()
         self._set_panels()
         self._set_dialog_buttons()
+        self._testing_features()
 
-        # self._add_widgets()
+        self._add_widgets()
 
         self.show()
 
     def _add_widgets(self):
-        self.layout.addWidget(self.folder_groupbox)
+        # this is where the order comes in
         self.layout.addWidget(self.panel_groupbox)
+        self.layout.addWidget(self.default_folder_groupbox)
+        self.layout.addWidget(self.default_save_to_folder_groupbox)
+        self.layout.addWidget(self.testing_groupbox)
         self.layout.addWidget(self.buttonBox)
 
+    def _testing_features(self):
+        self.testing_groupbox = QGroupBox("Features in testing")
+        self.testing_groupbox.setCheckable(True)
+        self.testing_groupbox.setChecked(False)
+
+        self.testing_layout = QVBoxLayout()
+        self.testing_groupbox.setLayout(self.testing_layout)
+
+        self.testing_display_lines = QCheckBox("Draw lines to connect points")
+        self.testing_layout.addWidget(self.testing_display_lines)
+
+
+
+
     def _default_folder(self):
-        self.folder_groupbox = QGroupBox("Set Working directory")
+        self.default_folder_groupbox = QGroupBox("Set Working directory")
 
         self.default_folder_layout = QVBoxLayout()
-        self.folder_groupbox.setLayout(self.default_folder_layout)
+        self.default_folder_groupbox.setLayout(self.default_folder_layout)
 
         self.folder_textbox = QLineEdit(self)
         self.default_folder_layout.addWidget(self.folder_textbox)
@@ -56,7 +74,7 @@ class OptionsDialog(QDialog):
         self.buttons_layout.addWidget(_open)
 
         self.default_folder_layout.addWidget(self.buttons_widget)
-        self.layout.addWidget(self.folder_groupbox)
+        # self.layout.addWidget(self.default_folder_groupbox)
 
     @staticmethod
     def _select_working_directory():
@@ -66,13 +84,13 @@ class OptionsDialog(QDialog):
             config_data.update_config_value("DefaultFolder", folderPath)
 
     def _default_save_to_folder(self):
-        self.folder_groupbox = QGroupBox("Set Default directory for saved files")
+        self.default_save_to_folder_groupbox = QGroupBox("Set Default directory for saved files")
 
-        self.default_folder_layout = QVBoxLayout()
-        self.folder_groupbox.setLayout(self.default_folder_layout)
+        self.default_save_to_folder_layout = QVBoxLayout()
+        self.default_save_to_folder_groupbox.setLayout(self.default_save_to_folder_layout)
 
         self.folder_textbox = QLineEdit(self)
-        self.default_folder_layout.addWidget(self.folder_textbox)
+        self.default_save_to_folder_layout.addWidget(self.folder_textbox)
 
         self.folder_textbox.setText(config_data.get_config_value('DefaultSaveToFolder'))
         self.folder_textbox.setReadOnly(True)
@@ -92,8 +110,8 @@ class OptionsDialog(QDialog):
         self.buttons_layout.addWidget(_browse)
         self.buttons_layout.addWidget(_open)
 
-        self.default_folder_layout.addWidget(self.buttons_widget)
-        self.layout.addWidget(self.folder_groupbox)
+        self.default_save_to_folder_layout.addWidget(self.buttons_widget)
+        # self.layout.addWidget(self.default_folder_groupbox)
 
     @staticmethod
     def _select_save_to_directory():
@@ -119,7 +137,7 @@ class OptionsDialog(QDialog):
 
         self.panel_groupbox_layout.addWidget(self.panel_horizontal_spinbox, 1, 2)
         self.panel_groupbox_layout.addWidget(self.panel_vertical_spinbox, 2, 2)
-        self.layout.addWidget(self.panel_groupbox)
+        # self.layout.addWidget(self.panel_groupbox)
 
     def _set_defaults(self):
         self.panel_number = 2, 0
@@ -133,7 +151,7 @@ class OptionsDialog(QDialog):
         self.buttonBox = QDialogButtonBox(self._qbtn)
         self.buttonBox.accepted.connect(self.accept)
         self.buttonBox.rejected.connect(self.reject)
-        self.layout.addWidget(self.buttonBox)
+        # self.layout.addWidget(self.buttonBox)
 
     def accept(self) -> None:
         if not self._check_panel_count():
