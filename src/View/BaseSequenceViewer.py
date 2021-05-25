@@ -217,7 +217,7 @@ class BaseSequenceViewer:
             _renderer.AddActor(_actor)
             print(_actor.GetBounds())
 
-            _renderer.InteractiveOn() # TODO: IS TEMPORARY
+            _renderer.InteractiveOn() # TODO: fix me
 
             self.window.AddRenderer(_renderer)
             _renderer.SetLayer(1)

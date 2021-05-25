@@ -90,7 +90,7 @@ class BaseModel(QWidget):
     def saveLengths(self):
         logger.info("Saving lengths to file...")
         # first argument of qfiledialog needs to be the qwidget itself
-        fileName, _ = QFileDialog.getSaveFileName(self, "Save Length Points As", config_data.get_config_value("DefaultSaveToFolder"),
+        fileName, _ = QFileDialog.getSaveFileName(self, "Save Length Points As", config_data.get_config_value("Defaults")["DefaultSaveToFolder"],
                 "%s Files (*.%s)" % ("json".upper(), "json"))
 
         if fileName:
@@ -98,7 +98,7 @@ class BaseModel(QWidget):
             logger.info(f"Saved as {fileName}")
 
     def saveMPRPoints(self):
-        fileName, _ = QFileDialog.getSaveFileName(self, "Save MPR Points As", config_data.get_config_value("DefaultSaveToFolder"),
+        fileName, _ = QFileDialog.getSaveFileName(self, "Save MPR Points As", config_data.get_config_value("Defaults")["DefaultSaveToFolder"],
                 "%s Files (*.%s);;All Files (*)" % ("json".upper(), "json"))
 
         if fileName:

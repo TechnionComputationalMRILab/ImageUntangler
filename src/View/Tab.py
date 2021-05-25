@@ -32,7 +32,7 @@ class Tab(QWidget):
 
     def loadImages(self):
         fileExplorer = QFileDialog(
-            directory=config_data.get_config_value("DefaultFolder"))  # opens location to default location
+            directory=config_data.get_config_value("Defaults")['DefaultFolder'])  # opens location to default location
         folderPath = str(fileExplorer.getExistingDirectory())
         self.MRIimages = MRI_files.getMRIimages(folderPath) # so can be loaded by the viewers
         # this must be set after MRIimages or else tab will be renamed to blank if user X-es out file explorer since error is thrown there
@@ -57,7 +57,7 @@ class Tab(QWidget):
             logger.critical("Error in opening file")
 
     def addViewers(self):
-        numViewers = config_data.get_config_value("NumViewers")
+        numViewers = config_data.get_config_value("Defaults")['NumViewers']
         for _ in range(numViewers):
             self.viewerInterfaces.append(self.get_viewer())
             self.mainLayout.addWidget(self.viewerInterfaces[-1])

@@ -15,17 +15,17 @@ class SettingsMenu(QMenu):
 
     @staticmethod
     def setDefaultFolder():
-        fileExplorer = QFileDialog(directory=config_data.get_config_value('DefaultFolder'))
+        fileExplorer = QFileDialog(directory=config_data.get_config_value('Defaults')['DefaultFolder'])
         folderPath = str(fileExplorer.getExistingDirectory())
         if os.path.exists(folderPath):  # if user picked a directory, ie did not X-out the window
-            config_data.update_config_value("DefaultFolder", folderPath)
+            config_data.update_default_config_value("DefaultFolder", folderPath)
             logg.debug(f"Default folder set to {folderPath}")
 
     @staticmethod
     def setPanelNumber():
         _panel_dialog = PanelNumberDialog()
         _panel_dialog.exec()
-        config_data.update_config_value("NumViewers", _panel_dialog.panel_number[0])
+        config_data.update_default_config_value("NumViewers", _panel_dialog.panel_number[0])
         logg.info(f"Panel count set to {_panel_dialog.panel_number[0]}")
 
     @staticmethod
@@ -33,7 +33,7 @@ class SettingsMenu(QMenu):
         _options_dialog = OptionsDialog()
         _options_dialog.exec()
 
-        config_data.update_config_value("NumViewers", _options_dialog.panel_number[0])
+        config_data.update_default_config_value("NumViewers", _options_dialog.panel_number[0])
 
     def getDefaultFolderAction(self):
         defaultFolderAction = QAction(parent=self)

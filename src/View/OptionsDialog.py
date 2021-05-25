@@ -81,7 +81,7 @@ class OptionsDialog(QDialog):
         fileExplorer = QFileDialog(directory=config_data.get_config_value('DefaultFolder'))
         folderPath = str(fileExplorer.getExistingDirectory())
         if os.path.exists(folderPath):  # if user picked a directory, ie did not X-out the window
-            config_data.update_config_value("DefaultFolder", folderPath)
+            config_data.update_default_config_value("DefaultFolder", folderPath)
 
     def _default_save_to_folder(self):
         self.default_save_to_folder_groupbox = QGroupBox("Set Default directory for saved files")
@@ -115,10 +115,10 @@ class OptionsDialog(QDialog):
 
     @staticmethod
     def _select_save_to_directory():
-        fileExplorer = QFileDialog(directory=config_data.get_config_value('DefaultSaveToFolder'))
+        fileExplorer = QFileDialog(directory=config_data.get_config_value('Defaults')['DefaultSaveToFolder'])
         folderPath = str(fileExplorer.getExistingDirectory())
         if os.path.exists(folderPath):  # if user picked a directory, ie did not X-out the window
-            config_data.update_config_value("DefaultSaveToFolder", folderPath)
+            config_data.update_default_config_value("DefaultSaveToFolder", folderPath)
 
     def _set_panels(self):
         self.panel_groupbox = QGroupBox("Set number of panels")

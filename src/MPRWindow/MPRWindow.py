@@ -27,7 +27,7 @@ class MPRWindow(QDialog):
         self.show()
 
     def set_title(self):
-        self.setWindowTitle(config_data.get_config_value("AppName") + ': MPR Window')
+        self.setWindowTitle('MPR Window')
 
     def set_icon(self):
         self.setWindowIcon(QIcon(config_data.get_icon_file_path()))

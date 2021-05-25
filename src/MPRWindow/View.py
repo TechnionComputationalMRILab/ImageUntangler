@@ -245,7 +245,7 @@ class MPRW_View(QWidget):
                 self.renderWindow.Render()
 
     def _save_file(self):
-        fileName, _ = QFileDialog.getSaveFileName(self, "Save Length Points As", config_data.get_config_value("DefaultFolder"),
+        fileName, _ = QFileDialog.getSaveFileName(self, "Save Length Points As", config_data.get_config_value("Defaults")['DefaultSaveToFolder'],
                 "%s Files (*.%s)" % ("json".upper(), "json"))
 
         if fileName:

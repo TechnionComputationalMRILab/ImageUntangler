@@ -1,4 +1,6 @@
 __author__ = "Yael Zaffrani and Avraham Kahan and Angeleene Ang"
+__version__ = "1.1.0"
+__AppName__ = "MRI Untangler"
 
 import sys
 from PyQt5 import QtWidgets
@@ -17,8 +19,8 @@ logger = logger.get_logger()
 class App(QMainWindow):
     def __init__(self):
         super().__init__()
-        logger.info(f"Starting {config_data.get_config_value('AppName')}")
-        logger.info(f"VERSION {config_data.get_config_value('VersionNumber')}")
+        logger.info(f"Starting {__AppName__}")
+        logger.info(f"VERSION {__version__}")
         self.setIcon()
         self.setTitle()
         # self.showMaximized()
@@ -38,7 +40,7 @@ class App(QMainWindow):
         self.setMenuBar(menuBar)
 
     def setTitle(self):
-        self.setWindowTitle(config_data.get_config_value("AppName") + " v" + config_data.get_config_value("VersionNumber"))
+        self.setWindowTitle(__AppName__ + " v" + str(__version__))
 
     def setIcon(self):
         self.setWindowIcon(QIcon(config_data.get_icon_file_path()))
