@@ -1,10 +1,10 @@
 import os
 from typing import List
-# from icecream import ic
+from icecream import ic
 from PyQt5.QtCore import QMetaObject, QCoreApplication, QRect
 from PyQt5.QtWidgets import QWidget, QHBoxLayout, QPushButton, QFileDialog
 
-from util import config_data, MRI_files, stylesheets, logger
+from util import ConfigRead as CFG, MRI_files, stylesheets, logger
 from MainWindowComponents.MessageBoxes import invalidDirectoryMessage
 from Model.NRRDModel import NRRDViewerModel
 from Model.DICOMModel import DICOMViewerModel
@@ -32,7 +32,7 @@ class Tab(QWidget):
 
     def loadImages(self):
         fileExplorer = QFileDialog(
-            directory=config_data.get_config_value("Defaults")['DefaultFolder'])  # opens location to default location
+            directory=CFG.get_config_data("folders", 'default-folder'))  # opens location to default location
         folderPath = str(fileExplorer.getExistingDirectory())
         self.MRIimages = MRI_files.getMRIimages(folderPath) # so can be loaded by the viewers
         # this must be set after MRIimages or else tab will be renamed to blank if user X-es out file explorer since error is thrown there
@@ -57,7 +57,7 @@ class Tab(QWidget):
             logger.critical("Error in opening file")
 
     def addViewers(self):
-        numViewers = config_data.get_config_value("Defaults")['NumViewers']
+        numViewers = int(CFG.get_config_data("display", 'horizontal-number-of-panels'))
         for _ in range(numViewers):
             self.viewerInterfaces.append(self.get_viewer())
             self.mainLayout.addWidget(self.viewerInterfaces[-1])

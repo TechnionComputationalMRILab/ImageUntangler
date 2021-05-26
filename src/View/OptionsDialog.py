@@ -1,5 +1,5 @@
 from PyQt5.QtWidgets import *
-from util import config_data, stylesheets
+from util import ConfigRead as CFG
 import os
 import webbrowser
 
@@ -55,16 +55,16 @@ class OptionsDialog(QDialog):
         self.folder_textbox = QLineEdit(self)
         self.default_folder_layout.addWidget(self.folder_textbox)
 
-        self.folder_textbox.setText(config_data.get_config_value('DefaultFolder'))
+        self.folder_textbox.setText(CFG.get_config_data('folders', 'default-folders'))
         self.folder_textbox.setReadOnly(True)
 
         _browse = QPushButton("Select working directory")
         _open = QPushButton("Open in Explorer")
 
         _browse.clicked.connect(self._select_working_directory)
-        _browse.clicked.connect(lambda: self.folder_textbox.setText(config_data.get_config_value('DefaultFolder')))
+        _browse.clicked.connect(lambda: self.folder_textbox.setText(CFG.get_config_data('folders', 'default-folders')))
 
-        _open.clicked.connect(lambda: webbrowser.open(config_data.get_config_value('DefaultFolder')))
+        _open.clicked.connect(lambda: webbrowser.open(CFG.get_config_data('folders', 'default-folders')))
 
         self.buttons_widget = QWidget()
         self.buttons_layout = QHBoxLayout()
@@ -78,10 +78,10 @@ class OptionsDialog(QDialog):
 
     @staticmethod
     def _select_working_directory():
-        fileExplorer = QFileDialog(directory=config_data.get_config_value('DefaultFolder'))
+        fileExplorer = QFileDialog(directory=CFG.get_config_data('folders', 'default-folders'))
         folderPath = str(fileExplorer.getExistingDirectory())
         if os.path.exists(folderPath):  # if user picked a directory, ie did not X-out the window
-            config_data.update_default_config_value("DefaultFolder", folderPath)
+            CFG.set_config_data('folders', 'default-folders', folderPath)
 
     def _default_save_to_folder(self):
         self.default_save_to_folder_groupbox = QGroupBox("Set Default directory for saved files")
@@ -92,16 +92,16 @@ class OptionsDialog(QDialog):
         self.folder_textbox = QLineEdit(self)
         self.default_save_to_folder_layout.addWidget(self.folder_textbox)
 
-        self.folder_textbox.setText(config_data.get_config_value('DefaultSaveToFolder'))
+        self.folder_textbox.setText(CFG.get_config_data('folders', 'default-save-to-folders'))
         self.folder_textbox.setReadOnly(True)
 
         _browse = QPushButton("Select working directory")
         _open = QPushButton("Open in Explorer")
 
         _browse.clicked.connect(self._select_working_directory)
-        _browse.clicked.connect(lambda: self.folder_textbox.setText(config_data.get_config_value('DefaultSaveToFolder')))
+        _browse.clicked.connect(lambda: self.folder_textbox.setText(CFG.get_config_data('folders', 'default-save-to-folders')))
 
-        _open.clicked.connect(lambda: webbrowser.open(config_data.get_config_value('DefaultSaveToFolder')))
+        _open.clicked.connect(lambda: webbrowser.open(CFG.get_config_data('folders', 'default-save-to-folders')))
 
         self.buttons_widget = QWidget()
         self.buttons_layout = QHBoxLayout()
@@ -115,10 +115,10 @@ class OptionsDialog(QDialog):
 
     @staticmethod
     def _select_save_to_directory():
-        fileExplorer = QFileDialog(directory=config_data.get_config_value('Defaults')['DefaultSaveToFolder'])
+        fileExplorer = QFileDialog(directory=CFG.get_config_data('folders', 'default-save-to-folders'))
         folderPath = str(fileExplorer.getExistingDirectory())
         if os.path.exists(folderPath):  # if user picked a directory, ie did not X-out the window
-            config_data.update_default_config_value("DefaultSaveToFolder", folderPath)
+            CFG.set_config_data('folders', 'default-save-to-folders', folderPath)
 
     def _set_panels(self):
         self.panel_groupbox = QGroupBox("Set number of panels")
@@ -140,7 +140,8 @@ class OptionsDialog(QDialog):
         # self.layout.addWidget(self.panel_groupbox)
 
     def _set_defaults(self):
-        self.panel_number = 2, 0
+        self.panel_number = int(CFG.get_config_data('display', 'horizontal-number-of-panels')), \
+                            int(CFG.get_config_data('display', 'vertical-number-of-panels'))
 
     def _set_title(self):
         self.setWindowTitle("Preferences")

@@ -14,7 +14,7 @@ from Control.SaveFormatter import SaveFormatter
 from Control.PointLoader import PointLoader
 from icecream import ic
 
-from util import logger
+from util import logger, ConfigRead as CFG
 logger = logger.get_logger()
 
 
@@ -39,7 +39,6 @@ class BaseSequenceViewer:
 
         self.MPRpoints = PointCollection()
         self.lengthPoints = PointCollection()
-        self.index_list = []
 
         self.presentCursor()
 
@@ -173,9 +172,9 @@ class BaseSequenceViewer:
 
     def addPoint(self, pointType, pickedCoordinates):
         if pointType.upper() == "MPR":
-            self.processNewPoint(self.MPRpoints, pickedCoordinates, color=(1, 0, 0))
+            self.processNewPoint(self.MPRpoints, pickedCoordinates, color=CFG.get_color('mpr-display-style'))
         elif pointType.upper() == "LENGTH":
-            self.processNewPoint(self.lengthPoints, pickedCoordinates, color=(55/255, 230/255, 128/255))
+            self.processNewPoint(self.lengthPoints, pickedCoordinates, color=CFG.get_color('length-display-style'))
 
     def calculateLengths(self):
         if len(self.lengthPoints) >= 2:
@@ -204,10 +203,25 @@ class BaseSequenceViewer:
         _save_formatter.add_pointcollection_data("MPR points", self.MPRpoints)
         _save_formatter.save_data()
 
+    def loadLengthPoints(self, filename):
+        logger.info(f"Loading length points from {filename}")
+        _length_loader = PointLoader(filename, self.imageData)
+
+        for point in _length_loader.get_points():
+            self.lengthPoints.addPoint(point.coordinates)
+            currentPolygonActor = self.lengthPoints.generatePolygonLastPoint(color=CFG.get_color('length-display-style'))
+            self.renderer.AddActor(currentPolygonActor)
+        self.presentPoints(self.lengthPoints, self.sliceIdx)
+
     def loadMPRPoints(self, filename):
         logger.info(f"Loading MPR points from {filename}")
         _mpr_loader = PointLoader(filename, self.imageData)
-        self.MPRpoints = _mpr_loader.get_points()
+
+        for point in _mpr_loader.get_points():
+            self.MPRpoints.addPoint(point.coordinates)
+            currentPolygonActor = self.MPRpoints.generatePolygonLastPoint(color=CFG.get_color('mpr-display-style'))
+            self.renderer.AddActor(currentPolygonActor)
+        self.presentPoints(self.MPRpoints, self.sliceIdx)
 
     def drawLengthLines(self):
         if len(self.lengthPoints) >= 2:

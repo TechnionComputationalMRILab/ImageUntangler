@@ -3,7 +3,7 @@ from PyQt5.QtCore import QRect
 from PyQt5.QtWidgets import QVBoxLayout, QGroupBox, QWidget, QFileDialog
 from View.Toolbar import Toolbar
 
-from util import config_data, stylesheets, logger
+from util import ConfigRead as CFG, stylesheets, logger
 logger = logger.get_logger()
 
 
@@ -90,7 +90,7 @@ class BaseModel(QWidget):
     def saveLengths(self):
         logger.info("Saving lengths to file...")
         # first argument of qfiledialog needs to be the qwidget itself
-        fileName, _ = QFileDialog.getSaveFileName(self, "Save Length Points As", config_data.get_config_value("Defaults")["DefaultSaveToFolder"],
+        fileName, _ = QFileDialog.getSaveFileName(self, "Save Length Points As", CFG.get_config_data("folders", 'default-save-to-folder'),
                 "%s Files (*.%s)" % ("json".upper(), "json"))
 
         if fileName:
@@ -98,16 +98,22 @@ class BaseModel(QWidget):
             logger.info(f"Saved as {fileName}")
 
     def saveMPRPoints(self):
-        fileName, _ = QFileDialog.getSaveFileName(self, "Save MPR Points As", config_data.get_config_value("Defaults")["DefaultSaveToFolder"],
+        fileName, _ = QFileDialog.getSaveFileName(self, "Save MPR Points As", CFG.get_config_data("folders", 'default-save-to-folder'),
                 "%s Files (*.%s);;All Files (*)" % ("json".upper(), "json"))
 
         if fileName:
             self.view.saveMPRPoints(fileName)
 
+    def loadLengthPoints(self):
+        fileName, _ = QFileDialog.getOpenFileName(self, "Load length points")
+        if fileName:
+            logger.info(f"Loading length points from {fileName}")
+            self.view.loadLengthPoints(fileName)
+
     def loadMPRPoints(self):
         fileName, _ = QFileDialog.getOpenFileName(self, "Load MPR points")
-
         if fileName:
+            logger.info(f"Loading MPR points from {fileName}")
             self.view.loadMPRPoints(fileName)
 
     def disablePointPicker(self):

@@ -1,6 +1,4 @@
 __author__ = "Yael Zaffrani and Avraham Kahan and Angeleene Ang"
-__version__ = "1.1.0"
-__AppName__ = "MRI Untangler"
 
 import sys
 from PyQt5 import QtWidgets
@@ -11,7 +9,7 @@ from MainWindowComponents import InitialMenuBar
 from MainWindowComponents.TabManager import TabManager
 import vtkmodules.all as vtk
 
-from util import config_data, stylesheets, logger
+from util import ConfigRead as CFG, stylesheets, logger
 logger.logger_setup()
 logger = logger.get_logger()
 
@@ -19,12 +17,13 @@ logger = logger.get_logger()
 class App(QMainWindow):
     def __init__(self):
         super().__init__()
-        logger.info(f"Starting {__AppName__}")
-        logger.info(f"VERSION {__version__}")
+        logger.info(f"Starting {CFG.get_app_name()}")
+        logger.info(f"VERSION {CFG.get_version_number()}")
         self.setIcon()
         self.setTitle()
         # self.showMaximized()
-        self.setMinimumSize(QSize(config_data.get_default_width(), config_data.get_default_height()))
+        self.setMinimumSize(QSize(int(CFG.get_config_data('display', 'display-width')),
+                                  int(CFG.get_config_data('display', 'display-height'))))
 
         vtk_out = vtk.vtkOutputWindow()
         vtk_out.SetInstance(vtk_out)
@@ -40,10 +39,10 @@ class App(QMainWindow):
         self.setMenuBar(menuBar)
 
     def setTitle(self):
-        self.setWindowTitle(__AppName__ + " v" + str(__version__))
+        self.setWindowTitle(CFG.get_app_name() + " v" + CFG.get_version_number())
 
     def setIcon(self):
-        self.setWindowIcon(QIcon(config_data.get_icon_file_path()))
+        self.setWindowIcon(QIcon(CFG.get_icon()))
 
     def closeEvent(self, a0: QCloseEvent) -> None:
         logger.info("Closing application...")

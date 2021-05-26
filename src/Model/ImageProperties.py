@@ -68,7 +68,9 @@ class ImageProperties: # class makes operations more efficient by caching image 
         _slice_list = []
         for i in z_coords:
             for k, v in self.slice_list.items():
-                if np.isclose(i, v):
+                # if np.isclose(i, v):
+                #     _slice_list.append(k)
+                if round(i, 3) == round(v, 3):
                     _slice_list.append(k)
 
         return _slice_list

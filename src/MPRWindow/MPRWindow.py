@@ -1,7 +1,7 @@
 from PyQt5.Qt import *
 from MPRWindow.Model import MPRW_Model
 
-from util import config_data, stylesheets, logger
+from util import ConfigRead as CFG, stylesheets, logger
 logger = logger.get_logger()
 
 
@@ -13,7 +13,8 @@ class MPRWindow(QDialog):
         self.set_icon()
         self.set_title()
         self.setStyleSheet(stylesheets.get_sheet_by_name("Default"))
-        self.setMinimumSize(QSize(1920, 1080))
+        self.setMinimumSize(QSize(int(CFG.get_config_data('display', 'display-width')),
+                                  int(CFG.get_config_data('display', 'display-height'))))
 
         self.model = MPRW_Model(points, image_data)
 
@@ -30,7 +31,7 @@ class MPRWindow(QDialog):
         self.setWindowTitle('MPR Window')
 
     def set_icon(self):
-        self.setWindowIcon(QIcon(config_data.get_icon_file_path()))
+        self.setWindowIcon(QIcon(CFG.get_icon()))
 
     def closeEvent(self, event) -> None:
         logger.debug("Closing MPR Window Dialogbox")

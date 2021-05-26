@@ -2,7 +2,7 @@ import os
 from PyQt5.QtWidgets import QMenuBar, QMenu, QAction, QFileDialog
 from View.PanelNumberDialog import PanelNumberDialog
 from View.OptionsDialog import OptionsDialog
-from util import config_data, stylesheets, logger
+from util import ConfigRead as CFG, config_data, stylesheets, logger
 
 logg = logger.get_logger()
 
@@ -15,7 +15,7 @@ class SettingsMenu(QMenu):
 
     @staticmethod
     def setDefaultFolder():
-        fileExplorer = QFileDialog(directory=config_data.get_config_value('Defaults')['DefaultFolder'])
+        fileExplorer = QFileDialog(directory=CFG.get_config_data("folders", 'default-folder'))
         folderPath = str(fileExplorer.getExistingDirectory())
         if os.path.exists(folderPath):  # if user picked a directory, ie did not X-out the window
             config_data.update_default_config_value("DefaultFolder", folderPath)

@@ -30,7 +30,6 @@ class NRRDSequenceViewer(BaseSequenceViewer):
 
     def processNewPoint(self, pointCollection, pickedCoordinates, color=(1, 0, 0)):
         pointLocation = [pickedCoordinates[0], pickedCoordinates[1], pickedCoordinates[2], self.sliceIdx]  # x,y,z,sliceIdx
-        self.index_list.append(self.sliceIdx)
 
         if pointCollection.addPoint(pointLocation):
             currentPolygonActor = pointCollection.generatePolygonLastPoint(color)
@@ -38,11 +37,10 @@ class NRRDSequenceViewer(BaseSequenceViewer):
         self.presentPoints(pointCollection, self.sliceIdx)
 
     def presentPoints(self, pointCollection, sliceIdx) -> None:
-        logger.debug("Presenting Points")
-        ic(sliceIdx)
+        logger.debug(f"{len(pointCollection)} points in memory")
         for point in pointCollection.points:
-            ic(point.coordinates)
             polygon = point.polygon
+            ic(polygon)
             if point.coordinates[3] != sliceIdx:  # dots were placed on different slices
                 polygon.GeneratePolygonOff()
             else:

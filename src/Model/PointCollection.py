@@ -118,4 +118,3 @@ class PointCollection:
         spline_actor.GetProperty().SetLineWidth(width)
 
         return spline_actor
-

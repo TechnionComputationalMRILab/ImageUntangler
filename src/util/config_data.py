@@ -76,8 +76,3 @@ def get_default_width() -> int:
 
 def get_default_height() -> int:
     return get_config_value('Defaults')['ResolutionHeight']
-
-
-print(get_config_value("Display")["Length"])
-update_display_length_config_value("color", "green")
-print(get_config_value("Display")["Length"])

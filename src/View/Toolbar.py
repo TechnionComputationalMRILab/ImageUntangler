@@ -41,6 +41,7 @@ class Toolbar(QToolBar):
         menu.addAction(self.addLengthPointsAction())
         menu.addAction(self.addLengthCalculation())
         menu.addAction(self.addLengthSave())
+        menu.addAction(self.loadLength())
 
         LengthPushButton.setMenu(menu)
         self.addWidget(LengthPushButton)
@@ -72,8 +73,14 @@ class Toolbar(QToolBar):
         MPRLoad = QAction("Load MPR Points from file", self)
         MPRLoad.setStatusTip("Load the MPR points from file")
         MPRLoad.triggered.connect(self.manager.loadMPRPoints)
-        MPRLoad.triggered.connect(self.manager.calculateMPR)
+        # MPRLoad.triggered.connect(self.manager.calculateMPR)
         return MPRLoad
+
+    def loadLength(self):
+        LengthLoad = QAction("Load length points from file", self)
+        LengthLoad.setStatusTip("Load length points from file")
+        LengthLoad.triggered.connect(self.manager.loadLengthPoints)
+        return LengthLoad
 
     def addMPRMenu(self):
         MPRPushButton = QPushButton("MPR Calculate")
@@ -103,4 +110,3 @@ class Toolbar(QToolBar):
 
     def changePickerStatus(self, status):
         self.PickerStatus.setText(f"Picking {status} Points")
-

@@ -1,5 +1,6 @@
 import sys
 import os
+from icecream import ic
 import numpy as np
 from PyQt5.Qt import *
 import vtkmodules.all as vtk
@@ -10,7 +11,7 @@ from typing import List
 from MPRWindow.MPRInteractor import MPRInteractorStyle
 from Model.PointCollection import PointCollection
 from MainWindowComponents import MessageBoxes
-from util import config_data, stylesheets, mpr_window_config, logger
+from util import ConfigRead as CFG, stylesheets, mpr_window_config, logger
 logger = logger.get_logger()
 
 
@@ -245,7 +246,7 @@ class MPRW_View(QWidget):
                 self.renderWindow.Render()
 
     def _save_file(self):
-        fileName, _ = QFileDialog.getSaveFileName(self, "Save Length Points As", config_data.get_config_value("Defaults")['DefaultSaveToFolder'],
+        fileName, _ = QFileDialog.getSaveFileName(self, "Save Length Points As", CFG.get_config_data("folders", 'default-save-to-folder'),
                 "%s Files (*.%s)" % ("json".upper(), "json"))
 
         if fileName:
