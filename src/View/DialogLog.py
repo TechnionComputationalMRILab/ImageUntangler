@@ -19,7 +19,7 @@ class DialogLog(QDialog):
 
     def _set_buttons(self):
         self.buttonBox = QDialogButtonBox(QDialogButtonBox.Close)
-        self.buttonBox.rejected.connect(self.close)  # TODO: FIX??
+        self.buttonBox.rejected.connect(self.close)
         self.layout.addWidget(self.buttonBox)
 
     def _set_up_textbox(self):

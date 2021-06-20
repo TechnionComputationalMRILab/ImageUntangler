@@ -47,6 +47,3 @@ def get_color(section):
         rgb_str = color_str.split(", ")
         as_list = [int(i)/255 for i in rgb_str]
         return tuple(as_list)
-
-
-print(get_color('length-display-style'))
