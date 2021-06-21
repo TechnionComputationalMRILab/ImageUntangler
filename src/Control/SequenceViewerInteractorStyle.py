@@ -14,8 +14,8 @@ class SequenceViewerInteractorStyle(vtkInteractorStyleImage):
         self.AddObserver("RightButtonPressEvent", self.ButtonCallback)
         self.AddObserver("RightButtonReleaseEvent", self.ButtonCallback)
         self.AddObserver("KeyPressEvent", self.KeyPressCallback)
-        self.AddObserver("MouseWheelForwardEvent", self.MouseWheelCallback)
-        self.AddObserver("MouseWheelBackwardEvent", self.MouseWheelCallback)
+        self.AddObserver("MouseWheelForwardEvent", self.MouseWheelForwardCallback)
+        self.AddObserver("MouseWheelBackwardEvent", self.MouseWheelBackwardCallback)
 
 
         ## Create callbacks for slicing the image
@@ -145,8 +145,11 @@ class SequenceViewerInteractorStyle(vtkInteractorStyleImage):
     def OnPickingCurserLeftButtonDown(self):
         pass
 
-    def MouseWheelCallback(self, obj,event):
-        pass
+    def MouseWheelForwardCallback(self, obj,event):
+        self.model.changeSliceIndex(1)
+
+    def MouseWheelBackwardCallback(self, obj,event):
+        self.model.changeSliceIndex(-1)
 
     def OnPickingLeftButtonDown(self):
         pass
