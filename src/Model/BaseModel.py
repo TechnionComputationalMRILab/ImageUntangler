@@ -125,3 +125,12 @@ class BaseModel(QWidget):
 
     def drawMPRSpline(self):
         self.view.drawMPRSpline()
+
+    def showMPRPanel(self):
+        self.view.showMPRPanel()
+
+    def modifyAnnotation(self, x, y):
+        self.view.modifyAnnotation(x, y)
+
+    def deleteAnnotation(self, x, y, prop):
+        self.view.deleteAnnotation(x, y, prop)
