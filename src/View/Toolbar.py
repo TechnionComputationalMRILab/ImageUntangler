@@ -82,6 +82,21 @@ class Toolbar(QToolBar):
         LengthLoad.triggered.connect(self.manager.loadLengthPoints)
         return LengthLoad
 
+    def showMPRPanel(self):
+        # for testing puposes
+        LengthLoad = QAction("TEST", self)
+        LengthLoad.setStatusTip("TESTING")
+        LengthLoad.triggered.connect(self.manager.showMPRPanel)
+        return LengthLoad
+
+    def editAnnotation(self):
+        # for testing puposes
+        LengthLoad = QAction("TEST2", self)
+        LengthLoad.setStatusTip("TESTING2")
+        LengthLoad.triggered.connect(self.manager.modifyAnnotation)
+        return LengthLoad
+
+
     def addMPRMenu(self):
         MPRPushButton = QPushButton("MPR Calculate")
         menu = QMenu()
@@ -89,6 +104,8 @@ class Toolbar(QToolBar):
         menu.addAction(self.addMPRcalculation())
         menu.addAction(self.addMPRSave())
         menu.addAction(self.loadMPR())
+        menu.addAction(self.showMPRPanel())
+        menu.addAction(self.editAnnotation())
 
         MPRPushButton.setMenu(menu)
         self.addWidget(MPRPushButton)

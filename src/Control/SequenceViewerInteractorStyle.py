@@ -1,6 +1,9 @@
 from vtk import vtkInteractorStyleImage, vtkPropPicker
 from icecream import ic
 
+from util import logger
+logger = logger.get_logger()
+
 
 class SequenceViewerInteractorStyle(vtkInteractorStyleImage):
     def __init__(self, parent, model):
@@ -14,8 +17,8 @@ class SequenceViewerInteractorStyle(vtkInteractorStyleImage):
         self.AddObserver("RightButtonPressEvent", self.ButtonCallback)
         self.AddObserver("RightButtonReleaseEvent", self.ButtonCallback)
         self.AddObserver("KeyPressEvent", self.KeyPressCallback)
-        self.AddObserver("MouseWheelForwardEvent", self.MouseWheelCallback)
-        self.AddObserver("MouseWheelBackwardEvent", self.MouseWheelCallback)
+        self.AddObserver("MouseWheelForwardEvent", self.MouseWheelForwardCallback)
+        self.AddObserver("MouseWheelBackwardEvent", self.MouseWheelBackwardCallback)
 
 
         ## Create callbacks for slicing the image
@@ -25,6 +28,7 @@ class SequenceViewerInteractorStyle(vtkInteractorStyleImage):
         self.actions["Zooming"] = 0
         self.actions["PickingMPR"] = 0
         self.actions["PickingLength"] = 0
+        self.actions["ModifyingMPRAnnotation"] = 0
         self.actions["Cursor"] = 0
         self.actions["Panning"] = 0
 
@@ -99,18 +103,32 @@ class SequenceViewerInteractorStyle(vtkInteractorStyleImage):
             self.OnMouseMove() # call to superclass
 
     def KeyPressCallback(self, obj, event):
-        if self.parent.GetKeyCode() == 'C' or self.parent.GetKeyCode() == 'c':
+        logger.info(f'Keycode entered: {self.parent.GetKeyCode()}')
+
+        if self.parent.GetKeyCode() == 'C' or self.parent.GetKeyCode() == 'c':  # cursor
             if self.ShowCursor:
                 self.ShowCursor = False
                 self.model.clearCursor()
-
             else:
                 self.ShowCursor = True
                 self.model.addCursor()
 
+        elif self.parent.GetKeyCode() == 'p' or self.parent.GetKeyCode() == 'P':  # pick
+            x, y = self.parent.GetEventPosition()
+            self.model.modifyAnnotation(x, y)
+            # turn on point picking
+
+        elif self.parent.GetKeyCode() == 'Q' or self.parent.GetKeyCode() == 'q':  # query
+            ic(self.parent.GetEventPosition())
+
+        elif self.parent.GetKeyCode() == 'd' or self.parent.GetKeyCode() == 'D':  # delete
+            x, y = self.parent.GetEventPosition()
+            _prop = self.model.modifyAnnotation(x, y)
+
+            self.model.deleteAnnotation(x, y, _prop)
+
         elif self.parent.GetKeySym() == 'Up':
             self.model.changeSliceIndex(1)
-
         elif self.parent.GetKeySym() == 'Down':
             self.model.changeSliceIndex(-1)
 
@@ -145,8 +163,11 @@ class SequenceViewerInteractorStyle(vtkInteractorStyleImage):
     def OnPickingCurserLeftButtonDown(self):
         pass
 
-    def MouseWheelCallback(self, obj,event):
-        pass
+    def MouseWheelForwardCallback(self, obj,event):
+        self.model.changeSliceIndex(1)
+
+    def MouseWheelBackwardCallback(self, obj,event):
+        self.model.changeSliceIndex(-1)
 
     def OnPickingLeftButtonDown(self):
         pass

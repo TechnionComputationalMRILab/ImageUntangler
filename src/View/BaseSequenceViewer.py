@@ -252,3 +252,33 @@ class BaseSequenceViewer:
             self.window.SetNumberOfLayers(2)
 
             self.window.Render()
+
+    def showMPRPanel(self):
+        print("show mpr panel placeholder")
+
+    def modifyAnnotation(self, x, y):
+        logger.debug("modifyAnnotation function activated")
+
+        _prop_picker = vtk.vtkPicker()
+        _prop_picker.SetTolerance(50)
+
+        _found_props = []
+
+        if _prop_picker.Pick(x, y, 0, self.renderer):
+            logger.info(f"Prop picked at {x}, {y}.")
+            ic(_prop_picker.GetProp3Ds().GetLastProp3D())
+            # _found_props.append(_prop_picker.GetViewProp())
+        # else:
+        #     _found_props = list(set(_found_props))
+        #     if _found_props:
+        #         for i in _found_props:
+        #             if not isinstance(i, vtkImageActor):
+            return _prop_picker.GetProp3Ds().GetLastProp3D()
+        else:
+            logger.info(f"No prop found at {x}, {y}.")
+
+    def deleteAnnotation(self, x, y, prop):
+        logger.debug("deleteAnnotation function activated")
+
+        print(f'Deleting {prop} at {x}, {y}.')
+        self.renderer.RemoveActor(prop)
