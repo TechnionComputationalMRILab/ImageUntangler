@@ -1,13 +1,32 @@
 import pydicom
 from typing import List
 import numpy as np
+import os
+import json
+
+
+def check_if_dicom_seqdir_exists(path):
+    for _, _, files in os.walk(path):
+        for file in files:
+            if file.endswith(".json"):
+                return True
+            else:
+                return False
 
 
 class DICOMReader:
-    def __init__(self, MRIimages: List[str]):
+    def __init__(self, folder: str):
+        self.folder = folder
+
+
         self.mri_images = MRIimages
-        self.sequence_dict = self._groupby(lambda x: self._get_info('SeriesDescription', x))
-        self.patient_dict = self._groupby(lambda x: self._get_info('PatientName', x))
+
+        if seqdir_exists:
+            # read seqdir from file
+            pass
+        else:
+            self.sequence_dict = self._groupby(lambda x: self._get_info('SeriesDescription', x))
+            self.patient_dict = self._groupby(lambda x: self._get_info('PatientName', x))
 
     def _groupby(self, func):
         _images_and_series_desc = self.mri_images.copy()
@@ -43,6 +62,15 @@ class DICOMReader:
             ds = pydicom.dcmread(f)
         return ds.pixel_array
 
+    def _get_seqdir_filename(self):
+        """ generates a filename for the sequence directory file """
+        paths = [os.path.dirname(os.path.abspath(files)) for files in self.mri_images]
+        if len(set(paths)) == 1:
+            _seq_filename = os.path.basename(paths[0]) + "_sequence_directory.json"
+            return _seq_filename
+        else:
+            raise NotImplementedError("Program does not yet work for data in nested folders")
+
     def get_sequence_dict(self):
         """
         returns a dict with the sequence name and the files linked to that
@@ -68,9 +96,8 @@ class DICOMReader:
 
 
 def get_images_from_folder(l):
-    from os import walk
     f = []
-    for (dir_path, dir_names, filenames) in walk(l):
+    for (dir_path, dir_names, filenames) in os.walk(l):
         f.extend(filenames)
         break
     return f
@@ -83,4 +110,6 @@ if __name__ == "__main__":
 
     # print(a.get_sequence_dict().keys())
 
-    print(a.get_pixel_data('Cor T2 SSFSE'))
+    print(check_if_dicom_seqdir_exists(path))
+
+    # print(a.get_pixel_data('Cor T2 SSFSE'))
