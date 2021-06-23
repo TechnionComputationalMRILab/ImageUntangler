@@ -30,6 +30,7 @@ def getImageData(imgPath: str, isDicom: bool):
     reader.SetFileName(imgPath)
     reader.Update()
     imageData = reader.GetOutput()
+    ic(imageData)
 
     header['filename'] = imgPath
     return ImageProperties(imageData, header)

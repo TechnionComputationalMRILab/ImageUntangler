@@ -2,28 +2,25 @@ from NRRDReader import NRRDReader
 from DICOMReader import DICOMReader
 import os
 from tqdm import tqdm
-from nrrd import read_header
-from pydicom import dcmread
+from icecream import ic
+from vtkmodules.all import vtkImageData
+from vtk.util import numpy_support
 
 
 class Imager:
-    """
-    looks at a directory, figures out the folder structure, identifies which reader to use
-    and then converts the pixel data from the reader to vtkImageData
-    """
     def __init__(self, directory):
         self.directory = directory
-        # self.dicom_list, self.nrrd_list = self._group_by_type()
-        #
-        # if len(self.dicom_list):
-        #     self._process_dicom()
-        # if len(self.nrrd_list):
-        #     self._process_nrrd()
+        self.dicom_list, self.nrrd_list = self._group_by_type()
+
+        if len(self.dicom_list):
+            self._process_dicoms()
+        if len(self.nrrd_list):
+            self._process_nrrds()
 
     def _group_by_type(self):
         """
         goes through all the items in file_list, checks if the files are nrrd, dicom, or neither
-        it returns a tuple of lists: dicom_folders, nrrd_folders
+        it returns a tuple of lists: dicom, nrrd, where the items in each list is a reader class
         """
         _folder_list = [item
                         for sublist in
@@ -31,53 +28,57 @@ class Imager:
                              for root, dirs, files in os.walk(self.directory)]
                         for item in sublist]
 
-        _dicom_folders = list()
-        _nrrd_folders = list()
-        for i in tqdm(_folder_list):
-            if self.has_valid_dicom(str(i)):
-                _dicom_folders.append(i)
-            elif self.has_valid_nrrd(str(i)):
-                _nrrd_folders.append(i)
+        _dicom = list()
+        _nrrd = list()
+        for f in tqdm(_folder_list):
 
-        return _dicom_folders, _nrrd_folders
+            _dicom_reader = DICOMReader.test_folder(f)
+            _nrrd_reader = None
 
-    def _process_nrrd(self):
-        pass
+            if _dicom_reader:
+                _dicom.append(_dicom_reader)
+            elif _nrrd_reader:
+                _nrrd.append(_nrrd_reader)
 
-    def _process_dicom(self):
-        _dicom_reader = DICOMReader(self.dicom_list)
+        return _dicom, _nrrd
 
-        if len(_dicom_reader.get_patient_dict().keys()) == 1:
-            for keys in _dicom_reader.get_sequence_dict().keys():
-                Image(_dicom_reader.get_sequence_dict()[keys])
-            print(len(_dicom_reader.get_sequence_dict().keys()))
-        else:
-            raise NotImplementedError("Cannot handle multiple patients in one directory.")
+    def _process_dicoms(self):
+        for dicom in self.dicom_list:
+            pass
 
-    def get_vtk(self):
-        pass
+    def _process_nrrds(self):
+        for nrrd in self.nrrd_list:
+            pass
 
-    @staticmethod
-    def has_valid_nrrd(folder):
-        try:
-            with open(filename, 'rb') as infile:
-                read_header(infile)
-        except:
-            return False
-        else:
-            return True
 
-    @staticmethod
-    def has_valid_dicom(folder):
-        try:
-            with open(filename, 'rb') as infile:
-                dcmread(infile)
-        except:
-            return False
-        else:
-            return True
+class Image:
+    # TODO
+    def __init__(self, reader, **kwargs):
+        self.x_points = list()
+        self.y_points = list()
+        self.z_points = list()
+
+        self.reader = reader
+        self._check_kwargs(kwargs)
+
+    def _check_kwargs(self, kwargs):
+        if isinstance(DICOMReader, self.reader):
+            if 'sequence' not in kwargs:
+                raise AttributeError("Sequence required for DICOM")
+            else:
+                self._process_single_dicom(kwargs['sequence'])
+
+        elif isinstance(NRRDReader, self.reader):
+            if 'filename' not in kwargs:
+                raise AttributeError("Filename required for NRRD")
+            else:
+                pass
+
+    def _process_single_dicom(self, sequence):
+        self.z_points = [z[0] for z in self.reader[sequence]]
 
 
 if __name__ == "__main__":
     a = Imager('C:\\Users\\vardo\\OneDrive\\Documents\\Github\\ImageUntangler\\internal_data\\MRI_Data\\')
-    a._group_by_type()
+    for i in a.dicom_list:
+        ic(i)
