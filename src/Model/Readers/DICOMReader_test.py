@@ -9,9 +9,6 @@ import vtkmodules.all as vtk
 # # valid path
 absolute_path = "C:\\Users\\vardo\\OneDrive\\Documents\\Github\\ImageUntangler\\internal_data\\MRI_Data\\enc_files"
 
-## mixed invalid path
-# absolute_path = 'C:\\Users\\vardo\\OneDrive\\Documents\\Github\\ImageUntangler\\internal_data\\MRI_Data\\Filename_test'
-
 test_dicom_reader = DICOMReader(absolute_path)
 
 print(test_dicom_reader.get_sequence_list())
