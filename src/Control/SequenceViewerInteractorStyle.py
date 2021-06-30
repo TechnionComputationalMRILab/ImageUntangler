@@ -1,5 +1,6 @@
 from vtk import vtkInteractorStyleImage, vtkPropPicker
 from icecream import ic
+ic.configureOutput(includeContext=True)
 
 from util import logger
 logger = logger.get_logger()

@@ -1,7 +1,7 @@
 import numpy as np
 import vtkmodules.all as vtk
-from vtk import vtkImageData
-from vtk.util import numpy_support
+from vtkmodules.all import vtkImageData
+from vtkmodules.util import numpy_support
 
 from icecream import ic
 from MPRWindow.Control import MPRW_Control
@@ -10,7 +10,7 @@ from Model.getMPR import PointsToPlaneVectors
 from Control.SaveFormatter import SaveFormatter
 from util import mpr_window_config, logger
 logger = logger.get_logger()
-
+ic.configureOutput(includeContext=True)
 
 class MPRW_Model:
     def __init__(self, points, image_data):

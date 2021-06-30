@@ -47,3 +47,8 @@ def get_color(section):
         rgb_str = color_str.split(", ")
         as_list = [int(i)/255 for i in rgb_str]
         return tuple(as_list)
+
+
+def get_testing_status(testing):
+    config_file, _ = initialize()
+    return config_file.getboolean('testing', testing)

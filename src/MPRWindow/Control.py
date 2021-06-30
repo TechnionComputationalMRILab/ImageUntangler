@@ -3,7 +3,7 @@ from typing import List
 from Model.getMPR import PointsToPlaneVectors
 from Control.SaveFormatter import SaveFormatter
 import vtkmodules.all as vtk
-from vtk import vtkImageData
+from vtkmodules.all import vtkImageData
 
 
 class MPRW_Control:

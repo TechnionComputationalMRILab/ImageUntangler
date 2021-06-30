@@ -3,10 +3,11 @@ from pydicom.errors import InvalidDicomError
 import numpy as np
 from icecream import ic
 import os
-from . import SequenceFile
+from . import SequenceFile, NumpyToVTK
 
-from util import logger
+from util import ConfigRead as CFG, logger
 logger = logger.get_logger()
+ic.configureOutput(includeContext=True)
 
 
 class DICOMReader:
@@ -23,7 +24,7 @@ class DICOMReader:
         if self._valid_files_len:
             self._load_sequence_dict()
         else:
-            logger.info("No DICOM files found")
+            logger.info(f"No DICOM files found in {self.folder}")
 
     @classmethod
     def test_folder(cls, folder: str):
@@ -38,7 +39,7 @@ class DICOMReader:
         if _seqfile:
             # if seqfile exists, save the seqfile as the dict for the files
             # seqfile is just name of file (not absolute path!) + sequence
-            logger.info(f"Sequence Directory Found in {self.folder}!")
+            logger.info(f"Sequence Directory Found: {_seqfile}!")
             if self.run_clean:
                 os.remove(os.path.join(self.folder, _seqfile))
                 self._load_sequence_dict()
@@ -100,3 +101,10 @@ class DICOMReader:
         else:
             self.cached_pixel_data_dict[item] = self._generate_pixel_data(item)
             return self.cached_pixel_data_dict[item]
+
+    def convert_to_vtk(self, seq):
+        arr = list()
+        for pix in self[seq]:
+            arr.append(NumpyToVTK.numpy_array_as_vtk_image_data(pix[1]))
+
+        return arr

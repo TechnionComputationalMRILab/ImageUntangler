@@ -13,7 +13,7 @@ from Model.PointCollection import PointCollection
 from MainWindowComponents import MessageBoxes
 from util import ConfigRead as CFG, stylesheets, mpr_window_config, logger
 logger = logger.get_logger()
-
+ic.configureOutput(includeContext=True)
 
 class MPRW_View(QWidget):
     def __init__(self, model, control, parent=None):

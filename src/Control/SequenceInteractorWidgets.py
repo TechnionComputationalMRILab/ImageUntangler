@@ -5,7 +5,7 @@ from PyQt5.QtWidgets import QSlider, QComboBox, QSizePolicy
 
 
 class SequenceInteractorWidgets:
-    def __init__(self, MRISequences: list, model):
+    def __init__(self, MRISequences, model):
         self.model = model
         self.sequenceList = self.addSequenceList(MRISequences, model)
         self.indexSlider = QSlider(Qt.Horizontal, parent=model)

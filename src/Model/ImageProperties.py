@@ -1,15 +1,26 @@
 import math
-from vtk import vtkNrrdReader, vtkDICOMImageReader
-from vtk.vtkCommonDataModel import vtkImageData
-from vtk.util import numpy_support
+from vtkmodules.all import vtkNrrdReader, vtkDICOMImageReader
+from vtkmodules.vtkCommonDataModel import vtkImageData
+from vtkmodules.util import numpy_support
 
 import nrrd
 import pydicom as dicom
 from icecream import ic
 import numpy as np
+ic.configureOutput(includeContext=True)
+from util import ConfigRead as CFG, logger
+logger = logger.get_logger()
 
 
-def getImageData(imgPath: str, isDicom: bool):
+def getImageData(imgPath: str, isDicom, imager):
+    if CFG.get_testing_status('reader-reimplementation'):
+        # TODO: get the vtkImageData from the Imager
+        pass
+
+    else:
+        return old_getImageData(imgPath, isDicom)
+
+def old_getImageData(imgPath, isDicom):
     if isDicom:
         reader = vtkDICOMImageReader()
 
@@ -30,7 +41,6 @@ def getImageData(imgPath: str, isDicom: bool):
     reader.SetFileName(imgPath)
     reader.Update()
     imageData = reader.GetOutput()
-    ic(imageData)
 
     header['filename'] = imgPath
     return ImageProperties(imageData, header)

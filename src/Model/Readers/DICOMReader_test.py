@@ -1,5 +1,6 @@
 import psutil, os, numpy
 from icecream import ic
+ic.configureOutput(includeContext=True)
 from DICOMReader import DICOMReader
 import vtkmodules.all as vtk
 
@@ -7,7 +8,7 @@ import vtkmodules.all as vtk
 # absolute_path = "C:\\Users\\vardo\\OneDrive\\Documents\\Github\\ImageUntangler\\internal_data\\MRI_Data\\Case005\\Case005\\NRRDS\\001_LOCALIZER_3_PLANE_"
 
 # # valid path
-absolute_path = "C:\\Users\\vardo\\OneDrive\\Documents\\Github\\ImageUntangler\\internal_data\\MRI_Data\\enc_files"
+absolute_path = "C:\\Users\\ang.a\\OneDrive - Technion\\Documents\\MRI_Data\\enc_files"
 
 test_dicom_reader = DICOMReader(absolute_path)
 
@@ -26,7 +27,6 @@ for i in range(1, len(zcoords)-1):
 # TODO: ask moti about the unevenly spaced SliceLocations
 
 print((zcoords[0] - zcoords[-1])/(len(zcoords) - 1))
-
 
 def test_class_method():
     if DICOMReader.test_folder(absolute_path):
@@ -60,18 +60,21 @@ def vtk_out():
     reader.SetDirectoryName(absolute_path)
     reader.Update()
 
+    # data = vtk.vtkImageData()
+    data = test_dicom_reader.convert_to_vtk('cor  2D FIESTA')
+
+    print(type(data[0]))
+
     # Visualize
-    imageViewer = vtk.vtkImageViewer2()
-    imageViewer.SetInputConnection(reader.GetOutputPort())
-
-
-
+    imageViewer = vtk.vtkImageViewer()
+    # imageViewer.SetInputConnection(reader.GetOutputPort())
+    imageViewer.SetInputData(data[20])
 
     # initialize rendering and interaction
-    imageViewer.GetRenderWindow().SetSize(400, 300)
-    imageViewer.GetRenderer().SetBackground(0.2, 0.3, 0.4)
-    imageViewer.Render()
-    imageViewer.GetRenderer().ResetCamera()
+    # imageViewer.GetRenderWindow().SetSize(400, 300)
+    # imageViewer.GetRenderer().SetBackground(0.2, 0.3, 0.4)
+    # imageViewer.Render()
+    # imageViewer.GetRenderer().ResetCamera()
     imageViewer.Render()
 
     window = vtk.vtkRenderWindow()
@@ -81,5 +84,5 @@ def vtk_out():
     interactor.SetRenderWindow(window)
     interactor.Start()
 
-# if __name__ == "__main__":
-#     vtk_out()
+if __name__ == "__main__":
+    vtk_out()

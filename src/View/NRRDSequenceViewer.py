@@ -11,7 +11,7 @@ from icecream import ic
 
 from util import logger
 logger = logger.get_logger()
-
+ic.configureOutput(includeContext=True)
 
 class NRRDSequenceViewer(BaseSequenceViewer):
     def __init__(self, manager, interactor: QVTKRenderWindowInteractor, interactorStyle: SequenceViewerInteractorStyle, imagePath: str, isDicom = False):
