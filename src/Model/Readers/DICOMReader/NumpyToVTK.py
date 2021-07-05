@@ -5,7 +5,7 @@ from vtkmodules.util import numpy_support
 debugOn = False
 
 
-def numpy_array_as_vtk_image_data(np_arr, origin=(0,0), spacing=(1,1)):
+def numpy_array_as_vtk_image_data(np_arr, origin, spacing):
     """
     source: adapted from https://github.com/dave3d/dicom2stl/blob/main/utils/sitk2vtk.py
     """

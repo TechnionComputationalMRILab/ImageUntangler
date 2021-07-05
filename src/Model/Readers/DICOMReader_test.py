@@ -8,7 +8,8 @@ import vtkmodules.all as vtk
 # absolute_path = "C:\\Users\\vardo\\OneDrive\\Documents\\Github\\ImageUntangler\\internal_data\\MRI_Data\\Case005\\Case005\\NRRDS\\001_LOCALIZER_3_PLANE_"
 
 # # valid path
-absolute_path = "C:\\Users\\ang.a\\OneDrive - Technion\\Documents\\MRI_Data\\enc_files"
+absolute_path = 'E:\\Downloads\\MRE enc'
+    # "C:\\Users\\ang.a\\OneDrive - Technion\\Documents\\MRI_Data\\enc_files"
 
 test_dicom_reader = DICOMReader(absolute_path)
 
@@ -16,7 +17,7 @@ print(test_dicom_reader.get_sequence_list())
 print(len(test_dicom_reader))
 
 zcoords = []
-for i in test_dicom_reader['cor  2D FIESTA']:
+for i in test_dicom_reader['Cor LAVA MultiPhase']:
     zcoords.append(i[0])
 
 print(len(zcoords))
@@ -24,6 +25,7 @@ print(len(zcoords))
 dz = []
 for i in range(1, len(zcoords)-1):
     dz.append(zcoords[i-1] - zcoords[i])
+    print(zcoords[i], zcoords[i-1] - zcoords[i])
 # TODO: ask moti about the unevenly spaced SliceLocations
 
 print((zcoords[0] - zcoords[-1])/(len(zcoords) - 1))
@@ -84,5 +86,5 @@ def vtk_out():
     interactor.SetRenderWindow(window)
     interactor.Start()
 
-if __name__ == "__main__":
-    vtk_out()
+# if __name__ == "__main__":
+#     vtk_out()

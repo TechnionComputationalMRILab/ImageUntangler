@@ -12,13 +12,14 @@ from util import ConfigRead as CFG, logger
 logger = logger.get_logger()
 
 
-def getImageData(imgPath: str, isDicom, imager):
+def getImageData(imgPath: str, isDicom, imager, **kwargs):
     if CFG.get_testing_status('reader-reimplementation'):
         # TODO: get the vtkImageData from the Imager
         pass
 
     else:
         return old_getImageData(imgPath, isDicom)
+
 
 def old_getImageData(imgPath, isDicom):
     if isDicom:

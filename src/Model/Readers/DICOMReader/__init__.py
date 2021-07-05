@@ -102,9 +102,9 @@ class DICOMReader:
             self.cached_pixel_data_dict[item] = self._generate_pixel_data(item)
             return self.cached_pixel_data_dict[item]
 
-    def convert_to_vtk(self, seq):
+    def convert_to_vtk(self, seq, spacing):
         arr = list()
         for pix in self[seq]:
-            arr.append(NumpyToVTK.numpy_array_as_vtk_image_data(pix[1]))
+            arr.append(NumpyToVTK.numpy_array_as_vtk_image_data(pix[1], origin=(0, 0), spacing=spacing))
 
         return arr
