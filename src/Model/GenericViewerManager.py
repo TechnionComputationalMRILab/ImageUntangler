@@ -10,7 +10,7 @@ logger = logger.get_logger()
 
 
 class GenericViewerManager:
-    def __init__(self, model, MRIimages: List[str]):
+    def __init__(self, model, MRIimages):
         self.MRIimages = MRIimages
         self.goodIndex = -1 # index of image that is properly encoded
         self.manager = model
@@ -37,11 +37,9 @@ class GenericViewerManager:
 
     def loadSequence(self, sequenceIndex: int, VTKinteractor: QVTKRenderWindowInteractor, interactorStyle):
         try:
-            logger.debug(f"Loading {self.MRIimages[sequenceIndex]}")
-            # sequenceViewer = NRRDSequenceViewer(self, VTKinteractor, interactorStyle, self.MRIimages[sequenceIndex],
-            #                                     self.MRIimages[0][-4:] != "nrrd")
-            sequenceViewer = GenericSequenceViewer(self, VTKinteractor, interactorStyle, self.MRIimages[sequenceIndex],
-                                                self.MRIimages[sequenceIndex][-4:] != "nrrd")
+            logger.debug(f"Loading {self.MRIimages.get_sequences()[sequenceIndex]}")
+            sequenceViewer = GenericSequenceViewer(self, VTKinteractor, interactorStyle, self.MRIimages[sequenceIndex])
+
             _ = sequenceViewer.sliceIdx # test if image was loaded properly
             self.goodIndex = sequenceIndex
             self.manager.setListWidgetIndex(self.goodIndex)

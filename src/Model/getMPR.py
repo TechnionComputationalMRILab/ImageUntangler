@@ -4,7 +4,7 @@ from scipy.interpolate import RegularGridInterpolator, splprep,splev
 from typing import List
 # from icecream import ic
 
-# ic.configureOutput(includeContext=True)
+#
 
 
 class PointsToPlaneVectors:

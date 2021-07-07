@@ -1,6 +1,6 @@
 from vtk import vtkInteractorStyleImage, vtkPropPicker
-from icecream import ic
-ic.configureOutput(includeContext=True)
+# from icecream import ic
+
 
 from util import logger
 logger = logger.get_logger()
@@ -120,7 +120,8 @@ class SequenceViewerInteractorStyle(vtkInteractorStyleImage):
             # turn on point picking
 
         elif self.parent.GetKeyCode() == 'Q' or self.parent.GetKeyCode() == 'q':  # query
-            ic(self.parent.GetEventPosition())
+            pass
+            # ic(self.parent.GetEventPosition())
 
         elif self.parent.GetKeyCode() == 'd' or self.parent.GetKeyCode() == 'D':  # delete
             x, y = self.parent.GetEventPosition()

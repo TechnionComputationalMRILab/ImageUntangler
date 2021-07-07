@@ -1,5 +1,5 @@
 from typing import List
-from vtk.qt.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
+from vtkmodules.qt.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
 
 from View.SlidersLayout import SlidersLayout
 from Model.BaseModel import BaseModel

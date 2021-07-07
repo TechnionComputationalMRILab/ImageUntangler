@@ -1,11 +1,11 @@
 import json
 import os
-from icecream import ic
+# from icecream import ic
 from MainWindowComponents import MessageBoxes
 from Model.PointCollection import PointCollection
 from util import logger
 logger = logger.get_logger()
-ic.configureOutput(includeContext=True)
+
 
 class PointLoader:
     def __init__(self, filename, image_data):

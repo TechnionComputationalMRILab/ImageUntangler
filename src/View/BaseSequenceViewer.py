@@ -12,11 +12,11 @@ from MPRWindow.MPRWindow import MPRWindow
 from MainWindowComponents import MessageBoxes
 from Control.SaveFormatter import SaveFormatter
 from Control.PointLoader import PointLoader
-from icecream import ic
+# from icecream import ic
 
 from util import logger, ConfigRead as CFG
 logger = logger.get_logger()
-ic.configureOutput(includeContext=True)
+
 
 class BaseSequenceViewer:
     def __init__(self, manager, interactor: QVTKRenderWindowInteractor, interactorStyle: SequenceViewerInteractorStyle, imagePath: str, isDicom = False):
@@ -266,7 +266,7 @@ class BaseSequenceViewer:
 
         if _prop_picker.Pick(x, y, 0, self.renderer):
             logger.info(f"Prop picked at {x}, {y}.")
-            ic(_prop_picker.GetProp3Ds().GetLastProp3D())
+            # ic(_prop_picker.GetProp3Ds().GetLastProp3D())
             # _found_props.append(_prop_picker.GetViewProp())
         # else:
         #     _found_props = list(set(_found_props))

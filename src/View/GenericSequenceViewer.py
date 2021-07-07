@@ -12,22 +12,23 @@ from MPRWindow.MPRWindow import MPRWindow
 from MainWindowComponents import MessageBoxes
 from Control.SaveFormatter import SaveFormatter
 from Control.PointLoader import PointLoader
-from icecream import ic
+# from icecream import ic
 
 from util import logger, ConfigRead as CFG
 logger = logger.get_logger()
-ic.configureOutput(includeContext=True)
+
 
 
 class GenericSequenceViewer:
-    def __init__(self, manager, interactor: QVTKRenderWindowInteractor, interactorStyle: SequenceViewerInteractorStyle, imagePath: str, isDicom = False):
+    def __init__(self, manager, interactor: QVTKRenderWindowInteractor, interactorStyle: SequenceViewerInteractorStyle, image):
         self.manager = manager
         self.interactor = interactor
 
         self.actor = vtkImageActor()
         self.renderer = vtkRenderer()
 
-        self.imageData = ImageProperties.getImageData(imagePath, isDicom)
+        # self.imageData = ImageProperties.getImageData(imager, sequence="")
+        self.imageData = image
         self.LevelVal = (self.imageData.dicomArray.max()+self.imageData.dicomArray.min())/2
         self.WindowVal = self.imageData.dicomArray.max()-self.imageData.dicomArray.min()
 
@@ -269,7 +270,7 @@ class GenericSequenceViewer:
 
         if _prop_picker.Pick(x, y, 0, self.renderer):
             logger.info(f"Prop picked at {x}, {y}.")
-            ic(_prop_picker.GetProp3Ds().GetLastProp3D())
+            # ic(_prop_picker.GetProp3Ds().GetLastProp3D())
             # _found_props.append(_prop_picker.GetViewProp())
         # else:
         #     _found_props = list(set(_found_props))
@@ -290,7 +291,7 @@ class GenericSequenceViewer:
         logger.debug(f"{len(pointCollection)} points in memory")
         for point in pointCollection.points:
             polygon = point.polygon
-            ic(polygon)
+            # ic(polygon)
             if point.coordinates[3] != sliceIdx:  # dots were placed on different slices
                 polygon.GeneratePolygonOff()
             else:

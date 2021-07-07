@@ -5,23 +5,14 @@ from vtkmodules.util import numpy_support
 
 import nrrd
 import pydicom as dicom
-from icecream import ic
+# from icecream import ic
 import numpy as np
-ic.configureOutput(includeContext=True)
+
 from util import ConfigRead as CFG, logger
 logger = logger.get_logger()
 
 
-def getImageData(imgPath: str, isDicom, imager, **kwargs):
-    if CFG.get_testing_status('reader-reimplementation'):
-        # TODO: get the vtkImageData from the Imager
-        pass
-
-    else:
-        return old_getImageData(imgPath, isDicom)
-
-
-def old_getImageData(imgPath, isDicom):
+def getImageData(imgPath: str = None, isDicom = False):
     if isDicom:
         reader = vtkDICOMImageReader()
 
@@ -47,7 +38,7 @@ def old_getImageData(imgPath, isDicom):
     return ImageProperties(imageData, header)
 
 
-class ImageProperties: # class makes operations more efficient by caching image data in memory
+class ImageProperties:
     def __init__(self, fullData: vtkImageData, header: dict):
         self.fullData = fullData # ??temp
         self.spacing = fullData.GetSpacing()
@@ -59,7 +50,10 @@ class ImageProperties: # class makes operations more efficient by caching image 
         self.dicomArray = numpy_support.vtk_to_numpy(fullData.GetPointData().GetArray(0))
         self.dicomArray = self.dicomArray.reshape(self.dimensions, order='F')
 
+        header['file type'] = 'dicom'
+        header['filename'] = 'aaa'
         self.header = header
+        # ic(header)
 
         min_z = round(center_z - (self.origin[2] + self.spacing[2] * (self.dimensions[2])), 1)
         max_z = math.floor((self.dimensions[2] * self.spacing[2]) + min_z)

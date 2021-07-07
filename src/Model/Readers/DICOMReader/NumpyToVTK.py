@@ -1,20 +1,35 @@
 import vtkmodules.all as vtk
 import numpy as np
 from vtkmodules.util import numpy_support
+from SimpleITK import ReadImage
 
-debugOn = False
+NP_TO_VTK_DEBUG = False
 
 
-def numpy_array_as_vtk_image_data(np_arr, origin, spacing):
+def get_image_properties(file_list):
+    _prop = dict()
+
+    dicom_itk = ReadImage(file_list)
+
+    _prop['size'] = list(dicom_itk.GetSize())
+    _prop['origin'] = list(dicom_itk.GetOrigin())
+    _prop['spacing'] = list(dicom_itk.GetSpacing())
+    _prop['ncomp'] = dicom_itk.GetNumberOfComponentsPerPixel()
+    _prop['direction'] = dicom_itk.GetDirection()
+
+    return _prop
+
+
+def numpy_array_as_vtk_image_data(np_arr, origin, spacing, ncomp, direction, size):
     """
     source: adapted from https://github.com/dave3d/dicom2stl/blob/main/utils/sitk2vtk.py
     """
     np_arr = np.flipud(np_arr)  # either this, or reshape with order F? TODO: check this
     vtk_image = vtk.vtkImageData()
 
-    size = list(np_arr.shape)
+    size = list(size)
     origin = list(origin)
-    spacing = list(spacing) # get this from PixelSpacing in the header
+    spacing = list(spacing)
 
     # VTK expects 3-dimensional parameters
     if len(size) == 2:
@@ -44,12 +59,12 @@ def numpy_array_as_vtk_image_data(np_arr, origin, spacing):
     # depth_array = numpy_support.numpy_to_vtk(i2.ravel(), deep=True,
     #                                          array_type = vtktype)
     depth_array = numpy_support.numpy_to_vtk(np_arr.ravel())
-    depth_array.SetNumberOfComponents(2)
+    depth_array.SetNumberOfComponents(ncomp)
     vtk_image.GetPointData().SetScalars(depth_array)
 
     vtk_image.Modified()
-    #
-    if debugOn:
+
+    if NP_TO_VTK_DEBUG:
         print("Volume object inside sitk2vtk")
         # print(vtk_image)
         print(size)

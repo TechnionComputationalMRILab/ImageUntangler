@@ -6,6 +6,8 @@ from pathlib import Path
 def initialize():
     config_file = configparser.ConfigParser()
     config_file_path = os.path.join(Path(__file__).resolve().parents[2], 'config.ini')
+    # config_file_path = f"{os.path.dirname(__file__)}{os.sep}config.ini"
+    print(config_file_path)
 
     try:
         config_file.read(config_file_path)

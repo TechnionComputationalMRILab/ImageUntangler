@@ -1,6 +1,6 @@
 import os
 from typing import List
-from icecream import ic
+# from icecream import ic
 from PyQt5.QtCore import QMetaObject, QCoreApplication, QRect
 from PyQt5.QtWidgets import QWidget, QHBoxLayout, QPushButton, QFileDialog
 
@@ -13,7 +13,7 @@ from Model.GenericModel import GenericModel
 from Model.Readers.Imager import Imager
 
 logger = logger.get_logger()
-ic.configureOutput(includeContext=True)
+
 
 
 class Tab(QWidget):

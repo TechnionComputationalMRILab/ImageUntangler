@@ -1,6 +1,6 @@
 import sys
 import os
-from icecream import ic
+# from icecream import ic
 import numpy as np
 from PyQt5.Qt import *
 import vtkmodules.all as vtk
@@ -13,7 +13,7 @@ from Model.PointCollection import PointCollection
 from MainWindowComponents import MessageBoxes
 from util import ConfigRead as CFG, stylesheets, mpr_window_config, logger
 logger = logger.get_logger()
-ic.configureOutput(includeContext=True)
+
 
 class MPRW_View(QWidget):
     def __init__(self, model, control, parent=None):

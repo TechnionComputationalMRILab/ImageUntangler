@@ -1,6 +1,6 @@
 import psutil, os, numpy
-from icecream import ic
-ic.configureOutput(includeContext=True)
+# from icecream import ic
+
 from DICOMReader import DICOMReader
 import vtkmodules.all as vtk
 
@@ -8,7 +8,7 @@ import vtkmodules.all as vtk
 # absolute_path = "C:\\Users\\vardo\\OneDrive\\Documents\\Github\\ImageUntangler\\internal_data\\MRI_Data\\Case005\\Case005\\NRRDS\\001_LOCALIZER_3_PLANE_"
 
 # # valid path
-absolute_path = 'E:\\Downloads\\MRE enc'
+absolute_path = 'C:\\Users\\ang.a\\OneDrive - Technion\\Documents\\MRI_Data\\MRE enc\\MRE enc'
     # "C:\\Users\\ang.a\\OneDrive - Technion\\Documents\\MRI_Data\\enc_files"
 
 test_dicom_reader = DICOMReader(absolute_path)
@@ -17,10 +17,12 @@ print(test_dicom_reader.get_sequence_list())
 print(len(test_dicom_reader))
 
 zcoords = []
-for i in test_dicom_reader['Cor LAVA MultiPhase']:
-    zcoords.append(i[0])
+for i in test_dicom_reader['3 plane Loc SSFSE BH']:
+    zcoords.append(i[1])
 
 print(len(zcoords))
+
+print(zcoords)
 
 dz = []
 for i in range(1, len(zcoords)-1):
@@ -32,8 +34,9 @@ print((zcoords[0] - zcoords[-1])/(len(zcoords) - 1))
 
 def test_class_method():
     if DICOMReader.test_folder(absolute_path):
-        ic(DICOMReader.test_folder(absolute_path))
-        ic(len(DICOMReader.test_folder(absolute_path)))
+        pass
+        # ic(DICOMReader.test_folder(absolute_path))
+        # ic(len(DICOMReader.test_folder(absolute_path)))
     else:
         print("not dicom")
 

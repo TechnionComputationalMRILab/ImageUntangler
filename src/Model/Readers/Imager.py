@@ -3,19 +3,22 @@ import os, psutil
 from Model.Readers.DICOMReader import DICOMReader
 from Model.Readers.NRRDReader import NRRDReader
 from tqdm import tqdm
-from icecream import ic
+# from icecream import ic
 from vtkmodules.all import vtkImageData
-from scipy.stats import mode
 
+from Model.ImageProperties import ImageProperties
 from util import ConfigRead as CFG, logger
 logger = logger.get_logger()
-ic.configureOutput(includeContext=True)
+
 
 
 class Imager:
     def __init__(self, directory):
+        self.image_list = dict()
+
         self.directory = directory
         self.dicom_list, self.nrrd_list, self.valid_folders = self._group_by_type()
+
         self.cache = {k: vtkImageData() for k in self.valid_folders}
 
         self.sequences = self._process_dicoms() if len(self.dicom_list) else list()
@@ -37,7 +40,6 @@ class Imager:
         _dicom = list()
         _nrrd = list()
         _valid_folders = list()
-        _key_list = list()
 
         for f in tqdm(_folder_list):
             _dicom_reader = DICOMReader.test_folder(f)
@@ -54,11 +56,12 @@ class Imager:
 
     def _process_dicoms(self):
         _seq_list = list()
-        # _image_list = list()
+        _image_list = list()
         for dicom in self.dicom_list:
             for seq in dicom.get_sequence_list():
                 _seq_list.append(seq)
                 # _image_list.append(Image(dicom, sequence=seq))
+                self.image_list[seq] = Image(dicom, sequence=seq)
         return _seq_list
 
     def _process_nrrds(self):
@@ -68,27 +71,31 @@ class Imager:
         return []
 
     def __getitem__(self, item):
-        if item not in self.get_sequences():
-            raise KeyError(f"{item} not found in Imager class")
+        if isinstance(item, int):
+            _seq = self.get_sequences()[item]
+            return self[_seq]
         else:
-            if item in self.cache.items():
-                return self.cache[item]
+            if item not in self.get_sequences():
+                raise KeyError(f"{item} not found in Imager class")
             else:
-                self.cache[item] = dict() # TODO: generate the image
-                return self.cache[item]
+                if item in self.cache.items():
+                    return ImageProperties(self.cache[item], self.image_list[item].get_header())
+                else:
+                    self.cache[item] = self.image_list[item].get_image()
+                    return ImageProperties(self.cache[item], self.image_list[item].get_header())
 
     def get_sequences(self):
         return self.sequences + self.files
 
+    def __len__(self):
+        return len(self.get_sequences())
+
     def get_folders(self):
         return self.valid_folders
 
-    def get_keys(self):
-        return ()  # folder and filename/sequence
-
 
 class Image:
-    """ translates any reader and flatten it to one vtkImageData volume """
+    """ translates any reader and flattens it to one vtkImageData volume """
     def __init__(self, reader, **kwargs):
         self.reader = reader
         self._check_kwargs(kwargs)
@@ -111,26 +118,14 @@ class Image:
             self._type = 'empty'
 
     def _process_single_dicom(self, sequence):
-        _x_spacing = 1
-        _y_spacing = 1
+        self._vtkImageData_array = self.reader.convert_to_vtk(sequence)
 
-        if CFG.get_testing_status('ignore-uneven-slices'):
-            _z_spacing = mode([round(z[0]) for z in self.reader[sequence]])
-        else:
-            _rounded_z = [round(z[0]) for z in self.reader[sequence]]
-            _dz = [_rounded_z[i-1] - _rounded_z[i] for i in range(1, len(_rounded_z))]
-            if len(set(_dz)) > 1:
-                raise ValueError("z-spacing not equal between slices")
-            else:
-                _z_spacing = set(_dz)
-
-        self._vtkImageData_array = self.reader.convert_to_vtk(sequence, spacing=(_x_spacing, _y_spacing, _z_spacing))
-
-    def __getitem__(self, item) -> vtkImageData:
+    def get_image(self) -> vtkImageData:
         """ the items are the slices """
         if self._type == 'dicom':
             self._process_single_dicom(self._param)
-            return self._vtkImageData_array[item]
+            # ic(self._vtkImageData_array)
+            return self._vtkImageData_array
         elif self._type == "nrrd":
             pass
         elif self._type == 'empty':
@@ -139,14 +134,23 @@ class Image:
             logger.critical("Bad type in Image class.")
             raise NotImplementedError("Issue with Image class. Please notify developers.")
 
+    def get_header(self):
+        return {"a":"b"}
 
 if __name__ == "__main__":
     print(psutil.Process(os.getpid()).memory_info().rss / 1024 ** 2)
 
-    a = Imager('C:\\Users\\vardo\\OneDrive\\Documents\\Github\\ImageUntangler\\internal_data\\MRI_Data')
+    a = Imager('C:\\Users\\ang.a\\OneDrive - Technion\\Documents\\MRI_Data\\MRE enc')
 
     print(psutil.Process(os.getpid()).memory_info().rss / 1024 ** 2)
 
-    print(a.get_keys())
+    print(len(a))
+
+    # for i in a.get_sequences():
+    #     print(i)
+    #     print(psutil.Process(os.getpid()).memory_info().rss / 1024 ** 2)
+    #     a[i]
+
+    print(a['Cor LAVA MultiPhase'].header)
 
     print(psutil.Process(os.getpid()).memory_info().rss / 1024 ** 2)

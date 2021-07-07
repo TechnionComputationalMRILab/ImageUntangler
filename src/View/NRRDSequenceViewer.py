@@ -7,11 +7,11 @@ from vtkmodules.all import vtkImageActor, vtkImageReslice, vtkMatrix4x4, vtkRend
 from View.BaseSequenceViewer import BaseSequenceViewer
 from Control.SequenceViewerInteractorStyle import SequenceViewerInteractorStyle
 from Model.PointCollection import PointCollection
-from icecream import ic
+# from icecream import ic
 
 from util import logger
 logger = logger.get_logger()
-ic.configureOutput(includeContext=True)
+
 
 class NRRDSequenceViewer(BaseSequenceViewer):
     def __init__(self, manager, interactor: QVTKRenderWindowInteractor, interactorStyle: SequenceViewerInteractorStyle, imagePath: str, isDicom = False):
@@ -40,7 +40,7 @@ class NRRDSequenceViewer(BaseSequenceViewer):
         logger.debug(f"{len(pointCollection)} points in memory")
         for point in pointCollection.points:
             polygon = point.polygon
-            ic(polygon)
+            # ic(polygon)
             if point.coordinates[3] != sliceIdx:  # dots were placed on different slices
                 polygon.GeneratePolygonOff()
             else:

@@ -1,6 +1,6 @@
 from typing import List
 from vtkmodules.qt.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
-from icecream import ic
+# from icecream import ic
 
 from typing import Tuple
 from PyQt5.QtCore import QRect
@@ -29,9 +29,9 @@ class GenericModel(QWidget):
         self.interactor = QVTKRenderWindowInteractor(frame)
         self.interactorStyle = SequenceViewerInteractorStyle(parent=self.interactor, model=self)
         self.widgets = SequenceInteractorWidgets(MRIimages.get_sequences(), self)
-        self.sequenceManager = GenericViewerManager(self, MRIimages.get_sequences())
-        self.view = self.sequenceManager.loadSequence(0, self.interactor, self.interactorStyle)
-        ic(self.view)
+
+        self.sequenceManager = GenericViewerManager(self, MRIimages)
+        self.view = self.sequenceManager.loadSequence(1, self.interactor, self.interactorStyle)
         slidersLayout = SlidersLayout(sequenceList=self.widgets.sequenceList,  windowSlider=self.widgets.windowSlider,
                                       levelSlider=self.widgets.levelSlider, indexSlider=self.widgets.indexSlider)
         self.initializeSliderValues()

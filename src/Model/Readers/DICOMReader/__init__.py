@@ -1,13 +1,13 @@
 import pydicom
 from pydicom.errors import InvalidDicomError
 import numpy as np
-from icecream import ic
+# from icecream import ic
 import os
 from . import SequenceFile, NumpyToVTK
 
 from util import ConfigRead as CFG, logger
 logger = logger.get_logger()
-ic.configureOutput(includeContext=True)
+
 
 
 class DICOMReader:
@@ -37,7 +37,7 @@ class DICOMReader:
     def _load_sequence_dict(self):
         _seqfile = SequenceFile.check_if_dicom_seqfile_exists(self.folder)
         if _seqfile:
-            # if seqfile exists, save the seqfile as the dict for the files
+            #             # if seqfile exists, save the seqfile as the dict for the files
             # seqfile is just name of file (not absolute path!) + sequence
             logger.info(f"Sequence Directory Found: {_seqfile}!")
             if self.run_clean:
@@ -80,10 +80,10 @@ class DICOMReader:
     def _generate_pixel_data(self, sequence):
         _list_of_files = self.sequence_dict[sequence]
 
-        _tuple_list = list(zip(# _list_of_files,
+        _tuple_list = list(zip(_list_of_files,
                                [float(SequenceFile.get_info('SliceLocation', f)) for f in _list_of_files],
                                [self._get_pixel_array(f) for f in _list_of_files]))
-        _tuple_list.sort(key=lambda x: x[0])
+        _tuple_list.sort(key=lambda x: x[1])
         return _tuple_list
 
     @staticmethod
@@ -102,9 +102,13 @@ class DICOMReader:
             self.cached_pixel_data_dict[item] = self._generate_pixel_data(item)
             return self.cached_pixel_data_dict[item]
 
-    def convert_to_vtk(self, seq, spacing):
-        arr = list()
-        for pix in self[seq]:
-            arr.append(NumpyToVTK.numpy_array_as_vtk_image_data(pix[1], origin=(0, 0), spacing=spacing))
+    def convert_to_vtk(self, seq):
+        _prop = NumpyToVTK.get_image_properties([pix[0] for pix in self[seq]])
+        _arr = np.array([pix[2] for pix in self[seq]])
+        return NumpyToVTK.numpy_array_as_vtk_image_data(_arr,
+                                                        origin=_prop['origin'],
+                                                        spacing=_prop['spacing'],
+                                                        ncomp=_prop['ncomp'],
+                                                        direction=_prop['direction'],
+                                                        size=_prop['size'])
 
-        return arr
