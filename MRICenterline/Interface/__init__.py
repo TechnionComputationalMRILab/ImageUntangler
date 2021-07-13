@@ -23,7 +23,7 @@ class DisplayCenterlineInterface:
         self.window = window
         self.updated = True
 
-    def set_points(self, points):
+    def set_points(self, points: PointCollection):
         self.points = points
         self.updated = True
 

@@ -46,5 +46,5 @@ class LoadPoints:
 
     def _open_file(self):
         with open(self.filename, 'r') as f:
-            logging.info(f"Opening {self.filename}")
+            logging.info(f"Opening annotation from {self.filename}")
             self.json_data = json.load(f)

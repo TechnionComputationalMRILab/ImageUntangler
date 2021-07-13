@@ -4,7 +4,7 @@ import os
 # from icecream import ic
 
 from MRICenterline.DisplayPanel.View.GenericSequenceViewer import GenericSequenceViewer
-# from MainWindowComponents.MessageBoxes import noGoodFiles, gzipFileMessage
+from MRICenterline.utils import message as MSG
 
 import logging
 logging.getLogger(__name__)
@@ -29,13 +29,11 @@ class GenericViewerManager:
         logging.debug(f"showValidImage function run. sequenceIndex: {sequenceIndex}")
         if self.goodIndex == -1: # first image is being loaded
             if sequenceIndex == len(self.MRIimages)-1:
-                print("files bad")
-                # noGoodFiles()
+                MSG.msg_box_error('files bad')
             else:
                 return self.loadSequence(sequenceIndex+1, VTKinteractor, interactorStyle)
         else:
-            print("gzip?")
-            # gzipFileMessage()
+            MSG.msg_box_error('files gzip')
             return self.loadSequence(self.goodIndex, VTKinteractor, interactorStyle)
 
     def loadSequence(self, sequenceIndex: int, VTKinteractor: QVTKRenderWindowInteractor, interactorStyle):
@@ -57,4 +55,3 @@ class GenericViewerManager:
                 # logging.error(f"File not found: {self.MRIimages[sequenceIndex]}")
         except Exception as err:
             logging.critical(f"Error in loading sequence. Error is {err}")
-

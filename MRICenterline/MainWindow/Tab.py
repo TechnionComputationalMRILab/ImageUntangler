@@ -9,12 +9,12 @@ from PyQt5.QtWidgets import QMenuBar, QMenu, QAction
 from MRICenterline.DisplayPanel.Model.GenericModel import GenericModel
 from MRICenterline.DisplayPanel.Model.Imager import Imager
 from MRICenterline.Config import ConfigParserRead as CFG
+
 import logging
 logging.getLogger(__name__)
 
 
 class Tab(QWidget):
-
     def __init__(self, parent):
         super(QWidget, self).__init__(parent)
         self.Tab_Bar = parent

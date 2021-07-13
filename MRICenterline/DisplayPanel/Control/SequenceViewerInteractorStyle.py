@@ -1,7 +1,6 @@
 from vtkmodules.all import vtkInteractorStyleImage, vtkPropPicker
 # from icecream import ic
 
-
 import logging
 logging.getLogger(__name__)
 

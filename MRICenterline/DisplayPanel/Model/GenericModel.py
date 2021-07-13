@@ -13,6 +13,8 @@ from MRICenterline.DisplayPanel.View.SlidersLayout import SlidersLayout
 from MRICenterline.DisplayPanel.Control.SequenceInteractorWidgets import SequenceInteractorWidgets
 from MRICenterline.DisplayPanel.Control.SequenceViewerInteractorStyle import SequenceViewerInteractorStyle
 
+from MRICenterline.Interface import DisplayCenterlineInterface
+
 from MRICenterline.Config import ConfigParserRead as CFG
 import logging
 logging.getLogger(__name__)
@@ -72,10 +74,12 @@ class GenericModel(QWidget):
     def changeWindow(self, window: int):
         self.widgets.windowSlider.setValue(window)
         self.view.adjustWindow(window)
+        self.interface.set_window(window)
 
     def changeLevel(self, level: int):
         self.widgets.levelSlider.setValue(level)
         self.view.adjustLevel(level)
+        self.interface.set_level(level)
 
     def setIndex(self, index: int):
         logging.info(f"Set index {int(index)}")
@@ -88,10 +92,11 @@ class GenericModel(QWidget):
         logging.info("Opening Centerline Panel dockable widget")
 
         self.interface.initialize_points(self.view.MPRpoints.getCoordinatesArray())
+        print(self.interface)
 
-        _centerline_panel = CenterlinePanel(image=self.view.imageData, interface=self.interface,
-                                            parent=self)
-        self.layout.addWidget(_centerline_panel)
+        # _centerline_panel = CenterlinePanel(image=self.view.imageData, interface=self.interface,
+        #                                     parent=self)
+        # self.layout.addWidget(_centerline_panel)
     #__________________________________________ Interface to InteractorStyle ________________________________
 
     def moveBullsEye(self, coordinates: Tuple[int]):

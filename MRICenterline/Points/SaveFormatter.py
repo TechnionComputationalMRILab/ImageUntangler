@@ -1,14 +1,12 @@
 import json
 import numpy as np
+from datetime import datetime, timezone
 
 from MRICenterline.DisplayPanel.Model.ImageProperties import ImageProperties
 from .PointCollection import PointCollection
 
 import logging
 logging.getLogger(__name__)
-
-ACCEPTABLE_FILE_TYPES = ['csv', 'json', 'sqllite', 'mysql', 'hdf5']
-NOT_IMPLEMENTED = ['csv', 'sqllite', 'mysql', 'hdf5']
 
 
 class SaveFormatter:
@@ -25,8 +23,8 @@ class SaveFormatter:
         self.output_data[key] = _points
 
     def add_generic_data(self, key: str, value):
-        logging.info(f"Adding [{key}]: {value}")
         """ works for anything except for point collections"""
+        logging.info(f"Adding [{key}]: {value}")
         self.output_data[key] = value
 
     # def add_sliceidx_list(self, key, value):
@@ -35,6 +33,8 @@ class SaveFormatter:
 
     def save_data(self):
         self._clean_data()
+
+        self.output_data['annotation timestamp'] = datetime.now(timezone.utc).astimezone().isoformat()
         with open(self.filename, 'w') as f:
             json.dump(self.output_data, f,
                       indent=4)
