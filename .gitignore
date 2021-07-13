@@ -5,3 +5,4 @@ src/*/__pycache__/*
 *log*.txt
 internal_data/*
 venv/*
+*.pyc
