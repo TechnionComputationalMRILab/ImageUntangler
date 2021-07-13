@@ -1,0 +1,10 @@
+APP_NAME = "ImageUntangler"
+APP_BYLINE = "TCML"
+VER_NUMBER = '2.0.0'
+
+LAB_ICON = 'labIcon.png'
+
+BG_COLOR = (204 / 255, 204 / 255, 204 / 255)
+
+CL_INITIAL_HEIGHT = 40
+CL_INITIAL_ANGLE = 180
