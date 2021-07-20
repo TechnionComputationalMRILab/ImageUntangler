@@ -1,4 +1,3 @@
-from icecream import ic
 from MRICenterline.Points.SaveFormatter import SaveFormatter
 import vtkmodules.all as vtk
 from vtkmodules.all import vtkImageData

@@ -1,5 +1,4 @@
 from vtkmodules.qt.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
-from icecream import ic
 
 from typing import Tuple
 from PyQt5.QtWidgets import QVBoxLayout, QGroupBox, QWidget, QFileDialog

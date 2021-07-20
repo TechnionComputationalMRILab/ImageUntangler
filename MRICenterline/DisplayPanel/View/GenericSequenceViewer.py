@@ -11,8 +11,6 @@ from MRICenterline.Points.PointCollection import PointCollection
 from MRICenterline.Points.LoadPoints import LoadPoints
 from MRICenterline.Points.SaveFormatter import SaveFormatter
 
-from icecream import ic
-
 from MRICenterline.utils import message as MSG
 from MRICenterline.Config import ConfigParserRead as CFG
 from MRICenterline.utils import program_constants as CONST

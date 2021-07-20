@@ -1,6 +1,5 @@
 import sys
 import os
-from icecream import ic
 import numpy as np
 from PyQt5.Qt import *
 import vtkmodules.all as vtk
