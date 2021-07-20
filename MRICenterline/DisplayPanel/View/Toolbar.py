@@ -1,7 +1,10 @@
 import os
 from PyQt5.QtGui import QFont
 from PyQt5.QtWidgets import *
+from PyQt5.QtCore import *
 import qtawesome as qta
+
+from MRICenterline.Config import ConfigParserRead as CFG
 
 import logging
 logging.getLogger(__name__)
@@ -10,19 +13,34 @@ logging.getLogger(__name__)
 class DisplayPanelToolbar(QToolBar):
     def __init__(self, parent, manager):
         super().__init__(parent=parent)
+        self.set_toolbar_display_style()
+
         self.manager = manager
         self.addInfoButton()
         self.addLengthMenu()
         self.addMPRMenu()
         self.addDisablePointPickers()
+
+        spacer = QWidget()
+        spacer.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
+        self.addWidget(spacer)
+
         self.showPickerStatus()
 
+    def set_toolbar_display_style(self):
+        if CFG.get_config_data('display', 'toolbar-style') == 'icon':
+            pass
+        elif CFG.get_config_data('display', 'toolbar-style') == 'text':
+            pass
+        else:
+            self.setToolButtonStyle(Qt.ToolButtonTextUnderIcon)
+
     def addInfoButton(self):
-        LengthLoad = QAction("Info", self)
-        LengthLoad.setStatusTip("TESTING")
-        LengthLoad.setIcon(qta.icon('fa5s.flag'))
-        LengthLoad.triggered.connect(lambda x: print("info buttn"))
-        self.addAction(LengthLoad)
+        _info_button = QPushButton("Info")
+        _info_button.setStatusTip("TESTING")
+        _info_button.setIcon(qta.icon('fa.info-circle'))
+        _info_button.clicked.connect(self.manager.showPatientInfoTable)
+        self.addWidget(_info_button)
 
     def addLengthPointsAction(self):
         lengthPointAction = QAction("Add Length Points", self)
@@ -36,9 +54,8 @@ class DisplayPanelToolbar(QToolBar):
     def addLengthCalculation(self):
         lengthCalculation = QAction("Calculate Length", self)
         lengthCalculation.setStatusTip("Calculate length from available points")
-        # lengthCalculation.triggered.connect(self.manager.drawLengthLines)
+        # lengthCalculation.triggered.connect(self.manager.drawLengthLines) # TODO
         lengthCalculation.triggered.connect(self.manager.calculateLengths)
-        # self.addAction(lengthCalculation)
         return lengthCalculation
 
     def addLengthSave(self):
@@ -50,6 +67,7 @@ class DisplayPanelToolbar(QToolBar):
     def addLengthMenu(self):
         LengthPushButton = QPushButton("Length")
         menu = QMenu()
+        LengthPushButton.setIcon(qta.icon('fa5s.ruler'))
         menu.addAction(self.addLengthPointsAction())
         menu.addAction(self.addLengthCalculation())
         menu.addAction(self.addLengthSave())
@@ -94,30 +112,24 @@ class DisplayPanelToolbar(QToolBar):
         LengthLoad.triggered.connect(self.manager.loadLengthPoints)
         return LengthLoad
 
-    def showMPRPanel(self):
-        # for testing puposes
-        LengthLoad = QAction("TEST", self)
-        LengthLoad.setStatusTip("TESTING")
-        LengthLoad.triggered.connect(self.manager.showMPRPanel)
-        return LengthLoad
-
     def editAnnotation(self):
-        # for testing puposes
-        LengthLoad = QAction("TEST2", self)
-        LengthLoad.setStatusTip("TESTING2")
+        LengthLoad = QAction("Edit annotation", self)
+        LengthLoad.setStatusTip("TESTING: Edit annotation")
         LengthLoad.triggered.connect(self.manager.modifyAnnotation)
         return LengthLoad
 
-
     def addMPRMenu(self):
         MPRPushButton = QPushButton("MPR Calculate")
+        MPRPushButton.setIcon(qta.icon('mdi.image-filter-center-focus-strong'))
+
         menu = QMenu()
         menu.addAction(self.addMPRpointsAction())
         menu.addAction(self.addMPRcalculation())
         menu.addAction(self.addMPRSave())
         menu.addAction(self.loadMPR())
-        menu.addAction(self.showMPRPanel())
-        menu.addAction(self.editAnnotation())
+
+        if CFG.get_testing_status('point-editing'):
+            menu.addAction(self.editAnnotation())
 
         MPRPushButton.setMenu(menu)
         self.addWidget(MPRPushButton)
@@ -131,11 +143,15 @@ class DisplayPanelToolbar(QToolBar):
         self.addWidget(self.PickerStatus)
 
     def addDisablePointPickers(self):
-        DisablePPButton = QAction("Disable Point Picker", self)
-        DisablePPButton.triggered.connect(self.manager.disablePointPicker)
-        DisablePPButton.triggered.connect(lambda: self.PickerStatus.clear())
-
-        self.addAction(DisablePPButton)
+        _disable_picker_button = QPushButton("Disable point picking")
+        _disable_picker_button.setStatusTip("Disables active point picker")
+        _disable_picker_button.setIcon(qta.icon('fa5.hand-point-up', 'fa5s.ban',
+                              options=[{'scale_factor': 0.5,
+                                        'active': 'fa5.hand-rock'},
+                                       {'color': 'red'}]))
+        _disable_picker_button.clicked.connect(self.manager.disablePointPicker)
+        _disable_picker_button.clicked.connect(lambda: self.PickerStatus.setText(" "))
+        self.addWidget(_disable_picker_button)
 
     def changePickerStatus(self, status):
         self.PickerStatus.setText(f"Picking {status} Points")

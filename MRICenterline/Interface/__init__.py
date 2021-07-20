@@ -6,6 +6,9 @@ logging.getLogger(__name__)
 
 class DisplayCenterlineInterface:
     def __init__(self):
+        self.level = 0
+        self.window = 0
+        self.points = PointCollection()
         self.updated = False
 
     def initialize_level_window(self, level, window):
@@ -23,11 +26,11 @@ class DisplayCenterlineInterface:
         self.window = window
         self.updated = True
 
-    def set_points(self, points: PointCollection):
+    def set_points(self, points):
         self.points = points
         self.updated = True
 
     def __repr__(self):
-        return {"level": self.level,
+        return str({"level": self.level,
                 "window": self.window,
-                "number of points": len(self.points)}
+                "number of points": len(self.points)})

@@ -4,11 +4,11 @@
 block_cipher = None
 
 
-a = Analysis(['main.py'],
+a = Analysis(['src\\MainWindowComponents\\MainWindow.py'],
              pathex=['C:\\Users\\ang.a\\OneDrive - Technion\\Documents\\GitHub\\ImageUntangler'],
              binaries=[],
-             datas=[('config.ini', '.')],
-             hiddenimports=['configparser', 'vtkmodules','vtkmodules.all','vtkmodules.qt.QVTKRenderWindowInteractor','vtkmodules.util','vtkmodules.util.numpy_support'],
+             datas=[('', 'config.ini')],
+             hiddenimports=['vtkmodules','vtkmodules.all','vtkmodules.qt.QVTKRenderWindowInteractor','vtkmodules.util','vtkmodules.util.numpy_support'],
              hookspath=[],
              runtime_hooks=[],
              excludes=[],
@@ -20,19 +20,15 @@ pyz = PYZ(a.pure, a.zipped_data,
              cipher=block_cipher)
 exe = EXE(pyz,
           a.scripts,
+          a.binaries,
+          a.zipfiles,
+          a.datas,
           [],
-          exclude_binaries=True,
-          name='ImageUntangler',
+          name='imageuntangler',
           debug=False,
           bootloader_ignore_signals=False,
           strip=False,
-          upx=True,
-          console=True , icon='static\\favicon.ico')
-coll = COLLECT(exe,
-               a.binaries,
-               a.zipfiles,
-               a.datas,
-               strip=False,
-               upx=True,
-               upx_exclude=[],
-               name='ImageUntangler')
+          upx=False,
+          upx_exclude=[],
+          runtime_tmpdir=None,
+          console=True )

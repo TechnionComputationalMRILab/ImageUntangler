@@ -2,7 +2,7 @@ import os
 from typing import List
 # from icecream import ic
 from PyQt5.QtCore import QMetaObject, QCoreApplication, QRect
-from PyQt5.QtWidgets import QWidget, QHBoxLayout, QPushButton, QFileDialog, QToolBar
+from PyQt5.QtWidgets import QWidget, QHBoxLayout, QPushButton, QFileDialog, QToolBar, QVBoxLayout
 
 from PyQt5.QtWidgets import QMenuBar, QMenu, QAction
 
@@ -33,9 +33,8 @@ class Tab(QWidget):
         _defaultTabMainWidget = QWidget(parent=self)
         addFilesButton = QPushButton(_defaultTabMainWidget)
         addFilesButton.setText(QCoreApplication.translate("Tab", "Add MRI Images"))
-        # addFilesButton.setStyleSheet(stylesheets.get_sheet_by_name("AddFiles"))
-        addFilesButton.setGeometry(QRect(375, 290, 960, 231))  #EMPHASIS# should be made more portable
         addFilesButton.clicked.connect(self.load_regular_tab)  # loads MRI viewer
+        addFilesButton.setGeometry(QRect(375, 290, 960, 231))  # TODO should be made more portable
 
         self.mainLayout.addWidget(_defaultTabMainWidget)
 
@@ -89,7 +88,7 @@ class Tab(QWidget):
         except FileNotFoundError: # user X-ed out file explorer
             return -1
         else:
-            self.clear_default()
+            # self.clear_default() # TODO: not sure what this is for
             self.Tab_Bar.change_tab_name(self)
             self.add_viewers()
             QMetaObject.connectSlotsByName(self)  # connect all components to Tab

@@ -1,7 +1,7 @@
 from .Tab import Tab
 
 import sys
-from PyQt5.QtWidgets import QWidget, QVBoxLayout, QTabWidget, QTabBar, QMessageBox
+from PyQt5.QtWidgets import QWidget, QVBoxLayout, QTabWidget, QTabBar, QMessageBox, QLabel
 
 import logging
 logging.getLogger(__name__)
@@ -29,6 +29,8 @@ class TabsBar(QTabWidget):
         self.setMovable(True)
         self.tabCloseRequested.connect(self.close_tab)
         self.build_initial_tab()
+
+        # self.setCornerWidget(QLabel('test'))
 
     def build_initial_tab(self):
         logging.debug("Building initial tab")

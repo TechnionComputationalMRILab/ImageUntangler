@@ -1,11 +1,9 @@
 from vtkmodules.qt.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
-# from icecream import ic
+from icecream import ic
 
 from typing import Tuple
 from PyQt5.QtWidgets import QVBoxLayout, QGroupBox, QWidget, QFileDialog
-
-from MRICenterline.CenterlinePanel import CenterlinePanel
-from MRICenterline.Interface import DisplayCenterlineInterface
+from PyQt5.Qt import *
 
 from MRICenterline.DisplayPanel.View.Toolbar import DisplayPanelToolbar
 from MRICenterline.DisplayPanel.Model.GenericViewerManager import GenericViewerManager
@@ -14,8 +12,10 @@ from MRICenterline.DisplayPanel.Control.SequenceInteractorWidgets import Sequenc
 from MRICenterline.DisplayPanel.Control.SequenceViewerInteractorStyle import SequenceViewerInteractorStyle
 
 from MRICenterline.Interface import DisplayCenterlineInterface
+from MRICenterline.CenterlinePanel import CenterlinePanel
 
 from MRICenterline.Config import ConfigParserRead as CFG
+from MRICenterline.utils import message as MSG
 import logging
 logging.getLogger(__name__)
 
@@ -28,6 +28,7 @@ class GenericModel(QWidget):
         # self.toolbar.setGeometry(QRect(0, 0, 500, 22))
         self.pickingLengthPoints = False
         self.pickingMPRpoints = False
+        self.interface = DisplayCenterlineInterface()
 
         frame = self.buildFrame()
         self.interactor = QVTKRenderWindowInteractor(frame)
@@ -54,7 +55,7 @@ class GenericModel(QWidget):
         logging.info(f"Index value {int(self.view.sliceIdx)}")
         self.widgets.setValues(sliceIdx=int(self.view.sliceIdx), maxSlice = self.view.imageData.extent[5],
                                windowValue=int(self.view.WindowVal), levelValue=int(self.view.LevelVal))
-        self.interface = DisplayCenterlineInterface()
+
         self.interface.initialize_level_window(level=self.view.LevelVal, window=self.view.WindowVal)
 
 #_____________________________________________Interface to Widgets_____________________________________________________
@@ -89,14 +90,15 @@ class GenericModel(QWidget):
         self.widgets.indexSlider.setValue(index)
 
     def showCenterlinePanel(self):
-        logging.info("Opening Centerline Panel dockable widget")
+        if self.view.MPRpoints.getCoordinatesArray().shape[0] <= 3:
+            MSG.msg_box_warning("Not enough points clicked to calculate Centerline")
+        else:
+            logging.info("Opening Centerline Panel dockable widget")
+            self.interface.initialize_points(self.view.MPRpoints.getCoordinatesArray())
 
-        self.interface.initialize_points(self.view.MPRpoints.getCoordinatesArray())
-        print(self.interface)
-
-        # _centerline_panel = CenterlinePanel(image=self.view.imageData, interface=self.interface,
-        #                                     parent=self)
-        # self.layout.addWidget(_centerline_panel)
+            _centerline_panel = CenterlinePanel(image=self.view.imageData, interface=self.interface,
+                                                parent=self)
+            self.layout.addWidget(_centerline_panel)
     #__________________________________________ Interface to InteractorStyle ________________________________
 
     def moveBullsEye(self, coordinates: Tuple[int]):
@@ -136,8 +138,8 @@ class GenericModel(QWidget):
     def calculateLengths(self):
         self.view.calculateLengths()
 
-    def calculateMPR(self):
-        self.view.calculateMPR()
+    # def calculateMPR(self):
+    #     self.view.calculateMPR()
 
     def saveLengths(self):
         logging.info("Saving lengths to file...")
@@ -186,3 +188,6 @@ class GenericModel(QWidget):
 
     def deleteAnnotation(self, x, y, prop):
         self.view.deleteAnnotation(x, y, prop)
+
+    def showPatientInfoTable(self):
+        print("show patient info table")

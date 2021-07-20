@@ -39,4 +39,7 @@ def get_color(section):
 
 def get_testing_status(testing):
     config_file, _ = initialize()
-    return config_file.getboolean('testing', testing)
+    if config_file['testing'][testing]:
+        return config_file.getboolean('testing', testing)
+    else:
+        return False

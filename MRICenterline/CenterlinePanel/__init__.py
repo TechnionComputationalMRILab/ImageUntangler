@@ -11,11 +11,12 @@ logging.getLogger(__name__)
 class CenterlinePanel(QDockWidget):
     def __init__(self, image, interface, parent):
         super().__init__(parent)
+        logging.info("Initializing CenterlinePanel")
 
         self.setWindowTitle("centerline panel")
-        self.allowedAreas = Qt.BottomDockWidgetArea
 
         self.model = CenterlineModel(image, interface)
+        self.setWidget(self.model.view)
         self.show()
 
     def closeEvent(self, event: QCloseEvent) -> None:

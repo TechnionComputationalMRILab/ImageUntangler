@@ -10,7 +10,7 @@ Project Founder: Yael Zaffrani
 
 See requirements.txt for dependencies.
 
-Run `MainWindow.py` in `MainWindowComponents`
+Run `main.py` in the root folder
 
 ## Screenshot
 

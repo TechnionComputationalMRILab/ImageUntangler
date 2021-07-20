@@ -1,6 +1,4 @@
-import numpy as np
-from typing import List
-from MRICenterline.utils.CalculateCenterline import PointsToPlaneVectors
+from icecream import ic
 from MRICenterline.Points.SaveFormatter import SaveFormatter
 import vtkmodules.all as vtk
 from vtkmodules.all import vtkImageData

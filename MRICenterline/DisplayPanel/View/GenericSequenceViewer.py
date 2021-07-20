@@ -11,8 +11,9 @@ from MRICenterline.Points.PointCollection import PointCollection
 from MRICenterline.Points.LoadPoints import LoadPoints
 from MRICenterline.Points.SaveFormatter import SaveFormatter
 
-# from icecream import ic
+from icecream import ic
 
+from MRICenterline.utils import message as MSG
 from MRICenterline.Config import ConfigParserRead as CFG
 from MRICenterline.utils import program_constants as CONST
 
@@ -183,25 +184,27 @@ class GenericSequenceViewer:
 
     def calculateLengths(self):
         if len(self.lengthPoints) >= 2:
+            # ic(self.lengthPoints.getCoordinatesArray())
             pointsPositions = np.asarray(self.lengthPoints.getCoordinatesArray())
             allLengths = [np.linalg.norm(pointsPositions[j, :] - pointsPositions[j + 1, :]) for j in
                           range(len(pointsPositions) - 1)]
             totalDistance = np.sum(allLengths)
-            print(totalDistance)
-            print(allLengths)
-        else:
-            pass
-            # MessageBoxes.notEnoughPointsClicked("length")
 
-    def calculateMPR(self):
-        self.manager.showCenterlinePanel()
-        # if self.MPRpoints.getCoordinatesArray().shape[0] <= 3:
-        #     pass
-        #     # MessageBoxes.notEnoughPointsClicked("MPR")
-        # else:
-        #     self.manager.addWidget(CenterlinePanel)
-        #     # TODO: MPRPanel
-        #     # MPRWindow(self.MPRpoints.getCoordinatesArray(), self.imageData)
+            strdis = ["{0:.2f}".format(allLengths[i]) for i in range(len(allLengths))]
+
+            MSG.msg_box_info("Calculated length",
+                             info="The lengths [mm] are:\n\n {0} \n\nThe total length:\n\n {1}".format(' , '.join(strdis),"{0:.2f}".format(totalDistance)))
+
+        else:
+            MSG.msg_box_warning("Not enough points clicked to calculate length")
+    #
+    # def calculateMPR(self):
+    #     if self.MPRpoints.getCoordinatesArray().shape[0] <= 3:
+    #         pass
+    #         # MessageBoxes.notEnoughPointsClicked("MPR")
+    #     else:
+    #         self.manager.showCenterlinePanel()
+    #         # MPRWindow(self.MPRpoints.getCoordinatesArray(), self.imageData)
 
     def saveLengths(self, filename):
         _save_formatter = SaveFormatter(filename, self.imageData)
