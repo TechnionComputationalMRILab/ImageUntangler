@@ -14,8 +14,8 @@ def create_external_menu_bar():
 class ExternalMenu(QMenu):
     def __init__(self, parent: QMenuBar):
         super().__init__(parent=parent)
-        self.set_up_preferences_menu()
-        self.set_up_help_menu()
+        # self.set_up_preferences_menu()
+        # self.set_up_help_menu()
 
     def help(self):
         logging.debug("Help button clicked")

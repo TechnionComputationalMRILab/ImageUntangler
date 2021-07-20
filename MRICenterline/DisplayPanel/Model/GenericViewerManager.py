@@ -29,11 +29,13 @@ class GenericViewerManager:
         logging.debug(f"showValidImage function run. sequenceIndex: {sequenceIndex}")
         if self.goodIndex == -1: # first image is being loaded
             if sequenceIndex == len(self.MRIimages)-1:
-                MSG.msg_box_error('files bad')
+                logging.error("Bad files?")
+                MSG.msg_box_warning("Bad files!")
             else:
                 return self.loadSequence(sequenceIndex+1, VTKinteractor, interactorStyle)
         else:
-            MSG.msg_box_error('files gzip')
+            logging.error("gzip files?")
+            MSG.msg_box_warning("GZip files, but you shouldnt be seeing this error")
             return self.loadSequence(self.goodIndex, VTKinteractor, interactorStyle)
 
     def loadSequence(self, sequenceIndex: int, VTKinteractor: QVTKRenderWindowInteractor, interactorStyle):

@@ -20,7 +20,7 @@ logging.getLogger(__name__)
 class CenterlineModel:
     def __init__(self, image_data, interface):
         self.interface = interface
-        self.points = self.interface.get()['points']
+        self.points = self.interface.points
         self.image_data = image_data
         self.height = CONST.CL_INITIAL_HEIGHT
         self.angle = CONST.CL_INITIAL_ANGLE
@@ -73,6 +73,7 @@ class CenterlineModel:
         _image_data.Modified()
 
         logging.info("MPR Calculation")
+
         return _image_data
 
     def saveLengths(self, filename, length_points):

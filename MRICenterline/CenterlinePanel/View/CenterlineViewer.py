@@ -1,6 +1,6 @@
 import sys
 import os
-# from icecream import ic
+from icecream import ic
 import numpy as np
 from PyQt5.Qt import *
 import vtkmodules.all as vtk
@@ -13,6 +13,9 @@ from MRICenterline.Points.PointCollection import PointCollection
 # from MainWindowComponents import MessageBoxes
 
 from MRICenterline.utils import program_constants as CONST
+from MRICenterline.Config import ConfigParserRead as CFG
+from MRICenterline.utils import message as MSG
+
 import logging
 logging.getLogger(__name__)
 
@@ -20,26 +23,27 @@ logging.getLogger(__name__)
 class CenterlineViewer(QWidget):
     def __init__(self, model, control, parent=None):
         super().__init__(parent=parent)
+        logging.debug("Initializing panel widgets")
         self.model = model
         self.control = control
         self.lengthPoints = PointCollection()
 
-        self.vl = QVBoxLayout()
+        self.vl = QVBoxLayout(parent)
         self.setLayout(self.vl)
 
         self._initialize_top()
         self._initialize_bottom()
 
-    def help_button(self, t):
-        logging.info("MPR Window Help Requested")
-        _msg = QMessageBox(self)
-        _msg.setIcon(QMessageBox.Information)
-        _msg.setText(t)
-        _msg.setInformativeText("more info")
-        _msg.setWindowTitle("help text")
-        _msg.setStandardButtons(QMessageBox.Ok)
-        _msg.buttonClicked.connect(lambda: _msg.close())
-        _msg.exec()
+    # def help_button(self, t):
+    #     logging.info("MPR Window Help Requested")
+    #     _msg = QMessageBox(self)
+    #     _msg.setIcon(QMessageBox.Information)
+    #     _msg.setText(t)
+    #     _msg.setInformativeText("more info")
+    #     _msg.setWindowTitle("help text")
+    #     _msg.setStandardButtons(QMessageBox.Ok)
+    #     _msg.buttonClicked.connect(lambda: _msg.close())
+    #     _msg.exec()
 
     def _initialize_top(self):
         logging.debug("Top widget of MPR Window initializing")
@@ -54,8 +58,7 @@ class CenterlineViewer(QWidget):
         self.actor = self.control.get_actor()
         self.renderer.AddActor(self.actor)
 
-        _bg_colors = self.get_background_from_stylesheet()
-        self.renderer.SetBackground(_bg_colors[0]/255, _bg_colors[1]/255, _bg_colors[2]/255)
+        self.renderer.SetBackground(CONST.BG_COLOR[0], CONST.BG_COLOR[1], CONST.BG_COLOR[2])
         self.renderer.ResetCamera()
 
         self.renderWindow = self.iren.GetRenderWindow()
@@ -85,14 +88,14 @@ class CenterlineViewer(QWidget):
         self.textActorWindow.GetTextProperty().SetFontSize(14)
         self.textActorWindow.GetTextProperty().SetColor(0, 34/255, 158/255)
         self.textActorWindow.SetDisplayPosition(0, 17)
-        self.textActorWindow.SetInput("Window: 525")#?#
+        self.textActorWindow.SetInput(f"Window: {self.model.interface.window}")
         self.renderer.AddActor(self.textActorWindow)
 
         self.textActorLevel = vtk.vtkTextActor()
         self.textActorLevel.GetTextProperty().SetFontSize(14)
         self.textActorLevel.GetTextProperty().SetColor(0, 34/255, 158/255)
         self.textActorLevel.SetDisplayPosition(0, 32)
-        self.textActorLevel.SetInput("Level: 1051") #?#)
+        self.textActorLevel.SetInput(f"Level: {self.model.interface.level}")
         self.renderer.AddActor(self.textActorLevel)
 
         self.textActorAngle = vtk.vtkTextActor()
@@ -101,12 +104,6 @@ class CenterlineViewer(QWidget):
         self.textActorAngle.SetDisplayPosition(0, 47)
         self.textActorAngle.SetInput("Angle: " + str(self.model.angle))
         self.renderer.AddActor(self.textActorAngle)
-
-    @staticmethod
-    def get_background_from_stylesheet():
-        _list = [i.split(":") for i in stylesheets.get_sheet_by_name("Default").split(";\n")]
-        d = {row[0]:k.strip() for row in _list for k in row[1:]}
-        return make_tuple(d["background-color"].strip('rgb'))
 
     def _initialize_bottom(self):
         _bottom_widget = QWidget()
@@ -128,8 +125,8 @@ class CenterlineViewer(QWidget):
         _set_height_angle_layout.addWidget(_height_label)
 
         self._height_set_box = QDoubleSpinBox(_size_set_groupbox)
-        self._height_set_box.setMinimum(mpr_window_config.height_minmax()[0])
-        self._height_set_box.setMaximum(mpr_window_config.height_minmax()[1])
+        self._height_set_box.setMinimum(CONST.CL_MIN_HEIGHT)
+        self._height_set_box.setMaximum(CONST.CL_MAX_HEIGHT)
         self._height_set_box.setProperty("value", CONST.CL_INITIAL_HEIGHT)
         self._height_set_box.valueChanged.connect(self.update_height)
         self._height_set_box.setSuffix(" mm")
@@ -140,8 +137,8 @@ class CenterlineViewer(QWidget):
         _set_height_angle_layout.addWidget(_angle_label)
 
         self._angle_set_box = QSpinBox(_size_set_groupbox)
-        self._angle_set_box.setMinimum(mpr_window_config.angle_minmax()[0])
-        self._angle_set_box.setMaximum(mpr_window_config.angle_minmax()[1])
+        self._angle_set_box.setMinimum(CONST.CL_MIN_ANGLE)
+        self._angle_set_box.setMaximum(CONST.CL_MAX_ANGLE)
         self._angle_set_box.setProperty("value", CONST.CL_INITIAL_ANGLE)
         self._angle_set_box.valueChanged.connect(self.update_angle)
         self._angle_set_box.setSuffix(" °")
@@ -230,8 +227,7 @@ class CenterlineViewer(QWidget):
             totalDistance = np.sum(allLengths)
             self.outputLengthResults(totalDistance, allLengths)
         else:
-            pass
-            # MessageBoxes.notEnoughPointsClicked("length")
+            MSG.msg_box_warning("Not enough points clicked to calculate length")
 
     def outputLengthResults(self, total_distance, all_lengths):
         strdis = ["{0:.2f}".format(all_lengths[i]) for i in range(len(all_lengths))]
