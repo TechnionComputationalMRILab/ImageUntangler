@@ -3,6 +3,7 @@ from PyQt5.QtGui import QFont
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 import qtawesome as qta
+from itertools import cycle
 
 from MRICenterline.Config import ConfigParserRead as CFG
 
@@ -14,18 +15,29 @@ class DisplayPanelToolbar(QToolBar):
     def __init__(self, parent, manager):
         super().__init__(parent=parent)
         self.set_toolbar_display_style()
-
         self.manager = manager
-        self.addInfoButton()
+
+        self.set_up_toolbar_order()
+
+    def set_up_toolbar_order(self):
         self.addLengthMenu()
         self.addMPRMenu()
-        self.addDisablePointPickers()
 
-        spacer = QWidget()
-        spacer.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
-        self.addWidget(spacer)
+        self.addSeparator()
+
+        self.addInfoButton()
+        self.addDisablePointPickers()
+        self.resetSlidersToDefault()
+
+        self.addSeparator(expand=True)
 
         self.showPickerStatus()
+
+    def addSeparator(self, expand=False):
+        if expand:
+            spacer = QWidget()
+            spacer.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
+            self.addWidget(spacer)
 
     def set_toolbar_display_style(self):
         if CFG.get_config_data('display', 'toolbar-style') == 'icon':
@@ -36,8 +48,9 @@ class DisplayPanelToolbar(QToolBar):
             self.setToolButtonStyle(Qt.ToolButtonTextUnderIcon)
 
     def addInfoButton(self):
-        _info_button = QPushButton("Info")
-        _info_button.setStatusTip("TESTING")
+        _info_button = QPushButton("Patient Info")
+        _info_button.adjustSize()
+        _info_button.setStatusTip("Show patient info from DICOM file")
         _info_button.setIcon(qta.icon('fa.info-circle'))
         _info_button.clicked.connect(self.manager.showPatientInfoTable)
         self.addWidget(_info_button)
@@ -112,14 +125,15 @@ class DisplayPanelToolbar(QToolBar):
         LengthLoad.triggered.connect(self.manager.loadLengthPoints)
         return LengthLoad
 
-    def editAnnotation(self):
-        LengthLoad = QAction("Edit annotation", self)
-        LengthLoad.setStatusTip("TESTING: Edit annotation")
-        LengthLoad.triggered.connect(self.manager.modifyAnnotation)
-        return LengthLoad
+    # def editAnnotation(self):
+    #     LengthLoad = QAction("Edit annotation", self)
+    #     LengthLoad.setStatusTip("TESTING: Edit annotation")
+    #     LengthLoad.triggered.connect(self.manager.modifyAnnotation)
+    #     return LengthLoad
 
     def addMPRMenu(self):
-        MPRPushButton = QPushButton("MPR Calculate")
+        MPRPushButton = QPushButton("MPR Calculations")
+        MPRPushButton.adjustSize()
         MPRPushButton.setIcon(qta.icon('mdi.image-filter-center-focus-strong'))
 
         menu = QMenu()
@@ -127,9 +141,6 @@ class DisplayPanelToolbar(QToolBar):
         menu.addAction(self.addMPRcalculation())
         menu.addAction(self.addMPRSave())
         menu.addAction(self.loadMPR())
-
-        if CFG.get_testing_status('point-editing'):
-            menu.addAction(self.editAnnotation())
 
         MPRPushButton.setMenu(menu)
         self.addWidget(MPRPushButton)
@@ -146,12 +157,15 @@ class DisplayPanelToolbar(QToolBar):
         _disable_picker_button = QPushButton("Disable point picking")
         _disable_picker_button.setStatusTip("Disables active point picker")
         _disable_picker_button.setIcon(qta.icon('fa5.hand-point-up', 'fa5s.ban',
-                              options=[{'scale_factor': 0.5,
-                                        'active': 'fa5.hand-rock'},
-                                       {'color': 'red'}]))
+                                                options=[{'scale_factor': 0.5,
+                                                          'active': 'fa5.hand-rock'},
+                                                         {'color': 'red'}]))
         _disable_picker_button.clicked.connect(self.manager.disablePointPicker)
         _disable_picker_button.clicked.connect(lambda: self.PickerStatus.setText(" "))
         self.addWidget(_disable_picker_button)
 
     def changePickerStatus(self, status):
         self.PickerStatus.setText(f"Picking {status} Points")
+
+    def resetSlidersToDefault(self):
+        pass

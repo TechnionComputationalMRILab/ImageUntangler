@@ -1,12 +1,11 @@
 from vtkmodules.qt.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
 
 from typing import Tuple
-from PyQt5.QtWidgets import QVBoxLayout, QGroupBox, QWidget, QFileDialog
 from PyQt5.Qt import *
 
 from MRICenterline.DisplayPanel.View.Toolbar import DisplayPanelToolbar
 from MRICenterline.DisplayPanel.Model.GenericViewerManager import GenericViewerManager
-from MRICenterline.DisplayPanel.View.SlidersLayout import SlidersLayout
+from MRICenterline.DisplayPanel.View.SlidersAndSpinboxLayout import SlidersAndSpinboxLayout
 from MRICenterline.DisplayPanel.Control.SequenceInteractorWidgets import SequenceInteractorWidgets
 from MRICenterline.DisplayPanel.Control.SequenceViewerInteractorStyle import SequenceViewerInteractorStyle
 
@@ -15,6 +14,7 @@ from MRICenterline.CenterlinePanel import CenterlinePanel
 
 from MRICenterline.Config import ConfigParserRead as CFG
 from MRICenterline.utils import message as MSG
+
 import logging
 logging.getLogger(__name__)
 
@@ -32,16 +32,24 @@ class GenericModel(QWidget):
         frame = self.buildFrame()
         self.interactor = QVTKRenderWindowInteractor(frame)
         self.interactorStyle = SequenceViewerInteractorStyle(parent=self.interactor, model=self)
+        self.interactor.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+
         self.widgets = SequenceInteractorWidgets(MRIimages.get_sequences(), self)
 
         self.sequenceManager = GenericViewerManager(self, MRIimages)
         self.view = self.sequenceManager.loadSequence(0, self.interactor, self.interactorStyle)
-        slidersLayout = SlidersLayout(sequenceList=self.widgets.sequenceList,  windowSlider=self.widgets.windowSlider,
-                                      levelSlider=self.widgets.levelSlider, indexSlider=self.widgets.indexSlider)
-        self.initializeSliderValues()
+
+        self.sliderspinboxLayout = SlidersAndSpinboxLayout(window_widgets=self.widgets.window_widgets,
+                                                           level_widgets=self.widgets.level_widgets,
+                                                           index_widgets=self.widgets.index_widgets)
+
+        self.set_up_sliders()
+
         self.layout.addWidget(self.toolbar)
+        self.layout.addWidget(self.widgets.sequenceList)
         self.layout.addWidget(self.interactor)
-        self.layout.addLayout(slidersLayout)
+
+        self.layout.addLayout(self.sliderspinboxLayout)
 
 #_________________________________________Constructor functions_____________________________________
     @staticmethod
@@ -50,12 +58,9 @@ class GenericModel(QWidget):
         frame.showMaximized()
         return frame
 
-    def initializeSliderValues(self):
-        logging.info(f"Index value {int(self.view.sliceIdx)}")
-        self.widgets.setValues(sliceIdx=int(self.view.sliceIdx), maxSlice = self.view.imageData.extent[5],
+    def set_up_sliders(self):
+        self.widgets.setValues(sliceIdx=int(self.view.sliceIdx), maxSlice=self.view.imageData.extent[5],
                                windowValue=int(self.view.WindowVal), levelValue=int(self.view.LevelVal))
-
-        self.interface.initialize_level_window(level=self.view.LevelVal, window=self.view.WindowVal)
 
 #_____________________________________________Interface to Widgets_____________________________________________________
 
@@ -72,12 +77,14 @@ class GenericModel(QWidget):
         self.widgets.sequenceList.setCurrentIndex(index)
 
     def changeWindow(self, window: int):
-        self.widgets.windowSlider.setValue(window)
+        self.widgets.window_widgets['Slider'].setValue(window)
+        self.widgets.window_widgets['Spinbox'].setValue(window)
         self.view.adjustWindow(window)
         self.interface.set_window(window)
 
     def changeLevel(self, level: int):
-        self.widgets.levelSlider.setValue(level)
+        self.widgets.level_widgets['Slider'].setValue(level)
+        self.widgets.level_widgets['Spinbox'].setValue(level)
         self.view.adjustLevel(level)
         self.interface.set_level(level)
 
@@ -86,7 +93,8 @@ class GenericModel(QWidget):
         self.view.setSliceIndex(index)
 
     def updateSliderIndex(self, index):
-        self.widgets.indexSlider.setValue(index)
+        self.widgets.index_widgets['Slider'].setValue(index)
+        self.widgets.index_widgets['Spinbox'].setValue(index)
 
     def showCenterlinePanel(self):
         if self.view.MPRpoints.getCoordinatesArray().shape[0] <= 3:
@@ -94,10 +102,12 @@ class GenericModel(QWidget):
         else:
             logging.info("Opening Centerline Panel dockable widget")
             self.interface.initialize_points(self.view.MPRpoints.getCoordinatesArray())
+            self.interface.set_level(self.view.LevelVal)
+            self.interface.set_window(self.view.WindowVal)
 
-            _centerline_panel = CenterlinePanel(image=self.view.imageData, interface=self.interface,
-                                                parent=self)
-            self.layout.addWidget(_centerline_panel)
+            self.centerline_panel = CenterlinePanel(image=self.view.imageData, interface=self.interface,
+                                                    parent=self)
+            self.layout.addWidget(self.centerline_panel)
     #__________________________________________ Interface to InteractorStyle ________________________________
 
     def moveBullsEye(self, coordinates: Tuple[int]):

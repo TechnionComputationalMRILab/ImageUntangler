@@ -21,7 +21,6 @@ class SequenceViewerInteractorStyle(vtkInteractorStyleImage):
         self.AddObserver("MouseWheelForwardEvent", self.MouseWheelForwardCallback)
         self.AddObserver("MouseWheelBackwardEvent", self.MouseWheelBackwardCallback)
 
-
         ## Create callbacks for slicing the image
         self.actions = dict()
         self.actions["Slicing"] = 0

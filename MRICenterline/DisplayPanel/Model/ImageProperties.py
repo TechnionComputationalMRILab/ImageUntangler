@@ -10,7 +10,7 @@ logging.getLogger(__name__)
 
 
 class ImageProperties:
-    def __init__(self, full_data: vtkImageData, header: dict):
+    def __init__(self, full_data: vtkImageData, header: dict, window, level):
         self.full_data = full_data
         self.spacing = full_data.GetSpacing()
         self.dimensions = full_data.GetDimensions()
@@ -19,8 +19,12 @@ class ImageProperties:
         center_z = self.origin[2] + self.spacing[2] * 0.5 * (self.extent[4] + self.extent[5])
         self.sliceIdx = math.ceil((center_z-self.origin[2]) / self.spacing[2])
 
+        # for NNRRD?
         self.dicomArray = numpy_support.vtk_to_numpy(full_data.GetPointData().GetArray(0))
         self.dicomArray = self.dicomArray.reshape(self.dimensions, order='F')
+
+        self.window_value = window
+        self.level_value = level
 
         self.header = header
 

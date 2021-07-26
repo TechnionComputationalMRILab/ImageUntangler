@@ -28,13 +28,15 @@ def set_config_data(section, key, value):
 
 def get_color(section):
     config_file, _ = initialize()
-    if 'color' not in config_file[section]:
+    if section == 'display':
+        color_str = config_file['display']['text-color']
+    elif 'color' not in config_file[section]:
         return 1, 1, 1
     else:
         color_str = config_file[section]['color']
-        rgb_str = color_str.split(", ")
-        as_list = [int(i)/255 for i in rgb_str]
-        return tuple(as_list)
+    rgb_str = color_str.split(", ")
+    as_list = [int(i) / 255 for i in rgb_str]
+    return tuple(as_list)
 
 
 def get_testing_status(testing):
@@ -43,3 +45,8 @@ def get_testing_status(testing):
         return config_file.getboolean('testing', testing)
     else:
         return False
+
+
+def get_boolean(section, key):
+    config_file, _ = initialize()
+    return config_file.getboolean(section, key)

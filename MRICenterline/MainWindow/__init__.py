@@ -1,16 +1,16 @@
-from MRICenterline.utils import program_constants as CONST
-from MRICenterline.Config import ConfigParserRead as CFG
-from .TabManager import TabManager
-from .MenuBar import create_external_menu_bar
-from .StatusBar import DisplayPanelStatus
-
 from PyQt5.QtWidgets import QMainWindow
 from PyQt5.QtCore import QSize
 from PyQt5.QtGui import QIcon, QCloseEvent
 import vtkmodules.all as vtk
 
+from .TabManager import TabManager
+from .MenuBar import create_external_menu_bar
+from .StatusBar import DisplayPanelStatus
+
+from MRICenterline.utils import program_constants as CONST
+from MRICenterline.Config import ConfigParserRead as CFG
+
 import os
-from pathlib import Path
 import logging
 logging.getLogger(__name__)
 
@@ -22,9 +22,12 @@ class App(QMainWindow):
         logging.info(f"VERSION {CONST.VER_NUMBER}")
         self.set_icon()
         self.set_title()
-        self.showMaximized()
+
         self.setMinimumSize(QSize(int(CFG.get_config_data('display', 'display-width')),
                                   int(CFG.get_config_data('display', 'display-height'))))
+
+        if CFG.get_boolean('display', 'start-maximized'):
+            self.showMaximized()
 
         # move VTK warnings/errors to terminal
         vtk_out = vtk.vtkOutputWindow()

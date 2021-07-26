@@ -26,9 +26,7 @@ def get_image_properties(file_list):
 
 
 def numpy_array_as_vtk_image_data(np_arr, origin, spacing, ncomp, direction, size):
-    """
-    source: adapted from https://github.com/dave3d/dicom2stl/blob/main/utils/sitk2vtk.py
-    """
+    """ adapted from https://github.com/dave3d/dicom2stl/blob/main/utils/sitk2vtk.py """
     np_arr = np.flipud(np_arr)  # either this, or reshape with order F? TODO: check this
     vtk_image = vtkImageData()
 

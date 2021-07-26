@@ -1,5 +1,4 @@
 import os
-# from icecream import ic
 from vtkmodules.all import vtkImageData
 
 from MRICenterline.DisplayPanel.FileReaders.DICOMReader import DICOMReader
@@ -77,10 +76,14 @@ class Imager:
                 raise KeyError(f"{item} not found in Imager class")
             else:
                 if item in self.cache.items():
-                    return ImageProperties(self.cache[item], self.image_list[item].get_header())
+                    _window, _level = self.image_list[item].get_window_and_level()
+                    return ImageProperties(self.cache[item], self.image_list[item].get_header(),
+                                           window=_window, level=_level)
                 else:
                     self.cache[item] = self.image_list[item].get_image()
-                    return ImageProperties(self.cache[item], self.image_list[item].get_header())
+                    _window, _level = self.image_list[item].get_window_and_level()
+                    return ImageProperties(self.cache[item], self.image_list[item].get_header(),
+                                           window=_window, level=_level)
 
     def get_sequences(self):
         return self.sequences + self.files
@@ -116,14 +119,14 @@ class Image:
             self._type = 'empty'
 
     def _process_single_dicom(self, sequence):
-        self.header = self.reader.get_header(sequence)
         self._vtkImageData_array = self.reader.convert_to_vtk(sequence)
+        self.header = self.reader.get_header(sequence)
+        self.window, self.level = self.reader.get_window_and_level(sequence)
 
     def get_image(self) -> vtkImageData:
         """ the items are the slices """
         if self._type == 'dicom':
             self._process_single_dicom(self._param)
-            # ic(self._vtkImageData_array)
             return self._vtkImageData_array
         elif self._type == "nrrd":
             pass
@@ -135,3 +138,6 @@ class Image:
 
     def get_header(self):
         return self.header
+
+    def get_window_and_level(self):
+        return self.window, self.level

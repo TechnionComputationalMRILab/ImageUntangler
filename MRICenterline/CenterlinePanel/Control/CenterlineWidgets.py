@@ -12,6 +12,8 @@ class CenterlineWidgets:
 
     def get_actor(self):
         self.actor.GetMapper().SetInputData(self.model.calculate_input_data())
+        self.actor.GetProperty().SetColorLevel(self.model.interface.level)
+        self.actor.GetProperty().SetColorWindow(self.model.interface.window)
         return self.actor
 
     def save_lengths(self, filename, length_points):

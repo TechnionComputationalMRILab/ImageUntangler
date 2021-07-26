@@ -3,9 +3,10 @@ import numpy as np
 
 
 class MPRInteractorStyle(vtk.vtkInteractorStyleImage):
-    def __init__(self, parent, MPRWindow):
+    def __init__(self, parent, MPRWindow, model):
         super().__init__()
 
+        self.model = model
         self.MPRWindow = MPRWindow
         self.parent = parent
         self.AddObserver("MouseMoveEvent", self.MouseMoveCallback)
@@ -15,6 +16,8 @@ class MPRInteractorStyle(vtk.vtkInteractorStyleImage):
         self.AddObserver("LeftButtonReleaseEvent", self.ButtonCallback)
         self.AddObserver("RightButtonPressEvent", self.ButtonCallback)
         self.AddObserver("RightButtonReleaseEvent", self.ButtonCallback)
+        self.AddObserver("MouseWheelForwardEvent", self.MouseWheelForwardCallback)
+        self.AddObserver("MouseWheelBackwardEvent", self.MouseWheelBackwardCallback)
 
         ## Create callbacks for slicing the image
         self.actions = {}
@@ -25,6 +28,12 @@ class MPRInteractorStyle(vtk.vtkInteractorStyleImage):
         self.actions["Picking"] = 0
 
         self.picker = vtk.vtkPointPicker()
+
+    def MouseWheelForwardCallback(self, obj, event):
+        self.MPRWindow.update_angle(1)
+
+    def MouseWheelBackwardCallback(self, obj, event):
+        self.MPRWindow.update_angle(-1)
 
     def ButtonCallback(self, obj, event):
         Shift = self.parent.GetShiftKey()

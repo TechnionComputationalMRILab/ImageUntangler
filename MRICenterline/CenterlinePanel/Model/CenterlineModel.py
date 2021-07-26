@@ -3,8 +3,6 @@ import vtkmodules.all as vtk
 from vtkmodules.all import vtkImageData
 from vtkmodules.util import numpy_support
 
-# from icecream import ic
-
 from MRICenterline.CenterlinePanel.Control.CenterlineWidgets import CenterlineWidgets
 from MRICenterline.CenterlinePanel.View.CenterlineViewer import CenterlineViewer
 
@@ -33,6 +31,15 @@ class CenterlineModel:
 
     def set_angle(self, angle):
         self.angle = angle
+
+        # cyclic
+        if self.angle == 181:
+            self.set_angle(0)
+        elif self.angle == -1:
+            self.set_angle(180)
+
+    def change_angle(self, angle_change):
+        self.set_angle(self.angle + angle_change)
 
     def get_mpr_properties(self):
         _mpr_properties = PointsToPlaneVectors(self.points, self.image_data, Plot=0,

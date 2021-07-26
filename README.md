@@ -8,13 +8,25 @@ Project Founder: Yael Zaffrani
 
 ## Installation
 
+Run the MainWindow.exe from the release section
+
+### Updating
+
+Overwrite the contents of the zip from the previous release
+
+### Build
+
 See requirements.txt for dependencies.
 
 Run `main.py` in the root folder
 
+To compile with PyInstaller, use the `MainWindow.spec` file for a one-folder install
+
 ## Screenshot
 
 ![screenshot](screenshot.PNG)
+
+![screenshot](screenshot_2.PNG)
 
 ## Roadmap
 

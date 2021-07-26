@@ -14,3 +14,5 @@ CL_MAX_HEIGHT = 50
 
 CL_MIN_ANGLE = 0
 CL_MAX_ANGLE = 180
+
+ORDER_OF_CONTROLS = ['Slice Index', "Window", "Level"]

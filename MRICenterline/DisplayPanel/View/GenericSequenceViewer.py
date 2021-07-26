@@ -29,8 +29,12 @@ class GenericSequenceViewer:
 
         # self.imageData = ImageProperties.getImageData(imager, sequence="")
         self.imageData = image
-        self.LevelVal = (self.imageData.dicomArray.max()+self.imageData.dicomArray.min())/2
-        self.WindowVal = self.imageData.dicomArray.max()-self.imageData.dicomArray.min()
+
+        # self.LevelVal = (self.imageData.dicomArray.max()+self.imageData.dicomArray.min())/2
+        # self.WindowVal = self.imageData.dicomArray.max()-self.imageData.dicomArray.min()
+
+        self.LevelVal = self.imageData.level_value
+        self.WindowVal = self.imageData.window_value
 
         self.sliceIdx = self.imageData.sliceIdx
         self.pastIndex = self.sliceIdx
@@ -96,26 +100,35 @@ class GenericSequenceViewer:
         self.renderer.GetActiveCamera().SetParallelScale(self.imageData.getParallelScale())
 
     def setIdxText(self):
+        _display_color = CFG.get_color('display')
+        _order = CONST.ORDER_OF_CONTROLS.index('Slice Index')
+
         self.textActorSliceIdx = vtkTextActor()
-        self.textActorSliceIdx.GetTextProperty().SetFontSize(14)
-        self.textActorSliceIdx.GetTextProperty().SetColor(0, 34/255, 158/255)
-        self.textActorSliceIdx.SetDisplayPosition(0, 2)
+        self.textActorSliceIdx.GetTextProperty().SetFontSize(int(CFG.get_config_data('display', 'font-size')))
+        self.textActorSliceIdx.GetTextProperty().SetColor(_display_color[0], _display_color[1], _display_color[2])
+        self.textActorSliceIdx.SetDisplayPosition(0, _order*int(CFG.get_config_data('display', 'font-size')))
         self.textActorSliceIdx.SetInput("SliceIdx: " + str(self.sliceIdx))
         self.renderer.AddActor(self.textActorSliceIdx)
 
     def setWindowText(self):
+        _display_color = CFG.get_color('display')
+        _order = CONST.ORDER_OF_CONTROLS.index('Window')
+
         self.textActorWindow = vtkTextActor()
-        self.textActorWindow.GetTextProperty().SetFontSize(14)
-        self.textActorWindow.GetTextProperty().SetColor(0, 34/255, 158/255)
-        self.textActorWindow.SetDisplayPosition(0, 17)
+        self.textActorWindow.GetTextProperty().SetFontSize(int(CFG.get_config_data('display', 'font-size')))
+        self.textActorWindow.GetTextProperty().SetColor(_display_color[0], _display_color[1], _display_color[2])
+        self.textActorWindow.SetDisplayPosition(0, _order*int(CFG.get_config_data('display', 'font-size')))
         self.textActorWindow.SetInput("Window: " + str(self.WindowVal))
         self.renderer.AddActor(self.textActorWindow)
 
     def setLevelText(self):
+        _display_color = CFG.get_color('display')
+        _order = CONST.ORDER_OF_CONTROLS.index('Level')
+
         self.textActorLevel = vtkTextActor()
-        self.textActorLevel.GetTextProperty().SetFontSize(14)
-        self.textActorLevel.GetTextProperty().SetColor(0, 34/255, 158/255)
-        self.textActorLevel.SetDisplayPosition(0, 32)
+        self.textActorLevel.GetTextProperty().SetFontSize(int(CFG.get_config_data('display', 'font-size')))
+        self.textActorLevel.GetTextProperty().SetColor(_display_color[0], _display_color[1], _display_color[2])
+        self.textActorLevel.SetDisplayPosition(0, _order*int(CFG.get_config_data('display', 'font-size')))
         self.textActorLevel.SetInput("Level: " + str(self.LevelVal))
         self.renderer.AddActor(self.textActorLevel)
 

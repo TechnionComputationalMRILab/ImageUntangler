@@ -1,15 +1,11 @@
-import sys
-import os
 import numpy as np
 from PyQt5.Qt import *
 import vtkmodules.all as vtk
 from vtkmodules.qt.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
-from ast import literal_eval as make_tuple
 from typing import List
 
 from MRICenterline.CenterlinePanel.Control.CenterlineViewerInteractorStyle import MPRInteractorStyle
 from MRICenterline.Points.PointCollection import PointCollection
-# from MainWindowComponents import MessageBoxes
 
 from MRICenterline.utils import program_constants as CONST
 from MRICenterline.Config import ConfigParserRead as CFG
@@ -63,7 +59,7 @@ class CenterlineViewer(QWidget):
         self.renderWindow = self.iren.GetRenderWindow()
         self.renderWindow.AddRenderer(self.renderer)
 
-        self.interactorStyle = MPRInteractorStyle(parent=self.iren, MPRWindow=self)
+        self.interactorStyle = MPRInteractorStyle(parent=self.iren, MPRWindow=self, model=self.model)
         self.interactorStyle.SetInteractor(self.iren)
         self.iren.SetInteractorStyle(self.interactorStyle)
         self.renderWindow.SetInteractor(self.iren)
@@ -83,24 +79,29 @@ class CenterlineViewer(QWidget):
 
     def set_text_actors(self):
         logging.debug("Setting text actors")
-        self.textActorWindow = vtk.vtkTextActor()
-        self.textActorWindow.GetTextProperty().SetFontSize(14)
-        self.textActorWindow.GetTextProperty().SetColor(0, 34/255, 158/255)
-        self.textActorWindow.SetDisplayPosition(0, 17)
-        self.textActorWindow.SetInput(f"Window: {self.model.interface.window}")
-        self.renderer.AddActor(self.textActorWindow)
+        _font_size = int(CFG.get_config_data('display', 'font-size'))
+        _display_color = CFG.get_color('display')
+        _order = CONST.ORDER_OF_CONTROLS
 
         self.textActorLevel = vtk.vtkTextActor()
-        self.textActorLevel.GetTextProperty().SetFontSize(14)
-        self.textActorLevel.GetTextProperty().SetColor(0, 34/255, 158/255)
-        self.textActorLevel.SetDisplayPosition(0, 32)
+        self.textActorLevel.GetTextProperty().SetFontSize(_font_size)
+        self.textActorLevel.GetTextProperty().SetColor(_display_color[0], _display_color[1], _display_color[2])
+        self.textActorLevel.SetDisplayPosition(0, _order.index('Level')*_font_size)
         self.textActorLevel.SetInput(f"Level: {self.model.interface.level}")
         self.renderer.AddActor(self.textActorLevel)
 
+        self.textActorWindow = vtk.vtkTextActor()
+        self.textActorWindow.GetTextProperty().SetFontSize(_font_size)
+        self.textActorWindow.GetTextProperty().SetColor(_display_color[0], _display_color[1], _display_color[2])
+        self.textActorWindow.SetDisplayPosition(0, _order.index('Window')*_font_size)
+        self.textActorWindow.SetInput(f"Window: {self.model.interface.window}")
+        self.renderer.AddActor(self.textActorWindow)
+
+        _angle_text_actor_order = _order.index('Angle') if 'Angle' in _order else _order.index('Slice Index')
         self.textActorAngle = vtk.vtkTextActor()
-        self.textActorAngle.GetTextProperty().SetFontSize(14)
-        self.textActorAngle.GetTextProperty().SetColor(0, 34/255, 158/255)
-        self.textActorAngle.SetDisplayPosition(0, 47)
+        self.textActorAngle.GetTextProperty().SetFontSize(_font_size)
+        self.textActorAngle.GetTextProperty().SetColor(_display_color[0], _display_color[1], _display_color[2])
+        self.textActorAngle.SetDisplayPosition(0, _angle_text_actor_order*_font_size)
         self.textActorAngle.SetInput("Angle: " + str(self.model.angle))
         self.renderer.AddActor(self.textActorAngle)
 
@@ -154,14 +155,21 @@ class CenterlineViewer(QWidget):
         self.renderer.AddActor(self.actor)
         self.renderWindow.Render()
 
-    def update_angle(self):
-        _angle = self._angle_set_box.value()
-        self.model.set_angle(_angle)
-        logging.info(f'Angle updated {_angle}')
+    def update_angle(self, angle_change=None):
+        if angle_change:
+            # angle changed using mouse wheel
+            self.model.change_angle(angle_change)
+        else:
+            # angle changed using box
+            # _angle =
+            self.model.set_angle(self._angle_set_box.value())
+
+        self._angle_set_box.setValue(self.model.angle)
 
         self.actor = self.control.get_actor()
         self.renderer.AddActor(self.actor)
         self.renderWindow.Render()
+        logging.info(f'Angle updated {self.model.angle}')
 
     def _build_length_calc_box(self):
         logging.debug("Second bottom widget of MPR Window initialized")

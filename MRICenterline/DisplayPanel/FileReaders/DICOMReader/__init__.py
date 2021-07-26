@@ -5,6 +5,7 @@ import os
 # from icecream import ic
 
 from . import SequenceFile, NumpyToVTK, Header
+from MRICenterline.Config import ConfigParserRead as CFG
 
 import logging
 logging.getLogger(__name__)
@@ -114,3 +115,8 @@ class DICOMReader:
 
     def get_header(self, seq):
         return Header.get_header_dict([pix[0] for pix in self[seq]])
+
+    def get_window_and_level(self, seq):
+        _arr = np.array([pix[2] for pix in self[seq]])
+        _window_percentile = int(CFG.get_config_data('display', 'window-percentile'))
+        return int(np.percentile(_arr, _window_percentile)), int(np.percentile(_arr, _window_percentile) / 2)
