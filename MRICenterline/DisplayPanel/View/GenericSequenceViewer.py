@@ -149,11 +149,11 @@ class GenericSequenceViewer:
         self.manager.changeWindow(self.actor.GetProperty().GetColorWindow())
         self.manager.changeLevel(self.actor.GetProperty().GetColorLevel())
 
-    def processNewPoint(self, pointCollection, pickedCoordinates, color=(1, 0, 0)):
+    def processNewPoint(self, pointCollection, pickedCoordinates, color=(1, 0, 0), size=1):
         pointLocation = [pickedCoordinates[0], pickedCoordinates[1], pickedCoordinates[2], self.sliceIdx]  # x,y,z,sliceIdx
 
         if pointCollection.addPoint(pointLocation):
-            currentPolygonActor = pointCollection.generatePolygonLastPoint(color)
+            currentPolygonActor = pointCollection.generatePolygonLastPoint(color, size)
             self.renderer.AddActor(currentPolygonActor)
         self.presentPoints(pointCollection, self.sliceIdx)
 
@@ -189,9 +189,13 @@ class GenericSequenceViewer:
 
     def addPoint(self, pointType, pickedCoordinates):
         if pointType.upper() == "MPR":
-            self.processNewPoint(self.MPRpoints, pickedCoordinates, color=CFG.get_color('mpr-display-style'))
+            self.processNewPoint(self.MPRpoints, pickedCoordinates,
+                                 color=CFG.get_color('mpr-display-style'),
+                                 size=int(CFG.get_config_data('mpr-display-style', 'marker-size')))
         elif pointType.upper() == "LENGTH":
-            self.processNewPoint(self.lengthPoints, pickedCoordinates, color=CFG.get_color('length-display-style'))
+            self.processNewPoint(self.lengthPoints, pickedCoordinates,
+                                 color=CFG.get_color('length-display-style'),
+                                 size=int(CFG.get_config_data('length-display-style', 'marker-size')))
 
     def calculateLengths(self):
         if len(self.lengthPoints) >= 2:

@@ -39,7 +39,7 @@ class PointCollection:
         else:
             return False
 
-    def generatePolygonLastPoint(self, color=(1, 0, 0)):
+    def generatePolygonLastPoint(self, color=(1, 0, 0), size=1):
         """adds a polygon for the last added point and returns the polygon"""
         polygon = vtkRegularPolygonSource()
         polygon.SetCenter((self.points[-1].coordinates[0], self.points[-1].coordinates[1], 0))
@@ -52,6 +52,7 @@ class PointCollection:
         polygonActor = vtkActor()
         polygonActor.SetMapper(polygonMapper)
         polygonActor.GetProperty().SetColor(color)
+        polygonActor.GetProperty().SetPointSize(size)
         polygonActor.GetProperty().SetAmbient(1)
         self.points[-1].addPolygon(polygon)
         return polygonActor
