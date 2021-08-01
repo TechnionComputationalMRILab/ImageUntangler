@@ -67,10 +67,8 @@ class Tab(QWidget):
             raise FileNotFoundError
 
     def clear_default(self):
-        while self.mainLayout.count():
-            child = self.mainLayout.takeAt(0)
-            if child.widget():
-                child.widget().deleteLater()
+        self.mainLayout.removeWidget(self._defaultTabMainWidget)
+        self._defaultTabMainWidget.deleteLater()
 
     def get_viewer(self):
         try:
@@ -93,8 +91,6 @@ class Tab(QWidget):
         except FileNotFoundError: # user X-ed out file explorer
             return -1
         else:
-            self.mainLayout.removeWidget(self._defaultTabMainWidget)
-
             self.clear_default()
             self.Tab_Bar.change_tab_name(self)
             self.add_viewers()
