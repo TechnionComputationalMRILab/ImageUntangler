@@ -1,8 +1,11 @@
-import vtkmodules.all as vtk
+from vtkmodules.all import vtkInteractorStyleImage, vtkPointPicker
 import numpy as np
 
+import logging
+logging.getLogger(__name__)
 
-class MPRInteractorStyle(vtk.vtkInteractorStyleImage):
+
+class MPRInteractorStyle(vtkInteractorStyleImage):
     def __init__(self, parent, MPRWindow, model):
         super().__init__()
 
@@ -19,15 +22,13 @@ class MPRInteractorStyle(vtk.vtkInteractorStyleImage):
         self.AddObserver("MouseWheelForwardEvent", self.MouseWheelForwardCallback)
         self.AddObserver("MouseWheelBackwardEvent", self.MouseWheelBackwardCallback)
 
-        ## Create callbacks for slicing the image
-        self.actions = {}
-        self.actions["Rotating"] = 0
-        self.actions["Windowing"] = 0
-        self.actions["Zooming"] = 0
-        self.actions["Panning"] = 0
-        self.actions["Picking"] = 0
+        self.actions = {"Rotating": 0,
+                        "Windowing": 0,
+                        "Zooming": 0,
+                        "Panning": 0,
+                        "Picking": 0}  # Create callbacks for slicing the image
 
-        self.picker = vtk.vtkPointPicker()
+        self.picker = vtkPointPicker()
 
     def MouseWheelForwardCallback(self, obj, event):
         self.MPRWindow.update_angle(1)
@@ -40,13 +41,13 @@ class MPRInteractorStyle(vtk.vtkInteractorStyleImage):
         if event == "MiddleButtonPressEvent":
             if Shift ==1:
                 self.actions["Panning"] = 1
-                vtk.vtkInteractorStyleImage.OnMiddleButtonDown(self)
+                vtkInteractorStyleImage.OnMiddleButtonDown(self)
             else:
                 self.actions["Rotating"] = 1
         elif event == "MiddleButtonReleaseEvent":
             if Shift == 1:
                 self.actions["Panning"] = 0
-                vtk.vtkInteractorStyleImage.OnMiddleButtonUp(self)
+                vtkInteractorStyleImage.OnMiddleButtonUp(self)
             else:
                 self.actions["Rotating"] = 0
 
@@ -56,24 +57,23 @@ class MPRInteractorStyle(vtk.vtkInteractorStyleImage):
                 self.OnPickingLeftButtonDown()
             else:
                 self.actions["Windowing"] = 1
-                vtk.vtkInteractorStyleImage.OnLeftButtonDown(self)
+                vtkInteractorStyleImage.OnLeftButtonDown(self)
 
         elif event == "LeftButtonReleaseEvent":
             (mouseX, mouseY) = self.parent.GetEventPosition()
             if self.actions["Picking"] == 0:
                 self.actions["Windowing"] = 0
-                vtk.vtkInteractorStyleImage.OnLeftButtonUp(self)
+                vtkInteractorStyleImage.OnLeftButtonUp(self)
             else:
                 self.OnPickingLeftButtonUp(mouseX, mouseY)
 
         if event == "RightButtonPressEvent":
             self.actions["Zooming"] = 1
-            vtk.vtkInteractorStyleImage.OnRightButtonDown(self)
+            vtkInteractorStyleImage.OnRightButtonDown(self)
 
         elif event == "RightButtonReleaseEvent":
             self.actions["Zooming"] = 0
-            vtk.vtkInteractorStyleImage.OnRightButtonUp(self)
-
+            vtkInteractorStyleImage.OnRightButtonUp(self)
 
     def MouseMoveCallback(self, obj, event):
         (lastX, lastY) = self.parent.GetLastEventPosition()
@@ -85,28 +85,16 @@ class MPRInteractorStyle(vtk.vtkInteractorStyleImage):
         if self.actions["Rotating"] == 1:
             screenSize = self.parent.GetRenderWindow().GetSize()
             angle = np.int32(np.round(180.0 * mouseY / screenSize[1]))
-            # print(angle)
             self.MPRWindow.changeAngle(angle)
-            # self.MPRWindow.Angle.setValue(angle)
-            # self.baseViewer.generateSMPR(viewAngle=angle)
-            # self.baseViewer.updateSMPRVisualization()
-            # self.baseViewer.window.Render()
-        #
+
         elif self.actions["Windowing"] == 1:
 
-            vtk.vtkInteractorStyleImage.OnMouseMove(self)
+            vtkInteractorStyleImage.OnMouseMove(self)
             self.MPRWindow.updateWindowAndLevel()
 
-        #
         elif self.actions["Zooming"] == 1:
             self.Dolly(self.MPRWindow.renderer, self.MPRWindow.renderer.GetActiveCamera(), mouseX, mouseY, lastX, lastY,
                   centerX, centerY)
-        #     vtk.vtkInteractorStyleImage.OnMouseMove(self)
-        #     curParallelScale = self.baseViewer.renderer.GetActiveCamera().GetParallelScale()
-        #     zoomFactor = curParallelScale / self.baseViewer.baseParallelScale
-        #     self.baseViewer.cardiacViewerLogic.updateZoomFacotr(zoomFactor, 'smpr')
-
-        # elif self.actions["Panning"] == 1:
 
         else:
             self.OnMouseMove()
@@ -129,6 +117,3 @@ class MPRInteractorStyle(vtk.vtkInteractorStyleImage):
         if self.picker.Pick(mouseX, mouseY, 0.0, self.MPRWindow.renderer):
             pickedCoordinates = self.picker.GetPickPosition()
             self.MPRWindow.processNewPoint(pickedCoordinates)
-
-
-

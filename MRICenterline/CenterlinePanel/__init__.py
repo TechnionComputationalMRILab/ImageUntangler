@@ -1,5 +1,5 @@
-from PyQt5.QtGui import *
-from PyQt5.Qt import *
+from PyQt5.QtWidgets import QDockWidget
+from PyQt5.Qt import QCloseEvent
 
 from MRICenterline.CenterlinePanel.Model.CenterlineModel import CenterlineModel
 from MRICenterline.Interface import DisplayCenterlineInterface

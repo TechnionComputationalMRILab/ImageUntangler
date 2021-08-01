@@ -1,14 +1,14 @@
 import os
 from typing import List
-# from icecream import ic
-from PyQt5.QtCore import QMetaObject, QCoreApplication, QRect
-from PyQt5.QtWidgets import QWidget, QHBoxLayout, QPushButton, QFileDialog, QToolBar, QVBoxLayout
+from PyQt5.QtCore import QMetaObject
+from PyQt5.QtWidgets import QWidget, QHBoxLayout, QFileDialog
 
-from PyQt5.QtWidgets import QMenuBar, QMenu, QAction
-
+from MRICenterline.MainWindow.DefaultTabWidget import DefaultTabWidget
 from MRICenterline.DisplayPanel.Model.GenericModel import GenericModel
 from MRICenterline.DisplayPanel.Model.Imager import Imager
+from MRICenterline.Config.DialogBox import DialogBox
 from MRICenterline.Config import ConfigParserRead as CFG
+from MRICenterline.utils import message as MSG
 
 import logging
 logging.getLogger(__name__)
@@ -30,13 +30,18 @@ class Tab(QWidget):
         self.build_default_tab()  # builds default tab until user adds regular MRI files
 
     def build_default_tab(self) -> None:
-        _defaultTabMainWidget = QWidget(parent=self)
-        addFilesButton = QPushButton(_defaultTabMainWidget)
-        addFilesButton.setText(QCoreApplication.translate("Tab", "Add MRI Images"))
-        addFilesButton.clicked.connect(self.load_regular_tab)  # loads MRI viewer
-        addFilesButton.setGeometry(QRect(375, 290, 960, 231))  # TODO should be made more portable
+        self._defaultTabMainWidget = DefaultTabWidget(parent=self)
+        self._defaultTabMainWidget.connect_add_mri_images_button(self.load_regular_tab)
+        self._defaultTabMainWidget.connect_preferences_button(self.show_preferences_dialog)
 
-        self.mainLayout.addWidget(_defaultTabMainWidget)
+        self.mainLayout.addWidget(self._defaultTabMainWidget)
+
+    def show_preferences_dialog(self):
+        logging.debug("Preferences dialog opened")
+        MSG.msg_box_warning("GUI Preferences editor not implemented in this version",
+                            info="Please edit the config.ini using a plain text editor")
+        # _preferences = DialogBox(parent=self)
+        # _preferences.setWindowModality()
 
     def get_name(self):
         return self.tab_name
@@ -69,7 +74,7 @@ class Tab(QWidget):
 
     def get_viewer(self):
         try:
-            return GenericModel(self.MRIimages)
+            return GenericModel(self.MRIimages, parent=self)
         except Exception as err:
             logging.critical(f"Error in opening file: {err}")
 
@@ -88,7 +93,9 @@ class Tab(QWidget):
         except FileNotFoundError: # user X-ed out file explorer
             return -1
         else:
-            # self.clear_default() # TODO: not sure what this is for
+            self.mainLayout.removeWidget(self._defaultTabMainWidget)
+
+            self.clear_default()
             self.Tab_Bar.change_tab_name(self)
             self.add_viewers()
             QMetaObject.connectSlotsByName(self)  # connect all components to Tab

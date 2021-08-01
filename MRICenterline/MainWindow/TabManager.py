@@ -1,7 +1,7 @@
 from .Tab import Tab
 
 import sys
-from PyQt5.QtWidgets import QWidget, QVBoxLayout, QTabWidget, QTabBar, QMessageBox, QLabel
+from PyQt5.QtWidgets import QWidget, QVBoxLayout, QTabWidget, QTabBar
 
 import logging
 logging.getLogger(__name__)

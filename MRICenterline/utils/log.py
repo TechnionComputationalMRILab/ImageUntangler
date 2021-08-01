@@ -16,16 +16,18 @@ LOGGING_CONFIG = {
             'class': 'logging.StreamHandler',
             'stream': 'ext://sys.stdout',  # Default is stderr
         },
+        'file': {
+            'level': 'DEBUG',
+            'formatter': 'terminal',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': 'logtxt.log',
+            'maxBytes': 10485760,
+        },
     },
     'loggers': {
         '': {  # root logger
-            'handlers': ['default'],
+            'handlers': ['default', 'file'],
             'level': 'DEBUG',
-            'propagate': False
-        },
-        'my.packg': {
-            'handlers': ['default'],
-            'level': 'INFO',
             'propagate': False
         },
         '__main__': {  # if __name__ == '__main__'

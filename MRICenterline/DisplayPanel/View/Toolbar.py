@@ -1,9 +1,7 @@
-import os
 from PyQt5.QtGui import QFont
-from PyQt5.QtWidgets import *
-from PyQt5.QtCore import *
+from PyQt5.QtWidgets import QWidget, QToolBar, QSizePolicy, QPushButton, QMenu, QLabel
+from PyQt5.Qt import Qt, QAction
 import qtawesome as qta
-from itertools import cycle
 
 from MRICenterline.Config import ConfigParserRead as CFG
 

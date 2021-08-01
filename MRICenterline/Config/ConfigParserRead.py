@@ -2,6 +2,9 @@ import configparser
 import os
 from pathlib import Path
 
+import logging
+logging.getLogger(__name__)
+
 
 def initialize():
     config_file = configparser.ConfigParser()
@@ -10,7 +13,8 @@ def initialize():
     try:
         config_file.read(config_file_path)
     except FileNotFoundError:
-        raise FileNotFoundError("Config file not found!")
+        raise FileNotFoundError
+
     return config_file, config_file_path
 
 

@@ -1,7 +1,7 @@
 from PyQt5.QtWidgets import QMainWindow
 from PyQt5.QtCore import QSize
 from PyQt5.QtGui import QIcon, QCloseEvent
-import vtkmodules.all as vtk
+from vtkmodules.all import vtkOutputWindow
 
 from .TabManager import TabManager
 from .MenuBar import create_external_menu_bar
@@ -30,7 +30,7 @@ class App(QMainWindow):
             self.showMaximized()
 
         # move VTK warnings/errors to terminal
-        vtk_out = vtk.vtkOutputWindow()
+        vtk_out = vtkOutputWindow()
         vtk_out.SetInstance(vtk_out)
 
         self.tabManager = TabManager(parent=self)

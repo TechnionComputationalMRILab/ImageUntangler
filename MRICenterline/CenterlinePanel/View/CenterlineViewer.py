@@ -1,5 +1,6 @@
 import numpy as np
-from PyQt5.Qt import *
+from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QLabel, QGroupBox, QDoubleSpinBox, QSpinBox, QPushButton
+from PyQt5.QtGui import QFont
 import vtkmodules.all as vtk
 from vtkmodules.qt.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
 from typing import List
@@ -28,17 +29,6 @@ class CenterlineViewer(QWidget):
 
         self._initialize_top()
         self._initialize_bottom()
-
-    # def help_button(self, t):
-    #     logging.info("MPR Window Help Requested")
-    #     _msg = QMessageBox(self)
-    #     _msg.setIcon(QMessageBox.Information)
-    #     _msg.setText(t)
-    #     _msg.setInformativeText("more info")
-    #     _msg.setWindowTitle("help text")
-    #     _msg.setStandardButtons(QMessageBox.Ok)
-    #     _msg.buttonClicked.connect(lambda: _msg.close())
-    #     _msg.exec()
 
     def _initialize_top(self):
         logging.debug("Top widget of MPR Window initializing")

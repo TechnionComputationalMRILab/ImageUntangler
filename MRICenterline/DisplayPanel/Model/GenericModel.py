@@ -1,7 +1,8 @@
 from vtkmodules.qt.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
 
 from typing import Tuple
-from PyQt5.Qt import *
+from PyQt5.QtWidgets import QWidget, QVBoxLayout, QGroupBox, QFileDialog
+from PyQt5.Qt import QSizePolicy
 
 from MRICenterline.DisplayPanel.View.Toolbar import DisplayPanelToolbar
 from MRICenterline.DisplayPanel.Model.GenericViewerManager import GenericViewerManager
@@ -20,10 +21,13 @@ logging.getLogger(__name__)
 
 
 class GenericModel(QWidget):
-    def __init__(self, MRIimages):
-        super().__init__()
+    def __init__(self, MRIimages, parent):
+        super().__init__(parent)
         self.layout = QVBoxLayout(self)
         self.toolbar = DisplayPanelToolbar(parent=self, manager=self)
+
+        self.statusbar = parent.parent().parent().parent().parent().statusBar() # TODO: i mean it works i guess ???
+
         # self.toolbar.setGeometry(QRect(0, 0, 500, 22))
         self.pickingLengthPoints = False
         self.pickingMPRpoints = False
@@ -66,6 +70,7 @@ class GenericModel(QWidget):
 
     def changeSequence(self, sequenceIndex: int):
         logging.info(f"Sequence changed {sequenceIndex}")
+        self.statusbar.update_memory_usage()
         try:
             self.view = self.sequenceManager.loadSequence(sequenceIndex, self.interactor, self.interactorStyle)
             self.widgets.setValues(sliceIdx=int(self.view.sliceIdx), maxSlice = self.view.imageData.extent[5], windowValue=int(self.view.WindowVal), levelValue=int(self.view.LevelVal))

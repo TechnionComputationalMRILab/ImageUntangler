@@ -34,6 +34,15 @@ To compile with PyInstaller, use the `MainWindow.spec` file for a one-folder ins
 
 ## Usage / Shortcuts
 
+### Mouse
+
+|                  | Display Panel                                        | Centerline Panel                                     |
+|------------------|------------------------------------------------------|------------------------------------------------------|
+| Left click       | Point picking (if activated)                         | Point picking (if activated)                         |
+| Left click drag  | Change level/window (if point picking is not active) | Change level/window (if point picking is not active) |
+| Mousewheel       | Change slice index                                   | Change angle                                         |
+| Right click drag | Zoom                                                 | Zoom                                                 |
+
 ### Keyboard shortcuts
 
 `c` - Disable bullseye
