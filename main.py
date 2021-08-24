@@ -6,6 +6,10 @@ from PyQt5.QtWidgets import QApplication
 from sys import exit
 import logging.config
 
+from icecream import ic, install
+install()
+
+ic.configureOutput(includeContext=True)
 
 if __name__ == "__main__":
     logging.config.dictConfig(LOGGING_CONFIG)

@@ -25,6 +25,7 @@ class DisplayPanelToolbar(QToolBar):
 
         self.addInfoButton()
         self.addDisablePointPickers()
+        self.addUndoButton()
         self.resetSlidersToDefault()
 
         self.addSeparator(expand=True)
@@ -167,3 +168,10 @@ class DisplayPanelToolbar(QToolBar):
 
     def resetSlidersToDefault(self):
         pass
+
+    def addUndoButton(self):
+        _undo_button = QPushButton("Undo")
+        _undo_button.setStatusTip("Removes last point added")
+        _undo_button.setIcon(qta.icon('fa5s.undo-alt'))
+        _undo_button.clicked.connect(self.manager.undoAnnotation)
+        self.addWidget(_undo_button)

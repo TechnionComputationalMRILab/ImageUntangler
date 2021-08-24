@@ -78,12 +78,14 @@ class Imager:
                 if item in self.cache.items():
                     _window, _level = self.image_list[item].get_window_and_level()
                     return ImageProperties(self.cache[item], self.image_list[item].get_header(),
-                                           window=_window, level=_level)
+                                           window=_window, level=_level,
+                                           z_coords=self.image_list[item].get_z_coords())
                 else:
                     self.cache[item] = self.image_list[item].get_image()
                     _window, _level = self.image_list[item].get_window_and_level()
                     return ImageProperties(self.cache[item], self.image_list[item].get_header(),
-                                           window=_window, level=_level)
+                                           window=_window, level=_level,
+                                           z_coords=self.image_list[item].get_z_coords())
 
     def get_sequences(self):
         return self.sequences + self.files
@@ -122,6 +124,7 @@ class Image:
         self._vtkImageData_array = self.reader.convert_to_vtk(sequence)
         self.header = self.reader.get_header(sequence)
         self.window, self.level = self.reader.get_window_and_level(sequence)
+        self.z_coords = self.reader.get_z_coords_list(sequence)
 
     def get_image(self) -> vtkImageData:
         """ the items are the slices """
@@ -141,3 +144,6 @@ class Image:
 
     def get_window_and_level(self):
         return self.window, self.level
+
+    def get_z_coords(self):
+        return self.z_coords

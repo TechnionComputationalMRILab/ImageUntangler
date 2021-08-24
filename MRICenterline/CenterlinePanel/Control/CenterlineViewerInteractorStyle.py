@@ -93,8 +93,8 @@ class MPRInteractorStyle(vtkInteractorStyleImage):
             self.MPRWindow.updateWindowAndLevel()
 
         elif self.actions["Zooming"] == 1:
-            self.Dolly(self.MPRWindow.renderer, self.MPRWindow.renderer.GetActiveCamera(), mouseX, mouseY, lastX, lastY,
-                  centerX, centerY)
+            self.Dolly(self.MPRWindow.panel_renderer, self.MPRWindow.panel_renderer.GetActiveCamera(), mouseX, mouseY, lastX, lastY,
+                       centerX, centerY)
 
         else:
             self.OnMouseMove()
@@ -114,6 +114,6 @@ class MPRInteractorStyle(vtkInteractorStyleImage):
         pass
 
     def OnPickingLeftButtonUp(self,mouseX,mouseY):
-        if self.picker.Pick(mouseX, mouseY, 0.0, self.MPRWindow.renderer):
+        if self.picker.Pick(mouseX, mouseY, 0.0, self.MPRWindow.panel_renderer):
             pickedCoordinates = self.picker.GetPickPosition()
             self.MPRWindow.processNewPoint(pickedCoordinates)

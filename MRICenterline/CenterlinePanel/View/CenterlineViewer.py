@@ -207,7 +207,7 @@ class CenterlineViewer(QWidget):
             self._set_points_button.setStyleSheet("QPushButton { background-color: rgb(171, 216, 255); }")
 
     def generateIndices(self, lengthPoints, delta) -> List[List[int]]:
-        return [[int(point.coordinates[0] // self.model.get_mpr_properties().delta), int(point.coordinates[1] // delta)]
+        return [[int(point.image_coordinates[0] // self.model.get_mpr_properties().delta), int(point.image_coordinates[1] // delta)]
                 for point in lengthPoints.points]
 
     def calculateDistances(self) -> None:

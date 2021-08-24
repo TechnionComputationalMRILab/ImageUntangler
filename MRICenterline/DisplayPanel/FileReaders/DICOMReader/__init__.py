@@ -113,6 +113,9 @@ class DICOMReader:
                                                         direction=_prop['direction'],
                                                         size=_prop['size'])
 
+    def get_z_coords_list(self, seq):
+        return [pix[1] for pix in self[seq]]
+
     def get_header(self, seq):
         return Header.get_header_dict([pix[0] for pix in self[seq]])
 

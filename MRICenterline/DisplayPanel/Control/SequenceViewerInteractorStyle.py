@@ -1,6 +1,8 @@
 from vtkmodules.all import vtkInteractorStyleImage, vtkPropPicker
 # from icecream import ic
 
+import vtkmodules.all as vtk
+
 import logging
 logging.getLogger(__name__)
 
@@ -31,6 +33,7 @@ class SequenceViewerInteractorStyle(vtkInteractorStyleImage):
         self.actions["ModifyingMPRAnnotation"] = 0
         self.actions["Cursor"] = 0
         self.actions["Panning"] = 0
+        self.actions['EditingMPR'] = 0
 
         self.pointPicker = vtkPropPicker()
 
@@ -80,9 +83,9 @@ class SequenceViewerInteractorStyle(vtkInteractorStyleImage):
                 self.actions["Cursor"] = 0
                 SequenceViewerInteractorStyle.OnPickingCursorLeftButtonUp(self)
             elif self.actions["PickingMPR"] == 1:
-                SequenceViewerInteractorStyle.pickPoint(self, "MPR", mouseX, mouseY)
+                SequenceViewerInteractorStyle.pickImagePoint(self, "MPR", mouseX, mouseY)
             elif self.actions["PickingLength"] == 1:
-                SequenceViewerInteractorStyle.pickPoint(self, "Length", mouseX, mouseY)
+                SequenceViewerInteractorStyle.pickImagePoint(self, "Length", mouseX, mouseY)
 
     def MouseMoveCallback(self, obj, event):
         (lastX, lastY) = self.parent.GetLastEventPosition()
@@ -114,8 +117,13 @@ class SequenceViewerInteractorStyle(vtkInteractorStyleImage):
                 self.model.addCursor()
 
         elif self.parent.GetKeyCode() == 'p' or self.parent.GetKeyCode() == 'P':  # pick
-            x, y = self.parent.GetEventPosition()
-            self.model.modifyAnnotation(x, y)
+            (mouseX, mouseY) = self.parent.GetEventPosition()
+
+            points = self.pickImagePoint("Editing", mouseX, mouseY, query=True)
+            ic(points)
+            # x, y = points[0:2]
+
+            self.model.modifyAnnotation(mouseX, mouseY)
             # turn on point picking
 
         elif self.parent.GetKeyCode() == 'Q' or self.parent.GetKeyCode() == 'q':  # query
@@ -135,7 +143,7 @@ class SequenceViewerInteractorStyle(vtkInteractorStyleImage):
 
     def cursorInBullsEye(self) -> int:
         (mouseX, mouseY) = self.parent.GetEventPosition()
-        if self.pointPicker.Pick(mouseX, mouseY, 0.0, self.model.view.renderer): #REMOVE
+        if self.pointPicker.Pick(mouseX, mouseY, 0.0, self.model.view.panel_renderer): #REMOVE
             StartCursorPickedCoordinates = self.pointPicker.GetPickPosition()
             cursorFocalPoint = self.model.view.Cursor.GetFocalPoint()
             if (abs(StartCursorPickedCoordinates[0]-cursorFocalPoint[0]) <= 3*self.model.view.Cursor.GetRadius())\
@@ -144,8 +152,8 @@ class SequenceViewerInteractorStyle(vtkInteractorStyleImage):
             else:
                 return 0
 
-    def pickPoint(self, pointType: str, mouseX, mouseY):
-        if self.pointPicker.Pick(mouseX, mouseY, 0.0, self.model.view.renderer):
+    def pickImagePoint(self, pointType: str, mouseX, mouseY, query=False):
+        if self.pointPicker.Pick(mouseX, mouseY, 0.0, self.model.view.panel_renderer):
             pickPosition = self.pointPicker.GetPickPosition()
             matrix = self.model.view.reslice.GetResliceAxes()
             center = matrix.MultiplyPoint((0, 0, 0, 1))
@@ -153,11 +161,14 @@ class SequenceViewerInteractorStyle(vtkInteractorStyleImage):
                              * self.model.view.imageData.spacing[2] / 2
             pickedCoordinates = (pickPosition[0], pickPosition[1], zCoordinate)
 
-            self.model.addPoint(pointType, pickedCoordinates)
+            if query:
+                return pickedCoordinates
+            else:
+                self.model.addPoint(pointType, pickedCoordinates)
 
     def OnPickingCursorLeftButtonUp(self):
         (mouseX, mouseY) = self.parent.GetEventPosition()
-        if self.pointPicker.Pick(mouseX, mouseY, 0.0, self.model.view.renderer):
+        if self.pointPicker.Pick(mouseX, mouseY, 0.0, self.model.view.panel_renderer):
             cursorPickedCoordinates = self.pointPicker.GetPickPosition()
             self.model.moveBullsEye(cursorPickedCoordinates)
 

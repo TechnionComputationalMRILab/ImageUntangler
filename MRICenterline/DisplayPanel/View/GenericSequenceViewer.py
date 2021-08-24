@@ -5,6 +5,7 @@ from vtkmodules.all import vtkImageActor, vtkImageReslice, vtkMatrix4x4, vtkRend
     vtkActor, vtkCursor2D
 import vtkmodules.all as vtk
 
+from MRICenterline.Points.PointArray import PointArray
 from MRICenterline.DisplayPanel.Model import ImageProperties
 from MRICenterline.DisplayPanel.Control.SequenceViewerInteractorStyle import SequenceViewerInteractorStyle
 from MRICenterline.Points.PointCollection import PointCollection
@@ -24,8 +25,8 @@ class GenericSequenceViewer:
         self.manager = manager
         self.interactor = interactor
 
-        self.actor = vtkImageActor()
-        self.renderer = vtkRenderer()
+        self.panel_actor = vtkImageActor()
+        self.panel_renderer = vtkRenderer()
 
         # self.imageData = ImageProperties.getImageData(imager, sequence="")
         self.imageData = image
@@ -47,12 +48,17 @@ class GenericSequenceViewer:
         self.interactorStyle = interactorStyle
         self.reslice = vtkImageReslice()
 
+        # self.window.AddRenderer(self.annotation_renderer)
+        # self.annotation_renderer.SetLayer(1)
+        # self.window.SetNumberOfLayers(2)
+
         self.Cursor = vtkCursor2D()
         self.performReslice()
         self.connectActor()
         self.renderImage()
 
-        self.MPRpoints = PointCollection()
+        # self.MPRpoints = PointCollection()
+        self.MPRpoints = PointArray()
         self.lengthPoints = PointCollection()
 
         self.presentCursor()
@@ -81,23 +87,23 @@ class GenericSequenceViewer:
         self.reslice.Update()
 
     def connectActor(self):
-        self.actor.GetMapper().SetInputConnection(self.reslice.GetOutputPort())
-        self.actor.GetProperty().SetColorWindow(self.WindowVal)
-        self.actor.GetProperty().SetColorLevel(self.LevelVal)
+        self.panel_actor.GetMapper().SetInputConnection(self.reslice.GetOutputPort())
+        self.panel_actor.GetProperty().SetColorWindow(self.WindowVal)
+        self.panel_actor.GetProperty().SetColorLevel(self.LevelVal)
 
     def renderImage(self):
         logging.info(f"Rendering Image {self.imageData.header['filename'][0]}, etc...")
-        self.renderer.SetBackground(CONST.BG_COLOR[0], CONST.BG_COLOR[1], CONST.BG_COLOR[2])
-        self.renderer.AddActor(self.actor)
-        self.renderer.SetLayer(0)
+        self.panel_renderer.SetBackground(CONST.BG_COLOR[0], CONST.BG_COLOR[1], CONST.BG_COLOR[2])
+        self.panel_renderer.AddActor(self.panel_actor)
+        self.panel_renderer.SetLayer(0)
         # self.window = self.interactor.GetRenderWindow()
-        self.window.AddRenderer(self.renderer)
+        self.window.AddRenderer(self.panel_renderer)
         self.interactorStyle.SetInteractor(self.interactor)
         self.interactor.SetInteractorStyle(self.interactorStyle)
         self.window.SetInteractor(self.interactor)
-        self.renderer.GetActiveCamera().ParallelProjectionOn()
-        self.renderer.ResetCamera()
-        self.renderer.GetActiveCamera().SetParallelScale(self.imageData.getParallelScale())
+        self.panel_renderer.GetActiveCamera().ParallelProjectionOn()
+        self.panel_renderer.ResetCamera()
+        self.panel_renderer.GetActiveCamera().SetParallelScale(self.imageData.getParallelScale())
 
     def setIdxText(self):
         _display_color = CFG.get_color('display')
@@ -108,7 +114,7 @@ class GenericSequenceViewer:
         self.textActorSliceIdx.GetTextProperty().SetColor(_display_color[0], _display_color[1], _display_color[2])
         self.textActorSliceIdx.SetDisplayPosition(0, _order*int(CFG.get_config_data('display', 'font-size')))
         self.textActorSliceIdx.SetInput("SliceIdx: " + str(self.sliceIdx))
-        self.renderer.AddActor(self.textActorSliceIdx)
+        self.panel_renderer.AddActor(self.textActorSliceIdx)
 
     def setWindowText(self):
         _display_color = CFG.get_color('display')
@@ -119,7 +125,7 @@ class GenericSequenceViewer:
         self.textActorWindow.GetTextProperty().SetColor(_display_color[0], _display_color[1], _display_color[2])
         self.textActorWindow.SetDisplayPosition(0, _order*int(CFG.get_config_data('display', 'font-size')))
         self.textActorWindow.SetInput("Window: " + str(self.WindowVal))
-        self.renderer.AddActor(self.textActorWindow)
+        self.panel_renderer.AddActor(self.textActorWindow)
 
     def setLevelText(self):
         _display_color = CFG.get_color('display')
@@ -130,32 +136,34 @@ class GenericSequenceViewer:
         self.textActorLevel.GetTextProperty().SetColor(_display_color[0], _display_color[1], _display_color[2])
         self.textActorLevel.SetDisplayPosition(0, _order*int(CFG.get_config_data('display', 'font-size')))
         self.textActorLevel.SetInput("Level: " + str(self.LevelVal))
-        self.renderer.AddActor(self.textActorLevel)
+        self.panel_renderer.AddActor(self.textActorLevel)
 
     def adjustWindow(self, window: int):
-        self.actor.GetProperty().SetColorWindow(window)
+        self.panel_actor.GetProperty().SetColorWindow(window)
         self.WindowVal = window
         self.textActorWindow.SetInput("Window: " + str(np.int32(self.WindowVal)))
         self.window.Render()
 
     def adjustLevel(self, level: int):
-        self.actor.GetProperty().SetColorLevel(level)
+        self.panel_actor.GetProperty().SetColorLevel(level)
         self.LevelVal = level
         self.textActorLevel.SetInput("Level: " + str(np.int32(self.LevelVal)))
         self.window.Render()
 
     def updateWindowLevel(self):
-        logging.debug(f"Window and Level updated to ({self.actor.GetProperty().GetColorWindow()}, {self.actor.GetProperty().GetColorLevel()})")
-        self.manager.changeWindow(self.actor.GetProperty().GetColorWindow())
-        self.manager.changeLevel(self.actor.GetProperty().GetColorLevel())
+        logging.debug(f"Window and Level updated to ({self.panel_actor.GetProperty().GetColorWindow()}, {self.panel_actor.GetProperty().GetColorLevel()})")
+        self.manager.changeWindow(self.panel_actor.GetProperty().GetColorWindow())
+        self.manager.changeLevel(self.panel_actor.GetProperty().GetColorLevel())
 
     def processNewPoint(self, pointCollection, pickedCoordinates, color=(1, 0, 0), size=1):
         pointLocation = [pickedCoordinates[0], pickedCoordinates[1], pickedCoordinates[2], self.sliceIdx]  # x,y,z,sliceIdx
 
         if pointCollection.addPoint(pointLocation):
             currentPolygonActor = pointCollection.generatePolygonLastPoint(color, size)
-            self.renderer.AddActor(currentPolygonActor)
-        self.presentPoints(pointCollection, self.sliceIdx)
+            self.panel_renderer.AddActor(currentPolygonActor)
+
+        # self.presentPoints(pointCollection, self.sliceIdx)
+        self.render_panel()
 
     # def addPoint(self, pointType, pickedCoordinates):
     #     raise NotImplementedError
@@ -171,16 +179,16 @@ class GenericSequenceViewer:
         cursorActorAx = vtkActor()
         cursorActorAx.SetMapper(cursorMapperAx)
         cursorActorAx.GetProperty().SetColor(1, 0, 0)
-        self.renderer.AddActor(cursorActorAx)
+        self.panel_renderer.AddActor(cursorActorAx)
 
     def Start(self):
         self.interactor.Initialize()
         self.interactor.Start()
 
     def updateZoomFactor(self):
-        curParallelScale = self.renderer.GetActiveCamera().GetParallelScale()
+        curParallelScale = self.panel_renderer.GetActiveCamera().GetParallelScale()
         newZoomFactor = curParallelScale / self.imageData.getParallelScale()
-        self.renderer.GetActiveCamera().SetParallelScale(self.imageData.getParallelScale() * newZoomFactor)
+        self.panel_renderer.GetActiveCamera().SetParallelScale(self.imageData.getParallelScale() * newZoomFactor)
         self.window.Render()
 
     def moveBullsEye(self, newCoordinates):
@@ -212,14 +220,6 @@ class GenericSequenceViewer:
 
         else:
             MSG.msg_box_warning("Not enough points clicked to calculate length")
-    #
-    # def calculateMPR(self):
-    #     if self.MPRpoints.getCoordinatesArray().shape[0] <= 3:
-    #         pass
-    #         # MessageBoxes.notEnoughPointsClicked("MPR")
-    #     else:
-    #         self.manager.showCenterlinePanel()
-    #         # MPRWindow(self.MPRpoints.getCoordinatesArray(), self.imageData)
 
     def saveLengths(self, filename):
         _save_formatter = SaveFormatter(filename, self.imageData)
@@ -236,20 +236,20 @@ class GenericSequenceViewer:
         _length_loader = LoadPoints(filename, self.imageData)
 
         for point in _length_loader.get_points():
-            self.lengthPoints.addPoint(point.coordinates)
+            self.lengthPoints.addPoint(point.image_coordinates)
             currentPolygonActor = self.lengthPoints.generatePolygonLastPoint(color=CFG.get_color('length-display-style'))
-            self.renderer.AddActor(currentPolygonActor)
-        self.presentPoints(self.lengthPoints, self.sliceIdx)
+            self.panel_renderer.AddActor(currentPolygonActor)
+        # self.presentPoints(self.lengthPoints, self.sliceIdx)
 
     def loadMPRPoints(self, filename):
         logging.info(f"Loading MPR points from {filename}")
         _mpr_loader = LoadPoints(filename, self.imageData)
 
         for point in _mpr_loader.get_points():
-            self.MPRpoints.addPoint(point.coordinates)
+            self.MPRpoints.addPoint(point.image_coordinates)
             currentPolygonActor = self.MPRpoints.generatePolygonLastPoint(color=CFG.get_color('mpr-display-style'))
-            self.renderer.AddActor(currentPolygonActor)
-        self.presentPoints(self.MPRpoints, self.sliceIdx)
+            self.panel_renderer.AddActor(currentPolygonActor)
+        # self.presentPoints(self.MPRpoints, self.sliceIdx)
 
     def drawLengthLines(self):
         if len(self.lengthPoints) >= 2:
@@ -285,42 +285,68 @@ class GenericSequenceViewer:
         print("show mpr panel placeholder")
 
     def modifyAnnotation(self, x, y):
-        logging.debug("modifyAnnotation function activated")
+        _picker = vtk.vtkPropPicker()
 
-        _prop_picker = vtk.vtkPicker()
-        _prop_picker.SetTolerance(50)
+        logging.info(f"Prop picked at {x}, {y} on slice {self.sliceIdx}.")
 
-        _found_props = []
-
-        if _prop_picker.Pick(x, y, 0, self.renderer):
-            logging.info(f"Prop picked at {x}, {y}.")
-            # ic(_prop_picker.GetProp3Ds().GetLastProp3D())
-            # _found_props.append(_prop_picker.GetViewProp())
-        # else:
-        #     _found_props = list(set(_found_props))
-        #     if _found_props:
-        #         for i in _found_props:
-        #             if not isinstance(i, vtkImageActor):
-            return _prop_picker.GetProp3Ds().GetLastProp3D()
+        if len(self.MPRpoints) == 0:
+            print("no mpr points to edit")
         else:
-            logging.info(f"No prop found at {x}, {y}.")
+            _distances = [(np.linalg.norm(np.array([x, y])-points[0:2]), points[0:2]) for points in self.MPRpoints]
+            _distances.sort(key=lambda tup: tup[0], reverse=False)
+
+            ic(_distances)
+
+            _closest_point = _distances[0][1]
+
+            ic(_closest_point)
+
+            ic(_picker.PickProp(_closest_point[0], _closest_point[1], self.panel_renderer))
 
     def deleteAnnotation(self, x, y, prop):
         logging.debug("deleteAnnotation function activated")
 
         print(f'Deleting {prop} at {x}, {y}.')
-        self.renderer.RemoveActor(prop)
+        self.panel_renderer.RemoveActor(prop)
+
+    def hide_off_slice_actors(self):
+        ic(self.MPRpoints.displayed_points(self.sliceIdx))
+        ic(self.MPRpoints.hidden_points(self.sliceIdx))
+
+        for i in self.MPRpoints.hidden_points(self.sliceIdx):
+            self.panel_renderer.RemoveActor(i.get_actor())
+            self.window.Render()
+
+    def render_panel(self):
+        self.hide_off_slice_actors()
+        print(f"new render in {self.sliceIdx}")
+
+        ic(self.panel_renderer.GetActors().GetNumberOfItems())
+
+        for i in self.MPRpoints.displayed_points(self.sliceIdx):
+            self.panel_renderer.AddActor(i.get_actor())
+
+            self.window.Render()
 
     def presentPoints(self, pointCollection, sliceIdx) -> None:
-        logging.debug(f"{len(pointCollection)} points in memory")
-        for point in pointCollection.points:
-            polygon = point.polygon
-            # ic(polygon)
-            if point.coordinates[3] != sliceIdx:  # dots were placed on different slices
-                polygon.GeneratePolygonOff()
-            else:
-                polygon.GeneratePolygonOn()
-            self.window.Render()
+        logging.debug(f"{len(pointCollection)} points in memory on slice {sliceIdx}")
+
+        self.hide_off_slice_actors()
+
+        # ic(pointCollection.displayed_points(sliceIdx))
+        #
+        # ic([i.GetVisibility() for i in pointCollection.get_actor_list()])
+
+        # if pointCollection.get_actor_list():
+        #     for point in pointCollection.get_actor_list():
+        #         ic(point.GetProperty())
+        #         ic(point)
+        #         self.panel_renderer.RemoveActor(point)
+        #
+        # for point in pointCollection.get_actor_list_for_slice(sliceIdx):
+        #     self.panel_renderer.AddActor(point)  # TODO: all points are still shown
+        #
+        #     self.window.Render()
 
     def UpdateViewerMatrixCenter(self, center: List[int], sliceIdx):
         matrix = self.reslice.GetResliceAxes()
@@ -332,7 +358,8 @@ class GenericSequenceViewer:
         self.sliceIdx = sliceIdx
         self.imageData.sliceIdx = sliceIdx
         self.manager.updateSliderIndex(self.sliceIdx)
-        self.presentPoints(self.MPRpoints, sliceIdx)
+        self.render_panel()
+        # self.presentPoints(self.MPRpoints, sliceIdx)
 
     def setSliceIndex(self, index: int):
         self.reslice.Update()
@@ -357,3 +384,9 @@ class GenericSequenceViewer:
             self.pastIndex = sliceIdx
             self.UpdateViewerMatrixCenter(center, sliceIdx)
 
+    def undoAnnotation(self):
+        print('remove from display')
+
+        logging.info(f"Removing last point, {len(self.MPRpoints)} MPR points")
+        if len(self.MPRpoints) > 0:
+            self.MPRpoints.delete(-1)

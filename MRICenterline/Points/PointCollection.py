@@ -63,6 +63,9 @@ class PointCollection:
     def __getitem__(self, item):
         return self.points[item]
 
+    def remove_point_from_collection(self, point):
+        pass
+
     def getCoordinatesArray(self) -> np.array:
         return np.asarray([point.coordinates for point in self.points])
 

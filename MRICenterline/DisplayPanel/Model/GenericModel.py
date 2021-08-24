@@ -3,6 +3,7 @@ from vtkmodules.qt.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
 from typing import Tuple
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QGroupBox, QFileDialog
 from PyQt5.Qt import QSizePolicy
+from PyQt5 import Qt
 
 from MRICenterline.DisplayPanel.View.Toolbar import DisplayPanelToolbar
 from MRICenterline.DisplayPanel.Model.GenericViewerManager import GenericViewerManager
@@ -26,7 +27,7 @@ class GenericModel(QWidget):
         self.layout = QVBoxLayout(self)
         self.toolbar = DisplayPanelToolbar(parent=self, manager=self)
 
-        self.statusbar = parent.parent().parent().parent().parent().statusBar() # TODO: i mean it works i guess ???
+        self.statusbar = parent.parent().parent().parent().parent().statusBar() # TODO: thanks i hate it
 
         # self.toolbar.setGeometry(QRect(0, 0, 500, 22))
         self.pickingLengthPoints = False
@@ -73,7 +74,8 @@ class GenericModel(QWidget):
         self.statusbar.update_memory_usage()
         try:
             self.view = self.sequenceManager.loadSequence(sequenceIndex, self.interactor, self.interactorStyle)
-            self.widgets.setValues(sliceIdx=int(self.view.sliceIdx), maxSlice = self.view.imageData.extent[5], windowValue=int(self.view.WindowVal), levelValue=int(self.view.LevelVal))
+            self.widgets.setValues(sliceIdx=int(self.view.sliceIdx), maxSlice=self.view.imageData.extent[5],
+                                   windowValue=int(self.view.WindowVal), levelValue=int(self.view.LevelVal))
         except Exception as err:
             logging.critical(f"Error: {err}")
 
@@ -136,6 +138,7 @@ class GenericModel(QWidget):
     def changeSliceIndex(self, changeFactor: int):
         self.view.adjustSliceIdx(changeFactor)
         self.widgets.indexSlider.setValue(self.view.sliceIdx)
+        self.view.hide_off_slice_actors()
 
     def addPoint(self, pointType: str, pickedCoordinates: Tuple[int]):
         self.view.addPoint(pointType, pickedCoordinates)
@@ -202,6 +205,9 @@ class GenericModel(QWidget):
 
     def deleteAnnotation(self, x, y, prop):
         self.view.deleteAnnotation(x, y, prop)
+
+    def undoAnnotation(self):
+        self.view.undoAnnotation()
 
     def showPatientInfoTable(self):
         print("show patient info table")
