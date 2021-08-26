@@ -7,6 +7,7 @@ from MRICenterline.MainWindow.DefaultTabWidget import DefaultTabWidget
 from MRICenterline.DisplayPanel.Model.GenericModel import GenericModel
 from MRICenterline.DisplayPanel.Model.Imager import Imager
 from MRICenterline.Config.DialogBox import DialogBox
+from MRICenterline import BulkFolderScanner
 from MRICenterline.Config import ConfigParserRead as CFG
 from MRICenterline.utils import message as MSG
 
@@ -33,8 +34,30 @@ class Tab(QWidget):
         self._defaultTabMainWidget = DefaultTabWidget(parent=self)
         self._defaultTabMainWidget.connect_add_mri_images_button(self.load_regular_tab)
         self._defaultTabMainWidget.connect_preferences_button(self.show_preferences_dialog)
+        self._defaultTabMainWidget.connect_scan_folders_button(self.scan_folders)
+        self._defaultTabMainWidget.connect_load_from_json_button(self.json_load)
 
         self.mainLayout.addWidget(self._defaultTabMainWidget)
+
+    def scan_folders(self):
+        logging.debug("Scanning folders...")
+
+        try:
+            _folder = BulkFolderScanner.get_parent_folder()
+        except FileNotFoundError: # user X-ed out file explorer
+            return -1
+        else:
+            _bfs_progress_widget = BulkFolderScanner.get_progress_widget(_folder, self)
+
+            self.clear_default()
+            self.tab_name = "Bulk scan"
+            self.Tab_Bar.change_tab_name(self)
+            self.mainLayout.addWidget(_bfs_progress_widget)
+            QMetaObject.connectSlotsByName(self)  # connect all components to Tab
+
+    def json_load(self):
+        logging.debug("Loading from JSON file button clicked")
+        MSG.msg_box_warning("Loading annotations from JSON files is not implemented in this version")
 
     def show_preferences_dialog(self):
         logging.debug("Preferences dialog opened")
