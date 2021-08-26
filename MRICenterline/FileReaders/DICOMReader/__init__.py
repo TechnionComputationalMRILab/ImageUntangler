@@ -53,6 +53,17 @@ class DICOMReader:
             self.sequence_dict = SequenceFile.create_sequence_file(self.valid_files)
             self.cached_pixel_data_dict = {k: list() for k, _ in self.sequence_dict.items()}
 
+    def check_seqfile_exists(self):
+        if SequenceFile.check_if_dicom_seqfile_exists(self.folder):
+            return True
+        else:
+            return False
+
+    def generate_seq_dict(self):
+        """ to be used with BulkFolderScanner """
+        self.sequence_dict = SequenceFile.create_sequence_file(self.valid_files)
+        self.cached_pixel_data_dict = {k: list() for k, _ in self.sequence_dict.items()}
+
     def _list_files_in_directory(self):
         """ generates a list of all the files in the directory """
         f = []

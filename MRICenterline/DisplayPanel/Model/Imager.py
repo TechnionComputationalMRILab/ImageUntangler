@@ -1,8 +1,8 @@
 import os
 from vtkmodules.all import vtkImageData
 
-from MRICenterline.DisplayPanel.FileReaders.DICOMReader import DICOMReader
-from MRICenterline.DisplayPanel.FileReaders.NRRDReader import NRRDReader
+from MRICenterline.FileReaders.DICOMReader import DICOMReader
+from MRICenterline.FileReaders.NRRDReader import NRRDReader
 from .ImageProperties import ImageProperties
 
 import logging
