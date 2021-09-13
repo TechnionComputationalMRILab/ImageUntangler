@@ -1,7 +1,7 @@
 import json
 import os
 # from icecream import ic
-from .PointCollection import PointCollection
+from .PointArray import PointArray, Point
 
 import logging
 logging.getLogger(__name__)
@@ -13,21 +13,24 @@ class LoadPoints:
         self.image_data = image_data
         self.slide_indices = []
 
-        self.points = PointCollection()
+        self.points = PointArray()
         self._open_file()
 
     def _calculate_slideIdx(self, point):
         return self.image_data.convertZCoordsToSlices([point])[0]
 
-    def get_points(self): # -> PointCollection:
+    def get_points(self): # -> PointArray:
         logging.debug(f"Getting point data from {self.filename}")
         _point_type = self._get_type_of_points()
 
         logging.info(f"Loading {len(self.json_data[_point_type])} {_point_type}")
         for i in self.json_data[_point_type]:
-            self.slide_indices.append(self._calculate_slideIdx(i[2]))
-            i.append(self._calculate_slideIdx(i[2]))
-            self.points.addPoint(i)
+            _point = Point(i + [self._calculate_slideIdx(i[2])])
+            self.points.add_point(_point)
+            # self.slide_indices.append(self._calculate_slideIdx(i[2]))
+            # i.append(self._calculate_slideIdx(i[2]))
+            # print(self._calculate_slideIdx(i[2]))
+            # self.points.add_point(i)
         return self.points
 
     def _get_type_of_points(self):

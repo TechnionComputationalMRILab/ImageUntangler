@@ -1,4 +1,5 @@
-from MRICenterline.Points.PointCollection import PointCollection
+
+from MRICenterline.Points.PointArray import PointArray
 
 import logging
 logging.getLogger(__name__)
@@ -8,7 +9,7 @@ class DisplayCenterlineInterface:
     def __init__(self):
         self.level = 0
         self.window = 0
-        self.points = PointCollection()
+        self.points = None
         self.updated = False
 
     def initialize_level_window(self, level, window):

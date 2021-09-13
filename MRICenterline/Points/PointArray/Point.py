@@ -1,19 +1,19 @@
 import numpy as np
 import vtkmodules.all as vtk
-from icecream import ic
 
 
 class Point:
-    def __init__(self, image_coordinates, color=(1, 0, 0), size=1):
+    def __init__(self, image_coordinates, color=(1, 1, 1), size=1):
         self.image_coordinates = image_coordinates[0:3]
         self.slice_idx = image_coordinates[-1]
         self.point_color = color
-        self.point_size = size if size >= 4 else 4
+        self.point_size = size
+        self.actor = self._generate_actor()
 
     def _generate_actor(self):
 
         source = vtk.vtkSphereSource()
-        source.SetCenter(self.image_coordinates[0], self.image_coordinates[1], self.image_coordinates[2])
+        source.SetCenter(self.image_coordinates[0], self.image_coordinates[1], 0)
         source.SetRadius(self.point_size)
 
         # Create a mapper
@@ -24,8 +24,8 @@ class Point:
         actor = vtk.vtkActor()
         actor.SetMapper(mapper)
         actor.GetProperty().SetColor(self.point_color)
-        actor.GetProperty().SetDiffuse(0.5)
-        actor.GetProperty().SetSpecular(0.5)
+        actor.GetProperty().SetDiffuse(1)
+        actor.GetProperty().SetSpecular(1)
 
         return actor
 

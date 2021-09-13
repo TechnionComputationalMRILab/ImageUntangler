@@ -22,7 +22,8 @@ class PointsToPlaneVectors:
         self.delta = V_spacing[0]
 
         self.Org_points = np.asarray(allPoints)
-        allPoints = self.Org_points[:, 0:3] # should be replaceable by [:, :]
+        # allPoints = self.Org_points[:, 0:3] # should be replaceable by [:, :]
+        allPoints = self.Org_points[:, :]
         x = np.squeeze(allPoints[:, 0])
         y = np.squeeze(allPoints[:, 1])
         z = np.squeeze(allPoints[:, 2])
@@ -153,7 +154,6 @@ class PointsToPlaneVectors:
             plt.show()
         #Add vectors to arrays
 
-
         self.Vector1_list = np.asarray(Vector1_list)
         self.Vector2_list = np.asarray(Vector2_list)
 
@@ -174,7 +174,8 @@ class PointsToPlaneVectors:
         Ponits_x = np.squeeze(org_points[:, 0])
         Ponits_y = np.squeeze(org_points[:, 1])
         Ponits_z = np.squeeze(org_points[:, 2])
-        Pointz_zslice = np.squeeze(org_points[:, 3])
+        # Pointz_zslice = np.squeeze(org_points[:, 3])
+        Pointz_zslice = np.squeeze(org_points[:, :])
 
         self.Pointz_zslice = Pointz_zslice
 

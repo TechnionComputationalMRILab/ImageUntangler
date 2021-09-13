@@ -93,7 +93,7 @@ class MPRInteractorStyle(vtkInteractorStyleImage):
             self.MPRWindow.updateWindowAndLevel()
 
         elif self.actions["Zooming"] == 1:
-            self.Dolly(self.MPRWindow.panel_renderer, self.MPRWindow.panel_renderer.GetActiveCamera(), mouseX, mouseY, lastX, lastY,
+            self.Dolly(self.MPRWindow.renderer, self.MPRWindow.renderer.GetActiveCamera(), mouseX, mouseY, lastX, lastY,
                        centerX, centerY)
 
         else:

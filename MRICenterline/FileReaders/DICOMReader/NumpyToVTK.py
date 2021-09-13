@@ -10,7 +10,6 @@ logging.getLogger(__name__)
 
 NP_TO_VTK_DEBUG = False
 
-
 def get_image_properties(file_list):
     _prop = dict()
 
