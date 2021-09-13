@@ -3,12 +3,12 @@ import numpy as np
 from vtkmodules.util import numpy_support
 from SimpleITK import ReadImage, ProcessObject_SetGlobalWarningDisplay
 
+ProcessObject_SetGlobalWarningDisplay(False)
+
 import logging
 logging.getLogger(__name__)
 
 NP_TO_VTK_DEBUG = False
-ProcessObject_SetGlobalWarningDisplay(False)
-
 
 def get_image_properties(file_list):
     _prop = dict()

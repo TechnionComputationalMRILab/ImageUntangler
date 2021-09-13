@@ -6,7 +6,6 @@ import numpy as np
 import copy
 
 from MRICenterline.utils import message as MSG
-
 import logging
 logging.getLogger(__name__)
 
@@ -41,6 +40,7 @@ def create_sequence_file(files: List[str]):
     """
     creates, saves, and returns a sequence file to be used by DICOMReader
     """
+
     try:
         grouped_files = _groupby(files, lambda x: get_info('SeriesDescription', x),
                                  include_path_key=True, include_path_in_list=False)
@@ -56,9 +56,6 @@ def create_sequence_file(files: List[str]):
             raise KeyError
 
     copy_grouped_files = copy.deepcopy(grouped_files)
-
-    ## TODO: if seriesdescription not found, use seriesnumber. if not found/empty/same for all files in directory,
-    ## do not open, throw a warning message box
 
     path = grouped_files.pop("Path")[0]
     filename = _get_seqfile_filename(files)
