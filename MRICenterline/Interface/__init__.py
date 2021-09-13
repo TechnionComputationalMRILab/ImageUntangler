@@ -1,6 +1,3 @@
-
-from MRICenterline.Points.PointArray import PointArray
-
 import logging
 logging.getLogger(__name__)
 

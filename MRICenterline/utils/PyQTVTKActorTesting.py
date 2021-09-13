@@ -1,7 +1,5 @@
 import sys
-from PyQt5 import QtCore, QtGui
 from PyQt5 import Qt
-from icecream import ic
 from vtkmodules.qt.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
 import vtkmodules.all as vtk
 

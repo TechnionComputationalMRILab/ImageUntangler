@@ -1,7 +1,6 @@
 import json
-import os
 # from icecream import ic
-from .PointArray import PointArray, Point
+from MRICenterline.Points import PointArray, Point
 
 import logging
 logging.getLogger(__name__)

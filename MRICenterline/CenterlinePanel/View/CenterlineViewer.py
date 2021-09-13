@@ -7,7 +7,7 @@ from vtkmodules.qt.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
 from typing import List
 
 from MRICenterline.CenterlinePanel.Control.CenterlineViewerInteractorStyle import MPRInteractorStyle
-from MRICenterline.Points.PointArray import PointArray
+from MRICenterline.Points import PointArray
 
 from MRICenterline.utils import program_constants as CONST
 from MRICenterline.Config import ConfigParserRead as CFG

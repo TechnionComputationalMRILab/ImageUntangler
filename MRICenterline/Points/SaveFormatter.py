@@ -3,7 +3,7 @@ import numpy as np
 from datetime import datetime, timezone
 
 from MRICenterline.DisplayPanel.Model.ImageProperties import ImageProperties
-from .PointArray import PointArray
+from MRICenterline.Points import PointArray
 
 import logging
 logging.getLogger(__name__)

@@ -5,8 +5,7 @@ from vtkmodules.all import vtkImageActor, vtkImageReslice, vtkMatrix4x4, vtkRend
     vtkActor, vtkCursor2D
 import vtkmodules.all as vtk
 
-from MRICenterline.Points.PointArray import PointArray
-from MRICenterline.DisplayPanel.Model import ImageProperties
+from MRICenterline.Points import PointArray
 from MRICenterline.DisplayPanel.Control.SequenceViewerInteractorStyle import SequenceViewerInteractorStyle
 from MRICenterline.Points.LoadPoints import LoadPoints
 from MRICenterline.Points.SaveFormatter import SaveFormatter
