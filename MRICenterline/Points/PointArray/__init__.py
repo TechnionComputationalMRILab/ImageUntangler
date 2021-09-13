@@ -8,12 +8,17 @@ from .LengthCalculation import length_actor
 
 
 class PointArray:
-    def __init__(self):
+    def __init__(self, point_color=(1, 1, 1), size=1):
         self.points: List[Point] = []
         self.lengths = []
+        self.pt_color = point_color
+        self.pt_size = size
 
     def __len__(self):
         return len(self.points)
+
+    def __getitem__(self, item):
+        return self.points[item]
 
     def __iter__(self):
         return iter(self.points)
@@ -26,12 +31,13 @@ class PointArray:
         self.add_point(image_point_location)
 
     def add_point(self, image_point_location):
-        self.points.append(Point(image_point_location))
+        _point = Point(image_point_location, color=self.pt_color, size=self.pt_size)
+        self.points.append(_point)
 
         if len(self) >= 2:
             for pt in self.points:
-                if Point(image_point_location) != pt:
-                    self.lengths.append((Point(image_point_location), pt, Point(image_point_location).distance(pt)))
+                if _point != pt:
+                    self.lengths.append((_point, pt, _point.distance(pt)))
 
     def show_length_text_actors(self):
         return [length_actor(length) for length in self.lengths]
@@ -49,6 +55,7 @@ class PointArray:
         return [i for i in self.points if i.slice_idx != slice_idx]
 
     def set_color(self, color, item=None):
+        self.pt_color = color
         try:
             self.points[item].set_color(color)
         except (TypeError, IndexError):
@@ -56,6 +63,7 @@ class PointArray:
                 point.set_color(color)
 
     def set_size(self, size, item=None):
+        self.pt_size = size
         try:
             self.points[item].set_size(size)
         except (TypeError, IndexError):
@@ -72,3 +80,9 @@ class PointArray:
         _actor_list = self.get_actor_list()
 
         [renderer.RemoveActor(actor) for actor in _actor_list]
+
+    def get_coordinates_as_array(self) -> np.array:
+        return np.asarray([point.image_coordinates for point in self.points])
+
+    def extend(self, point_array):
+        self.points.extend(point_array.points)

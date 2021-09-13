@@ -1,12 +1,13 @@
 import numpy as np
-from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QLabel, QGroupBox, QDoubleSpinBox, QSpinBox, QPushButton
+from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QLabel, QGroupBox, QDoubleSpinBox, QSpinBox, \
+                            QPushButton, QFileDialog
 from PyQt5.QtGui import QFont
 import vtkmodules.all as vtk
 from vtkmodules.qt.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
 from typing import List
 
 from MRICenterline.CenterlinePanel.Control.CenterlineViewerInteractorStyle import MPRInteractorStyle
-from MRICenterline.Points.PointCollection import PointCollection
+from MRICenterline.Points.PointArray import PointArray
 
 from MRICenterline.utils import program_constants as CONST
 from MRICenterline.Config import ConfigParserRead as CFG
@@ -22,7 +23,7 @@ class CenterlineViewer(QWidget):
         logging.debug("Initializing panel widgets")
         self.model = model
         self.control = control
-        self.lengthPoints = PointCollection()
+        self.lengthPoints = PointArray()
 
         self.vl = QVBoxLayout(parent)
         self.setLayout(self.vl)
@@ -231,15 +232,17 @@ class CenterlineViewer(QWidget):
         self._length_results_label.setText("The lengths [mm] are:\n\n {0} \n\nThe total length:\n\n {1}".format(' , '.join(strdis),"{0:.2f}".format(total_distance)))
 
     def processNewPoint(self, pickedCoordinates):
-        coordinates = [pickedCoordinates[0], pickedCoordinates[1], pickedCoordinates[2], 0] # x,y,z,sliceIdx
-        if self.lengthPoints.addPoint(coordinates): # if did not already exist
-            currentPolygonActor = self.lengthPoints.generatePolygonLastPoint(pickedCoordinates) # generate polygon for the point we just added
-            self.renderer.AddActor(currentPolygonActor)
-
-            for point in self.lengthPoints.points:
-                polygon = point.polygon
-                polygon.GeneratePolygonOn()
-                self.renderWindow.Render()
+        pass
+        # TODO
+        # coordinates = [pickedCoordinates[0], pickedCoordinates[1], pickedCoordinates[2], 0] # x,y,z,sliceIdx
+        # if self.lengthPoints.addPoint(coordinates): # if did not already exist
+        #     currentPolygonActor = self.lengthPoints.generatePolygonLastPoint(pickedCoordinates) # generate polygon for the point we just added
+        #     self.renderer.AddActor(currentPolygonActor)
+        #
+        #     for point in self.lengthPoints.points:
+        #         polygon = point.polygon
+        #         polygon.GeneratePolygonOn()
+        #         self.renderWindow.Render()
 
     def _save_file(self):
         fileName, _ = QFileDialog.getSaveFileName(self, "Save Length Points As", CFG.get_config_data("folders", 'default-save-to-folder'),

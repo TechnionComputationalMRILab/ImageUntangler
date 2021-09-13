@@ -3,7 +3,7 @@ import numpy as np
 from datetime import datetime, timezone
 
 from MRICenterline.DisplayPanel.Model.ImageProperties import ImageProperties
-from .PointCollection import PointCollection
+from .PointArray import PointArray
 
 import logging
 logging.getLogger(__name__)
@@ -16,9 +16,9 @@ class SaveFormatter:
         self.header = dict(imagedata.header)
         self.output_data = self.header
 
-    def add_pointcollection_data(self, key: str, value: PointCollection):
+    def add_pointcollection_data(self, key: str, value: PointArray):
         logging.info(f"added {len(value)} {key} to saved file")
-        _points = value.getCoordinatesArray()[:, 0:3]
+        _points = value.get_coordinates_as_array()
 
         self.output_data[key] = _points
 
@@ -26,10 +26,6 @@ class SaveFormatter:
         """ works for anything except for point collections"""
         logging.info(f"Adding [{key}]: {value}")
         self.output_data[key] = value
-
-    # def add_sliceidx_list(self, key, value):
-    #     logging.info(f"Adding {len(value)} slice indices to saved file")
-    #     self.output_data[key + " sliceIdx_list"] = value
 
     def save_data(self):
         self._clean_data()

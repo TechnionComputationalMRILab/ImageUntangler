@@ -1,9 +1,9 @@
 from vtkmodules.qt.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
 
 from typing import Tuple
-from PyQt5.QtWidgets import QWidget, QVBoxLayout, QGroupBox, QFileDialog
+from PyQt5.QtWidgets import QWidget, QVBoxLayout, QGroupBox, QFileDialog, QShortcut
 from PyQt5.Qt import QSizePolicy
-from PyQt5 import Qt
+from PyQt5.QtGui import QKeySequence
 
 from MRICenterline.DisplayPanel.View.Toolbar import DisplayPanelToolbar
 from MRICenterline.DisplayPanel.Model.GenericViewerManager import GenericViewerManager
@@ -49,6 +49,7 @@ class GenericModel(QWidget):
                                                            index_widgets=self.widgets.index_widgets)
 
         self.set_up_sliders()
+        self.set_up_keyboard_shortcuts()
 
         self.layout.addWidget(self.toolbar)
         self.layout.addWidget(self.widgets.sequenceList)
@@ -104,11 +105,11 @@ class GenericModel(QWidget):
         self.widgets.index_widgets['Spinbox'].setValue(index)
 
     def showCenterlinePanel(self):
-        if self.view.MPRpoints.getCoordinatesArray().shape[0] <= 3:
+        if self.view.MPRpoints.get_coordinates_as_array().shape[0] <= 3:
             MSG.msg_box_warning("Not enough points clicked to calculate Centerline")
         else:
             logging.info("Opening Centerline Panel dockable widget")
-            self.interface.initialize_points(self.view.MPRpoints.getCoordinatesArray())
+            self.interface.initialize_points(self.view.MPRpoints.get_coordinates_as_array())
             self.interface.set_level(self.view.LevelVal)
             self.interface.set_window(self.view.WindowVal)
 
@@ -138,7 +139,6 @@ class GenericModel(QWidget):
     def changeSliceIndex(self, changeFactor: int):
         self.view.adjustSliceIdx(changeFactor)
         self.widgets.indexSlider.setValue(self.view.sliceIdx)
-        self.view.hide_off_slice_actors()
 
     def addPoint(self, pointType: str, pickedCoordinates: Tuple[int]):
         self.view.addPoint(pointType, pickedCoordinates)
@@ -210,4 +210,15 @@ class GenericModel(QWidget):
         self.view.undoAnnotation()
 
     def showPatientInfoTable(self):
-        print("show patient info table")
+        logging.info("Showing patient table")
+        MSG.msg_box_info("Patient info display not implemented in this version.")
+
+# _________________________________________Keyboard Shortcuts_______________________________________
+
+    def set_up_keyboard_shortcuts(self):
+        self.undo_kb_shortcut = QShortcut(QKeySequence('Ctrl+z'), self)
+        self.undo_kb_shortcut.activated.connect(self.undo_kb_shortcut_func)
+
+    def undo_kb_shortcut_func(self):
+        logging.info("Undo keyboard shortcut used")
+        self.view.undoAnnotation()

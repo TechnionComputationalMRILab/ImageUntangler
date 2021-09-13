@@ -39,8 +39,11 @@ class CenterlineModel:
         self.set_angle(self.angle + angle_change)
 
     def get_mpr_properties(self):
-        _mpr_properties = PointsToPlaneVectors(self.points, self.image_data, Plot=0,
-                                               height=self.height, viewAngle=self.angle)
+        try:
+            _mpr_properties = PointsToPlaneVectors(self.points, self.image_data, Plot=0,
+                                                   height=self.height, viewAngle=self.angle)
+        except Exception as err:
+            print(err)
         return _mpr_properties
 
     def calculate_input_data(self):

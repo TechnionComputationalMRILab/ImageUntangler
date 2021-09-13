@@ -1,7 +1,4 @@
 from vtkmodules.qt.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
-from typing import List
-import os
-# from icecream import ic
 
 from MRICenterline.DisplayPanel.View.GenericSequenceViewer import GenericSequenceViewer
 from MRICenterline.utils import message as MSG

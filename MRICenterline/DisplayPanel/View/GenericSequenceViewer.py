@@ -8,7 +8,6 @@ import vtkmodules.all as vtk
 from MRICenterline.Points.PointArray import PointArray
 from MRICenterline.DisplayPanel.Model import ImageProperties
 from MRICenterline.DisplayPanel.Control.SequenceViewerInteractorStyle import SequenceViewerInteractorStyle
-from MRICenterline.Points.PointCollection import PointCollection
 from MRICenterline.Points.LoadPoints import LoadPoints
 from MRICenterline.Points.SaveFormatter import SaveFormatter
 
@@ -24,15 +23,10 @@ class GenericSequenceViewer:
     def __init__(self, manager, interactor: QVTKRenderWindowInteractor, interactorStyle: SequenceViewerInteractorStyle, image):
         self.manager = manager
         self.interactor = interactor
+        self.imageData = image
 
         self.panel_actor = vtkImageActor()
         self.panel_renderer = vtkRenderer()
-
-        # self.imageData = ImageProperties.getImageData(imager, sequence="")
-        self.imageData = image
-
-        # self.LevelVal = (self.imageData.dicomArray.max()+self.imageData.dicomArray.min())/2
-        # self.WindowVal = self.imageData.dicomArray.max()-self.imageData.dicomArray.min()
 
         self.LevelVal = self.imageData.level_value
         self.WindowVal = self.imageData.window_value
@@ -48,18 +42,13 @@ class GenericSequenceViewer:
         self.interactorStyle = interactorStyle
         self.reslice = vtkImageReslice()
 
-        # self.window.AddRenderer(self.annotation_renderer)
-        # self.annotation_renderer.SetLayer(1)
-        # self.window.SetNumberOfLayers(2)
-
         self.Cursor = vtkCursor2D()
         self.performReslice()
         self.connectActor()
         self.renderImage()
 
-        # self.MPRpoints = PointCollection()
-        self.MPRpoints = PointArray()
-        self.lengthPoints = PointCollection()
+        self.MPRpoints = PointArray(point_color=(1, 0, 0))
+        self.lengthPoints = PointArray(point_color=(0, 1, 0))
 
         self.presentCursor()
 
@@ -155,18 +144,11 @@ class GenericSequenceViewer:
         self.manager.changeWindow(self.panel_actor.GetProperty().GetColorWindow())
         self.manager.changeLevel(self.panel_actor.GetProperty().GetColorLevel())
 
-    def processNewPoint(self, pointCollection, pickedCoordinates, color=(1, 0, 0), size=1):
+    def processNewPoint(self, pointCollection, pickedCoordinates):
         pointLocation = [pickedCoordinates[0], pickedCoordinates[1], pickedCoordinates[2], self.sliceIdx]  # x,y,z,sliceIdx
-
-        if pointCollection.addPoint(pointLocation):
-            currentPolygonActor = pointCollection.generatePolygonLastPoint(color, size)
-            self.panel_renderer.AddActor(currentPolygonActor)
-
-        # self.presentPoints(pointCollection, self.sliceIdx)
+        pointCollection.add_point(pointLocation)
+        self.panel_renderer.AddActor(pointCollection[-1].actor)
         self.render_panel()
-
-    # def addPoint(self, pointType, pickedCoordinates):
-    #     raise NotImplementedError
 
     def presentCursor(self):
         self.Cursor.SetModelBounds(-10000, 10000, -10000, 10000, 0, 0)
@@ -197,17 +179,12 @@ class GenericSequenceViewer:
 
     def addPoint(self, pointType, pickedCoordinates):
         if pointType.upper() == "MPR":
-            self.processNewPoint(self.MPRpoints, pickedCoordinates,
-                                 color=CFG.get_color('mpr-display-style'),
-                                 size=int(CFG.get_config_data('mpr-display-style', 'marker-size')))
+            self.processNewPoint(self.MPRpoints, pickedCoordinates)
         elif pointType.upper() == "LENGTH":
-            self.processNewPoint(self.lengthPoints, pickedCoordinates,
-                                 color=CFG.get_color('length-display-style'),
-                                 size=int(CFG.get_config_data('length-display-style', 'marker-size')))
+            self.processNewPoint(self.lengthPoints, pickedCoordinates)
 
     def calculateLengths(self):
         if len(self.lengthPoints) >= 2:
-            # ic(self.lengthPoints.getCoordinatesArray())
             pointsPositions = np.asarray(self.lengthPoints.getCoordinatesArray())
             allLengths = [np.linalg.norm(pointsPositions[j, :] - pointsPositions[j + 1, :]) for j in
                           range(len(pointsPositions) - 1)]
@@ -235,54 +212,23 @@ class GenericSequenceViewer:
         logging.info(f"Loading length points from {filename}")
         _length_loader = LoadPoints(filename, self.imageData)
 
-        for point in _length_loader.get_points():
-            self.lengthPoints.addPoint(point.image_coordinates)
-            currentPolygonActor = self.lengthPoints.generatePolygonLastPoint(color=CFG.get_color('length-display-style'))
-            self.panel_renderer.AddActor(currentPolygonActor)
-        # self.presentPoints(self.lengthPoints, self.sliceIdx)
+        self.lengthPoints.extend(_length_loader.get_points())
+
+        for i in self.lengthPoints:
+            self.panel_renderer.AddActor(i.actor)
+
+        self.render_panel()
 
     def loadMPRPoints(self, filename):
         logging.info(f"Loading MPR points from {filename}")
         _mpr_loader = LoadPoints(filename, self.imageData)
 
-        for point in _mpr_loader.get_points():
-            self.MPRpoints.addPoint(point.image_coordinates)
-            currentPolygonActor = self.MPRpoints.generatePolygonLastPoint(color=CFG.get_color('mpr-display-style'))
-            self.panel_renderer.AddActor(currentPolygonActor)
-        # self.presentPoints(self.MPRpoints, self.sliceIdx)
+        self.MPRpoints.extend(_mpr_loader.get_points())
 
-    def drawLengthLines(self):
-        if len(self.lengthPoints) >= 2:
-            _actor = self.lengthPoints.generateLineActor()
+        for i in self.MPRpoints:
+            self.panel_renderer.AddActor(i.actor)
 
-            _renderer = vtkRenderer()
-            _renderer.AddActor(_actor)
-            print(_actor.GetBounds())
-
-            _renderer.InteractiveOn() # TODO: fix me
-
-            self.window.AddRenderer(_renderer)
-            _renderer.SetLayer(1)
-            self.window.SetNumberOfLayers(2)
-
-            self.window.Render()
-
-    def drawMPRSpline(self):
-        if self.MPRpoints.getCoordinatesArray().shape[0] >= 3:
-            _actor = self.MPRpoints.generateSplineActor()
-
-            _renderer = vtkRenderer()
-            _renderer.AddActor(_actor)
-            _renderer.InteractiveOn() # TODO: IS TEMPORARY
-
-            self.window.AddRenderer(_renderer)
-            _renderer.SetLayer(1)
-            self.window.SetNumberOfLayers(2)
-
-            self.window.Render()
-
-    def showMPRPanel(self):
-        print("show mpr panel placeholder")
+        self.render_panel()
 
     def modifyAnnotation(self, x, y):
         _picker = vtk.vtkPropPicker()
@@ -309,29 +255,22 @@ class GenericSequenceViewer:
         print(f'Deleting {prop} at {x}, {y}.')
         self.panel_renderer.RemoveActor(prop)
 
-    def hide_off_slice_actors(self):
-        ic(self.MPRpoints.displayed_points(self.sliceIdx))
-        ic(self.MPRpoints.hidden_points(self.sliceIdx))
+    def render_panel(self):
+        logging.debug(f"Rendering slice {self.sliceIdx}")
+        logging.debug(f"Current number of actors: {self.panel_renderer.GetActors().GetNumberOfItems()}")
 
-        for i in self.MPRpoints.hidden_points(self.sliceIdx):
-            self.panel_renderer.RemoveActor(i.get_actor())
+        for i in self.lengthPoints:
+            i.actor.SetVisibility(i.slice_idx == self.sliceIdx)
             self.window.Render()
 
-    def render_panel(self):
-        self.hide_off_slice_actors()
-        print(f"new render in {self.sliceIdx}")
-
-        ic(self.panel_renderer.GetActors().GetNumberOfItems())
-
-        for i in self.MPRpoints.displayed_points(self.sliceIdx):
-            self.panel_renderer.AddActor(i.get_actor())
-
+        for i in self.MPRpoints:
+            i.actor.SetVisibility(i.slice_idx == self.sliceIdx)
             self.window.Render()
 
     def presentPoints(self, pointCollection, sliceIdx) -> None:
-        logging.debug(f"{len(pointCollection)} points in memory on slice {sliceIdx}")
-
-        self.hide_off_slice_actors()
+        # logging.debug(f"{len(pointCollection)} points in memory on slice {sliceIdx}")
+        #
+        # self.hide_off_slice_actors()
 
         # ic(pointCollection.displayed_points(sliceIdx))
         #
@@ -347,6 +286,19 @@ class GenericSequenceViewer:
         #     self.panel_renderer.AddActor(point)  # TODO: all points are still shown
         #
         #     self.window.Render()
+
+        ## original code
+        logging.debug(f"{len(pointCollection)} points in memory")
+        for point in pointCollection.points:
+            polygon = point.polygon
+            # ic(polygon)
+            if point.coordinates[3] != sliceIdx:  # dots were placed on different slices
+                # polygon.GeneratePolygonOff()
+                point.get_actor().SetVisibility(False)
+            else:
+                # polygon.GeneratePolygonOn()
+                point.get_actor().SetVisibility(True)
+            self.window.Render()
 
     def UpdateViewerMatrixCenter(self, center: List[int], sliceIdx):
         matrix = self.reslice.GetResliceAxes()
@@ -385,8 +337,9 @@ class GenericSequenceViewer:
             self.UpdateViewerMatrixCenter(center, sliceIdx)
 
     def undoAnnotation(self):
-        print('remove from display')
+        logging.info(f"Removing last MPR point, {len(self.MPRpoints)} points remaining")
 
-        logging.info(f"Removing last point, {len(self.MPRpoints)} MPR points")
         if len(self.MPRpoints) > 0:
+            self.MPRpoints[-1].actor.SetVisibility(False)
             self.MPRpoints.delete(-1)
+            self.window.Render()
