@@ -3,7 +3,7 @@ from typing import List
 from MRICenterline.Points.Point import Point
 from MRICenterline.Points.LineActor import generate_lines
 from MRICenterline.Points.SplineActor import generate_spline
-from MRICenterline.Points.LengthCalculation import length_actor
+from MRICenterline.Points.LengthCalculation import length_actor, temp_length_calc_function
 
 
 class PointArray:
@@ -40,6 +40,10 @@ class PointArray:
 
     def show_length_text_actors(self):
         return [length_actor(length) for length in self.lengths]
+
+    def temp_length_display(self):
+        #TODO: remove this, use length actors instead
+        return [temp_length_calc_function(length) for length in self.lengths]
 
     def get_actor_list(self):
         return [i.get_actor() for i in self.points]

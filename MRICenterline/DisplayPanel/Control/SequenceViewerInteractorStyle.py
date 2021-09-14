@@ -120,7 +120,7 @@ class SequenceViewerInteractorStyle(vtkInteractorStyleImage):
             (mouseX, mouseY) = self.parent.GetEventPosition()
 
             points = self.pickImagePoint("Editing", mouseX, mouseY, query=True)
-            ic(points)
+            # ic(points)
             # x, y = points[0:2]
 
             self.model.modifyAnnotation(mouseX, mouseY)

@@ -19,3 +19,7 @@ def length_actor(length_array, color=(0, 1, 1)):
     textActor.GetProperty().SetColor(color)
 
     return textActor
+
+
+def temp_length_calc_function(length_array):
+    return round(length_array[2], 2)

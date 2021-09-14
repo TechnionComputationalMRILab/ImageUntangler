@@ -184,9 +184,13 @@ class GenericSequenceViewer:
 
     def calculateLengths(self):
         if len(self.lengthPoints) >= 2:
-            pointsPositions = np.asarray(self.lengthPoints.getCoordinatesArray())
-            allLengths = [np.linalg.norm(pointsPositions[j, :] - pointsPositions[j + 1, :]) for j in
-                          range(len(pointsPositions) - 1)]
+            # TODO: remove this, use length actors instead
+            allLengths = self.lengthPoints.temp_length_display()
+            print(allLengths)
+
+            # pointsPositions = np.asarray(self.lengthPoints.getCoordinatesArray())
+            # allLengths = [np.linalg.norm(pointsPositions[j, :] - pointsPositions[j + 1, :]) for j in
+            #               range(len(pointsPositions) - 1)]
             totalDistance = np.sum(allLengths)
 
             strdis = ["{0:.2f}".format(allLengths[i]) for i in range(len(allLengths))]
@@ -240,13 +244,13 @@ class GenericSequenceViewer:
             _distances = [(np.linalg.norm(np.array([x, y])-points[0:2]), points[0:2]) for points in self.MPRpoints]
             _distances.sort(key=lambda tup: tup[0], reverse=False)
 
-            ic(_distances)
+            # ic(_distances)
 
             _closest_point = _distances[0][1]
 
-            ic(_closest_point)
+            # ic(_closest_point)
 
-            ic(_picker.PickProp(_closest_point[0], _closest_point[1], self.panel_renderer))
+            # ic(_picker.PickProp(_closest_point[0], _closest_point[1], self.panel_renderer))
 
     def deleteAnnotation(self, x, y, prop):
         logging.debug("deleteAnnotation function activated")
