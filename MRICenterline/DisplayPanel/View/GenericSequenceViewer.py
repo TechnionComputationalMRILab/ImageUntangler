@@ -185,12 +185,9 @@ class GenericSequenceViewer:
     def calculateLengths(self):
         if len(self.lengthPoints) >= 2:
             # TODO: remove this, use length actors instead
-            allLengths = self.lengthPoints.temp_length_display()
-            print(allLengths)
-
-            # pointsPositions = np.asarray(self.lengthPoints.getCoordinatesArray())
-            # allLengths = [np.linalg.norm(pointsPositions[j, :] - pointsPositions[j + 1, :]) for j in
-            #               range(len(pointsPositions) - 1)]
+            pointsPositions = np.asarray(self.lengthPoints.get_coordinates_as_array())
+            allLengths = [np.linalg.norm(pointsPositions[j, :] - pointsPositions[j + 1, :]) for j in
+                          range(len(pointsPositions) - 1)]
             totalDistance = np.sum(allLengths)
 
             strdis = ["{0:.2f}".format(allLengths[i]) for i in range(len(allLengths))]
