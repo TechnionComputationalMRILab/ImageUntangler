@@ -1,7 +1,9 @@
+import csv
 from PyQt5.QtWidgets import QWidget, QProgressBar, QPushButton, QVBoxLayout, QLabel, \
-                            QGridLayout, QTextEdit
+                            QGridLayout, QTextEdit, QFileDialog
 
 from . import Scanner
+from MRICenterline.Config import ConfigParserRead as CFG
 
 import logging
 logging.getLogger(__name__)
@@ -53,13 +55,18 @@ class ProgressWidget(QWidget):
         self._add_to_textbox("<b>Does not currently support sequences with different patients in the same "
                              "directory.</b>", color='red')
 
-        _start_button = QPushButton("Start")
-        _start_button.setMinimumSize(600, 200)
+        _start_button = QPushButton("Generate sequence dictionary files")
+        _start_button.setMinimumSize(600, 100)
         _start_button.clicked.connect(self.scan)
+
+        _folder_report = QPushButton("Generate folder report")
+        _folder_report.setMinimumSize(600, 100)
+        _folder_report.clicked.connect(self.report)
 
         self._v_layout.addWidget(_warning)
         self._v_layout.addWidget(self.text_box)
         self._v_layout.addWidget(_start_button)
+        self._v_layout.addWidget(_folder_report)
 
         if len(self.directories) > 1:
             self.prog_bar = QProgressBar(self)
@@ -69,7 +76,7 @@ class ProgressWidget(QWidget):
         self._grid_layout.addLayout(self._v_layout, 1, 1, 1, 1)
 
     def scan(self):
-        logging.info("Starting folder scan")
+        logging.info("Starting folder scan for seqdict")
         self._add_to_textbox("Starting scan!")
 
         for i, val in enumerate(self.directories):
@@ -80,6 +87,37 @@ class ProgressWidget(QWidget):
                 self.prog_bar.setValue(i)
 
         self._add_to_textbox("Done! You can close this tab now", color='blue')
+
+    def report(self):
+        logging.info("Starting folder scan for reporting")
+
+        if len(self.directories) > 0:
+            self._add_to_textbox("Starting scan!")
+
+            _to_csv = []
+            for i, val in enumerate(self.directories):
+                _dict = Scanner.generate_report(val)
+                _dict['Path'] = val
+                _to_csv.append(_dict)
+
+                self._add_to_textbox(f"<b>[Folder {i+1}/{len(self.directories)}]</b>: {val}")
+
+                if len(self.directories) > 1:
+                    self.prog_bar.setValue(i)
+
+            _csv_filename, _ = QFileDialog.getSaveFileName(self, "Save report to",
+                                                           CFG.get_config_data("folders", 'default-save-to-folder'),
+                                                           "%s Files (*.%s);;All Files (*)" % ("csv".upper(), "csv"))
+
+            if _csv_filename:
+                logging.debug(f"Saving report to {_csv_filename}")
+
+                with open(_csv_filename, 'w', encoding='utf8', newline='') as output_file:
+                    fc = csv.DictWriter(output_file, fieldnames=_to_csv[0].keys())
+                    fc.writeheader()
+                    fc.writerows(_to_csv)
+
+                self._add_to_textbox(f"Done! Report is saved to {_csv_filename}. You can close this tab now", color='blue')
 
     def _add_to_textbox(self, text, color=None):
         if color:

@@ -134,3 +134,14 @@ class DICOMReader:
         _arr = np.array([pix[2] for pix in self[seq]])
         _window_percentile = int(CFG.get_config_data('display', 'window-percentile'))
         return int(np.percentile(_arr, _window_percentile)), int(np.percentile(_arr, _window_percentile) / 2)
+
+    def generate_report(self, required_fields):
+        _dict = {}
+        for field in required_fields:
+            try:
+                _dict[field] = SequenceFile.get_info(field, self.valid_files[0])
+            except KeyError:
+                _dict[field] = ""
+
+        _dict["Sequences"] = list(self.sequence_dict)
+        return _dict

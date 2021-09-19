@@ -1,5 +1,6 @@
 import os
 from MRICenterline.FileReaders.DICOMReader import DICOMReader
+from MRICenterline.FileReaders.DICOMReader.SequenceFile import get_info
 
 
 def get_directories(folder):
@@ -17,3 +18,12 @@ def generate_seq_dict(folder):
     if _dicomreader is type(DICOMReader):
         if _dicomreader.check_seqfile_exists():
             _dicomreader.generate_seq_dict()
+
+
+def generate_report(folder):
+    _dicomreader = DICOMReader.test_folder(folder)
+
+    required_fields = ["PatientName", "PatientID", "Manufacturer", "ManufacturerModelName", "ProtocolName"]
+    filled_out_dict = _dicomreader.generate_report(required_fields)
+
+    return filled_out_dict

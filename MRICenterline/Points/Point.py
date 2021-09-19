@@ -49,6 +49,7 @@ class Point:
 
     def distance(self, other):
         return np.sqrt(np.sum([(self.image_coordinates[i] + other[i]) ** 2 for i in range(3)]))
+        # return np.linalg.norm(self - other)
 
     def __getitem__(self, item):
         return self.image_coordinates[item]

@@ -188,6 +188,8 @@ class GenericSequenceViewer:
             pointsPositions = np.asarray(self.lengthPoints.get_coordinates_as_array())
             allLengths = [np.linalg.norm(pointsPositions[j, :] - pointsPositions[j + 1, :]) for j in
                           range(len(pointsPositions) - 1)]
+
+            # allLengths = self.lengthPoints.temp_length_display()
             totalDistance = np.sum(allLengths)
 
             strdis = ["{0:.2f}".format(allLengths[i]) for i in range(len(allLengths))]
