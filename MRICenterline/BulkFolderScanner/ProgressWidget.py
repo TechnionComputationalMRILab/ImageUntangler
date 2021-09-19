@@ -97,8 +97,11 @@ class ProgressWidget(QWidget):
             _to_csv = []
             for i, val in enumerate(self.directories):
                 _dict = Scanner.generate_report(val)
-                _dict['Path'] = val
-                _to_csv.append(_dict)
+                if _dict:
+                    _dict['Path'] = val
+                    _to_csv.append(_dict)
+                else:
+                    pass
 
                 self._add_to_textbox(f"<b>[Folder {i+1}/{len(self.directories)}]</b>: {val}")
 
