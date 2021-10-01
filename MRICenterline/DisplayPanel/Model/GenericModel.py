@@ -209,6 +209,9 @@ class GenericModel(QWidget):
     def undoAnnotation(self):
         self.view.undoAnnotation()
 
+    def deleteAllPoints(self):
+        self.view.deleteAllPoints()
+
     def showPatientInfoTable(self):
         logging.info("Showing patient table")
         MSG.msg_box_info("Patient info display not implemented in this version.")

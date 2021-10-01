@@ -20,7 +20,7 @@ def generate_seq_dict(folder):
 
 
 def generate_report(folder):
-    required_fields = ["PatientName", "PatientID", "Manufacturer", "ManufacturerModelName", "ProtocolName"]
+    required_fields = ["PatientName", "PatientID", "Manufacturer", "ManufacturerModelName", "ProtocolName", "StudyDate", "StudyTime"]
     _dicomreader = DICOMReader.test_folder(folder)
 
     if type(_dicomreader) is DICOMReader:
@@ -28,3 +28,7 @@ def generate_report(folder):
         return filled_out_dict
     else:
         return None
+
+
+
+

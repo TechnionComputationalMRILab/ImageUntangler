@@ -2,6 +2,7 @@ import pydicom
 from pydicom.errors import InvalidDicomError
 import numpy as np
 import os
+from glob import glob
 # from icecream import ic
 
 from . import SequenceFile, NumpyToVTK, Header
@@ -66,11 +67,12 @@ class DICOMReader:
 
     def _list_files_in_directory(self):
         """ generates a list of all the files in the directory """
-        f = []
-        for (_, _, filenames) in os.walk(self.folder):
-            f.extend(filenames)
-            break
-        return [os.path.join(self.folder, i) for i in f]
+        # f = []
+        # for (_, _, filenames) in os.walk(self.folder):
+        #     f.extend(filenames)
+        #     break
+        # return [os.path.join(self.folder, i) for i in f]
+        return [file.replace('\\', '/') for file in glob(f'{self.folder}/*.dcm')]
 
     def _get_valid_files(self):
         _files = self._list_files_in_directory()

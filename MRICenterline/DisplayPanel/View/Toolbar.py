@@ -26,6 +26,8 @@ class DisplayPanelToolbar(QToolBar):
         self.addInfoButton()
         self.addDisablePointPickers()
         self.addUndoButton()
+        self.addDeleteAllButton()
+        self.addTimerButton()
         self.resetSlidersToDefault()
 
         self.addSeparator(expand=True)
@@ -175,3 +177,24 @@ class DisplayPanelToolbar(QToolBar):
         _undo_button.setIcon(qta.icon('fa5s.undo-alt'))
         _undo_button.clicked.connect(self.manager.undoAnnotation)
         self.addWidget(_undo_button)
+
+    def addTimerButton(self):
+        _timer_button = QPushButton("Start Timer")
+        _timer_button.setStatusTip("Start a timer")
+        _timer_button.setIcon(qta.icon('mdi.timer-outline'))
+        self.addWidget(_timer_button)
+
+        _timer_status = False
+        _timer_button.clicked.connect(lambda: self.setTimerRunningIcon(_timer_button, _timer_status))
+
+    def addDeleteAllButton(self):
+        _delete_all = QPushButton("Delete all points")
+        _delete_all.setIcon(qta.icon('mdi.delete-outline'))
+        _delete_all.clicked.connect(self.manager.deleteAllPoints)
+        self.addWidget(_delete_all)
+
+    def setTimerRunningIcon(self, button, status):
+        if status:
+            button.setIcon(qta.icon('mdi.timer-outline'))
+        else:
+            button.setIcon(qta.icon('mdi.timer-off-outline'))

@@ -46,7 +46,7 @@ class GenericSequenceViewer:
         self.connectActor()
         self.renderImage()
 
-        self.MPRpoints = PointArray(point_color=(1, 0, 0))
+        self.MPRpoints = PointArray(point_color=(1, 0, 0), highlight_last=True)
         self.lengthPoints = PointArray(point_color=(0, 1, 0))
 
         self.presentCursor()
@@ -345,3 +345,12 @@ class GenericSequenceViewer:
             self.MPRpoints[-1].actor.SetVisibility(False)
             self.MPRpoints.delete(-1)
             self.window.Render()
+
+    def deleteAllPoints(self):
+        logging.info("Removing all points")
+
+        while len(self.MPRpoints) > 0:
+            self.MPRpoints[-1].actor.SetVisibility(False)
+            self.MPRpoints.delete(-1)
+
+        self.window.Render()
