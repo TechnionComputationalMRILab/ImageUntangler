@@ -2,8 +2,8 @@ import os
 import pydicom
 from typing import List
 import json
+from glob import glob
 import numpy as np
-import copy
 
 from MRICenterline.utils import message as MSG
 import logging
@@ -21,6 +21,7 @@ def check_if_dicom_seqfile_exists(path):
     looks for a json file in the directory
     to implement: make sure that the json file is the seqfile and not some other json file
     """
+    glob(path)
     for file in os.listdir(path):
         if file.endswith(".json"):
             return file
@@ -41,29 +42,31 @@ def create_sequence_file(files: List[str]):
     creates, saves, and returns a sequence file to be used by DICOMReader
     """
 
-    try:
-        grouped_files = _groupby(files, lambda x: get_info('SeriesDescription', x),
-                                 include_path_key=True, include_path_in_list=False)
-    except KeyError:
-        try:
-            grouped_files = _groupby(files, lambda x: get_info('SeriesNumber', x),
-                                     include_path_key=True, include_path_in_list=False)
-        except KeyError:
-            _file_list_as_string = "".join([i + "\n" for i in files])
-            MSG.msg_box_warning("Series Description and Series Number not found for the following files",
-                                details=f'{_file_list_as_string}')
-            logging.critical(f"Series Description and Series Number not found for {_file_list_as_string}")
-            raise KeyError
+    # try:
+    #     grouped_files = _groupby(files, lambda x: get_info('SeriesDescription', x),
+    #                              include_path_key=True, include_path_in_list=False)
+    # except KeyError:
+    #     try:
+    #         grouped_files = _groupby(files, lambda x: get_info('SeriesNumber', x),
+    #                                  include_path_key=True, include_path_in_list=False)
+    #     except KeyError:
+    #         _file_list_as_string = "".join([i + "\n" for i in files])
+    #         MSG.msg_box_warning("Series Description and Series Number not found for the following files",
+    #                             details=f'{_file_list_as_string}')
+    #         logging.critical(f"Series Description and Series Number not found for {_file_list_as_string}")
+    #         raise KeyError
+    #
+    # copy_grouped_files = copy.deepcopy(grouped_files)
 
-    copy_grouped_files = copy.deepcopy(grouped_files)
+    path = os.path.dirname(files[0]) #grouped_files.pop("Path")[0]
+    # filename = _get_seqfile_filename(files)
 
-    path = grouped_files.pop("Path")[0]
-    filename = _get_seqfile_filename(files)
+    grouped_files = generate_seqlist_dict(files)
 
-    with open(os.path.join(path, filename), 'w') as f:
+    with open(os.path.join(path, 'data', 'seqdict.json'), 'w') as f:
         json.dump(grouped_files, f, indent=4, sort_keys=True)
 
-    return copy_grouped_files
+    return grouped_files
 
 
 def _groupby(files: List[str], func,
@@ -119,3 +122,27 @@ def _get_seqfile_filename(files):
         return _seq_filename
     else:
         raise NotImplementedError("Program does not yet work for data in nested folders")
+
+
+def generate_seqlist_dict(files_list):
+    seq_list = {}
+    sorted_files = {}
+    for filename in files_list:
+        # filename = filename.replace('\\','/')
+        dicom_info = pydicom.dcmread(filename)
+        try:
+            seq_name = dicom_info['SeriesDescription'].value
+            if seq_name in seq_list:
+                sorted_files[seq_name][filename] = filename
+            else:
+                sorted_files[seq_name]={filename: filename}
+                seq_list[seq_name] = seq_name
+        except:
+            logging.warning(f"Ignoring invalid file: {filename}")
+    seq_list = [seq_val[1] for seq_val in seq_list.items()]
+    seq_list = set(seq_list)
+    seq_files_list = {}
+    for seq_name in seq_list:
+        seq_files_list[seq_name] = [file_entry[1] for file_entry in sorted_files[seq_name].items()]
+
+    return seq_files_list

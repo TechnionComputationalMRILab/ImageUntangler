@@ -28,6 +28,13 @@ class DICOMReader:
         else:
             logging.info(f"No DICOM files found in {self.folder}")
 
+    def _check_data_folder(self):
+        # TODO:
+        #   check for data folder
+        #   check for metadata and seqlist
+        #   check for any annotation files
+        pass
+
     @classmethod
     def test_folder(cls, folder: str):
         _dicom = cls(folder)

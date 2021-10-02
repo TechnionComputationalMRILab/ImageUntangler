@@ -6,3 +6,4 @@ src/*/__pycache__/*
 internal_data/*
 venv/*
 *.pyc
+/logs/*

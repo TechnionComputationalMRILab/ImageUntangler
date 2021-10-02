@@ -1,3 +1,6 @@
+from datetime import datetime, timezone
+log_timestamp = datetime.now(timezone.utc).astimezone().isoformat().replace(":", "_")
+
 LOGGING_CONFIG = {
     'version': 1,
     'disable_existing_loggers': True,
@@ -20,7 +23,7 @@ LOGGING_CONFIG = {
             'level': 'DEBUG',
             'formatter': 'terminal',
             'class': 'logging.handlers.RotatingFileHandler',
-            'filename': 'logtxt.log',
+            'filename': "./logs/{}.log".format(log_timestamp),
             'maxBytes': 10485760,
         },
     },
