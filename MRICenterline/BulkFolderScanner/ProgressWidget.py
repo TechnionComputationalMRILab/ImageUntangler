@@ -1,6 +1,6 @@
 import csv
 from PyQt5.QtWidgets import QWidget, QProgressBar, QPushButton, QVBoxLayout, QLabel, \
-                            QGridLayout, QTextEdit, QFileDialog
+                            QGridLayout, QTextEdit, QFileDialog, QHBoxLayout, QCheckBox
 
 from . import Scanner
 from MRICenterline.Config import ConfigParserRead as CFG
@@ -38,35 +38,15 @@ class ProgressWidget(QWidget):
         _warning.setText("Bulk folder scanner: Creates sequence dictionaries for several folders at a time.")
         _warning.setWordWrap(True)
 
-        # self.file_system_model = QFileSystemModel()
-        # self.file_system_model.setFilter(QDir.AllDirs | QDir.NoDotAndDotDot)
-        # self.file_system_model.setRootPath(self.folder_path)
-        #
-        # self.tree_view = QTreeView()
-        # self.tree_view.setModel(self.file_system_model)
-        # self.tree_view.setRootIndex(self.file_system_model.index(self.folder_path, column=0))
-        # self.tree_view.setColumnWidth(0, 500)
-        # self.tree_view.hideColumn(1)
-        # self.tree_view.hideColumn(2)
-
         self.text_box = QTextEdit()
         self.text_box.setHtml(self.status_text)
-
         self._add_to_textbox("<b>Does not currently support sequences with different patients in the same "
                              "directory.</b>", color='red')
 
-        _start_button = QPushButton("Generate sequence dictionary files")
-        _start_button.setMinimumSize(600, 100)
-        _start_button.clicked.connect(self.scan)
-
-        _folder_report = QPushButton("Generate folder report")
-        _folder_report.setMinimumSize(600, 100)
-        _folder_report.clicked.connect(self.report)
-
         self._v_layout.addWidget(_warning)
         self._v_layout.addWidget(self.text_box)
-        self._v_layout.addWidget(_start_button)
-        self._v_layout.addWidget(_folder_report)
+
+        self._run_preprocessing()
 
         if len(self.directories) > 1:
             self.prog_bar = QProgressBar(self)
@@ -75,9 +55,50 @@ class ProgressWidget(QWidget):
 
         self._grid_layout.addLayout(self._v_layout, 1, 1, 1, 1)
 
-    def scan(self):
+    def _run_preprocessing(self):
+        _preprocess_options = {
+            "move_dicom":
+                QCheckBox("Move DICOM files to destination (delete original)"),
+            "rename_folders":
+                QCheckBox("Rename folders to 1, 2, 3..."),
+            "seqdict":
+                QCheckBox("Generate sequence directory"),
+            "report":
+                QCheckBox("Generate folder report as CSV")
+        }
+
+        _preprocess_options['move_dicom'].setChecked(False)
+        _preprocess_options['move_dicom'].setEnabled(False)
+
+        _preprocess_options['rename_folders'].setChecked(True)
+        _preprocess_options['seqdict'].setChecked(True)
+        _preprocess_options['report'].setChecked(True)
+
+        _preprocess_options_layout = QHBoxLayout()
+        [_preprocess_options_layout.addWidget(chkbox) for chkbox in _preprocess_options.values()]
+
+        _preprocess_button = QPushButton("Start")
+        _preprocess_button.setStatusTip("Generates sequence dictionary + folder report")
+        _preprocess_button.setMinimumSize(600, 100)
+
+        if _preprocess_options['move_dicom'].isChecked():
+            _preprocess_button.clicked.connect(self.copy_files)
+            _preprocess_button.clicked.connect(self.delete_original_folder)
+        else:
+            _preprocess_button.clicked.connect(self.copy_files)
+
+        if _preprocess_options['rename_folders'].isChecked():
+            _preprocess_button.clicked.connect(self.rename_folders)
+        if _preprocess_options['seqdict'].isChecked():
+            _preprocess_button.clicked.connect(self.generate_seqdict)
+        if _preprocess_options['report'].isChecked():
+            _preprocess_button.clicked.connect(self.generate_report)
+
+        self._v_layout.addWidget(_preprocess_button)
+        self._v_layout.addLayout(_preprocess_options_layout)
+
+    def generate_seqdict(self):
         logging.info("Starting folder scan for seqdict")
-        self._add_to_textbox("Starting scan!")
 
         for i, val in enumerate(self.directories):
             Scanner.generate_seq_dict(val)
@@ -88,7 +109,7 @@ class ProgressWidget(QWidget):
 
         self._add_to_textbox("Done! You can close this tab now", color='blue')
 
-    def report(self):
+    def generate_report(self):
         logging.info("Starting folder scan for reporting")
 
         if len(self.directories) > 0:
@@ -120,7 +141,24 @@ class ProgressWidget(QWidget):
                     fc.writeheader()
                     fc.writerows(_to_csv)
 
-                self._add_to_textbox(f"Done! Report is saved to {_csv_filename}. You can close this tab now", color='blue')
+                self._add_to_textbox(f"Done! Report is saved to {_csv_filename}. You can close this tab now",
+                                     color='blue')
+
+    def rename_folders(self):
+        self._add_to_textbox("Renaming the folders...")
+        pass
+
+    def copy_files(self):
+        fileName, _ = QFileDialog.getSaveFileName(self, "Select destination",
+                                                  CFG.get_config_data("folders", 'default-save-to-folder'))
+
+        if fileName:
+            logging.info(f"Copying the dicom files to {fileName}")
+            self._add_to_textbox(f"Copying the dicom files to {fileName}")
+        pass
+
+    def delete_original_folder(self):
+        pass
 
     def _add_to_textbox(self, text, color=None):
         if color:

@@ -3,7 +3,6 @@ from pydicom.errors import InvalidDicomError
 import numpy as np
 import os
 from glob import glob
-# from icecream import ic
 
 from . import SequenceFile, NumpyToVTK, Header
 from MRICenterline.Config import ConfigParserRead as CFG
