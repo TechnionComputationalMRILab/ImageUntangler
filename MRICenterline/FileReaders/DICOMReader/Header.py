@@ -29,5 +29,8 @@ def get_header_dict(file_list):
     _dict['filename'] = file_list
 
     for key in FOR_USE_WITH_HEADER:
-        _dict[key] = get_sequence_header(key, file_list)
+        try:
+            _dict[key] = get_sequence_header(key, file_list)
+        except:
+            _dict[key] = ""
     return _dict

@@ -135,10 +135,11 @@ def generate_seqlist_dict(files_list):
             if seq_name in seq_list:
                 sorted_files[seq_name][filename] = filename
             else:
-                sorted_files[seq_name]={filename: filename}
+                sorted_files[seq_name] = {filename: filename}
                 seq_list[seq_name] = seq_name
         except:
             logging.warning(f"Ignoring invalid file: {filename}")
+
     seq_list = [seq_val[1] for seq_val in seq_list.items()]
     seq_list = set(seq_list)
     seq_files_list = {}
