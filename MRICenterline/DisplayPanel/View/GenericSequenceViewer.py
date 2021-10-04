@@ -46,8 +46,11 @@ class GenericSequenceViewer:
         self.connectActor()
         self.renderImage()
 
-        self.MPRpoints = PointArray(point_color=(1, 0, 0), highlight_last=True)
-        self.lengthPoints = PointArray(point_color=(0, 1, 0))
+        self.MPRpoints = PointArray(point_color=(1, 0, 0),
+                                    size=int(CFG.get_config_data('mpr-display-style', 'marker-size')),
+                                    highlight_last=True)
+        self.lengthPoints = PointArray(point_color=(0, 1, 0),
+                                       size=int(CFG.get_config_data('length-display-style', 'marker-size')))
 
         self.presentCursor()
 

@@ -3,6 +3,7 @@ from pydicom.errors import InvalidDicomError
 import numpy as np
 import os
 from glob import glob
+from pathlib import Path
 
 from . import SequenceFile, NumpyToVTK, Header
 from MRICenterline.Config import ConfigParserRead as CFG
@@ -28,8 +29,10 @@ class DICOMReader:
             logging.info(f"No DICOM files found in {self.folder}")
 
     def _check_data_folder(self):
+        # create the data folder if it doesnt exist
+        Path(os.path.join(self.folder, 'data')).mkdir(parents=True, exist_ok=True)
+
         # TODO:
-        #   check for data folder
         #   check for metadata and seqlist
         #   check for any annotation files
         pass
@@ -45,7 +48,7 @@ class DICOMReader:
     def _load_sequence_dict(self):
         _seqfile = SequenceFile.check_if_dicom_seqfile_exists(self.folder)
         if _seqfile:
-            #             # if seqfile exists, save the seqfile as the dict for the files
+            # if seqfile exists, save the seqfile as the dict for the files
             # seqfile is just name of file (not absolute path!) + sequence
             logging.info(f"Sequence Directory Found: {_seqfile}!")
             if self.run_clean:

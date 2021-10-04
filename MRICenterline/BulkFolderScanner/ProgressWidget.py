@@ -1,4 +1,6 @@
 import csv
+import os
+from glob import glob
 from PyQt5.QtWidgets import QWidget, QProgressBar, QPushButton, QVBoxLayout, QLabel, \
                             QGridLayout, QTextEdit, QFileDialog, QHBoxLayout, QCheckBox
 
@@ -56,7 +58,7 @@ class ProgressWidget(QWidget):
         self._grid_layout.addLayout(self._v_layout, 1, 1, 1, 1)
 
     def _run_preprocessing(self):
-        _preprocess_options = {
+        self._preprocess_options = {
             "move_dicom":
                 QCheckBox("Move DICOM files to destination (delete original)"),
             "rename_folders":
@@ -67,37 +69,46 @@ class ProgressWidget(QWidget):
                 QCheckBox("Generate folder report as CSV")
         }
 
-        _preprocess_options['move_dicom'].setChecked(False)
-        _preprocess_options['move_dicom'].setEnabled(False)
+        self._preprocess_options['move_dicom'].setChecked(False)
+        self._preprocess_options['move_dicom'].setEnabled(False)
 
-        _preprocess_options['rename_folders'].setChecked(True)
-        _preprocess_options['seqdict'].setChecked(True)
-        _preprocess_options['report'].setChecked(True)
+        self._preprocess_options['rename_folders'].setChecked(True)
+        self._preprocess_options['seqdict'].setChecked(True)
+        self._preprocess_options['report'].setChecked(True)
 
         _preprocess_options_layout = QHBoxLayout()
-        [_preprocess_options_layout.addWidget(chkbox) for chkbox in _preprocess_options.values()]
+        [_preprocess_options_layout.addWidget(chkbox) for chkbox in self._preprocess_options.values()]
 
         _preprocess_button = QPushButton("Start")
         _preprocess_button.setStatusTip("Generates sequence dictionary + folder report")
         _preprocess_button.setMinimumSize(600, 100)
 
-        if _preprocess_options['move_dicom'].isChecked():
-            _preprocess_button.clicked.connect(self.copy_files)
-            _preprocess_button.clicked.connect(self.delete_original_folder)
-        else:
-            _preprocess_button.clicked.connect(self.copy_files)
-
-        if _preprocess_options['rename_folders'].isChecked():
-            _preprocess_button.clicked.connect(self.rename_folders)
-        if _preprocess_options['seqdict'].isChecked():
-            _preprocess_button.clicked.connect(self.generate_seqdict)
-        if _preprocess_options['report'].isChecked():
-            _preprocess_button.clicked.connect(self.generate_report)
+        _preprocess_button.clicked.connect(self._connect_options)
 
         self._v_layout.addWidget(_preprocess_button)
         self._v_layout.addLayout(_preprocess_options_layout)
 
-    def generate_seqdict(self):
+    def _connect_options(self):
+        _opts_for_logger = [opt.isChecked() for opt in self._preprocess_options.values()]
+        logging.info(f"Running scanner with {_opts_for_logger}")
+
+        # if self._preprocess_options['move_dicom'].isChecked():
+        #     self._copy_files()
+        #     self._delete_original_folder()
+        # else:
+        #     pass
+        #     # self._copy_files()
+        #
+        # if self.preprocess_options['rename_folders'].isChecked():
+        #     self._rename_folders()
+        #
+        if self._preprocess_options['seqdict'].isChecked():
+            self._generate_seqdict()
+
+        if self._preprocess_options['report'].isChecked():
+            self._generate_report()
+
+    def _generate_seqdict(self):
         logging.info("Starting folder scan for seqdict")
 
         for i, val in enumerate(self.directories):
@@ -109,7 +120,7 @@ class ProgressWidget(QWidget):
 
         self._add_to_textbox("Done! You can close this tab now", color='blue')
 
-    def generate_report(self):
+    def _generate_report(self):
         logging.info("Starting folder scan for reporting")
 
         if len(self.directories) > 0:
@@ -129,36 +140,31 @@ class ProgressWidget(QWidget):
                 if len(self.directories) > 1:
                     self.prog_bar.setValue(i)
 
-            _csv_filename, _ = QFileDialog.getSaveFileName(self, "Save report to",
-                                                           CFG.get_config_data("folders", 'default-save-to-folder'),
-                                                           "%s Files (*.%s);;All Files (*)" % ("csv".upper(), "csv"))
+            logging.debug(f"Saving report")
 
-            if _csv_filename:
-                logging.debug(f"Saving report to {_csv_filename}")
+            with open(os.path.join(self.folder_path, 'report.csv'), 'w', encoding='utf8', newline='') as output_file:
+                fc = csv.DictWriter(output_file, fieldnames=_to_csv[0].keys())
+                fc.writeheader()
+                fc.writerows(_to_csv)
 
-                with open(_csv_filename, 'w', encoding='utf8', newline='') as output_file:
-                    fc = csv.DictWriter(output_file, fieldnames=_to_csv[0].keys())
-                    fc.writeheader()
-                    fc.writerows(_to_csv)
+            self._add_to_textbox(f"Done! Report is saved to {os.path.join(self.folder_path, 'report.csv')}. "
+                                 f"You can close this tab now",
+                                 color='blue')
 
-                self._add_to_textbox(f"Done! Report is saved to {_csv_filename}. You can close this tab now",
-                                     color='blue')
-
-    def rename_folders(self):
+    def _rename_folders(self):
         self._add_to_textbox("Renaming the folders...")
         pass
 
-    def copy_files(self):
+    def _copy_files(self):
         fileName, _ = QFileDialog.getSaveFileName(self, "Select destination",
                                                   CFG.get_config_data("folders", 'default-save-to-folder'))
 
         if fileName:
             logging.info(f"Copying the dicom files to {fileName}")
             self._add_to_textbox(f"Copying the dicom files to {fileName}")
-        pass
 
-    def delete_original_folder(self):
-        pass
+    def _delete_original_folder(self):
+        raise NotImplementedError
 
     def _add_to_textbox(self, text, color=None):
         if color:

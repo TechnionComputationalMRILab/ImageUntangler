@@ -21,10 +21,9 @@ def check_if_dicom_seqfile_exists(path):
     looks for a json file in the directory
     to implement: make sure that the json file is the seqfile and not some other json file
     """
-    glob(path)
-    for file in os.listdir(path):
-        if file.endswith(".json"):
-            return file
+    _seqdict_path = glob(f'{path}/data/seqdict.json')
+    if _seqdict_path:
+        return _seqdict_path[0]
     else:
         return None
 
@@ -112,16 +111,16 @@ def get_info(header_name, filename, get_one=True):
         return {i: ds[i].value for i in ds.dir(header_name)}
 
 
-def _get_seqfile_filename(files):
-    """
-    generates a filename for the sequence directory file
-    """
-    paths = [os.path.dirname(os.path.abspath(file)) for file in files]
-    if len(set(paths)) == 1:
-        _seq_filename = os.path.basename(paths[0]) + "_sequence_directory.json"
-        return _seq_filename
-    else:
-        raise NotImplementedError("Program does not yet work for data in nested folders")
+# def _get_seqfile_filename(files):
+#     """
+#     generates a filename for the sequence directory file
+#     """
+#     paths = [os.path.dirname(os.path.abspath(file)) for file in files]
+#     if len(set(paths)) == 1:
+#         _seq_filename = os.path.basename(paths[0]) + "_sequence_directory.json"
+#         return _seq_filename
+#     else:
+#         raise NotImplementedError("Program does not yet work for data in nested folders")
 
 
 def generate_seqlist_dict(files_list):

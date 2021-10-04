@@ -7,7 +7,7 @@ from MRICenterline.Points.LengthCalculation import length_actor, temp_length_cal
 
 
 class PointArray:
-    def __init__(self, point_color=(1, 1, 1), size=1, highlight_last=False, highlight_color=(0, 0, 1)):
+    def __init__(self, point_color=(1, 1, 1), size=1, highlight_last=False, highlight_color=(1, 0, 0)):
         self.points: List[Point] = []
         self.lengths = []
         self.pt_color = point_color
