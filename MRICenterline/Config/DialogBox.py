@@ -76,7 +76,6 @@ class PreferencesWidget(QWidget):
 
         _folders_widget.setLayout(_folders_layout)
         self.default_folder = QLineEdit(CFG.get_config_data('folders', 'default-folder'))
-        self.default_save_to_folder = QLineEdit(CFG.get_config_data('folders', 'default-save-to-folder'))
 
         _folders_layout.addRow(QLabel("Add MRI Images default folder"), self.default_folder)
         _folders_layout.addRow(QLabel("Save annotation to"), self.default_save_to_folder)

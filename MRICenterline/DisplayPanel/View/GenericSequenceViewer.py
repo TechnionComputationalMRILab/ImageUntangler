@@ -4,10 +4,11 @@ from vtkmodules.qt.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
 from vtkmodules.all import vtkImageActor, vtkImageReslice, vtkMatrix4x4, vtkRenderer, vtkTextActor, vtkPolyDataMapper,\
     vtkActor, vtkCursor2D
 import vtkmodules.all as vtk
+from datetime import datetime, timezone
 
 from MRICenterline.Points import PointArray
 from MRICenterline.DisplayPanel.Control.SequenceViewerInteractorStyle import SequenceViewerInteractorStyle
-from MRICenterline.Points.LoadPoints import LoadPoints
+from MRICenterline.Loader.LoadPoints import LoadPoints
 from MRICenterline.Points.SaveFormatter import SaveFormatter
 
 from MRICenterline.utils import message as MSG
@@ -56,6 +57,9 @@ class GenericSequenceViewer:
 
         logging.debug("Rendering sequence")
         self.window.Render()
+
+        self._start_time = None
+        self._stop_time = None
 
     def performReslice(self):
         # Extract a slice in the desired orientation
@@ -152,6 +156,35 @@ class GenericSequenceViewer:
         self.panel_renderer.AddActor(pointCollection[-1].actor)
         self.render_panel()
 
+    def loadAllPoints(self, filename):
+        _loader = LoadPoints(filename, self.imageData)
+        logging.info(f'Loading {len(_loader.get_points())} points from file')
+        # self.MPRpoints.extend(_loader.get_points())
+
+        _loaded_indices = _loader.slide_indices
+        for key, val in enumerate(_loader.get_points()):
+            self.loadPoint("MPR", val, _loaded_indices[key])
+
+        # for i in self.MPRpoints:
+        #     self.panel_renderer.AddActor(i.actor)
+        #     self.window.Render()
+
+        # self.render_panel()
+
+    def processLoadedPoint(self, pointCollection, pickedCoordinates, sliceIdx):
+        pointLocation = [pickedCoordinates[0], pickedCoordinates[1], pickedCoordinates[2], sliceIdx]  # x,y,z,sliceIdx
+        pointCollection.add_point(pointLocation)
+        self.panel_renderer.AddActor(pointCollection[-1].actor)
+        self.render_panel()
+
+    def loadPoint(self, pointType, pickedCoordinates, slideIdx):
+        logging.debug(f"Loading {pointType} point in {pickedCoordinates}")
+
+        if pointType.upper() == "MPR":
+            self.processLoadedPoint(self.MPRpoints, pickedCoordinates, slideIdx)
+        elif pointType.upper() == "LENGTH":
+            self.processLoadedPoint(self.lengthPoints, pickedCoordinates, slideIdx)
+
     def presentCursor(self):
         self.Cursor.SetModelBounds(-10000, 10000, -10000, 10000, 0, 0)
         self.Cursor.SetFocalPoint(0, 0, 0)
@@ -180,6 +213,8 @@ class GenericSequenceViewer:
         self.window.Render()
 
     def addPoint(self, pointType, pickedCoordinates):
+        logging.debug(f"Adding {pointType} point in {pickedCoordinates}")
+
         if pointType.upper() == "MPR":
             self.processNewPoint(self.MPRpoints, pickedCoordinates)
         elif pointType.upper() == "LENGTH":
@@ -203,13 +238,25 @@ class GenericSequenceViewer:
         else:
             MSG.msg_box_warning("Not enough points clicked to calculate length")
 
-    def saveLengths(self, filename):
-        _save_formatter = SaveFormatter(filename, self.imageData)
+    def save_points(self):
+        _save_formatter = SaveFormatter(self.imageData)
+        if len(self.lengthPoints) + len(self.MPRpoints):
+            if len(self.lengthPoints):
+                _save_formatter.add_pointcollection_data('length points', self.lengthPoints)
+            if len(self.MPRpoints):
+                _save_formatter.add_pointcollection_data("MPR points", self.MPRpoints)
+            logging.info(f"Saved {len(self.lengthPoints) + len(self.MPRpoints)} points to data folder")
+
+            _save_formatter.add_timestamps(self._start_time, self._stop_time)
+            _save_formatter.save_data()
+
+    def saveLengths(self):
+        _save_formatter = SaveFormatter(self.imageData)
         _save_formatter.add_pointcollection_data('length points', self.lengthPoints)
         _save_formatter.save_data()
 
-    def saveMPRPoints(self, filename):
-        _save_formatter = SaveFormatter(filename, self.imageData)
+    def saveMPRPoints(self):
+        _save_formatter = SaveFormatter(self.imageData)
         _save_formatter.add_pointcollection_data("MPR points", self.MPRpoints)
         _save_formatter.save_data()
 
@@ -341,6 +388,14 @@ class GenericSequenceViewer:
             self.pastIndex = sliceIdx
             self.UpdateViewerMatrixCenter(center, sliceIdx)
 
+    def start_timer(self):
+        self._start_time = datetime.now(timezone.utc).astimezone()
+        logging.info(f"Starting timer: {self._start_time}")
+
+    def stop_timer(self):
+        self._stop_time = datetime.now(timezone.utc).astimezone()
+        logging.info(f"Stopping timer: {self._stop_time}")
+
     def undoAnnotation(self):
         logging.info(f"Removing last MPR point, {len(self.MPRpoints)} points remaining")
 
@@ -355,5 +410,9 @@ class GenericSequenceViewer:
         while len(self.MPRpoints) > 0:
             self.MPRpoints[-1].actor.SetVisibility(False)
             self.MPRpoints.delete(-1)
+
+        while len(self.lengthPoints) > 0:
+            self.lengthPoints[-1].actor.SetVisibility(False)
+            self.lengthPoints.delete(-1)
 
         self.window.Render()

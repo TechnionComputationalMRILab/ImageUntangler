@@ -238,7 +238,7 @@ class CenterlineViewer(QWidget):
         self.renderWindow.Render()
 
     def _save_file(self):
-        fileName, _ = QFileDialog.getSaveFileName(self, "Save Length Points As", CFG.get_config_data("folders", 'default-save-to-folder'),
+        fileName, _ = QFileDialog.getSaveFileName(self, "Save Length Points As",
                 "%s Files (*.%s)" % ("json".upper(), "json"))
 
         if fileName:

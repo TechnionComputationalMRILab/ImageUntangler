@@ -109,7 +109,7 @@ class ProgressWidget(QWidget):
             self._generate_report()
 
     def _generate_seqdict(self):
-        logging.info("Starting folder scan for seqdict")
+        logging.info("Starting folder scan for seqdicts")
 
         for i, val in enumerate(self.directories):
             Scanner.generate_seq_dict(val)
@@ -156,8 +156,7 @@ class ProgressWidget(QWidget):
         pass
 
     def _copy_files(self):
-        fileName, _ = QFileDialog.getSaveFileName(self, "Select destination",
-                                                  CFG.get_config_data("folders", 'default-save-to-folder'))
+        fileName, _ = QFileDialog.getSaveFileName(self, "Select destination")
 
         if fileName:
             logging.info(f"Copying the dicom files to {fileName}")

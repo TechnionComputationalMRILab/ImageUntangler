@@ -5,7 +5,6 @@
 
     [folders]
     default-folder = C:/Users/ang.a/OneDrive - Technion/Documents/MRI_Data/Filename_test
-    default-save-to-folder = C:/Users/ang.a/OneDrive - Technion
 
 
 ## Display

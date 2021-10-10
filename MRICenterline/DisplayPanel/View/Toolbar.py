@@ -18,21 +18,22 @@ class DisplayPanelToolbar(QToolBar):
         self.set_up_toolbar_order()
 
     def set_up_toolbar_order(self):
+        self.addSaveAnnotationButton()
+
         self.addLengthMenu()
         self.addMPRMenu()
 
         self.addSeparator()
 
-        self.addInfoButton()
         self.addDisablePointPickers()
         self.addUndoButton()
         self.addDeleteAllButton()
-        self.addTimerButton()
         self.resetSlidersToDefault()
 
         self.addSeparator(expand=True)
 
-        self.showPickerStatus()
+        self.addInfoButton()
+        self.addTimerButton()
 
     def addSeparator(self, expand=False):
         if expand:
@@ -48,8 +49,15 @@ class DisplayPanelToolbar(QToolBar):
         else:
             self.setToolButtonStyle(Qt.ToolButtonTextUnderIcon)
 
+    def addSaveAnnotationButton(self):
+        _save_button = QPushButton("Save all annotations")
+        _save_button = QPushButton("Save all annotations")
+        _save_button.setIcon(qta.icon('fa.save'))
+        _save_button.clicked.connect(self.manager.save_all)
+        self.addWidget(_save_button)
+
     def addInfoButton(self):
-        _info_button = QPushButton("Patient Info")
+        _info_button = QPushButton("Patient Info / Add comment")
         _info_button.adjustSize()
         _info_button.setStatusTip("Show patient info from DICOM file")
         _info_button.setIcon(qta.icon('fa.info-circle'))
@@ -61,7 +69,7 @@ class DisplayPanelToolbar(QToolBar):
         lengthPointAction.setStatusTip("Set Length Points")
         lengthPointAction.triggered.connect(self.manager.disablePointPicker)
         lengthPointAction.triggered.connect(self.manager.reverseLengthPointsStatus)
-        lengthPointAction.triggered.connect(lambda: self.changePickerStatus("length"))
+        # lengthPointAction.triggered.connect(lambda: self.changePickerStatus("length"))
         # self.addAction(lengthPointAction)
         return lengthPointAction
 
@@ -84,8 +92,8 @@ class DisplayPanelToolbar(QToolBar):
         LengthPushButton.setIcon(qta.icon('fa5s.ruler'))
         menu.addAction(self.addLengthPointsAction())
         menu.addAction(self.addLengthCalculation())
-        menu.addAction(self.addLengthSave())
-        menu.addAction(self.loadLength())
+        # menu.addAction(self.addLengthSave())
+        # menu.addAction(self.loadLength())
 
         LengthPushButton.setMenu(menu)
         self.addWidget(LengthPushButton)
@@ -95,7 +103,7 @@ class DisplayPanelToolbar(QToolBar):
         MPRpointsAction.setStatusTip("Set MPR Points")
         MPRpointsAction.triggered.connect(self.manager.disablePointPicker)
         MPRpointsAction.triggered.connect(self.manager.reverseMPRpointsStatus)
-        MPRpointsAction.triggered.connect(lambda: self.changePickerStatus("MPR"))
+        # MPRpointsAction.triggered.connect(lambda: self.changePickerStatus("MPR"))
         # self.addAction(MPRpointsAction)
         return MPRpointsAction
 
@@ -140,8 +148,8 @@ class DisplayPanelToolbar(QToolBar):
         menu = QMenu()
         menu.addAction(self.addMPRpointsAction())
         menu.addAction(self.addMPRcalculation())
-        menu.addAction(self.addMPRSave())
-        menu.addAction(self.loadMPR())
+        # menu.addAction(self.addMPRSave())
+        # menu.addAction(self.loadMPR())
 
         MPRPushButton.setMenu(menu)
         self.addWidget(MPRPushButton)
@@ -172,29 +180,33 @@ class DisplayPanelToolbar(QToolBar):
         pass
 
     def addUndoButton(self):
-        _undo_button = QPushButton("Undo")
+        _undo_button = QPushButton("Undo last MPR point")
         _undo_button.setStatusTip("Removes last MPR point added")
         _undo_button.setIcon(qta.icon('fa5s.undo-alt'))
         _undo_button.clicked.connect(self.manager.undoAnnotation)
         self.addWidget(_undo_button)
 
     def addTimerButton(self):
-        _timer_button = QPushButton("Start Timer")
-        _timer_button.setStatusTip("Start a timer")
-        _timer_button.setIcon(qta.icon('mdi.timer-outline'))
-        self.addWidget(_timer_button)
+        self._timer_button = QPushButton("Start timer")
+        self._timer_button.setStatusTip("Start timer")
+        self._timer_button.setIcon(qta.icon('mdi.timer-outline'))
+        self._timer_button.setCheckable(True)
+        self._timer_button.clicked.connect(self.toggleTimer)
 
-        _timer_status = False
-        _timer_button.clicked.connect(lambda: self.setTimerRunningIcon(_timer_button, _timer_status))
+        self.addWidget(self._timer_button)
 
     def addDeleteAllButton(self):
-        _delete_all = QPushButton("Delete all points")
+        _delete_all = QPushButton("Clear MPR points")
         _delete_all.setIcon(qta.icon('mdi.delete-outline'))
         _delete_all.clicked.connect(self.manager.deleteAllPoints)
         self.addWidget(_delete_all)
 
-    def setTimerRunningIcon(self, button, status):
-        if status:
-            button.setIcon(qta.icon('mdi.timer-outline'))
+    def toggleTimer(self):
+        if not self._timer_button.isChecked():
+            self._timer_button.setIcon(qta.icon('mdi.timer-outline'))
+            self._timer_button.setText("Start timer")
+            self.manager.stop_timer()
         else:
-            button.setIcon(qta.icon('mdi.timer-off-outline'))
+            self._timer_button.setIcon(qta.icon('mdi.timer-off-outline'))
+            self._timer_button.setText("Stop timer")
+            self.manager.start_timer()

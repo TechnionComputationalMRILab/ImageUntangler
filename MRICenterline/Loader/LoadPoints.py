@@ -1,5 +1,5 @@
 import json
-# from icecream import ic
+from icecream import ic
 from MRICenterline.Points import PointArray, Point
 
 import logging
@@ -24,12 +24,11 @@ class LoadPoints:
 
         logging.info(f"Loading {len(self.json_data[_point_type])} {_point_type}")
         for i in self.json_data[_point_type]:
+            # ic(self._calculate_slideIdx(i[2]))
+
             _point = Point(i + [self._calculate_slideIdx(i[2])])
+            self.slide_indices.append(self._calculate_slideIdx(i[2]))
             self.points.add_point(_point)
-            # self.slide_indices.append(self._calculate_slideIdx(i[2]))
-            # i.append(self._calculate_slideIdx(i[2]))
-            # print(self._calculate_slideIdx(i[2]))
-            # self.points.add_point(i)
         return self.points
 
     def _get_type_of_points(self):

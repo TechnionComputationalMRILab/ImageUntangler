@@ -20,7 +20,7 @@ class DefaultTabWidget(QWidget):
         self._grid_layout.setColumnStretch(1, 2)
         self._grid_layout.setColumnStretch(2, 1)
 
-        self.add_mri_images_button = QPushButton("Add MRI Images")
+        self.add_mri_images_button = QPushButton("Open MRI Images")
         self.add_mri_images_button.setMinimumSize(600, 300)
         self._grid_layout.addWidget(self.add_mri_images_button, 1, 1, 1, 1)
 
@@ -31,11 +31,11 @@ class DefaultTabWidget(QWidget):
         self.preferences_button.setMinimumSize(200, 300)
         self._bottom_layout.addWidget(self.preferences_button)
 
-        self.scan_folders_button = QPushButton("Pre-load Folders")
+        self.scan_folders_button = QPushButton("Pre-process Folders")
         self.scan_folders_button.setMinimumSize(200, 300)
         self._bottom_layout.addWidget(self.scan_folders_button)
 
-        self.load_from_json_button = QPushButton("Load from JSON")
+        self.load_from_json_button = QPushButton("Load Annotations")
         self.load_from_json_button.setMinimumSize(200, 300)
         self._bottom_layout.addWidget(self.load_from_json_button)
 

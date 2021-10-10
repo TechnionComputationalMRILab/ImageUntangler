@@ -37,7 +37,7 @@ class GenericViewerManager:
 
     def loadSequence(self, sequenceIndex: int, VTKinteractor: QVTKRenderWindowInteractor, interactorStyle):
         try:
-            logging.debug(f"Loading {self.MRIimages.get_sequences()[sequenceIndex]}")
+            logging.debug(f"Loading sequence {sequenceIndex} / {self.MRIimages.get_sequences()[sequenceIndex]}")
 
             sequenceViewer = GenericSequenceViewer(self, VTKinteractor, interactorStyle, self.MRIimages[sequenceIndex])
             _ = sequenceViewer.sliceIdx # test if image was loaded properly
@@ -54,3 +54,7 @@ class GenericViewerManager:
                 # logging.error(f"File not found: {self.MRIimages[sequenceIndex]}")
         except Exception as err:
             logging.critical(f"Error in loading sequence. Error is {err}")
+
+    def load_single_sequence(self, VTKinteractor: QVTKRenderWindowInteractor, interactorStyle, single_image):
+        logging.debug(f"Loading single sequence")
+        return GenericSequenceViewer(self, VTKinteractor, interactorStyle, single_image)

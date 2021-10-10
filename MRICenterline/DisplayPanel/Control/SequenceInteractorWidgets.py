@@ -32,6 +32,10 @@ class SequenceInteractorWidgets:
 
         self.addActions()
 
+    def freeze_sequence_list(self, text):
+        self.sequenceList.setEnabled(False)
+        self.sequenceList.setItemText(0, text)
+
     def _buildSizePolicy(self, sequenceListBox: QComboBox) -> QSizePolicy:
         sizePolicy = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
         sizePolicy.setHorizontalStretch(0)

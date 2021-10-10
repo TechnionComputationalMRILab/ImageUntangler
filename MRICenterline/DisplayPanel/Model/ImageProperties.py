@@ -34,6 +34,8 @@ class ImageProperties:
         # self.slice_list = dict(zip(np.arange(self.dimensions[2]), z_coords))
 
         # TODO: check this for the point loader
+        # print(self.slice_list)
+        #
         # print(z_coords, len(z_coords))
         # print(np.arange(min_z, max_z, self.spacing[2]), len(np.arange(min_z, max_z, self.spacing[2])))
 

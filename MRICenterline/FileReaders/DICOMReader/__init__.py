@@ -5,7 +5,7 @@ import os
 from glob import glob
 from pathlib import Path
 
-from . import SequenceFile, NumpyToVTK, Header
+from . import SequenceFile, NumpyToVTK, Header, GenerateMetadata
 from MRICenterline.Config import ConfigParserRead as CFG
 
 import logging
@@ -16,6 +16,8 @@ class DICOMReader:
     def __init__(self, folder: str, run_clean=False):
         self.folder = folder
         self.run_clean = run_clean  # if set to true, deletes and re-builds the sequence directory
+
+        self._check_data_folder()
 
         self.sequence_dict = dict()
         self.cached_pixel_data_dict = dict()
@@ -29,13 +31,25 @@ class DICOMReader:
             logging.info(f"No DICOM files found in {self.folder}")
 
     def _check_data_folder(self):
-        # create the data folder if it doesnt exist
-        Path(os.path.join(self.folder, 'data')).mkdir(parents=True, exist_ok=True)
+        if self.folder.endswith('data'):
+            self.folder = self.folder.replace('data', '')
 
-        # TODO:
-        #   check for metadata and seqlist
+        # create the data folder if it doesnt exist
+        if not os.path.exists(os.path.join(self.folder, 'data')):
+            logging.info("Creating data directory")
+            Path(os.path.join(self.folder, 'data')).mkdir()
+        else:
+            logging.info("Loading from data directory")
+
+        # check for metadata and seqlist
+        if not os.path.exists(os.path.join(self.folder, 'data', 'metadata.json')):
+            logging.info("Creating metadata file")
+            print("make metadata ")
+
         #   check for any annotation files
-        pass
+        _annotation_files = glob(os.path.join(self.folder, 'data') + "/*.annotation.json")
+        if len(_annotation_files):
+            logging.info(f"Found {len(_annotation_files)} annotation files")
 
     @classmethod
     def test_folder(cls, folder: str):
