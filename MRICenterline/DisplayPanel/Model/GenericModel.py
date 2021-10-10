@@ -10,6 +10,7 @@ from MRICenterline.DisplayPanel.Model.GenericViewerManager import GenericViewerM
 from MRICenterline.DisplayPanel.View.SlidersAndSpinboxLayout import SlidersAndSpinboxLayout
 from MRICenterline.DisplayPanel.Control.SequenceInteractorWidgets import SequenceInteractorWidgets
 from MRICenterline.DisplayPanel.Control.SequenceViewerInteractorStyle import SequenceViewerInteractorStyle
+from MRICenterline.PatientInfo import PatientInfoPanel
 
 from MRICenterline.Interface import DisplayCenterlineInterface
 from MRICenterline.CenterlinePanel import CenterlinePanel
@@ -231,13 +232,21 @@ class GenericModel(QWidget):
 
     def showPatientInfoTable(self):
         logging.info("Showing patient table")
-        MSG.msg_box_info("Patient info display not implemented in this version.")
+        _patient_info_panel = PatientInfoPanel(parent=self)
+        self.layout.addWidget(self.centerline_panel)
+
 
     def start_timer(self):
         self.view.start_timer()
 
     def stop_timer(self):
         self.view.stop_timer()
+
+    def show_intermediate_points(self):
+        self.view.show_intermediate_points()
+
+    def hide_intermediate_points(self):
+        self.view.hide_intermediate_points()
 
 # _________________________________________Keyboard Shortcuts_______________________________________
 

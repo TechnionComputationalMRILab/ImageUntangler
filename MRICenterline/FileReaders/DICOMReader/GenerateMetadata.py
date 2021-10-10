@@ -14,7 +14,10 @@ def get(seq_dict):
 
     metadata_dict = {}
     for item in relevant_info:
-        metadata_dict[item] = patient_data[item].value
+        try:
+            metadata_dict[item] = str(patient_data[item].value)
+        except:
+            metadata_dict[item] = " "
 
     return metadata_dict
 
@@ -24,5 +27,7 @@ def save(metadata_dict, folder):
         json.dump(metadata_dict, f, indent=4, sort_keys=True)
 
 
-def check(folder):
-    [file.replace('\\', '/') for file in glob(f'{folder}/*.json')]
+def read(folder):
+    with open(join(folder, 'data', 'metadata.json'), 'w') as f:
+        metadata_dict = json.load(f)
+    return metadata_dict

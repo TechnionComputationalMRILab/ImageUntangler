@@ -33,6 +33,7 @@ class Point:
         return self._generate_actor()
 
     def set_color(self, color):
+        self.actor.GetProperty().SetColor(color)
         self.point_color = color
 
     def set_size(self, size):

@@ -52,6 +52,7 @@ class GenericSequenceViewer:
                                     highlight_last=True)
         self.lengthPoints = PointArray(point_color=(0, 1, 0),
                                        size=int(CFG.get_config_data('length-display-style', 'marker-size')))
+        self._point_order = []
 
         self.presentCursor()
 
@@ -180,10 +181,12 @@ class GenericSequenceViewer:
     def loadPoint(self, pointType, pickedCoordinates, slideIdx):
         logging.debug(f"Loading {pointType} point in {pickedCoordinates}")
 
+        self._point_order.append(pointType.upper())
         if pointType.upper() == "MPR":
             self.processLoadedPoint(self.MPRpoints, pickedCoordinates, slideIdx)
         elif pointType.upper() == "LENGTH":
             self.processLoadedPoint(self.lengthPoints, pickedCoordinates, slideIdx)
+
 
     def presentCursor(self):
         self.Cursor.SetModelBounds(-10000, 10000, -10000, 10000, 0, 0)
@@ -215,28 +218,34 @@ class GenericSequenceViewer:
     def addPoint(self, pointType, pickedCoordinates):
         logging.debug(f"Adding {pointType} point in {pickedCoordinates}")
 
+        self._point_order.append(pointType.upper())
         if pointType.upper() == "MPR":
             self.processNewPoint(self.MPRpoints, pickedCoordinates)
         elif pointType.upper() == "LENGTH":
             self.processNewPoint(self.lengthPoints, pickedCoordinates)
+            # if len(self.lengthPoints) == 2:
+            #     self.calculateLengths()
+            #     while len(self.lengthPoints) > 0:
+            #         self.lengthPoints[-1].actor.SetVisibility(False)
+            #         self.lengthPoints.delete(-1)
 
     def calculateLengths(self):
-        if len(self.lengthPoints) >= 2:
+        # if len(self.lengthPoints) >= 2:
             # TODO: remove this, use length actors instead
-            pointsPositions = np.asarray(self.lengthPoints.get_coordinates_as_array())
-            allLengths = [np.linalg.norm(pointsPositions[j, :] - pointsPositions[j + 1, :]) for j in
-                          range(len(pointsPositions) - 1)]
+        pointsPositions = np.asarray(self.lengthPoints.get_coordinates_as_array())
+        allLengths = [np.linalg.norm(pointsPositions[j, :] - pointsPositions[j + 1, :]) for j in
+                      range(len(pointsPositions) - 1)]
 
-            # allLengths = self.lengthPoints.temp_length_display()
-            totalDistance = np.sum(allLengths)
+        # allLengths = self.lengthPoints.temp_length_display()
+        totalDistance = np.sum(allLengths)
 
-            strdis = ["{0:.2f}".format(allLengths[i]) for i in range(len(allLengths))]
+        strdis = ["{0:.2f}".format(allLengths[i]) for i in range(len(allLengths))]
 
-            MSG.msg_box_info("Calculated length",
-                             info="The lengths [mm] are:\n\n {0} \n\nThe total length:\n\n {1}".format(' , '.join(strdis),"{0:.2f}".format(totalDistance)))
+        MSG.msg_box_info("Calculated length",
+                         info="The lengths [mm] are:\n\n {0} \n\nThe total length:\n\n {1}".format(' , '.join(strdis),"{0:.2f}".format(totalDistance)))
 
-        else:
-            MSG.msg_box_warning("Not enough points clicked to calculate length")
+        # else:
+        #     MSG.msg_box_warning("Not enough points clicked to calculate length")
 
     def save_points(self):
         _save_formatter = SaveFormatter(self.imageData)
@@ -397,22 +406,49 @@ class GenericSequenceViewer:
         logging.info(f"Stopping timer: {self._stop_time}")
 
     def undoAnnotation(self):
-        logging.info(f"Removing last MPR point, {len(self.MPRpoints)} points remaining")
+        logging.info(f"Removing last {self._point_order[-1]} point")
 
-        if len(self.MPRpoints) > 0:
-            self.MPRpoints[-1].actor.SetVisibility(False)
-            self.MPRpoints.delete(-1)
-            self.window.Render()
+        if self._point_order[-1] == "MPR":
+            if len(self.MPRpoints) > 0:
+                # self.MPRpoints[-1].actor.SetVisibility(False)
+                self.MPRpoints.delete(-1)
+        elif self._point_order[-1] == "LENGTH":
+            if len(self.lengthPoints) > 0:
+                self.lengthPoints.delete(-1)
+        self._point_order.pop()
+        self.window.Render()
 
     def deleteAllPoints(self):
         logging.info("Removing all points")
 
         while len(self.MPRpoints) > 0:
-            self.MPRpoints[-1].actor.SetVisibility(False)
+            # self.MPRpoints[-1].actor.SetVisibility(False)
             self.MPRpoints.delete(-1)
 
         while len(self.lengthPoints) > 0:
-            self.lengthPoints[-1].actor.SetVisibility(False)
+            # self.lengthPoints[-1].actor.SetVisibility(False)
             self.lengthPoints.delete(-1)
 
         self.window.Render()
+
+    def show_intermediate_points(self):
+        logging.debug("Show intermediate MPR points (i.e., show all points)")
+
+        for i in range(len(self.MPRpoints)):
+            self.MPRpoints.show(i)
+
+        self.window.Render()
+
+        logging.debug(f'Actor visibility status: {[i.actor.GetVisibility() for i in self.MPRpoints]}')
+
+    def hide_intermediate_points(self):
+        logging.info("Hiding intermediate MPR points")
+
+        for i in range(len(self.MPRpoints)):
+            if i == 0 or i == len(self.MPRpoints)-1:
+                self.MPRpoints.set_color(color=(0, 0, 1), item=i)
+            else:
+                self.MPRpoints.hide(i)
+        self.window.Render()
+
+        logging.debug(f'Actor visibility status: {[i.actor.GetVisibility() for i in self.MPRpoints]}')

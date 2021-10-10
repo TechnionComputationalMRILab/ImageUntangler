@@ -27,6 +27,7 @@ class DICOMReader:
 
         if self._valid_files_len:
             self._load_sequence_dict()
+            self._load_metadata_dict()
         else:
             logging.info(f"No DICOM files found in {self.folder}")
 
@@ -41,15 +42,20 @@ class DICOMReader:
         else:
             logging.info("Loading from data directory")
 
-        # check for metadata and seqlist
-        if not os.path.exists(os.path.join(self.folder, 'data', 'metadata.json')):
-            logging.info("Creating metadata file")
-            print("make metadata ")
-
         #   check for any annotation files
         _annotation_files = glob(os.path.join(self.folder, 'data') + "/*.annotation.json")
         if len(_annotation_files):
             logging.info(f"Found {len(_annotation_files)} annotation files")
+
+    def _load_metadata_dict(self):
+        if not os.path.exists(os.path.join(self.folder, 'data', 'metadata.json')):
+            logging.debug("Creating metadata file")
+            _metadata_dict = GenerateMetadata.get(self.sequence_dict)
+            print(_metadata_dict)
+            GenerateMetadata.save(_metadata_dict, self.folder)
+            logging.info(f"Metadata file saved in {os.path.join(self.folder, 'data', 'metadata.json')}")
+        else:
+            logging.debug("Loading metadata file")
 
     @classmethod
     def test_folder(cls, folder: str):

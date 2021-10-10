@@ -7,7 +7,7 @@ from MRICenterline.Points.LengthCalculation import length_actor, temp_length_cal
 
 
 class PointArray:
-    def __init__(self, point_color=(1, 1, 1), size=1, highlight_last=False, highlight_color=(1, 0, 0)):
+    def __init__(self, point_color=(1, 1, 1), size=1, highlight_last=False, highlight_color=(0, 1, 1)):
         self.points: List[Point] = []
         self.lengths = []
         self.pt_color = point_color
@@ -25,7 +25,14 @@ class PointArray:
         return iter(self.points)
 
     def delete(self, item):
+        self.points[item].actor.SetVisibility(False)
         del self.points[item]
+
+    def show(self, item):
+        self.points[item].actor.SetVisibility(True)
+
+    def hide(self, item):
+        self.points[item].actor.SetVisibility(False)
 
     def addPoint(self, image_point_location):
         # TODO: fix compatibility

@@ -32,6 +32,7 @@ class DisplayPanelToolbar(QToolBar):
 
         self.addSeparator(expand=True)
 
+        self.addHideIntermediatePointsButton()
         self.addInfoButton()
         self.addTimerButton()
 
@@ -195,12 +196,6 @@ class DisplayPanelToolbar(QToolBar):
 
         self.addWidget(self._timer_button)
 
-    def addDeleteAllButton(self):
-        _delete_all = QPushButton("Clear MPR points")
-        _delete_all.setIcon(qta.icon('mdi.delete-outline'))
-        _delete_all.clicked.connect(self.manager.deleteAllPoints)
-        self.addWidget(_delete_all)
-
     def toggleTimer(self):
         if not self._timer_button.isChecked():
             self._timer_button.setIcon(qta.icon('mdi.timer-outline'))
@@ -210,3 +205,35 @@ class DisplayPanelToolbar(QToolBar):
             self._timer_button.setIcon(qta.icon('mdi.timer-off-outline'))
             self._timer_button.setText("Stop timer")
             self.manager.start_timer()
+
+    def addDeleteAllButton(self):
+        _delete_all = QPushButton("Clear MPR points")
+        _delete_all.setIcon(qta.icon('mdi.delete-outline'))
+        _delete_all.clicked.connect(self.manager.deleteAllPoints)
+        self.addWidget(_delete_all)
+
+    def addHideIntermediatePointsButton(self):
+        self._intermediate_points_button = QPushButton("Hide Intermediate MPR points")
+        self._intermediate_points_button.setStatusTip("Hide all MPR points")
+        self._intermediate_points_button.setIcon(qta.icon('mdi.laser-pointer', 'fa5s.ban',
+                                                          options=[{'scale_factor': 0.5,
+                                                                    'active': 'mdi.laser-pointer'},
+                                                                   {'color': 'red'}]))
+        self._intermediate_points_button.setCheckable(True)
+        self._intermediate_points_button.clicked.connect(self.toggleIntermediatePoints)
+
+        self.addWidget(self._intermediate_points_button)
+
+    def toggleIntermediatePoints(self):
+        if not self._intermediate_points_button.isChecked():
+            self._intermediate_points_button.setIcon(qta.icon('mdi.laser-pointer', 'fa5s.ban',
+                                                          options=[{'scale_factor': 0.5,
+                                                                    'active': 'mdi.laser-pointer'},
+                                                                   {'color': 'red'}]))
+            self._intermediate_points_button.setText("Hide Intermediate MPR points")
+            self.manager.show_intermediate_points()
+
+        else:
+            self._intermediate_points_button.setIcon(qta.icon('mdi.laser-pointer'))
+            self._intermediate_points_button.setText("Show Intermediate MPR points")
+            self.manager.hide_intermediate_points()
