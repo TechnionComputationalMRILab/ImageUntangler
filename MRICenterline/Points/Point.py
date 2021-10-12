@@ -9,6 +9,7 @@ class Point:
         self.point_color = color
         self.point_size = size
         self.actor = self._generate_actor()
+        self.point_visibility: bool = True
 
     def _generate_actor(self):
 
@@ -28,6 +29,10 @@ class Point:
         actor.GetProperty().SetSpecular(1)
 
         return actor
+
+    def set_visibility(self, visibility: bool):
+        self.point_visibility = visibility
+        self.actor.SetVisibility(visibility)
 
     def get_actor(self):
         return self._generate_actor()

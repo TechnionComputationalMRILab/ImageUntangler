@@ -13,19 +13,17 @@ logging.getLogger(__name__)
 
 
 class DICOMReader:
-    def __init__(self, folder: str, run_clean=False):
+    def __init__(self, folder: str, run_clean=True):
         self.folder = folder
         self.run_clean = run_clean  # if set to true, deletes and re-builds the sequence directory
 
         self._check_data_folder()
 
-        self.sequence_dict = dict()
+        self._files_list = [file.replace('\\', '/') for file in glob(f'{self.folder}/*.dcm')]
+        self.sequence_dict = SequenceFile.generate_seqlist_dict(self._files_list)
         self.cached_pixel_data_dict = dict()
 
-        self.valid_files = self._get_valid_files()
-        self._valid_files_len = len(self.valid_files)
-
-        if self._valid_files_len:
+        if self.sequence_dict:
             self._load_sequence_dict()
             # self._load_metadata_dict()
         else:
@@ -75,12 +73,10 @@ class DICOMReader:
                 os.remove(os.path.join(self.folder, _seqfile))
                 self._load_sequence_dict()
             else:
-                self.sequence_dict = SequenceFile.load_seqfile(self.folder, _seqfile)
                 self.cached_pixel_data_dict = {k: None for k, _ in self.sequence_dict.items()}
         else:
             # create and populate the seqfile
             logging.info("Sequence Directory Not Found! Creating...")
-            self.sequence_dict = SequenceFile.create_sequence_file(self.valid_files)
             self.cached_pixel_data_dict = {k: list() for k, _ in self.sequence_dict.items()}
 
     def check_seqfile_exists(self):
@@ -91,34 +87,28 @@ class DICOMReader:
 
     def generate_seq_dict(self):
         """ to be used with BulkFolderScanner """
-        self.sequence_dict = SequenceFile.create_sequence_file(self.valid_files)
         self.cached_pixel_data_dict = {k: list() for k, _ in self.sequence_dict.items()}
 
     def _list_files_in_directory(self):
         """ generates a list of all the files in the directory """
-        # f = []
-        # for (_, _, filenames) in os.walk(self.folder):
-        #     f.extend(filenames)
-        #     break
-        # return [os.path.join(self.folder, i) for i in f]
         return [file.replace('\\', '/') for file in glob(f'{self.folder}/*.dcm')]
 
-    def _get_valid_files(self):
-        _files = self._list_files_in_directory()
-        _valid_dicom = []
-        for f in _files:
-            try:
-                with open(f, 'rb') as infile:
-                    pydicom.dcmread(infile)
-            except InvalidDicomError:
-                pass
-            else:
-                _valid_dicom.append(f)
-        return _valid_dicom
+    # def _get_valid_files(self):
+    #     _files = self._list_files_in_directory()
+    #     _valid_dicom = []
+    #     for f in _files:
+    #         try:
+    #             with open(f, 'rb') as infile:
+    #                 pydicom.dcmread(infile)
+    #         except InvalidDicomError:
+    #             pass
+    #         else:
+    #             _valid_dicom.append(f)
+    #     return _valid_dicom
 
     def __len__(self):
         """ returns the number of dicom files in the directory """
-        return self._valid_files_len
+        return len(self.sequence_dict)
 
     def _generate_pixel_data(self, sequence):
         _list_of_files = self.sequence_dict[sequence]
@@ -136,7 +126,7 @@ class DICOMReader:
         return ds.pixel_array  # can't get this using the getinfo function
 
     def get_sequence_list(self):
-        return list(self.cached_pixel_data_dict.keys())
+        return list(self.sequence_dict.keys())
 
     def __getitem__(self, item):
         if item in self.cached_pixel_data_dict.items():
@@ -170,7 +160,7 @@ class DICOMReader:
         _dict = {}
         for field in required_fields:
             try:
-                _dict[field] = SequenceFile.get_info(field, self.valid_files[0])
+                _dict[field] = SequenceFile.get_info(field, self.sequence_dict[0])
             except KeyError:
                 _dict[field] = ""
 

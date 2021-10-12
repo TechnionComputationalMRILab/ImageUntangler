@@ -160,17 +160,11 @@ class GenericSequenceViewer:
     def loadAllPoints(self, filename):
         _loader = LoadPoints(filename, self.imageData)
         logging.info(f'Loading {len(_loader.get_points())} points from file')
-        # self.MPRpoints.extend(_loader.get_points())
 
         _loaded_indices = _loader.slide_indices
         for key, val in enumerate(_loader.get_points()):
             self.loadPoint("MPR", val, _loaded_indices[key])
 
-        # for i in self.MPRpoints:
-        #     self.panel_renderer.AddActor(i.actor)
-        #     self.window.Render()
-
-        # self.render_panel()
 
     def processLoadedPoint(self, pointCollection, pickedCoordinates, sliceIdx):
         pointLocation = [pickedCoordinates[0], pickedCoordinates[1], pickedCoordinates[2], sliceIdx]  # x,y,z,sliceIdx
@@ -301,14 +295,7 @@ class GenericSequenceViewer:
         else:
             _distances = [(np.linalg.norm(np.array([x, y])-points[0:2]), points[0:2]) for points in self.MPRpoints]
             _distances.sort(key=lambda tup: tup[0], reverse=False)
-
-            # ic(_distances)
-
             _closest_point = _distances[0][1]
-
-            # ic(_closest_point)
-
-            # ic(_picker.PickProp(_closest_point[0], _closest_point[1], self.panel_renderer))
 
     def deleteAnnotation(self, x, y, prop):
         logging.debug("deleteAnnotation function activated")
@@ -321,45 +308,21 @@ class GenericSequenceViewer:
         logging.debug(f"Current number of actors: {self.panel_renderer.GetActors().GetNumberOfItems()}")
 
         for i in self.lengthPoints:
-            i.actor.SetVisibility(i.slice_idx == self.sliceIdx)
-            self.window.Render()
+            i.set_visibility(i.slice_idx == self.sliceIdx)
+            # i.actor.SetVisibility(i.slice_idx == self.sliceIdx)
 
-        for i in self.MPRpoints:
-            i.actor.SetVisibility(i.slice_idx == self.sliceIdx)
-            self.window.Render()
+        if self.MPRpoints.hiding_intermediate_points:
+            _first_point = self.MPRpoints.get_first_point()
+            _first_point.set_visibility(_first_point.slice_idx == self.sliceIdx)
 
-    def presentPoints(self, pointCollection, sliceIdx) -> None:
-        # logging.debug(f"{len(pointCollection)} points in memory on slice {sliceIdx}")
-        #
-        # self.hide_off_slice_actors()
+            _last_point = self.MPRpoints.get_last_point()
+            _last_point.set_visibility(_last_point.slice_idx == self.sliceIdx)
+        else:
+            for i in self.MPRpoints:
+                i.set_visibility(i.slice_idx == self.sliceIdx)
+                # i.actor.SetVisibility(i.slice_idx == self.sliceIdx)
 
-        # ic(pointCollection.displayed_points(sliceIdx))
-        #
-        # ic([i.GetVisibility() for i in pointCollection.get_actor_list()])
-
-        # if pointCollection.get_actor_list():
-        #     for point in pointCollection.get_actor_list():
-        #         ic(point.GetProperty())
-        #         ic(point)
-        #         self.panel_renderer.RemoveActor(point)
-        #
-        # for point in pointCollection.get_actor_list_for_slice(sliceIdx):
-        #     self.panel_renderer.AddActor(point)  # TODO: all points are still shown
-        #
-        #     self.window.Render()
-
-        ## original code
-        logging.debug(f"{len(pointCollection)} points in memory")
-        for point in pointCollection.points:
-            polygon = point.polygon
-            # ic(polygon)
-            if point.coordinates[3] != sliceIdx:  # dots were placed on different slices
-                # polygon.GeneratePolygonOff()
-                point.get_actor().SetVisibility(False)
-            else:
-                # polygon.GeneratePolygonOn()
-                point.get_actor().SetVisibility(True)
-            self.window.Render()
+        self.window.Render()
 
     def UpdateViewerMatrixCenter(self, center: List[int], sliceIdx):
         matrix = self.reslice.GetResliceAxes()
@@ -372,7 +335,6 @@ class GenericSequenceViewer:
         self.imageData.sliceIdx = sliceIdx
         self.manager.updateSliderIndex(self.sliceIdx)
         self.render_panel()
-        # self.presentPoints(self.MPRpoints, sliceIdx)
 
     def setSliceIndex(self, index: int):
         self.reslice.Update()
@@ -410,7 +372,6 @@ class GenericSequenceViewer:
 
         if self._point_order[-1] == "MPR":
             if len(self.MPRpoints) > 0:
-                # self.MPRpoints[-1].actor.SetVisibility(False)
                 self.MPRpoints.delete(-1)
         elif self._point_order[-1] == "LENGTH":
             if len(self.lengthPoints) > 0:
@@ -422,33 +383,22 @@ class GenericSequenceViewer:
         logging.info("Removing all points")
 
         while len(self.MPRpoints) > 0:
-            # self.MPRpoints[-1].actor.SetVisibility(False)
             self.MPRpoints.delete(-1)
 
         while len(self.lengthPoints) > 0:
-            # self.lengthPoints[-1].actor.SetVisibility(False)
             self.lengthPoints.delete(-1)
 
         self.window.Render()
 
     def show_intermediate_points(self):
         logging.debug("Show intermediate MPR points (i.e., show all points)")
-
-        for i in range(len(self.MPRpoints)):
-            self.MPRpoints.show(i)
-
+        self.MPRpoints.hiding_intermediate_points = False
+        self.MPRpoints.show_intermediate_points()
         self.window.Render()
-
-        logging.debug(f'Actor visibility status: {[i.actor.GetVisibility() for i in self.MPRpoints]}')
 
     def hide_intermediate_points(self):
         logging.info("Hiding intermediate MPR points")
-
-        for i in range(len(self.MPRpoints)):
-            if i == 0 or i == len(self.MPRpoints)-1:
-                self.MPRpoints.set_color(color=(0, 0, 1), item=i)
-            else:
-                self.MPRpoints.hide(i)
+        self.MPRpoints.hiding_intermediate_points = True
+        self.MPRpoints.hide_intermediate_points()
         self.window.Render()
 
-        logging.debug(f'Actor visibility status: {[i.actor.GetVisibility() for i in self.MPRpoints]}')

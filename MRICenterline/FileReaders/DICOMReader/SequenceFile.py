@@ -40,26 +40,7 @@ def create_sequence_file(files: List[str]):
     """
     creates, saves, and returns a sequence file to be used by DICOMReader
     """
-
-    # try:
-    #     grouped_files = _groupby(files, lambda x: get_info('SeriesDescription', x),
-    #                              include_path_key=True, include_path_in_list=False)
-    # except KeyError:
-    #     try:
-    #         grouped_files = _groupby(files, lambda x: get_info('SeriesNumber', x),
-    #                                  include_path_key=True, include_path_in_list=False)
-    #     except KeyError:
-    #         _file_list_as_string = "".join([i + "\n" for i in files])
-    #         MSG.msg_box_warning("Series Description and Series Number not found for the following files",
-    #                             details=f'{_file_list_as_string}')
-    #         logging.critical(f"Series Description and Series Number not found for {_file_list_as_string}")
-    #         raise KeyError
-    #
-    # copy_grouped_files = copy.deepcopy(grouped_files)
-
-    path = os.path.dirname(files[0]) #grouped_files.pop("Path")[0]
-    # filename = _get_seqfile_filename(files)
-
+    path = os.path.dirname(files[0])
     grouped_files = generate_seqlist_dict(files)
 
     with open(os.path.join(path, 'data', 'seqdict.json'), 'w') as f:
@@ -127,7 +108,6 @@ def generate_seqlist_dict(files_list):
     seq_list = {}
     sorted_files = {}
     for filename in files_list:
-        # filename = filename.replace('\\','/')
         dicom_info = pydicom.dcmread(filename)
         try:
             seq_name = dicom_info['SeriesDescription'].value

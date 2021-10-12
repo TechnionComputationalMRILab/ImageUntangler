@@ -8,12 +8,20 @@ from MRICenterline.Points.LengthCalculation import length_actor, temp_length_cal
 
 class PointArray:
     def __init__(self, point_color=(1, 1, 1), size=1, highlight_last=False, highlight_color=(0, 1, 1)):
+
         self.points: List[Point] = []
         self.lengths = []
         self.pt_color = point_color
         self.pt_size = size
         self.highlight_last = highlight_last
         self.highlight_color = highlight_color
+        self.hiding_intermediate_points = False
+
+    def get_first_point(self):
+        return self[0]
+
+    def get_last_point(self):
+        return self[len(self) - 1]
 
     def __len__(self):
         return len(self.points)
@@ -29,10 +37,28 @@ class PointArray:
         del self.points[item]
 
     def show(self, item):
+        self.points[item].set_visibility(True)
         self.points[item].actor.SetVisibility(True)
 
     def hide(self, item):
+        self.points[item].set_visibility(False)
         self.points[item].actor.SetVisibility(False)
+
+    def hide_intermediate_points(self):
+        for i in range(len(self)):
+            if i == 0 or i == len(self)-1:
+                self.set_color(color=(0, 0, 1), item=i)
+            else:
+                self.points[i].set_visibility(False)
+                self.hide(i)
+
+    def show_intermediate_points(self):
+        for i in range(len(self)):
+            if i == 0 or i == len(self)-1:
+                self.set_color(color=self.pt_color, item=i)
+            else:
+                self.points[i].set_visibility(True)
+                self.show(i)
 
     def addPoint(self, image_point_location):
         # TODO: fix compatibility
@@ -102,3 +128,4 @@ class PointArray:
 
     def extend(self, point_array):
         self.points.extend(point_array.points)
+
