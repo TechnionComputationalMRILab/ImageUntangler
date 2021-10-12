@@ -13,7 +13,7 @@ logging.getLogger(__name__)
 
 
 class DICOMReader:
-    def __init__(self, folder: str, run_clean=True):
+    def __init__(self, folder: str, run_clean=False):
         self.folder = folder
         self.run_clean = run_clean  # if set to true, deletes and re-builds the sequence directory
 
@@ -77,6 +77,7 @@ class DICOMReader:
         else:
             # create and populate the seqfile
             logging.info("Sequence Directory Not Found! Creating...")
+            SequenceFile.create_sequence_file(self.folder, self.sequence_dict)
             self.cached_pixel_data_dict = {k: list() for k, _ in self.sequence_dict.items()}
 
     def check_seqfile_exists(self):

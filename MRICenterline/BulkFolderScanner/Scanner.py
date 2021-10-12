@@ -26,7 +26,7 @@ def generate_report(folder):
     _dicomreader = DICOMReader.test_folder(folder)
 
     if type(_dicomreader) is DICOMReader:
-        get_first_valid_file = _dicomreader.valid_files[-1]
+        get_first_valid_file = list(_dicomreader.sequence_dict.values())[-1][-1]
         patient_data = dcmread(get_first_valid_file)
 
         filled_out_dict = {}

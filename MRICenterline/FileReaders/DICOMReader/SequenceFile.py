@@ -36,17 +36,12 @@ def load_seqfile(folder, seqfile):
     return sequence_dict
 
 
-def create_sequence_file(files: List[str]):
-    """
-    creates, saves, and returns a sequence file to be used by DICOMReader
-    """
-    path = os.path.dirname(files[0])
-    grouped_files = generate_seqlist_dict(files)
+def create_sequence_file(path, seq_dict):
+    # path = os.path.dirname(files[0])
+    # grouped_files = generate_seqlist_dict(files)
 
     with open(os.path.join(path, 'data', 'seqdict.json'), 'w') as f:
-        json.dump(grouped_files, f, indent=4, sort_keys=True)
-
-    return grouped_files
+        json.dump(seq_dict, f, indent=4, sort_keys=True)
 
 
 def _groupby(files: List[str], func,
