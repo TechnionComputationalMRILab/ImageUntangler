@@ -27,7 +27,7 @@ class DICOMReader:
 
         if self._valid_files_len:
             self._load_sequence_dict()
-            self._load_metadata_dict()
+            # self._load_metadata_dict()
         else:
             logging.info(f"No DICOM files found in {self.folder}")
 

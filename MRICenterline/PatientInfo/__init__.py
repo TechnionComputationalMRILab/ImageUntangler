@@ -25,17 +25,3 @@ class PatientInfoPanel(QDockWidget):
         self._v_layout = QVBoxLayout(self)
         # self._v_layout.addWidget(self._table)
         self._v_layout.addWidget(self._comment_box)
-
-    def accept(self) -> None:
-        logging.debug(f"Saving comment")
-        super().accept()
-
-
-if __name__ == "__main__":
-    import sys
-    from PyQt5.QtWidgets import QApplication
-
-    app = QApplication(sys.argv)
-    win = LoadDirDialog()
-    win.show()
-    sys.exit(app.exec())

@@ -232,9 +232,8 @@ class GenericModel(QWidget):
 
     def showPatientInfoTable(self):
         logging.info("Showing patient table")
-        _patient_info_panel = PatientInfoPanel(parent=self)
-        self.layout.addWidget(self.centerline_panel)
-
+        # _patient_info_panel = PatientInfoPanel(parent=self)
+        # self.layout.addWidget(_patient_info_panel)
 
     def start_timer(self):
         self.view.start_timer()

@@ -1,5 +1,5 @@
 import json
-from icecream import ic
+# from icecream import ic
 from MRICenterline.Points import PointArray, Point
 
 import logging

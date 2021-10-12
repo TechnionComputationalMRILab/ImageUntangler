@@ -1,7 +1,6 @@
 import os
 import json
 import csv
-import h5py
 import numpy as np
 from datetime import datetime, timezone
 

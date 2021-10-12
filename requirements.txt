@@ -22,4 +22,3 @@ QtPy==1.9.0
 scipy
 SimpleITK==2.0.2
 vtk
-h5py
