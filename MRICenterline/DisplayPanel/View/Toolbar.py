@@ -181,8 +181,8 @@ class DisplayPanelToolbar(QToolBar):
         pass
 
     def addUndoButton(self):
-        _undo_button = QPushButton("Undo last MPR point")
-        _undo_button.setStatusTip("Removes last MPR point added")
+        _undo_button = QPushButton("Undo last point")
+        _undo_button.setStatusTip("Removes last point added")
         _undo_button.setIcon(qta.icon('fa5s.undo-alt'))
         _undo_button.clicked.connect(self.manager.undoAnnotation)
         self.addWidget(_undo_button)

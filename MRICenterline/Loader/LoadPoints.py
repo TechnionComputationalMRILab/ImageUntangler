@@ -10,10 +10,11 @@ class LoadPoints:
     def __init__(self, filename, image_data):
         self.filename = filename
         self.image_data = image_data
+
         self.slide_indices = []
 
-        self.points = PointArray()
         self._open_file()
+        self.point_set = self.get_points()
 
     def _calculate_slideIdx(self, point):
         return self.image_data.convertZCoordsToSlices([point])[0]
@@ -22,25 +23,30 @@ class LoadPoints:
         logging.debug(f"Getting point data from {self.filename}")
         _point_type = self._get_type_of_points()
 
-        logging.info(f"Loading {len(self.json_data[_point_type])} {_point_type}")
-        for i in self.json_data[_point_type]:
-            # ic(self._calculate_slideIdx(i[2]))
-
-            _point = Point(i + [self._calculate_slideIdx(i[2])])
-            self.slide_indices.append(self._calculate_slideIdx(i[2]))
-            self.points.add_point(_point)
-        return self.points
+        _ptset = {}
+        for point_set in _point_type:
+            logging.info(f"Loading {len(self.json_data[point_set])} {point_set} in loader")
+            _point_array = PointArray()
+            for k, i in enumerate(self.json_data[point_set]):
+                _point = Point(i + [self._calculate_slideIdx(i[2])])
+                self.slide_indices.append(self._calculate_slideIdx(i[2]))
+                _point_array.add_point(_point)
+            _ptset[point_set] = _point_array
+        return _ptset
 
     def _get_type_of_points(self):
-        if "length points" in self.json_data.keys():
+        if "length points" in self.json_data.keys() and "MPR points" in self.json_data.keys():
+            logging.debug("Opening MPR and length points")
+            return ["length points", "MPR points"]
+        elif "length points" in self.json_data.keys():
             logging.debug("Opened length points JSON file")
-            return "length points"
+            return ["length points"]
         elif "MPR points" in self.json_data.keys():
             logging.debug("Opened MPR points JSON file")
-            return "MPR points"
+            return ["MPR points"]
         elif "length in mpr points" and "mpr points" in self.json_data.keys():
-            print("length in mpr points open")
             logging.debug("Opened length points in MPR JSON file")
+            raise NotImplemented
         else:
             logging.error("JSON file invalid, point headers not found")
             return None

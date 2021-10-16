@@ -4,13 +4,6 @@ from pydicom import dcmread
 
 
 def get_directories(folder):
-    # _folders = []
-    # for root, dirs, files in os.walk(folder, topdown=False):
-    #     for name in dirs:
-    #         _full_path = os.path.join(root, name)
-    #         _folders.append(_full_path)
-    #
-    # return _folders
     return glob(f"{folder}/*/")
 
 
@@ -23,7 +16,7 @@ def generate_seq_dict(folder):
 
 def generate_report(folder):
     required_fields = ["PatientName", "PatientID", "Manufacturer", "ManufacturerModelName", "ProtocolName", "StudyDate", "StudyTime"]
-    _dicomreader = DICOMReader.test_folder(folder)
+    _dicomreader = DICOMReader.test_folder(folder, run_clean=True)
 
     if type(_dicomreader) is DICOMReader:
         get_first_valid_file = list(_dicomreader.sequence_dict.values())[-1][-1]

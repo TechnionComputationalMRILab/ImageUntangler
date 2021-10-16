@@ -72,10 +72,11 @@ class PointArray:
         _point = Point(image_point_location, color=_new_point_color, size=self.pt_size)
         self.points.append(_point)
 
-        if len(self) >= 2:
-            for pt in self.points:
-                if _point != pt:
-                    self.lengths.append((_point, pt, _point.distance(pt)))
+        # if len(self) >= 2:
+        #     for i in range(1, len(self.points)):
+        #         _prev_point = self.points[len(self.points)-1]
+        #         print(_point.distance(_prev_point))
+        #         self.lengths.append((_prev_point, _point, _point.distance(_prev_point)))
 
     def show_length_text_actors(self):
         return [length_actor(length) for length in self.lengths]

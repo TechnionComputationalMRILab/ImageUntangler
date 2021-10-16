@@ -21,6 +21,7 @@ logging.getLogger(__name__)
 
 class GenericSequenceViewer:
     def __init__(self, manager, interactor: QVTKRenderWindowInteractor, interactorStyle: SequenceViewerInteractorStyle, image):
+        self.count = 0
         self.manager = manager
         self.interactor = interactor
         self.imageData = image
@@ -159,12 +160,16 @@ class GenericSequenceViewer:
 
     def loadAllPoints(self, filename):
         _loader = LoadPoints(filename, self.imageData)
-        logging.info(f'Loading {len(_loader.get_points())} points from file')
+        logging.info(f'Loading {len(_loader.point_set.keys())} point sets from file')
 
-        _loaded_indices = _loader.slide_indices
-        for key, val in enumerate(_loader.get_points()):
-            self.loadPoint("MPR", val, _loaded_indices[key])
-
+        if 'MPR points' in _loader.point_set.keys():
+            logging.debug(f"Loading {len(_loader.point_set['MPR points'].points)} MPR points")
+            for key, val in enumerate(_loader.point_set['MPR points'].points):
+                self.loadPoint("MPR", val, _loader.slide_indices[key])
+        if 'length points' in _loader.point_set.keys():
+            logging.debug(f"Loading {len(_loader.point_set['length points'].points)} length points")
+            for key, val in enumerate(_loader.point_set['length points'].points):
+                self.loadPoint("LENGTH", val, _loader.slide_indices[key])
 
     def processLoadedPoint(self, pointCollection, pickedCoordinates, sliceIdx):
         pointLocation = [pickedCoordinates[0], pickedCoordinates[1], pickedCoordinates[2], sliceIdx]  # x,y,z,sliceIdx
@@ -180,7 +185,6 @@ class GenericSequenceViewer:
             self.processLoadedPoint(self.MPRpoints, pickedCoordinates, slideIdx)
         elif pointType.upper() == "LENGTH":
             self.processLoadedPoint(self.lengthPoints, pickedCoordinates, slideIdx)
-
 
     def presentCursor(self):
         self.Cursor.SetModelBounds(-10000, 10000, -10000, 10000, 0, 0)
@@ -263,28 +267,6 @@ class GenericSequenceViewer:
         _save_formatter.add_pointcollection_data("MPR points", self.MPRpoints)
         _save_formatter.save_data()
 
-    def loadLengthPoints(self, filename):
-        logging.info(f"Loading length points from {filename}")
-        _length_loader = LoadPoints(filename, self.imageData)
-
-        self.lengthPoints.extend(_length_loader.get_points())
-
-        for i in self.lengthPoints:
-            self.panel_renderer.AddActor(i.actor)
-
-        self.render_panel()
-
-    def loadMPRPoints(self, filename):
-        logging.info(f"Loading MPR points from {filename}")
-        _mpr_loader = LoadPoints(filename, self.imageData)
-
-        self.MPRpoints.extend(_mpr_loader.get_points())
-
-        for i in self.MPRpoints:
-            self.panel_renderer.AddActor(i.actor)
-
-        self.render_panel()
-
     def modifyAnnotation(self, x, y):
         _picker = vtk.vtkPropPicker()
 
@@ -309,7 +291,6 @@ class GenericSequenceViewer:
 
         for i in self.lengthPoints:
             i.set_visibility(i.slice_idx == self.sliceIdx)
-            # i.actor.SetVisibility(i.slice_idx == self.sliceIdx)
 
         if self.MPRpoints.hiding_intermediate_points:
             _first_point = self.MPRpoints.get_first_point()
@@ -320,7 +301,6 @@ class GenericSequenceViewer:
         else:
             for i in self.MPRpoints:
                 i.set_visibility(i.slice_idx == self.sliceIdx)
-                # i.actor.SetVisibility(i.slice_idx == self.sliceIdx)
 
         self.window.Render()
 
@@ -394,11 +374,12 @@ class GenericSequenceViewer:
         logging.debug("Show intermediate MPR points (i.e., show all points)")
         self.MPRpoints.hiding_intermediate_points = False
         self.MPRpoints.show_intermediate_points()
-        self.window.Render()
+        # self.window.Render()
+        self.render_panel()
 
     def hide_intermediate_points(self):
         logging.info("Hiding intermediate MPR points")
         self.MPRpoints.hiding_intermediate_points = True
         self.MPRpoints.hide_intermediate_points()
-        self.window.Render()
-
+        # self.window.Render()
+        self.render_panel()

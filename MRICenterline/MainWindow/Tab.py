@@ -32,8 +32,8 @@ class Tab(QWidget):
 
     def build_new_tab(self):
         logging.debug("Building a new tab")
-        self.mainLayout = QHBoxLayout(self)  # sets this as layout manager for the tab
-        self.build_default_tab()  # builds default tab until user adds regular MRI files
+        self.mainLayout = QHBoxLayout(self)
+        self.build_default_tab()
 
     def build_default_tab(self) -> None:
         self._defaultTabMainWidget = DefaultTabWidget(parent=self)

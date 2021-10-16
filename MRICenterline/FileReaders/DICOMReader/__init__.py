@@ -56,8 +56,8 @@ class DICOMReader:
             logging.debug("Loading metadata file")
 
     @classmethod
-    def test_folder(cls, folder: str):
-        _dicom = cls(folder)
+    def test_folder(cls, folder: str, run_clean=False):
+        _dicom = cls(folder, run_clean)
         if len(_dicom):
             return _dicom
         else:
@@ -72,6 +72,7 @@ class DICOMReader:
             if self.run_clean:
                 os.remove(os.path.join(self.folder, _seqfile))
                 self._load_sequence_dict()
+                self.run_clean = False
             else:
                 self.cached_pixel_data_dict = {k: None for k, _ in self.sequence_dict.items()}
         else:

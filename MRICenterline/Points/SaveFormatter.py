@@ -16,8 +16,8 @@ logging.getLogger(__name__)
 
 class SaveFormatter:
     """ handles the formatting and saving of the files """
-    def __init__(self, imagedata: ImageProperties):
-        self.filename = datetime.now(timezone.utc).astimezone().strftime("%d.%m.%Y__%H_%M") + ".annotation.json"
+    def __init__(self, imagedata: ImageProperties, suffix: str = ""):
+        self.filename = datetime.now(timezone.utc).astimezone().strftime("%d.%m.%Y__%H_%M") + "." + suffix + ".annotation.json"
         self.case_number = [int(s) for s in os.path.dirname(imagedata.header['filename'][-1]).split("/") if s.isdigit()][-1]
         self.save_to = os.path.join(os.path.dirname(imagedata.header['filename'][-1]), 'data')
         self.header = dict(imagedata.header)
@@ -33,7 +33,7 @@ class SaveFormatter:
 
     def add_generic_data(self, key: str, value):
         """ works for anything except for point collections"""
-        logging.info(f"Adding [{key}]: {value}")
+        logging.info(f"Adding generic-formatting data {key}")
         self.output_data[key] = value
 
     def add_timestamps(self, start_time=None, stop_time=None):

@@ -16,6 +16,7 @@ class CenterlineModel:
     def __init__(self, image_data, interface):
         self.interface = interface
         self.points = self.interface.points
+
         self.image_data = image_data
         self.height = CONST.CL_INITIAL_HEIGHT
         self.angle = CONST.CL_INITIAL_ANGLE
@@ -25,6 +26,12 @@ class CenterlineModel:
 
     def set_height(self, height):
         self.height = height
+
+    def update_height(self):
+        self.view.update_height()
+
+    def update_angle(self):
+        self.view.update_angle()
 
     def set_angle(self, angle):
         self.angle = angle
@@ -44,14 +51,38 @@ class CenterlineModel:
                                                    height=self.height, viewAngle=self.angle)
         except Exception as err:
             print(err)
-        return _mpr_properties
+        else:
+            return _mpr_properties
 
     def calculate_input_data(self):
         return Calculate.calculate_input_data(self.get_mpr_properties())
 
-    def saveLengths(self, filename, length_points):
-        self.control.save_lengths(filename, length_points)
-        _save_formatter = SaveFormatter(filename, self.image_data)
+    def saveLengths(self, length_points):
+        self.control.save_lengths(length_points)
+        _save_formatter = SaveFormatter(self.image_data)
         _save_formatter.add_pointcollection_data('length in mpr points', length_points)
         _save_formatter.add_generic_data("mpr points", self.points)
         _save_formatter.save_data()
+
+    def set_points_button_click(self):
+        logging.debug("Adding length points...")
+        self.view.set_points_button_click()
+
+    def save_all(self):
+        self.view.save_file()
+
+    def start_timer(self):
+        self.view.start_timer()
+
+    def stop_timer(self):
+        self.view.stop_timer()
+
+    def undo_annotation(self):
+        self.view.undo_annotation()
+
+    def disable_point_picker(self):
+        logging.debug("Disabling point picker")
+        self.view.disable_point_picker()
+
+    def delete_all_points(self):
+        self.view.delete_all_points()
