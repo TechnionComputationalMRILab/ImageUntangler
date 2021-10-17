@@ -2,7 +2,7 @@ import os
 import json
 import csv
 import numpy as np
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 
 from MRICenterline.DisplayPanel.Model.ImageProperties import ImageProperties
 from MRICenterline.Points import PointArray
@@ -16,7 +16,8 @@ logging.getLogger(__name__)
 
 class SaveFormatter:
     """ handles the formatting and saving of the files """
-    def __init__(self, imagedata: ImageProperties, suffix: str = ""):
+    def __init__(self, imagedata: ImageProperties, suffix: str = "", append_to_directory=True):
+        self.append_to_directory = append_to_directory
         self.filename = datetime.now(timezone.utc).astimezone().strftime("%d.%m.%Y__%H_%M") + "." + suffix + ".annotation.json"
         self.case_number = [int(s) for s in os.path.dirname(imagedata.header['filename'][-1]).split("/") if s.isdigit()][-1]
         self.save_to = os.path.join(os.path.dirname(imagedata.header['filename'][-1]), 'data')
@@ -36,19 +37,30 @@ class SaveFormatter:
         logging.info(f"Adding generic-formatting data {key}")
         self.output_data[key] = value
 
-    def add_timestamps(self, start_time=None, stop_time=None):
+    def add_timestamps(self, start_time=None, stop_time=None, time_gap=None):
         if start_time and not stop_time:
             logging.info("Setting the stop_time as the current timestamp.")
             stop_time = datetime.now(timezone.utc).astimezone()
             self.output_data['START'] = start_time.isoformat()
             self.output_data['STOP'] = stop_time.isoformat()
-            self.output_data['Time measurement'] = str(stop_time - start_time)
+
+            if time_gap:
+                all_gaps = sum(time_gap, timedelta())
+                self.output_data['Time measurement'] = str(stop_time - start_time - all_gaps)
+            else:
+                self.output_data['Time measurement'] = str(stop_time - start_time)
 
         elif start_time and stop_time:
             logging.debug("Saving with provided start and stop timestamp.")
             self.output_data['START'] = start_time.isoformat()
             self.output_data['STOP'] = stop_time.isoformat()
             self.output_data['Time measurement'] = str(stop_time - start_time)
+
+            if time_gap:
+                all_gaps = sum(time_gap, timedelta())
+                self.output_data['Time measurement'] = str(stop_time - start_time - all_gaps)
+            else:
+                self.output_data['Time measurement'] = str(stop_time - start_time)
 
         else:
             logging.debug("Not start/stop entered")
@@ -65,8 +77,9 @@ class SaveFormatter:
             json.dump(self.output_data, f,
                       indent=4)
 
-        self._append_to_directory()
-        MSG.msg_box_info(f"Save complete!")
+        if self.append_to_directory:
+            self._append_to_directory()
+        MSG.msg_box_info(f"Save completed to {self.filename}!")
 
     def _append_to_directory(self):
         _directory = os.path.join(CFG.get_config_data("folders", 'default-folder'), 'directory.csv')

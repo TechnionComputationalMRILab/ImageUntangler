@@ -25,11 +25,11 @@ class CenterlineWidgets:
         self.actor.GetProperty().SetColorWindow(self.model.interface.window)
         return self.actor
 
-    def save_lengths(self, length_points):
-        _save_formatter = SaveFormatter(self.model.image_data)
-        _save_formatter.add_pointcollection_data('length in mpr points', length_points)
-        _save_formatter.add_generic_data("mpr points", self.model.points)
-        _save_formatter.save_data()
+    # def save_lengths(self, length_points):
+    #     _save_formatter = SaveFormatter(self.model.image_data)
+    #     _save_formatter.add_pointcollection_data('length in mpr points', length_points)
+    #     _save_formatter.add_generic_data("mpr points", self.model.points)
+    #     _save_formatter.save_data()
 
 # ------------------------------ toolbar widgets ------------------------------
 
@@ -76,18 +76,49 @@ class CenterlineWidgets:
                 _timer_button.setIcon(qta.icon('mdi.timer-outline'))
                 _timer_button.setText("Start timer")
                 self.model.stop_timer()
+                _pause_timer_button.setEnabled(False)
             else:
                 _timer_button.setIcon(qta.icon('mdi.timer-off-outline'))
                 _timer_button.setText("Stop timer")
                 self.model.start_timer()
+                _pause_timer_button.setEnabled(True)
+
+        def togglePause():
+            if not _pause_timer_button.isChecked():
+                _pause_timer_button.setIcon(qta.icon("ei.pause-alt"))
+                _pause_timer_button.setText("Pause timer")
+                self.model.resume_timer()
+            else:
+                _pause_timer_button.setIcon(qta.icon("ei.play-alt"))
+                _pause_timer_button.setText('Resume timer')
+                self.model.pause_timer()
+
+        _timer_widget = QWidget()
+        _timer_layout = QHBoxLayout()
+        _timer_widget.setLayout(_timer_layout)
 
         _timer_button = QPushButton("Start timer")
+        _pause_timer_button = QPushButton("Pause timer")
+
         _timer_button.setStatusTip("Start timer")
         _timer_button.setIcon(qta.icon('mdi.timer-outline'))
         _timer_button.setCheckable(True)
         _timer_button.clicked.connect(toggleTimer)
+        _timer_layout.addWidget(_timer_button)
 
-        return _timer_button
+        _pause_timer_button.setCheckable(True)
+        _pause_timer_button.setEnabled(False)
+        _pause_timer_button.clicked.connect(togglePause)
+        _pause_timer_button.setIcon(qta.icon("ei.pause-alt"))
+        _timer_layout.addWidget(_pause_timer_button)
+
+        return _timer_widget
+
+    def addLengthCalculateButton(self):
+        _calculate_length = QPushButton("Calculate Length")
+        _calculate_length.setIcon(qta.icon('mdi.delete-outline'))
+        _calculate_length.clicked.connect(self.model.calculate_length)
+        return _calculate_length
 
     def addHeightSpinbox(self):
         _height_label_widget = QWidget()

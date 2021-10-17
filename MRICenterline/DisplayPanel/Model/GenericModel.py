@@ -241,6 +241,12 @@ class GenericModel(QWidget):
     def stop_timer(self):
         self.view.stop_timer()
 
+    def pause_timer(self):
+        self.view.pause_timer()
+
+    def resume_timer(self):
+        self.view.resume_timer()
+
     def show_intermediate_points(self):
         self.view.show_intermediate_points()
 

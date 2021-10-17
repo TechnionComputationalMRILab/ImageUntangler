@@ -31,6 +31,7 @@ class CenterlinePanelToolbar(QToolBar):
         self.addSeparator()
 
         self.addWidget(self.control.addLengthPointsButton())
+        self.addWidget(self.control.addLengthCalculateButton())
         self.addWidget(self.control.addDisablePointPickingButton())
 
         self.addSeparator()

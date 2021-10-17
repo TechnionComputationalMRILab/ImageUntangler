@@ -4,7 +4,7 @@ from PyQt5.QtWidgets import QWidget, QVBoxLayout
 import vtkmodules.all as vtk
 from vtkmodules.qt.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
 from typing import List
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 
 from MRICenterline.Points.SaveFormatter import SaveFormatter
 from MRICenterline.CenterlinePanel.Control.CenterlineViewerInteractorStyle import MPRInteractorStyle
@@ -36,6 +36,9 @@ class CenterlineViewer(QWidget):
 
         self._start_time = None
         self._stop_time = None
+        self._pause_time = None
+        self._resume_time = None
+        self._time_gap = []
         # self.vtkWidget.GetRenderWindow().Render()
 
     def _initialize_top(self):
@@ -135,19 +138,20 @@ class CenterlineViewer(QWidget):
         return [[int(point.image_coordinates[0] // self.model.get_mpr_properties().delta), int(point.image_coordinates[1] // delta)]
                 for point in lengthPoints.points]
 
-    def calculateDistances(self) -> None:
+    def calculateDistances(self):
         # calculate and output distance of length points in MPRwindow Viewer
-
         if len(self.lengthPoints) >= 2:
-            indices = self.generateIndices(self.lengthPoints, self.model.get_mpr_properties().delta)
-            MPR_Position = self.model.get_mpr_properties().MPR_indexs_np
+            # indices = self.generateIndices(self.lengthPoints, self.model.get_mpr_properties().delta)
+            # MPR_Position = self.model.get_mpr_properties().MPR_indexs_np
+            #
+            # pointsPositions = [MPR_Position[indices[i][0], indices[i][1], :] for i in range(len(indices))]
+            # pointsPositions = np.asarray(pointsPositions)
 
-            pointsPositions = [MPR_Position[indices[i][0], indices[i][1], :] for i in range(len(indices))]
-            pointsPositions = np.asarray(pointsPositions)
+            pointsPositions = np.asarray(self.lengthPoints.get_coordinates_as_array())
             allLengths = [np.linalg.norm(pointsPositions[j, :] - pointsPositions[j + 1, :]) for j in
                           range(len(pointsPositions) - 1)]
             totalDistance = np.sum(allLengths)
-            self.outputLengthResults(totalDistance, allLengths)
+            return totalDistance, allLengths
         else:
             MSG.msg_box_warning("Not enough points clicked to calculate length")
 
@@ -163,9 +167,9 @@ class CenterlineViewer(QWidget):
 
     def save_file(self):
         logging.info(f'Saving length with MPR points')
-        _save_formatter = SaveFormatter(self.model.image_data, suffix="centerline")
+        _save_formatter = SaveFormatter(self.model.image_data, suffix="centerline", append_to_directory=False)
         _save_formatter.add_pointcollection_data('length in mpr points', self.lengthPoints)
-        _save_formatter.add_timestamps(self._start_time, self._stop_time)
+        _save_formatter.add_timestamps(self._start_time, self._stop_time, self._time_gap)
         _save_formatter.add_generic_data("mpr points", self.model.points)
         _save_formatter.save_data()
 
@@ -185,6 +189,22 @@ class CenterlineViewer(QWidget):
         self._stop_time = datetime.now(timezone.utc).astimezone()
         logging.info(f"Stopping timer: {self._stop_time}")
 
+        if self._time_gap:
+            logging.info(f"Time measured: {self._stop_time - self._start_time - sum(self._time_gap, timedelta())}")
+        else:
+            logging.info(f"Time measured: {self._stop_time - self._start_time}")
+
+    def pause_timer(self):  # TODO
+        self._pause_time = datetime.now(timezone.utc).astimezone()
+        logging.info(f"Pausing timer: {self._pause_time}")
+
+    def resume_timer(self):  # TODO
+        self._resume_time = datetime.now(timezone.utc).astimezone()
+        logging.info(f"Resuming timer: {self._resume_time}")
+
+        logging.info(f"Time gap: {self._resume_time - self._pause_time}")
+        self._time_gap.append(self._resume_time - self._pause_time)
+
     def undo_annotation(self):
         logging.info(f"Removing last centerline annitation point")
 
@@ -201,6 +221,13 @@ class CenterlineViewer(QWidget):
         while len(self.lengthPoints) > 0:
             self.lengthPoints.delete(-1)
         self.renderWindow.Render()
+
+    def calculate_length(self):
+        totalDistance, all_lengths = self.calculateDistances()
+        strdis = ["{0:.2f}".format(all_lengths[i]) for i in range(len(all_lengths))]
+        MSG.msg_box_info("Calculated length",
+                         info="The lengths [mm] are:\n\n {0} \n\nThe total length:\n\n {1}".format(' , '.join(strdis),"{0:.2f}".format(totalDistance)))
+
 
 # # redundant functions, subject for deletion
 #     def _initialize_bottom(self):

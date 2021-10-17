@@ -57,12 +57,12 @@ class CenterlineModel:
     def calculate_input_data(self):
         return Calculate.calculate_input_data(self.get_mpr_properties())
 
-    def saveLengths(self, length_points):
-        self.control.save_lengths(length_points)
-        _save_formatter = SaveFormatter(self.image_data)
-        _save_formatter.add_pointcollection_data('length in mpr points', length_points)
-        _save_formatter.add_generic_data("mpr points", self.points)
-        _save_formatter.save_data()
+    # def saveLengths(self, length_points):
+    #     self.control.save_lengths(length_points)
+    #     _save_formatter = SaveFormatter(self.image_data)
+    #     _save_formatter.add_pointcollection_data('length in mpr points', length_points)
+    #     _save_formatter.add_generic_data("mpr points", self.points)
+    #     _save_formatter.save_data()
 
     def set_points_button_click(self):
         logging.debug("Adding length points...")
@@ -77,6 +77,12 @@ class CenterlineModel:
     def stop_timer(self):
         self.view.stop_timer()
 
+    def pause_timer(self):
+        self.view.pause_timer()
+
+    def resume_timer(self):
+        self.view.resume_timer()
+
     def undo_annotation(self):
         self.view.undo_annotation()
 
@@ -86,3 +92,6 @@ class CenterlineModel:
 
     def delete_all_points(self):
         self.view.delete_all_points()
+
+    def calculate_length(self):
+        self.view.calculate_length()

@@ -4,7 +4,7 @@ from vtkmodules.qt.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
 from vtkmodules.all import vtkImageActor, vtkImageReslice, vtkMatrix4x4, vtkRenderer, vtkTextActor, vtkPolyDataMapper,\
     vtkActor, vtkCursor2D
 import vtkmodules.all as vtk
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 
 from MRICenterline.Points import PointArray
 from MRICenterline.DisplayPanel.Control.SequenceViewerInteractorStyle import SequenceViewerInteractorStyle
@@ -62,6 +62,9 @@ class GenericSequenceViewer:
 
         self._start_time = None
         self._stop_time = None
+        self._pause_time = None
+        self._resume_time = None
+        self._time_gap = []
 
     def performReslice(self):
         # Extract a slice in the desired orientation
@@ -228,22 +231,16 @@ class GenericSequenceViewer:
             #         self.lengthPoints.delete(-1)
 
     def calculateLengths(self):
-        # if len(self.lengthPoints) >= 2:
-            # TODO: remove this, use length actors instead
+        # TODO: remove this, use length actors instead
         pointsPositions = np.asarray(self.lengthPoints.get_coordinates_as_array())
         allLengths = [np.linalg.norm(pointsPositions[j, :] - pointsPositions[j + 1, :]) for j in
                       range(len(pointsPositions) - 1)]
 
-        # allLengths = self.lengthPoints.temp_length_display()
         totalDistance = np.sum(allLengths)
-
         strdis = ["{0:.2f}".format(allLengths[i]) for i in range(len(allLengths))]
 
         MSG.msg_box_info("Calculated length",
                          info="The lengths [mm] are:\n\n {0} \n\nThe total length:\n\n {1}".format(' , '.join(strdis),"{0:.2f}".format(totalDistance)))
-
-        # else:
-        #     MSG.msg_box_warning("Not enough points clicked to calculate length")
 
     def save_points(self):
         _save_formatter = SaveFormatter(self.imageData)
@@ -254,7 +251,7 @@ class GenericSequenceViewer:
                 _save_formatter.add_pointcollection_data("MPR points", self.MPRpoints)
             logging.info(f"Saved {len(self.lengthPoints) + len(self.MPRpoints)} points to data folder")
 
-            _save_formatter.add_timestamps(self._start_time, self._stop_time)
+            _save_formatter.add_timestamps(self._start_time, self._stop_time, self._time_gap)
             _save_formatter.save_data()
 
     def saveLengths(self):
@@ -347,6 +344,22 @@ class GenericSequenceViewer:
         self._stop_time = datetime.now(timezone.utc).astimezone()
         logging.info(f"Stopping timer: {self._stop_time}")
 
+        if self._time_gap:
+            logging.info(f"Time measured: {self._stop_time - self._start_time - sum(self._time_gap, timedelta())}")
+        else:
+            logging.info(f"Time measured: {self._stop_time - self._start_time}")
+
+    def pause_timer(self):  # TODO
+        self._pause_time = datetime.now(timezone.utc).astimezone()
+        logging.info(f"Pausing timer: {self._pause_time}")
+
+    def resume_timer(self):  # TODO
+        self._resume_time = datetime.now(timezone.utc).astimezone()
+        logging.info(f"Resuming timer: {self._resume_time}")
+
+        logging.info(f"Time gap: {self._resume_time - self._pause_time}")
+        self._time_gap.append(self._resume_time - self._pause_time)
+
     def undoAnnotation(self):
         logging.info(f"Removing last {self._point_order[-1]} point")
 
@@ -383,3 +396,4 @@ class GenericSequenceViewer:
         self.MPRpoints.hide_intermediate_points()
         # self.window.Render()
         self.render_panel()
+
