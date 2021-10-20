@@ -67,7 +67,9 @@ class ProgressWidget(QWidget):
             "seqdict":
                 QCheckBox("Generate sequence directory"),
             "report":
-                QCheckBox("Generate folder report as CSV"),
+                QCheckBox("Generate folder report"),
+            "directory":
+                QCheckBox("Generate directory report"),
             "time_report":
                 QCheckBox("Generate report on timer data as CSV"),
             "rebuild_directory":
@@ -83,7 +85,7 @@ class ProgressWidget(QWidget):
 
         self._preprocess_options['seqdict'].setChecked(True)
         self._preprocess_options['report'].setChecked(True)
-
+        self._preprocess_options['directory'].setChecked(True)
 
         _preprocess_options_group_box = QGroupBox("Options")
         _preprocess_options_layout = QGridLayout()
@@ -95,6 +97,7 @@ class ProgressWidget(QWidget):
         _preprocess_options_layout.addWidget(self._preprocess_options['move_dicom'], 1, 1)
         _preprocess_options_layout.addWidget(self._preprocess_options['time_report'], 2, 0)
         _preprocess_options_layout.addWidget(self._preprocess_options['rebuild_directory'], 2, 1)
+        _preprocess_options_layout.addWidget(self._preprocess_options['directory'], 3 ,0)
 
         _preprocess_button = QPushButton("Start")
         _preprocess_button.setStatusTip("Generates sequence dictionary + folder report")
@@ -129,8 +132,65 @@ class ProgressWidget(QWidget):
         if self._preprocess_options['time_report'].isChecked():
             self._generate_time_report()
 
+        if self._preprocess_options['directory'].isChecked():
+            self._generate_directory_report()
+
+    def _generate_directory_report(self, get_only_latest=True, also_show_centerline=False):
+        logging.info("Scanning for data directories for the directory CSV")
+
+        os.remove(os.path.join(self.folder_path, 'directory.csv'))
+
+        # go through all the data directories
+        _data_directories = [file.replace('\\', '/') for file in glob(f"{self.folder_path}/*/data/")]
+        _to_csv = []
+
+        for di in _data_directories:
+            _centerline_annotation_data = set([file.replace('\\', '/') for file in glob(f"{di}/*.centerline.annotation.json")])
+
+            if _centerline_annotation_data:
+                _annotation_data = set([file.replace('\\', '/') for file in glob(f"{di}/*.annotation.json")]) - _centerline_annotation_data
+            else:
+                _annotation_data = set([file.replace('\\', '/') for file in glob(f"{di}/*.annotation.json")])
+
+            if _annotation_data:
+                _dict = {}
+                if get_only_latest:
+                    _latest_annotation = max(_annotation_data, key=os.path.getctime)
+
+                    with open(_latest_annotation, 'r') as annotation_file:
+                        _file = json.load(annotation_file)
+                        _dict["case number"] = [int(s) for s in di.split('/') if s.isdigit()][0]
+                        _dict["sequence name"] = _file['SeriesDescription']
+                        _dict['date'] = _file['annotation timestamp'][:10]
+                        _dict['number of MPR points'] = -999
+                        _dict['path'] = di
+                        _dict['filename'] = os.path.basename(_latest_annotation)
+                        _to_csv.append(_dict)
+
+                    if also_show_centerline and _centerline_annotation_data:
+                        _latest_centerline_annotation = max(_centerline_annotation_data, key=os.path.getctime)
+
+                        with open(_latest_centerline_annotation, 'r') as annotation_file:
+                            _file = json.load(annotation_file)
+                            _dict["case number"] = str([int(s) for s in di.split('/') if s.isdigit()][0]) + "-CL"
+                            _dict["sequence name"] = _file['SeriesDescription']
+                            _dict['date'] = _file['annotation timestamp'][:10]
+                            _dict['number of MPR points'] = -999
+                            _dict['path'] = di
+                            _dict['filename'] = os.path.basename(_latest_centerline_annotation)
+                            _to_csv.append(_dict)
+
+        with open(os.path.join(self.folder_path, 'directory.csv'), 'w', encoding='utf8', newline='') as output_file:
+            fc = csv.DictWriter(output_file, fieldnames=_to_csv[0].keys())
+            fc.writeheader()
+            fc.writerows(_to_csv)
+
+        self._add_to_textbox(f"Done! Report is saved to {os.path.join(self.folder_path, 'generated directory.csv')}. "
+                             f"You can close this tab now",
+                             color='blue')
+
     def _generate_time_report(self):
-        logging.info("Scanning for data directories")
+        logging.info("Scanning for data directories for the time report")
 
         # go through all the data directories
         _data_directories = [file.replace('\\', '/') for file in glob(f"{self.folder_path}/*/data/")]
@@ -142,7 +202,6 @@ class ProgressWidget(QWidget):
                 continue
 
             _annotation_data = list(set([file.replace('\\', '/') for file in glob(f"{di}/*.annotation.json")]) - set(_centerline_annotation_data))
-            print(_annotation_data)
 
             # get the latest dated annotation and centerline.annotation file
             _latest_annotation = max(_annotation_data, key=os.path.getctime)

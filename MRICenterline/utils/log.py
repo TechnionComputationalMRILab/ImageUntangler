@@ -1,12 +1,13 @@
 from datetime import datetime, timezone
 log_timestamp = datetime.now(timezone.utc).astimezone().isoformat().replace(":", "_")
 
+
 LOGGING_CONFIG = {
     'version': 1,
     'disable_existing_loggers': True,
     'formatters': {
         'terminal': {
-            'format': '[%(levelname)s] | %(asctime)s | FILE: %(pathname)s | FUNC: %(funcName)s | LINE: %(lineno)d | %(message)s'
+            'format': f'[%(levelname)s] | %(asctime)s | FILE: %(pathname)s | FUNC: %(funcName)s | LINE: %(lineno)d | %(message)s'
         },
         'gui_logger': {
             'format': '[%(levelname)s] | %(asctime)s | %(message)s'

@@ -1,6 +1,6 @@
 APP_NAME = "ImageUntangler"
 APP_BYLINE = "TCML"
-VER_NUMBER = '2.8.3'
+VER_NUMBER = '3.0.0'
 
 LAB_ICON = 'labIcon.png'
 

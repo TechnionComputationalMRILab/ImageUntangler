@@ -194,11 +194,11 @@ class CenterlineViewer(QWidget):
         else:
             logging.info(f"Time measured: {self._stop_time - self._start_time}")
 
-    def pause_timer(self):  # TODO
+    def pause_timer(self):
         self._pause_time = datetime.now(timezone.utc).astimezone()
         logging.info(f"Pausing timer: {self._pause_time}")
 
-    def resume_timer(self):  # TODO
+    def resume_timer(self):
         self._resume_time = datetime.now(timezone.utc).astimezone()
         logging.info(f"Resuming timer: {self._resume_time}")
 

@@ -9,6 +9,7 @@ from MRICenterline.Points import PointArray
 
 from MRICenterline.utils import message as MSG
 from MRICenterline.Config import ConfigParserRead as CFG
+from MRICenterline.utils import program_constants as CONST
 
 import logging
 logging.getLogger(__name__)
@@ -25,6 +26,7 @@ class SaveFormatter:
 
         self.output_data = self.header
         self.output_data['annotation timestamp'] = datetime.now(timezone.utc).astimezone().isoformat()
+        self.output_data['VERSION_NUMBER'] = CONST.VER_NUMBER
 
     def add_pointcollection_data(self, key: str, value: PointArray):
         logging.info(f"added {len(value)} {key} to saved file")

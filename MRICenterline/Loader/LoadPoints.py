@@ -1,23 +1,42 @@
 import json
 # from icecream import ic
 from MRICenterline.Points import PointArray, Point
+import numpy as np
 
 import logging
 logging.getLogger(__name__)
 
 
 class LoadPoints:
-    def __init__(self, filename, image_data):
+    def __init__(self, filename, image_data, get_raw_dataset=False):
         self.filename = filename
         self.image_data = image_data
 
         self.slide_indices = []
 
         self._open_file()
-        self.point_set = self.get_points()
+
+        if get_raw_dataset:
+            self.point_set = self.get_raw_points()
+        else:
+            self.point_set = self.get_points()
+
+    def _find_nearest_in_zcoords(self, value):
+        array = self.image_data.z_coords
+        array = np.asarray(array)
+        idx = (np.abs(array - value)).argmin()
+        return array[idx]
 
     def _calculate_slideIdx(self, point):
-        return self.image_data.convertZCoordsToSlices([point])[0]
+        _converted = self.image_data.convertZCoordsToSlices_alternate([point])
+        print("conv ", _converted)
+
+        if len(_converted) == 0:
+            _nearest_zcoords = self._find_nearest_in_zcoords(point)
+            print(point, _nearest_zcoords, self.image_data.z_coords.index(_nearest_zcoords))
+            return self.image_data.z_coords.index(_nearest_zcoords)
+        else:
+            return _converted[0]
 
     def get_points(self): # -> PointArray:
         logging.debug(f"Getting point data from {self.filename}")
@@ -28,8 +47,22 @@ class LoadPoints:
             logging.info(f"Loading {len(self.json_data[point_set])} {point_set} in loader")
             _point_array = PointArray()
             for k, i in enumerate(self.json_data[point_set]):
-                _point = Point(i + [self._calculate_slideIdx(i[2])])
-                self.slide_indices.append(self._calculate_slideIdx(i[2]))
+                _index = self._calculate_slideIdx(i[2])
+
+                _point = Point(i + [_index])
+                self.slide_indices.append(_index)
+                _point_array.add_point(_point)
+            _ptset[point_set] = _point_array
+        return _ptset
+
+    def get_raw_points(self):
+        _point_type = self._get_type_of_points()
+
+        _ptset = {}
+        for point_set in _point_type:
+            _point_array = PointArray()
+            for k, i in enumerate(self.json_data[point_set]):
+                _point = Point(i)
                 _point_array.add_point(_point)
             _ptset[point_set] = _point_array
         return _ptset

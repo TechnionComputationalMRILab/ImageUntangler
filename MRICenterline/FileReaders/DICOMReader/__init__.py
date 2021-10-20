@@ -138,7 +138,7 @@ class DICOMReader:
             return self.cached_pixel_data_dict[item]
 
     def convert_to_vtk(self, seq):
-        _prop = NumpyToVTK.get_image_properties([pix[0] for pix in self[seq]])
+        _prop, _ = NumpyToVTK.get_image_properties([pix[0] for pix in self[seq]])
         _arr = np.array([pix[2] for pix in self[seq]])
         return NumpyToVTK.numpy_array_as_vtk_image_data(_arr,
                                                         origin=_prop['origin'],
@@ -147,7 +147,18 @@ class DICOMReader:
                                                         direction=_prop['direction'],
                                                         size=_prop['size'])
 
+    # def TransformPhysicalPointToZSliceIndex(self, seq, coordinates):
+    #     _, _itk_image = NumpyToVTK.get_image_properties([pix[0] for pix in self[seq]])
+    #     _, _, _z_slice = _itk_image.TransformPhysicalPointToContinuousIndex(coordinates)
+    #     return round(_z_slice)
+    #
+    # def TransformZindextoPhysicalPoint(self, seq, index):
+    #     _, _itk_image = NumpyToVTK.get_image_properties([pix[0] for pix in self[seq]])
+    #     _, _, _z = _itk_image.TransformContinuousIndexToPhysicalPoint([0,0, index])
+    #     return _z
+
     def get_z_coords_list(self, seq):
+        # return [self.TransformZindextoPhysicalPoint(seq, i) for i in range(len(self))]
         return [pix[1] for pix in self[seq]]
 
     def get_header(self, seq):

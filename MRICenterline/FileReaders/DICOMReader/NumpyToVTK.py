@@ -10,6 +10,7 @@ logging.getLogger(__name__)
 
 NP_TO_VTK_DEBUG = False
 
+
 def get_image_properties(file_list):
     _prop = dict()
 
@@ -21,7 +22,7 @@ def get_image_properties(file_list):
     _prop['ncomp'] = dicom_itk.GetNumberOfComponentsPerPixel()
     _prop['direction'] = dicom_itk.GetDirection()
 
-    return _prop
+    return _prop, dicom_itk
 
 
 def numpy_array_as_vtk_image_data(np_arr, origin, spacing, ncomp, direction, size):

@@ -25,7 +25,7 @@ class GenericSequenceViewer:
         self.manager = manager
         self.interactor = interactor
         self.imageData = image
-
+        self.z_coords = self.imageData.z_coords
         self.panel_actor = vtkImageActor()
         self.panel_renderer = vtkRenderer()
 
@@ -224,11 +224,6 @@ class GenericSequenceViewer:
             self.processNewPoint(self.MPRpoints, pickedCoordinates)
         elif pointType.upper() == "LENGTH":
             self.processNewPoint(self.lengthPoints, pickedCoordinates)
-            # if len(self.lengthPoints) == 2:
-            #     self.calculateLengths()
-            #     while len(self.lengthPoints) > 0:
-            #         self.lengthPoints[-1].actor.SetVisibility(False)
-            #         self.lengthPoints.delete(-1)
 
     def calculateLengths(self):
         # TODO: remove this, use length actors instead
@@ -252,17 +247,8 @@ class GenericSequenceViewer:
             logging.info(f"Saved {len(self.lengthPoints) + len(self.MPRpoints)} points to data folder")
 
             _save_formatter.add_timestamps(self._start_time, self._stop_time, self._time_gap)
+            # _save_formatter.add_generic_data("Length", )
             _save_formatter.save_data()
-
-    def saveLengths(self):
-        _save_formatter = SaveFormatter(self.imageData)
-        _save_formatter.add_pointcollection_data('length points', self.lengthPoints)
-        _save_formatter.save_data()
-
-    def saveMPRPoints(self):
-        _save_formatter = SaveFormatter(self.imageData)
-        _save_formatter.add_pointcollection_data("MPR points", self.MPRpoints)
-        _save_formatter.save_data()
 
     def modifyAnnotation(self, x, y):
         _picker = vtk.vtkPropPicker()
@@ -283,7 +269,8 @@ class GenericSequenceViewer:
         self.panel_renderer.RemoveActor(prop)
 
     def render_panel(self):
-        logging.debug(f"Rendering slice {self.sliceIdx}")
+        _zcoord = round(self.z_coords[self.sliceIdx], 2)
+        logging.debug(f"Rendering slice {self.sliceIdx} / z = {_zcoord}")
         logging.debug(f"Current number of actors: {self.panel_renderer.GetActors().GetNumberOfItems()}")
 
         for i in self.lengthPoints:
@@ -349,11 +336,11 @@ class GenericSequenceViewer:
         else:
             logging.info(f"Time measured: {self._stop_time - self._start_time}")
 
-    def pause_timer(self):  # TODO
+    def pause_timer(self):
         self._pause_time = datetime.now(timezone.utc).astimezone()
         logging.info(f"Pausing timer: {self._pause_time}")
 
-    def resume_timer(self):  # TODO
+    def resume_timer(self):
         self._resume_time = datetime.now(timezone.utc).astimezone()
         logging.info(f"Resuming timer: {self._resume_time}")
 
@@ -397,3 +384,20 @@ class GenericSequenceViewer:
         # self.window.Render()
         self.render_panel()
 
+    # TODO REMOVE AFTER COMPLETION
+    def convert_zcoords(self):
+        print("CONVERTING")
+        from MRICenterline.utils import annotation_cleaner
+
+        _zlist = []
+        for i in range(self.imageData.extent[5]):
+            self.setSliceIndex(i)
+
+            matrix = self.reslice.GetResliceAxes()
+            center = matrix.MultiplyPoint((0, 0, 0, 1))
+            __zCoordinate = (center[2] - self.imageData.origin[2]) - self.imageData.dimensions[2] \
+                            * self.imageData.spacing[2] / 2
+
+            _zlist.append(__zCoordinate)
+
+        annotation_cleaner.convert(self.imageData, _zlist)
