@@ -156,14 +156,6 @@ class SequenceViewerInteractorStyle(vtkInteractorStyleImage):
         if self.pointPicker.Pick(mouseX, mouseY, 0.0, self.model.view.panel_renderer):
             pickPosition = self.pointPicker.GetPickPosition()
 
-            # TODO REMOVE
-            matrix = self.model.view.reslice.GetResliceAxes()
-            center = matrix.MultiplyPoint((0, 0, 0, 1))
-            __zCoordinate = (center[2] - self.model.view.imageData.origin[2]) - self.model.view.imageData.dimensions[2]\
-                             * self.model.view.imageData.spacing[2] / 2
-
-            print(__zCoordinate)
-
             zCoordinate = self.model.view.z_coords[self.model.view.sliceIdx]
             pickedCoordinates = (pickPosition[0], pickPosition[1], zCoordinate)
 

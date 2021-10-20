@@ -57,7 +57,6 @@ class Imager:
         for dicom in self.dicom_list:
             for seq in dicom.get_sequence_list():
                 _seq_list.append(seq)
-                # _image_list.append(Image(dicom, sequence=seq))
                 self.image_list[seq] = Image(dicom, sequence=seq)
         return _seq_list
 

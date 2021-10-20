@@ -1,7 +1,5 @@
 import json
-# from icecream import ic
 from MRICenterline.Points import PointArray, Point
-import numpy as np
 
 import logging
 logging.getLogger(__name__)
@@ -13,7 +11,6 @@ class LoadPoints:
         self.image_data = image_data
 
         self.slide_indices = []
-
         self._open_file()
 
         if get_raw_dataset:
@@ -21,24 +18,10 @@ class LoadPoints:
         else:
             self.point_set = self.get_points()
 
-    def _find_nearest_in_zcoords(self, value):
-        array = self.image_data.z_coords
-        array = np.asarray(array)
-        idx = (np.abs(array - value)).argmin()
-        return array[idx]
-
     def _calculate_slideIdx(self, point):
-        _converted = self.image_data.convertZCoordsToSlices_alternate([point])
-        print("conv ", _converted)
+        return self.image_data.convertZCoordsToSlices([point])[0]
 
-        if len(_converted) == 0:
-            _nearest_zcoords = self._find_nearest_in_zcoords(point)
-            print(point, _nearest_zcoords, self.image_data.z_coords.index(_nearest_zcoords))
-            return self.image_data.z_coords.index(_nearest_zcoords)
-        else:
-            return _converted[0]
-
-    def get_points(self): # -> PointArray:
+    def get_points(self):
         logging.debug(f"Getting point data from {self.filename}")
         _point_type = self._get_type_of_points()
 

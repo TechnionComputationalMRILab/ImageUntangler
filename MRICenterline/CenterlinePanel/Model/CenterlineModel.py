@@ -57,13 +57,6 @@ class CenterlineModel:
     def calculate_input_data(self):
         return Calculate.calculate_input_data(self.get_mpr_properties())
 
-    # def saveLengths(self, length_points):
-    #     self.control.save_lengths(length_points)
-    #     _save_formatter = SaveFormatter(self.image_data)
-    #     _save_formatter.add_pointcollection_data('length in mpr points', length_points)
-    #     _save_formatter.add_generic_data("mpr points", self.points)
-    #     _save_formatter.save_data()
-
     def set_points_button_click(self):
         logging.debug("Adding length points...")
         self.view.set_points_button_click()

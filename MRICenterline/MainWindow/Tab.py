@@ -10,7 +10,9 @@ from MRICenterline.MainWindow.CustomOpenDialog import CustomOpenDialog
 from MRICenterline.DisplayPanel.Model.GenericModel import GenericModel
 from MRICenterline.DisplayPanel.Model.Imager import Imager
 from MRICenterline.Loader.LoadDialog import LoadDirDialog
+from MRICenterline.Config.DialogBox import DialogBox
 from MRICenterline import BulkFolderScanner
+
 from MRICenterline.Config import ConfigParserRead as CFG
 from MRICenterline.utils import message as MSG
 
@@ -88,18 +90,14 @@ class Tab(QWidget):
 
     def show_preferences_dialog(self):
         logging.debug("Preferences dialog opened")
-        MSG.msg_box_warning("GUI Preferences editor not implemented in this version",
-                            info="Please edit the config.ini using a plain text editor")
-        # _preferences = DialogBox(parent=self)
-        # _preferences.setWindowModality()
+        # MSG.msg_box_warning("GUI Preferences editor not implemented in this version",
+        #                     info="Please edit the config.ini using a plain text editor")
+
+        _preferences = DialogBox(parent=self)
+        _preferences.exec()
 
     def get_name(self):
         return self.tab_name
-        # if len(self.name) >= 16:
-        #     return self.name[:16]
-        # else:
-        #     padding = 16 - len(self.name)
-        #     return "{0}{1}{2}".format(' ' * int(padding/2), self.name, ' ' * int((padding/2) + 0.51))
 
     def load_images(self):
         _open_dlg = CustomOpenDialog()
@@ -164,7 +162,8 @@ class Tab(QWidget):
         # open file explorer and load selected NRRD images
         try:
             self.load_images()  # load list of images
-        except FileNotFoundError: # user X-ed out file explorer
+        except Exception as e: # user X-ed out file explorer
+            logging.critical(f"Error in loading tab: {e}")
             return -1
         else:
             self.clear_default()

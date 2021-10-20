@@ -2,7 +2,6 @@ import math
 from vtkmodules.vtkCommonDataModel import vtkImageData
 from vtkmodules.util import numpy_support
 
-# from icecream import ic
 import numpy as np
 
 import logging
@@ -31,15 +30,8 @@ class ImageProperties:
 
         min_z = round(center_z - (self.origin[2] + self.spacing[2] * (self.dimensions[2])), 1)
         max_z = math.ceil((self.dimensions[2] * self.spacing[2]) + min_z)
-        # self.slice_list = dict(zip(np.arange(self.dimensions[2]), np.arange(min_z+self.spacing[2], max_z, self.spacing[2])))
+
         self.slice_list = dict(zip(np.arange(self.dimensions[2]), z_coords))
-
-        # TODO: check this for the point loader
-        # print("slicelist", self.slice_list)
-        #
-
-        # print(z_coords, len(z_coords))
-        # print(np.arange(min_z, max_z, self.spacing[2]), len(np.arange(min_z, max_z, self.spacing[2])))
 
     def getParallelScale(self):
         return 0.5 * self.spacing[0] * (self.extent[1] - self.extent[0])
@@ -48,16 +40,6 @@ class ImageProperties:
         _slice_list = []
         for i in z_coords:
             for k, v in self.slice_list.items():
-                if round(i, 1) == round(v, 1):
-                    _slice_list.append(k)
-
-        return _slice_list
-
-    def convertZCoordsToSlices_alternate(self, z_coords: list):
-        _alternate_slice_list = dict(zip(np.arange(self.dimensions[2]), self.z_coords))
-        _slice_list = []
-        for i in z_coords:
-            for k, v in _alternate_slice_list.items():
                 if round(i, 1) == round(v, 1):
                     _slice_list.append(k)
 

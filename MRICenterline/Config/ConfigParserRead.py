@@ -14,8 +14,8 @@ def initialize():
         config_file.read(config_file_path)
     except FileNotFoundError:
         raise FileNotFoundError
-
-    return config_file, config_file_path
+    else:
+        return config_file, config_file_path
 
 
 def get_config_data(section, key):
@@ -25,7 +25,19 @@ def get_config_data(section, key):
 
 def set_config_data(section, key, value):
     config_file, config_file_path = initialize()
-    config_file[section][key] = value
+    config_file.set(section, key, str(value))
+
+    with open(config_file_path, 'w') as f:
+        config_file.write(f)
+
+
+def set_color_data(section, value):
+    config_file, config_file_path = initialize()
+    if section == 'display':
+        config_file.set('display', 'text-color', '{r}, {g}, {b}'.format(r=int(value[0]), g=int(value[1]), b=int(value[2])))
+    else:
+        config_file.set(section, 'color', '{r}, {g}, {b}'.format(r=int(value[0]), g=int(value[1]), b=int(value[2])))
+
     with open(config_file_path, 'w') as f:
         config_file.write(f)
 

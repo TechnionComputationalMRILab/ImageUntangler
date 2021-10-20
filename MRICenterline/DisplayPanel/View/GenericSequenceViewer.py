@@ -60,6 +60,7 @@ class GenericSequenceViewer:
         logging.debug("Rendering sequence")
         self.window.Render()
 
+        self._timer_status = "STOPPED"
         self._start_time = None
         self._stop_time = None
         self._pause_time = None
@@ -227,11 +228,15 @@ class GenericSequenceViewer:
 
     def calculateLengths(self):
         # TODO: remove this, use length actors instead
-        pointsPositions = np.asarray(self.lengthPoints.get_coordinates_as_array())
-        allLengths = [np.linalg.norm(pointsPositions[j, :] - pointsPositions[j + 1, :]) for j in
-                      range(len(pointsPositions) - 1)]
+        # pointsPositions = np.asarray(self.lengthPoints.get_coordinates_as_array())
+        # allLengths = [np.linalg.norm(pointsPositions[j, :] - pointsPositions[j + 1, :]) for j in
+        #               range(len(pointsPositions) - 1)]
+        #
+        # totalDistance = np.sum(allLengths)
 
-        totalDistance = np.sum(allLengths)
+        allLengths = self.lengthPoints.lengths
+        totalDistance = self.lengthPoints.total_length
+
         strdis = ["{0:.2f}".format(allLengths[i]) for i in range(len(allLengths))]
 
         MSG.msg_box_info("Calculated length",
@@ -242,12 +247,14 @@ class GenericSequenceViewer:
         if len(self.lengthPoints) + len(self.MPRpoints):
             if len(self.lengthPoints):
                 _save_formatter.add_pointcollection_data('length points', self.lengthPoints)
+                if len(self.lengthPoints) > 2:
+                    _save_formatter.add_generic_data('measured length', self.lengthPoints.total_length)
+
             if len(self.MPRpoints):
                 _save_formatter.add_pointcollection_data("MPR points", self.MPRpoints)
             logging.info(f"Saved {len(self.lengthPoints) + len(self.MPRpoints)} points to data folder")
 
             _save_formatter.add_timestamps(self._start_time, self._stop_time, self._time_gap)
-            # _save_formatter.add_generic_data("Length", )
             _save_formatter.save_data()
 
     def modifyAnnotation(self, x, y):
@@ -324,12 +331,19 @@ class GenericSequenceViewer:
             self.UpdateViewerMatrixCenter(center, sliceIdx)
 
     def start_timer(self):
+        self._timer_status = "STARTED"
+
         self._start_time = datetime.now(timezone.utc).astimezone()
         logging.info(f"Starting timer: {self._start_time}")
 
     def stop_timer(self):
+        self._timer_status = "STOPPED"
+
         self._stop_time = datetime.now(timezone.utc).astimezone()
         logging.info(f"Stopping timer: {self._stop_time}")
+
+        if self._timer_status == "RESUMED":
+            self.resume_timer()
 
         if self._time_gap:
             logging.info(f"Time measured: {self._stop_time - self._start_time - sum(self._time_gap, timedelta())}")
@@ -337,10 +351,14 @@ class GenericSequenceViewer:
             logging.info(f"Time measured: {self._stop_time - self._start_time}")
 
     def pause_timer(self):
+        self._timer_status = "PAUSED"
+
         self._pause_time = datetime.now(timezone.utc).astimezone()
         logging.info(f"Pausing timer: {self._pause_time}")
 
     def resume_timer(self):
+        self._timer_status = "RESUMED"
+
         self._resume_time = datetime.now(timezone.utc).astimezone()
         logging.info(f"Resuming timer: {self._resume_time}")
 

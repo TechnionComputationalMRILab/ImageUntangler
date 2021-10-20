@@ -190,11 +190,19 @@ class DisplayPanelToolbar(QToolBar):
     def addTimerButton(self):
         def toggleTimer():
             if not _timer_button.isChecked():
+                print("1")
                 _timer_button.setIcon(qta.icon('mdi.timer-outline'))
                 _timer_button.setText("Start timer")
                 self.manager.stop_timer()
                 _pause_timer_button.setEnabled(False)
+
+                if _pause_timer_button.isChecked():
+                    _pause_timer_button.setChecked(False)
+                    _pause_timer_button.setIcon(qta.icon("ei.pause-alt"))
+                    _pause_timer_button.setText("Pause timer")
+                    self.manager.resume_timer()
             else:
+                print("2")
                 _timer_button.setIcon(qta.icon('mdi.timer-off-outline'))
                 _timer_button.setText("Stop timer")
                 self.manager.start_timer()
@@ -202,10 +210,12 @@ class DisplayPanelToolbar(QToolBar):
 
         def togglePause():
             if not _pause_timer_button.isChecked():
+                print("3")
                 _pause_timer_button.setIcon(qta.icon("ei.pause-alt"))
                 _pause_timer_button.setText("Pause timer")
                 self.manager.resume_timer()
             else:
+                print("4")
                 _pause_timer_button.setIcon(qta.icon("ei.play-alt"))
                 _pause_timer_button.setText('Resume timer')
                 self.manager.pause_timer()
@@ -230,25 +240,6 @@ class DisplayPanelToolbar(QToolBar):
         _timer_layout.addWidget(_pause_timer_button)
 
         self.addWidget(_timer_widget)
-    #
-    # def addTimerButton(self):
-    #     self._timer_button = QPushButton("Start timer")
-    #     self._timer_button.setStatusTip("Start timer")
-    #     self._timer_button.setIcon(qta.icon('mdi.timer-outline'))
-    #     self._timer_button.setCheckable(True)
-    #     self._timer_button.clicked.connect(self.toggleTimer)
-    #
-    #     self.addWidget(self._timer_button)
-    #
-    # def toggleTimer(self):
-    #     if not self._timer_button.isChecked():
-    #         self._timer_button.setIcon(qta.icon('mdi.timer-outline'))
-    #         self._timer_button.setText("Start timer")
-    #         self.manager.stop_timer()
-    #     else:
-    #         self._timer_button.setIcon(qta.icon('mdi.timer-off-outline'))
-    #         self._timer_button.setText("Stop timer")
-    #         self.manager.start_timer()
 
     def addDeleteAllButton(self):
         _delete_all = QPushButton("Clear MPR points")

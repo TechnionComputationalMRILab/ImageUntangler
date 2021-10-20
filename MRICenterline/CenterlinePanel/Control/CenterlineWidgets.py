@@ -25,12 +25,6 @@ class CenterlineWidgets:
         self.actor.GetProperty().SetColorWindow(self.model.interface.window)
         return self.actor
 
-    # def save_lengths(self, length_points):
-    #     _save_formatter = SaveFormatter(self.model.image_data)
-    #     _save_formatter.add_pointcollection_data('length in mpr points', length_points)
-    #     _save_formatter.add_generic_data("mpr points", self.model.points)
-    #     _save_formatter.save_data()
-
 # ------------------------------ toolbar widgets ------------------------------
 
     def addSaveAnnotationButton(self):
