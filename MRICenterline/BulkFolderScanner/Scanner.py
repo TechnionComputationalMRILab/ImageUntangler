@@ -2,6 +2,7 @@ import os
 import json
 from glob import glob
 from pydicom import dcmread
+from pathlib import Path
 
 from MRICenterline.FileReaders.DICOMReader import DICOMReader
 
@@ -42,18 +43,18 @@ def generate_directory_report(folder, get_only_latest, also_show_centerline):
         pass
 
     # go through all the data directories
-    _data_directories = [file.replace('\\', '/') for file in glob(f"{folder}/*/data/")]
+    _data_directories = [Path(file) for file in glob(f"{folder}/*/data/")]
     _to_csv = []
 
     for di in _data_directories:
         _centerline_annotation_data = set(
-            [file.replace('\\', '/') for file in glob(f"{di}/*.centerline.annotation.json")])
+            [Path(file) for file in glob(f"{di}/*.centerline.annotation.json")])
 
         if _centerline_annotation_data:
             _annotation_data = set(
-                [file.replace('\\', '/') for file in glob(f"{di}/*.annotation.json")]) - _centerline_annotation_data
+                [Path(file) for file in glob(f"{di}/*.annotation.json")]) - _centerline_annotation_data
         else:
-            _annotation_data = set([file.replace('\\', '/') for file in glob(f"{di}/*.annotation.json")])
+            _annotation_data = set([Path(file) for file in glob(f"{di}/*.annotation.json")])
 
         if _annotation_data:
             _dict = {}
@@ -89,19 +90,26 @@ def generate_directory_report(folder, get_only_latest, also_show_centerline):
                         _dict['filename'] = os.path.basename(_latest_centerline_annotation)
                         _to_csv.append(_dict)
 
+                elif _centerline_annotation_data:
+                    _latest_centerline_annotation = max(_centerline_annotation_data, key=os.path.getctime)
+                    if os.path.getctime(_latest_centerline_annotation) > os.path.getctime(_latest_annotation):
+                        _dict['has CL'] = "CL available"
+                    else:
+                        _dict['has CL'] = "CL not available"
+
     return _to_csv
 
 
 def generate_time_report(folder):
-    _data_directories = [file.replace('\\', '/') for file in glob(f"{folder}/*/data/")]
+    _data_directories = [Path(file) for file in glob(f"{folder}/*/data/")]
     _to_csv = []
 
     for di in _data_directories:
-        _centerline_annotation_data = [file.replace('\\', '/') for file in glob(f"{di}/*.centerline.annotation.json")]
+        _centerline_annotation_data = [Path(file) for file in glob(f"{di}/*.centerline.annotation.json")]
         if not _centerline_annotation_data:
             continue
 
-        _annotation_data = list(set([file.replace('\\', '/') for file in glob(f"{di}/*.annotation.json")]) - set(
+        _annotation_data = list(set([Path(file) for file in glob(f"{di}/*.annotation.json")]) - set(
             _centerline_annotation_data))
 
         # get the latest dated annotation and centerline.annotation file
@@ -112,8 +120,13 @@ def generate_time_report(folder):
         _dict = {}
         with open(_latest_annotation, 'r') as annotation_file, \
                 open(_latest_centerline_annotation, 'r') as centerline_file:
-            _dict['Annotation time measurement'] = json.load(annotation_file)['Time measurement']
-            _dict['Centerline Annotation time measurement'] = json.load(centerline_file)['Time measurement']
+            _json_file = json.load(annotation_file)
+            _dict['Annotation time measurement'] = _json_file['Time measurement']
+            _dict['Centerline Annotation time measurement'] = _json_file['Time measurement']
+
+            # get measured lengths
+            # if "VERSION_NUMBER" in _json_file.keys():
+            #     _dict["measured length"] =
 
         _dict['Case Number'] = [int(s) for s in di.split('/') if s.isdigit()][0]
         _dict['Path'] = di
