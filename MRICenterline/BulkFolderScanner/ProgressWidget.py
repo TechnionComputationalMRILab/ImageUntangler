@@ -127,6 +127,7 @@ class ProgressWidget(QWidget):
 
         _to_csv = Scanner.generate_directory_report(self.folder_path, get_only_latest, also_show_centerline)
 
+        logging.debug(f'writing to file: {_to_csv}')
         with open(os.path.join(self.folder_path, 'directory.csv'), 'w', encoding='utf8', newline='') as output_file:
             fc = csv.DictWriter(output_file, fieldnames=_to_csv[0].keys())
             fc.writeheader()

@@ -41,13 +41,13 @@ class LoadDirTable(QTableWidget):
                                                     # based on column name k
             self.file_list = _columns.pop('filename')
             self.path_list = _columns.pop('path')
-            self.data = {k: _columns[k] for k in ['case number', 'sequence name', "date",
+            self.data = {k: _columns[k] for k in ['case number', 'sequence name', "date", 'has CL',
                                                   '# MPR points', '# len points', 'Time measurement', 'length']}
 
         # self.hidden_rows = self._get_latest_cases()
 
         self.setRowCount(_num_of_rows)
-        self.setColumnCount(7)
+        self.setColumnCount(8)
 
         self.set_data()
         self.resizeColumnsToContents()

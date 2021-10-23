@@ -1,6 +1,7 @@
 import os
 import csv
 import json
+from pathlib import Path
 from typing import List
 from PyQt5.QtCore import QMetaObject
 from PyQt5.QtWidgets import QWidget, QHBoxLayout, QFileDialog
@@ -73,8 +74,8 @@ class Tab(QWidget):
 
             try:
                 self.load_images_in_pathname(self._ldd.path['path'])
-            except:
-                pass
+            except Exception as e:
+                logging.error(f"Error in JSON loader: {e}")
             else:
                 self._case_is_new = False
                 with open(self._ldd.path['full_path'], 'r') as f:
@@ -108,7 +109,7 @@ class Tab(QWidget):
 
         _folder_path = _open_dlg.full_path
         if _folder_path:
-            self.load_images_in_pathname(_folder_path.replace('\\', '/'))
+            self.load_images_in_pathname(Path(_folder_path))
         else:
             logging.debug("User canceled/closed file open dialog.")
             self.build_new_tab()
@@ -117,7 +118,7 @@ class Tab(QWidget):
     def load_images_in_pathname(self, path):
         self.MRIimages: Imager = Imager(path)
         # self.name = path[path.rfind(os.path.sep) + 1:]
-        self.name = path.split("/")[-2]
+        self.name = str(Path(path)).split("\\")[-2]
         logging.info(f"Loading {self.name}")
         self.tab_name = os.path.basename(self.name)
 

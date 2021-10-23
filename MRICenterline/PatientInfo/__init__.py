@@ -1,10 +1,8 @@
 import os
 
-from PyQt5.QtWidgets import QDockWidget, QVBoxLayout, QDialogButtonBox, QTextEdit
+from PyQt5.QtWidgets import QDockWidget, QVBoxLayout, QTextEdit
 
 from MRICenterline.PatientInfo.PatientTable import PatientTable
-from MRICenterline.Config import ConfigParserRead as CFG
-from MRICenterline.utils import message as MSG
 
 import logging
 logging.getLogger(__name__)
