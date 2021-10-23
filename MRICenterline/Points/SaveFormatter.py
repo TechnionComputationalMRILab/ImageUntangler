@@ -18,13 +18,18 @@ logging.getLogger(__name__)
 
 class SaveFormatter:
     """ handles the formatting and saving of the files """
-    def __init__(self, imagedata: ImageProperties, path, suffix: str = "", append_to_directory=True):
+    def __init__(self, imagedata: ImageProperties, path, suffix: str = "",
+                 append_to_directory=True, use_data_folder=True):
         self.path = Path(path)
         self.append_to_directory = append_to_directory
         self.filename = datetime.now(timezone.utc).astimezone().strftime("%d.%m.%Y__%H_%M") + "." + suffix + ".annotation.json"
         self.case_number = os.path.basename(self.path)
 
-        self.save_to = os.path.join(path, 'data')
+        if use_data_folder:
+            self.save_to = os.path.join(path, 'data')
+        else:
+            self.save_to = path
+
         self.header = dict(imagedata.header)
 
         self.output_data = self.header

@@ -28,7 +28,8 @@ def convert(imagedata, bad_z_coords, model):
     with open(_file, 'r') as f:
         json_data = json.load(f)
 
-    _save_formatter = SaveFormatter(imagedata, append_to_directory=False, path=os.path.split(_file)[0])
+    _save_formatter = SaveFormatter(imagedata, append_to_directory=False,
+                                    path=os.path.split(_file)[0], use_data_folder=False)
 
     _fix = []
     for i in lp.point_set.keys():
