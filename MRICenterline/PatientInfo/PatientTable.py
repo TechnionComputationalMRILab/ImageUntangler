@@ -40,9 +40,7 @@ class PatientTable(QTableWidget):
                                                     # based on column name k
             self.file_list = _columns.pop('filename')
             self.path_list = _columns.pop('path')
-            self.data = {k: _columns[k] for k in ['case number', "date", 'number of MPR points', 'sequence name']}
-
-        # self.hidden_rows = self._get_latest_cases()
+            self.data = {k: _columns[k] for k in ['case number', "date", '# MPR points', '# len points', 'sequence name']}
 
         self.setRowCount(_num_of_rows)
         self.setColumnCount(4)

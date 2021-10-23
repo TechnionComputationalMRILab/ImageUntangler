@@ -14,6 +14,7 @@ class PreferencesWidget(QWidget):
         self.categories.insertItem(1, 'Display')
         self.categories.insertItem(2, "Length style")
         self.categories.insertItem(3, "Centerline style")
+        self.categories.insertItem(4, "Dev tools")
         self.categories.currentRowChanged.connect(self.current_category_changed)
         self.categories.setMaximumWidth(200)
 
@@ -24,6 +25,7 @@ class PreferencesWidget(QWidget):
         self.preferences.addWidget(self.display())
         self.preferences.addWidget(self.length_display_style())
         self.preferences.addWidget(self.centerline_style())
+        self.preferences.addWidget(self.dev_tools())
         self.preferences.setCurrentIndex(0)
 
         self.main_layout.addWidget(self.categories, stretch=1)
@@ -230,3 +232,26 @@ class PreferencesWidget(QWidget):
         _mpr_layout.addWidget(_line_measurement_style, 5, 1)
 
         return _mpr_widget
+
+    def dev_tools(self):
+        self.testing_show_fixer = CFG.get_boolean('testing', 'show-fixer-button')
+
+        def fixer_checkbox():
+            self.testing_show_fixer = _show_fixer_checkbox.isChecked()
+
+        _show_fixer_checkbox = QCheckBox()
+        _show_fixer_checkbox.setChecked(self.testing_show_fixer)
+        _show_fixer_checkbox.clicked.connect(fixer_checkbox)
+
+        _widget = QWidget()
+        _layout = QGridLayout()
+        _widget.setLayout(_layout)
+
+        _layout.addWidget(QLabel("Show Fixer Button"), 0, 0)
+        _layout.addWidget(_show_fixer_checkbox, 0, 1)
+
+        SPACER = QWidget()
+        SPACER.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
+        _layout.addWidget(SPACER)
+
+        return _widget

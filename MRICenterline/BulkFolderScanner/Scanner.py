@@ -11,7 +11,7 @@ def get_directories(folder):
 
 
 def generate_seq_dict(folder):
-    _dicomreader = DICOMReader.test_folder(folder)
+    _dicomreader = DICOMReader.test_folder(folder, run_clean=True)
     if _dicomreader is type(DICOMReader):
         if _dicomreader.check_seqfile_exists():
             _dicomreader.generate_seq_dict()
@@ -19,11 +19,11 @@ def generate_seq_dict(folder):
 
 def generate_report(folder):
     required_fields = ["PatientName", "PatientID", "Manufacturer", "ManufacturerModelName", "ProtocolName", "StudyDate", "StudyTime"]
-    _dicomreader = DICOMReader.test_folder(folder, run_clean=True)
+    _dicomreader = DICOMReader.test_folder(folder)
 
     if type(_dicomreader) is DICOMReader:
         get_first_valid_file = list(_dicomreader.sequence_dict.values())[-1][-1]
-        patient_data = dcmread(get_first_valid_file)
+        patient_data = dcmread(os.path.join(folder, get_first_valid_file))
 
         filled_out_dict = {}
         filled_out_dict['Sequences'] = _dicomreader.get_sequence_list()
@@ -36,7 +36,10 @@ def generate_report(folder):
 
 
 def generate_directory_report(folder, get_only_latest, also_show_centerline):
-    os.remove(os.path.join(folder, 'directory.csv'))
+    try:
+        os.remove(os.path.join(folder, 'directory.csv'))
+    except Exception:
+        pass
 
     # go through all the data directories
     _data_directories = [file.replace('\\', '/') for file in glob(f"{folder}/*/data/")]
@@ -62,8 +65,11 @@ def generate_directory_report(folder, get_only_latest, also_show_centerline):
                     _dict["case number"] = [int(s) for s in di.split('/') if s.isdigit()][0]
                     _dict["sequence name"] = _file['SeriesDescription']
                     _dict['date'] = _file['annotation timestamp'][:10]
-                    _dict['number of MPR points'] = -999
-                    _dict['path'] = di.replace('data', '')
+                    _dict['# MPR points'] = -999
+                    _dict['# len points'] = -999
+                    _dict['Time measurement'] = _file['Time measurement']
+                    _dict['length'] = _file['measured length']
+                    _dict['path'] = di
                     _dict['filename'] = os.path.basename(_latest_annotation)
                     _to_csv.append(_dict)
 
@@ -75,7 +81,10 @@ def generate_directory_report(folder, get_only_latest, also_show_centerline):
                         _dict["case number"] = str([int(s) for s in di.split('/') if s.isdigit()][0]) + "-CL"
                         _dict["sequence name"] = _file['SeriesDescription']
                         _dict['date'] = _file['annotation timestamp'][:10]
-                        _dict['number of MPR points'] = -999
+                        _dict['# MPR points'] = -999
+                        _dict['# len points'] = -999
+                        _dict['Time measurement'] = _file['Time measurement']
+                        _dict['length'] = _file['measured length']
                         _dict['path'] = di
                         _dict['filename'] = os.path.basename(_latest_centerline_annotation)
                         _to_csv.append(_dict)

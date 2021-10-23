@@ -15,6 +15,7 @@ logging.getLogger(__name__)
 class LoadDirTable(QTableWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
+        self.setSortingEnabled(True)
         self.selected_item = None
         self._raw_data = []
 
@@ -40,12 +41,13 @@ class LoadDirTable(QTableWidget):
                                                     # based on column name k
             self.file_list = _columns.pop('filename')
             self.path_list = _columns.pop('path')
-            self.data = {k: _columns[k] for k in ['case number', "date", 'number of MPR points', 'sequence name']}
+            self.data = {k: _columns[k] for k in ['case number', 'sequence name', "date",
+                                                  '# MPR points', '# len points', 'Time measurement', 'length']}
 
         # self.hidden_rows = self._get_latest_cases()
 
         self.setRowCount(_num_of_rows)
-        self.setColumnCount(4)
+        self.setColumnCount(7)
 
         self.set_data()
         self.resizeColumnsToContents()

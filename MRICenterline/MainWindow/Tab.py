@@ -106,8 +106,9 @@ class Tab(QWidget):
         # fileExplorer = QFileDialog(directory=CFG.get_config_data("folders", 'default-folder'))
         # folderPath = str(fileExplorer.getExistingDirectory())
 
-        if _open_dlg.full_path:
-            self.load_images_in_pathname(_open_dlg.full_path)
+        _folder_path = _open_dlg.full_path
+        if _folder_path:
+            self.load_images_in_pathname(_folder_path.replace('\\', '/'))
         else:
             logging.debug("User canceled/closed file open dialog.")
             self.build_new_tab()
@@ -124,7 +125,7 @@ class Tab(QWidget):
         self.mainLayout.removeWidget(self._defaultTabMainWidget)
         self._defaultTabMainWidget.deleteLater()
 
-    def get_viewer(self, sequence="None"):
+    def get_viewer(self, sequence=None):
         try:
             _generic_model = GenericModel(self.MRIimages, parent=self, use_sequence=sequence)
         except Exception as err:
@@ -153,8 +154,9 @@ class Tab(QWidget):
         if not os.path.exists(_directory):
             logging.info("Directory does not exist, creating...")
             with open(_directory, 'w', newline="") as f:
-                _directory_headers = ['case number', 'sequence name', 'date', 'number of MPR points',
-                                      'path', 'filename']
+                _directory_headers = ['case number', 'sequence name', 'date', '# MPR points', '# len points',
+                                      'Time measurement', 'length', 'path', 'filename']
+
                 csv.DictWriter(f, fieldnames=_directory_headers).writeheader()
         else:
             logging.info("Directory found! New savefiles will be appended.")

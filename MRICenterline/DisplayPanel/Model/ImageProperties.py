@@ -9,7 +9,8 @@ logging.getLogger(__name__)
 
 
 class ImageProperties:
-    def __init__(self, full_data: vtkImageData, header: dict, window, level, z_coords):
+    def __init__(self, full_data: vtkImageData, header: dict, window, level, z_coords, path):
+        self.path = path
         self.full_data = full_data
         self.spacing = full_data.GetSpacing()
         self.dimensions = full_data.GetDimensions()

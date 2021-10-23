@@ -54,6 +54,9 @@ class DialogBox(QDialog):
         # centerline_style
         CFG.set_color_data('mpr-display-style', self.preferences_widget.centerline_color)
 
+        # testing
+        CFG.set_config_data('testing', 'show-fixer-button', self.preferences_widget.testing_show_fixer)
+
         super().accept()
 
     def reject(self) -> None:

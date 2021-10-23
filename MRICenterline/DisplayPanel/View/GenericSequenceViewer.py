@@ -20,7 +20,8 @@ logging.getLogger(__name__)
 
 
 class GenericSequenceViewer:
-    def __init__(self, manager, interactor: QVTKRenderWindowInteractor, interactorStyle: SequenceViewerInteractorStyle, image):
+    def __init__(self, manager, interactor: QVTKRenderWindowInteractor,
+                 interactorStyle: SequenceViewerInteractorStyle, image):
         self.count = 0
         self.manager = manager
         self.interactor = interactor
@@ -243,11 +244,17 @@ class GenericSequenceViewer:
                          info="The lengths [mm] are:\n\n {0} \n\nThe total length:\n\n {1}".format(' , '.join(strdis),"{0:.2f}".format(totalDistance)))
 
     def save_points(self):
-        _save_formatter = SaveFormatter(self.imageData)
+        logging.info('Saving file...')
+
+        _save_formatter = SaveFormatter(imagedata=self.imageData, path=self.imageData.path)
+        print("1")
         if len(self.lengthPoints) + len(self.MPRpoints):
+            print("2")
             if len(self.lengthPoints):
+                print("3")
                 _save_formatter.add_pointcollection_data('length points', self.lengthPoints)
                 if len(self.lengthPoints) > 2:
+                    logging.debug(f"Also saving total length: {self.lengthPoints.total_length}")
                     _save_formatter.add_generic_data('measured length', self.lengthPoints.total_length)
 
             if len(self.MPRpoints):
@@ -405,6 +412,7 @@ class GenericSequenceViewer:
     # TODO REMOVE AFTER COMPLETION
     def convert_zcoords(self):
         print("CONVERTING")
+
         from MRICenterline.utils import annotation_cleaner
 
         _zlist = []
@@ -418,4 +426,4 @@ class GenericSequenceViewer:
 
             _zlist.append(__zCoordinate)
 
-        annotation_cleaner.convert(self.imageData, _zlist)
+        annotation_cleaner.convert(self.imageData, _zlist, self.manager.manager)

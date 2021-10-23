@@ -23,7 +23,7 @@ logging.getLogger(__name__)
 
 
 class GenericModel(QWidget):
-    def __init__(self, MRIimages, parent, use_sequence="None"):
+    def __init__(self, MRIimages, parent, use_sequence):
         super().__init__(parent)
         self.images = MRIimages
 
@@ -43,15 +43,15 @@ class GenericModel(QWidget):
         self.interactor.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
 
         self.widgets = SequenceInteractorWidgets(self.images.get_sequences(), self)
-
         self.sequenceManager = GenericViewerManager(self, self.images)
 
-        try:
+        if use_sequence in self.images.get_sequences():
             logging.debug(f"Loading single image using sequence {use_sequence}")
             _index = self.images.get_sequences().index(use_sequence)
             self.view = self.sequenceManager.load_single_sequence(self.interactor, self.interactorStyle, self.images[_index])
             self.widgets.freeze_sequence_list(use_sequence)
-        except:
+        else:
+            logging.debug("Loading multiple sequences...")
             self.view = self.sequenceManager.loadSequence(0, self.interactor, self.interactorStyle)
 
         self.sliderspinboxLayout = SlidersAndSpinboxLayout(window_widgets=self.widgets.window_widgets,
@@ -264,3 +264,7 @@ class GenericModel(QWidget):
         _annotation_cleaner = QShortcut(QKeySequence('Ctrl+q'), self)
         _annotation_cleaner.activated.connect(lambda : logging.info("RUN ANNOTATION CLEANER"))
         _annotation_cleaner.activated.connect(self.view.convert_zcoords)
+
+    # TODO REMOVE
+    def FIXER(self):
+        self.view.convert_zcoords()

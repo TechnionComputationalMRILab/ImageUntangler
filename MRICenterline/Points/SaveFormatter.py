@@ -3,6 +3,7 @@ import json
 import csv
 import numpy as np
 from datetime import datetime, timezone, timedelta
+from pathlib import Path
 
 from MRICenterline.DisplayPanel.Model.ImageProperties import ImageProperties
 from MRICenterline.Points import PointArray
@@ -17,11 +18,13 @@ logging.getLogger(__name__)
 
 class SaveFormatter:
     """ handles the formatting and saving of the files """
-    def __init__(self, imagedata: ImageProperties, suffix: str = "", append_to_directory=True):
+    def __init__(self, imagedata: ImageProperties, path, suffix: str = "", append_to_directory=True):
+        self.path = Path(path)
         self.append_to_directory = append_to_directory
         self.filename = datetime.now(timezone.utc).astimezone().strftime("%d.%m.%Y__%H_%M") + "." + suffix + ".annotation.json"
-        self.case_number = [int(s) for s in os.path.dirname(imagedata.header['filename'][-1]).split("/") if s.isdigit()][-1]
-        self.save_to = os.path.join(os.path.dirname(imagedata.header['filename'][-1]), 'data')
+        self.case_number = os.path.basename(self.path)
+
+        self.save_to = os.path.join(path, 'data')
         self.header = dict(imagedata.header)
 
         self.output_data = self.header
@@ -86,14 +89,20 @@ class SaveFormatter:
     def _append_to_directory(self):
         _directory = os.path.join(CFG.get_config_data("folders", 'default-folder'), 'directory.csv')
         _num_of_mpr_points = len(self.output_data['MPR points']) if "MPR points" in self.output_data.keys() else 0
+        _num_of_len_points = len(self.output_data['length points']) if "length points" in self.output_data.keys() else 0
+
         with open(_directory, 'a', newline='') as f:
             _writer = csv.writer(f)
 
-            # ['case number', 'sequence name', 'date', 'number of MPR points', 'path', 'filename']
+            # ['case number', 'sequence name', 'date', '# MPR points', '# len points',
+                                        #   'Time measurement', 'length', 'path', 'filename']
             _writer.writerow([self.case_number,
                               self.output_data['SeriesDescription'],
                               datetime.now(timezone.utc).astimezone().strftime('%d.%m.%Y %H:%M'),
                               _num_of_mpr_points,
+                              _num_of_len_points,
+                              self.output_data['Time measurement'],
+                              round(self.output_data['measured length'], 2),
                               self.save_to,
                               self.filename])
 

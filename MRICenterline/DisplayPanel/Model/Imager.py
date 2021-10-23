@@ -14,6 +14,7 @@ class Imager:
         self.image_list = dict()
 
         self.directory = directory
+
         self.dicom_list, self.nrrd_list, self.valid_folders = self._group_by_type()
 
         self.cache = {k: vtkImageData() for k in self.valid_folders}
@@ -53,7 +54,7 @@ class Imager:
 
     def _process_dicoms(self):
         _seq_list = list()
-        _image_list = list()
+        # _image_list = list()
         for dicom in self.dicom_list:
             for seq in dicom.get_sequence_list():
                 _seq_list.append(seq)
@@ -78,13 +79,15 @@ class Imager:
                     _window, _level = self.image_list[item].get_window_and_level()
                     return ImageProperties(self.cache[item], self.image_list[item].get_header(),
                                            window=_window, level=_level,
-                                           z_coords=self.image_list[item].get_z_coords())
+                                           z_coords=self.image_list[item].get_z_coords(),
+                                           path=self.image_list[item].reader.folder)
                 else:
                     self.cache[item] = self.image_list[item].get_image()
                     _window, _level = self.image_list[item].get_window_and_level()
                     return ImageProperties(self.cache[item], self.image_list[item].get_header(),
                                            window=_window, level=_level,
-                                           z_coords=self.image_list[item].get_z_coords())
+                                           z_coords=self.image_list[item].get_z_coords(),
+                                           path=self.image_list[item].reader.folder)
 
     def get_sequences(self):
         return self.sequences + self.files
@@ -119,7 +122,7 @@ class Image:
         else:
             self._type = 'empty'
 
-    def _process_single_dicom(self, sequence):
+    def _process_single_dicom(self, sequence: DICOMReader):
         self._vtkImageData_array = self.reader.convert_to_vtk(sequence)
         self.header = self.reader.get_header(sequence)
         self.window, self.level = self.reader.get_window_and_level(sequence)

@@ -166,6 +166,11 @@ class ProgressWidget(QWidget):
     def _generate_report(self):
         logging.info("Starting folder scan for reporting")
 
+        try:
+            os.remove(os.path.join(self.folder_path, 'report.csv'))
+        except Exception:
+            pass
+
         if len(self.directories) > 0:
             self._add_to_textbox("Starting scan!")
 

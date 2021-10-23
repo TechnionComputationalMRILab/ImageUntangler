@@ -30,6 +30,10 @@ class DisplayPanelToolbar(QToolBar):
         self.addDeleteAllButton()
         self.resetSlidersToDefault()
 
+        if CFG.get_boolean('testing', 'show-fixer-button'):
+            self.addSeparator(expand=True)
+            self.addFixerButton() #TODO REMOVE
+
         self.addSeparator(expand=True)
 
         self.addHideIntermediatePointsButton()
@@ -190,7 +194,6 @@ class DisplayPanelToolbar(QToolBar):
     def addTimerButton(self):
         def toggleTimer():
             if not _timer_button.isChecked():
-                print("1")
                 _timer_button.setIcon(qta.icon('mdi.timer-outline'))
                 _timer_button.setText("Start timer")
                 self.manager.stop_timer()
@@ -202,7 +205,6 @@ class DisplayPanelToolbar(QToolBar):
                     _pause_timer_button.setText("Pause timer")
                     self.manager.resume_timer()
             else:
-                print("2")
                 _timer_button.setIcon(qta.icon('mdi.timer-off-outline'))
                 _timer_button.setText("Stop timer")
                 self.manager.start_timer()
@@ -210,12 +212,10 @@ class DisplayPanelToolbar(QToolBar):
 
         def togglePause():
             if not _pause_timer_button.isChecked():
-                print("3")
                 _pause_timer_button.setIcon(qta.icon("ei.pause-alt"))
                 _pause_timer_button.setText("Pause timer")
                 self.manager.resume_timer()
             else:
-                print("4")
                 _pause_timer_button.setIcon(qta.icon("ei.play-alt"))
                 _pause_timer_button.setText('Resume timer')
                 self.manager.pause_timer()
@@ -242,7 +242,7 @@ class DisplayPanelToolbar(QToolBar):
         self.addWidget(_timer_widget)
 
     def addDeleteAllButton(self):
-        _delete_all = QPushButton("Clear MPR points")
+        _delete_all = QPushButton("Clear points")
         _delete_all.setIcon(qta.icon('mdi.delete-outline'))
         _delete_all.clicked.connect(self.manager.deleteAllPoints)
         self.addWidget(_delete_all)
@@ -272,3 +272,9 @@ class DisplayPanelToolbar(QToolBar):
             self._intermediate_points_button.setIcon(qta.icon('mdi.laser-pointer'))
             self._intermediate_points_button.setText("Show Intermediate MPR points")
             self.manager.hide_intermediate_points()
+
+    #TODO REMOVE
+    def addFixerButton(self):
+        _fixer_button = QPushButton('FIXER')
+        _fixer_button.clicked.connect(self.manager.FIXER)
+        self.addWidget(_fixer_button)

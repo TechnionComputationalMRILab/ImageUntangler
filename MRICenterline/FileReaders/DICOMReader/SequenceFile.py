@@ -21,9 +21,8 @@ def check_if_dicom_seqfile_exists(path):
     looks for a json file in the directory
     to implement: make sure that the json file is the seqfile and not some other json file
     """
-    _seqdict_path = glob(f'{path}/data/seqdict.json')
-    if _seqdict_path:
-        return _seqdict_path[0]
+    if os.path.isfile(os.path.join(path, 'data', 'seqdict.json')):
+        return os.path.join(path, 'data', 'seqdict.json')
     else:
         return None
 
@@ -104,15 +103,18 @@ def generate_seqlist_dict(files_list):
     sorted_files = {}
     for filename in files_list:
         dicom_info = pydicom.dcmread(filename)
+        _file = os.path.basename(filename)
         try:
             seq_name = dicom_info['SeriesDescription'].value
-            if seq_name in seq_list:
-                sorted_files[seq_name][filename] = filename
-            else:
-                sorted_files[seq_name] = {filename: filename}
-                seq_list[seq_name] = seq_name
         except:
-            logging.warning(f"Ignoring invalid file: {filename}")
+            logging.warning(f"Ignoring invalid file: {_file}")
+        else:
+            if seq_name:  # takes care of the blank sequence names
+                if seq_name in seq_list:
+                    sorted_files[seq_name][_file] = _file
+                else:
+                    sorted_files[seq_name] = {_file: _file}
+                    seq_list[seq_name] = seq_name
 
     seq_list = [seq_val[1] for seq_val in seq_list.items()]
     seq_list = set(seq_list)

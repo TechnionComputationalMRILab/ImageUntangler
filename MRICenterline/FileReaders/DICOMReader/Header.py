@@ -1,4 +1,5 @@
 # from icecream import ic
+import os
 from pydicom.errors import InvalidDicomError
 
 from . import SequenceFile
@@ -26,7 +27,7 @@ def get_sequence_header(header_name, list_of_files):
 
 def get_header_dict(file_list):
     _dict = dict()
-    _dict['filename'] = file_list
+    _dict['filename'] = [os.path.basename(file) for file in file_list]
 
     for key in FOR_USE_WITH_HEADER:
         try:

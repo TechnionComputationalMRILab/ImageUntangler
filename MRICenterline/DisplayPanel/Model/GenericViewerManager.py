@@ -1,5 +1,6 @@
 from vtkmodules.qt.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
 
+from MRICenterline.DisplayPanel.Model.Imager import Imager
 from MRICenterline.DisplayPanel.View.GenericSequenceViewer import GenericSequenceViewer
 from MRICenterline.utils import message as MSG
 
@@ -8,7 +9,7 @@ logging.getLogger(__name__)
 
 
 class GenericViewerManager:
-    def __init__(self, model, MRIimages):
+    def __init__(self, model, MRIimages: Imager):
         self.MRIimages = MRIimages
         self.goodIndex = -1 # index of image that is properly encoded
         self.manager = model
@@ -40,20 +41,14 @@ class GenericViewerManager:
             logging.debug(f"Loading sequence {sequenceIndex} / {self.MRIimages.get_sequences()[sequenceIndex]}")
 
             sequenceViewer = GenericSequenceViewer(self, VTKinteractor, interactorStyle, self.MRIimages[sequenceIndex])
-            _ = sequenceViewer.sliceIdx # test if image was loaded properly
+        except Exception as err:
+            logging.critical(f"Error in loading sequence. Error is {err}")
+        else:
+            _ = sequenceViewer.sliceIdx
 
             self.goodIndex = sequenceIndex
             self.manager.setListWidgetIndex(self.goodIndex)
             return sequenceViewer
-        except AttributeError as err:
-            logging.error(f"AttributeError found: {err}")
-            return self.showValidImage(sequenceIndex, VTKinteractor, interactorStyle)
-        except FileNotFoundError as err:
-            logging.error(f"FileNotFoundError found: {err}")
-            return self.showValidImage(sequenceIndex, VTKinteractor, interactorStyle)
-                # logging.error(f"File not found: {self.MRIimages[sequenceIndex]}")
-        except Exception as err:
-            logging.critical(f"Error in loading sequence. Error is {err}")
 
     def load_single_sequence(self, VTKinteractor: QVTKRenderWindowInteractor, interactorStyle, single_image):
         logging.debug(f"Loading single sequence")

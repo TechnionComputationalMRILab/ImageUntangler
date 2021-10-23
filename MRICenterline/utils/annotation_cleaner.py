@@ -1,3 +1,4 @@
+from PyQt5.QtWidgets import QFileDialog
 from MRICenterline.Loader.LoadPoints import LoadPoints
 from MRICenterline.Points.SaveFormatter import SaveFormatter
 import numpy as np
@@ -6,43 +7,48 @@ import os
 from shutil import copy
 
 
-def convert(imagedata, bad_z_coords):
+def convert(imagedata, bad_z_coords, model):
     print("CONVERTING")
 
     fixed_z_coords = imagedata.z_coords
-    path_to_file = 'C:\\Users\\ang.a\\OneDrive - Technion\\Documents\\MRI_Data\\problematic_enc_files\\104\\data'
-    file_list = ['17.10.2021__12_34..annotation.json', '17.10.2021__12_33..annotation.json', '17.10.2021__12_32..annotation.json']
 
-    for file_to_convert in file_list:
-        copy(os.path.join(path_to_file, file_to_convert), os.path.join(path_to_file, "BACKUP__" + file_to_convert))
-        lp = LoadPoints(os.path.join(path_to_file, file_to_convert), imagedata, get_raw_dataset=True)
+    _file, _ = QFileDialog.getOpenFileName(model)
+    print(os.path.split(_file))
 
-        # for i in lp.point_set.values():
-        #     for pt in i:
-        #         for k, bad_z in enumerate(bad_z_coords):
-        #             if np.isclose(pt[2], bad_z):
-        #                 pass
-                        # print(f"replace {bad_z} with {fixed_z_coords[k]}")
+    copy(_file, os.path.join(os.path.split(_file)[0], "BACKUP__" + os.path.split(_file)[1]))
+    lp = LoadPoints(_file, imagedata, get_raw_dataset=True)
 
-        with open(os.path.join(path_to_file, file_to_convert), 'r') as f:
-            json_data = json.load(f)
+    # for i in lp.point_set.values():
+    #     for pt in i:
+    #         for k, bad_z in enumerate(bad_z_coords):
+    #             if np.isclose(pt[2], bad_z):
+    #                 pass
+                    # print(f"replace {bad_z} with {fixed_z_coords[k]}")
 
-        for i in lp.point_set.keys():
-            print(i)
-            for pt in json_data[i]:
-                for k, bad_z in enumerate(bad_z_coords):
-                    if np.isclose(pt[2], bad_z):
-                        print(f"replace {bad_z} with {fixed_z_coords[k]}")
-                        pt[2] = fixed_z_coords[k]
+    with open(_file, 'r') as f:
+        json_data = json.load(f)
 
-        _save_formatter = SaveFormatter(imagedata, append_to_directory=False)
-        for i in lp.point_set.keys():
-            _save_formatter.add_generic_data(i, json_data[i])
+    _save_formatter = SaveFormatter(imagedata, append_to_directory=False, path=os.path.split(_file)[0])
 
-        # with open(os.path.join(path_to_file, file_to_convert), 'w') as f:
-        #     json.dump(json_data, f, indent=4)
+    _fix = []
+    for i in lp.point_set.keys():
+        print(i)
+        _list = []
+        for pt in json_data[i]:
+            for k, bad_z in enumerate(bad_z_coords):
+                if np.isclose(pt[2], bad_z):
+                    print(f"replace {bad_z} with {fixed_z_coords[k]}")
+                    _list.append([pt[0], pt[1], fixed_z_coords[k]])
+        # _fix.append({i + ' fix': _list})
 
-        print('done?')
+        _save_formatter.add_generic_data(i + "_fix", _list)
+
+    _save_formatter.save_data()
+
+    # with open(os.path.join(path_to_file, file_to_convert), 'w') as f:
+    #     json.dump(json_data, f, indent=4)
+
+    print('done?')
 
 
 def find_nearest(array, value):
