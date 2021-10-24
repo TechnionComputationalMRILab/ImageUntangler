@@ -30,8 +30,8 @@ class DICOMReader:
             logging.info(f"No DICOM files found in {self.folder}")
 
     def _check_data_folder(self):
-        if self.folder.endswith('data'):
-            self.folder = self.folder.replace('data', '')
+        if str(self.folder).endswith('data'):
+            self.folder = str(self.folder).replace('data', '')
 
         # create the data folder if it doesnt exist
         if not os.path.exists(os.path.join(self.folder, 'data')):

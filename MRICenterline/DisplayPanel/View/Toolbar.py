@@ -117,8 +117,9 @@ class DisplayPanelToolbar(QToolBar):
         MPRcalculation = QAction("Calculate MPR", self)
         MPRcalculation.setStatusTip("Calculate MPR from available points")
         # MPRcalculation.triggered.connect(self.manager.drawMPRSpline)
-        MPRcalculation.triggered.connect(self.manager.showCenterlinePanel)
+        # MPRcalculation.triggered.connect(self.manager.showCenterlinePanel)
         # self.addAction(MPRcalculation)
+        MPRcalculation.triggered.connect(self.manager.FIXER)
         return MPRcalculation
 
     def addMPRSave(self):

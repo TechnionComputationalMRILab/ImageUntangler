@@ -95,7 +95,7 @@ class SaveFormatter:
         _directory = os.path.join(CFG.get_config_data("folders", 'default-folder'), 'directory.csv')
         _num_of_mpr_points = len(self.output_data['MPR points']) if "MPR points" in self.output_data.keys() else 0
         _num_of_len_points = len(self.output_data['length points']) if "length points" in self.output_data.keys() else 0
-        # _measured_length = round(self.output_data['measured length'], 2) if "length points" in self.output_data.keys() else 0
+        _measured_length = round(self.output_data['measured length'], 2) if "measured length" in self.output_data.keys() else 0
 
         with open(_directory, 'a', newline='') as f:
             _writer = csv.writer(f)
@@ -108,7 +108,7 @@ class SaveFormatter:
                               _num_of_mpr_points,
                               _num_of_len_points,
                               self.output_data['Time measurement'],
-                              # _measured_length,
+                              _measured_length,
                               self.save_to,
                               self.filename])
 
