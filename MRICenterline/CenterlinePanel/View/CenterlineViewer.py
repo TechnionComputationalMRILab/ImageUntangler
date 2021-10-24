@@ -167,7 +167,8 @@ class CenterlineViewer(QWidget):
 
     def save_file(self):
         logging.info(f'Saving length with MPR points')
-        _save_formatter = SaveFormatter(self.model.image_data, suffix="centerline", append_to_directory=False)
+        _save_formatter = SaveFormatter(self.model.image_data, suffix="centerline",
+                                        append_to_directory=False, path=self.model.image_data.path)
         _save_formatter.add_pointcollection_data('length in mpr points', self.lengthPoints)
         _save_formatter.add_timestamps(self._start_time, self._stop_time, self._time_gap)
         _save_formatter.add_generic_data("mpr points", self.model.points)

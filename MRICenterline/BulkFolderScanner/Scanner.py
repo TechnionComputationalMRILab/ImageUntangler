@@ -72,6 +72,7 @@ def generate_directory_report(folder, get_only_latest, also_show_centerline):
                     _dict['# MPR points'] = -999
                     _dict['# len points'] = -999
                     _dict['Time measurement'] = _file['Time measurement'] if 'Time measurement' in _file.keys() else -999
+                    _dict['length'] = _file['measured length'] if 'measured length' in _file.keys() else -999
                     _dict['path'] = str(di)
                     _dict['filename'] = os.path.basename(_latest_annotation)
 
@@ -99,8 +100,8 @@ def generate_directory_report(folder, get_only_latest, also_show_centerline):
                         _dict['date'] = _file['annotation timestamp'][:10]
                         _dict['# MPR points'] = -999
                         _dict['# len points'] = -999
-                        _dict['Time measurement'] = _file['Time measurement']
-                        _dict['length'] = _file['measured length']
+                        _dict['Time measurement'] = _file['Time measurement'] if 'Time measurement' in _file.keys() else -999
+                        # _dict['length'] = _file['length'] if 'measured length' in _file.keys() else -999
                         _dict['path'] = di
                         _dict['filename'] = os.path.basename(_latest_centerline_annotation)
                         _to_csv.append(_dict)

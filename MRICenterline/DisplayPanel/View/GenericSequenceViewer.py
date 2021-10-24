@@ -426,4 +426,24 @@ class GenericSequenceViewer:
 
             _zlist.append(__zCoordinate)
 
+        # annotation_cleaner.convert(self.imageData, _zlist, self.manager.manager)
+        return _zlist
+
+    # TODO REMOVE AFTER COMPLETION
+    def run_cleaner(self):
+        print("CONVERTING")
+
+        from MRICenterline.utils import annotation_cleaner
+
+        _zlist = []
+        for i in range(self.imageData.extent[5]):
+            self.setSliceIndex(i)
+
+            matrix = self.reslice.GetResliceAxes()
+            center = matrix.MultiplyPoint((0, 0, 0, 1))
+            __zCoordinate = (center[2] - self.imageData.origin[2]) - self.imageData.dimensions[2] \
+                            * self.imageData.spacing[2] / 2
+
+            _zlist.append(__zCoordinate)
+
         annotation_cleaner.convert(self.imageData, _zlist, self.manager.manager)

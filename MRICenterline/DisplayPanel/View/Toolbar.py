@@ -33,6 +33,7 @@ class DisplayPanelToolbar(QToolBar):
         if CFG.get_boolean('testing', 'show-fixer-button'):
             self.addSeparator(expand=True)
             self.addFixerButton() #TODO REMOVE
+            self.addFixer2Button() #TODO REMOVE
 
         self.addSeparator(expand=True)
 
@@ -275,6 +276,12 @@ class DisplayPanelToolbar(QToolBar):
 
     #TODO REMOVE
     def addFixerButton(self):
-        _fixer_button = QPushButton('FIXER')
+        _fixer_button = QPushButton('FIXER: MPR')
         _fixer_button.clicked.connect(self.manager.FIXER)
+        self.addWidget(_fixer_button)
+
+    #TODO REMOVE
+    def addFixer2Button(self):
+        _fixer_button = QPushButton('FIXER2: POINTS')
+        _fixer_button.clicked.connect(self.manager.FIXER2)
         self.addWidget(_fixer_button)

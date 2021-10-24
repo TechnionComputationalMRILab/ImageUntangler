@@ -1,5 +1,6 @@
 from vtkmodules.qt.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
 
+import numpy as np
 from typing import Tuple
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QGroupBox, QFileDialog, QShortcut
 from PyQt5.Qt import QSizePolicy
@@ -120,6 +121,7 @@ class GenericModel(QWidget):
             MSG.msg_box_warning("Not enough points clicked to calculate Centerline")
         else:
             logging.info("Opening Centerline Panel dockable widget")
+            print(self.view.MPRpoints.get_coordinates_as_array())
             self.interface.initialize_points(self.view.MPRpoints.get_coordinates_as_array())
             self.interface.set_level(self.view.LevelVal)
             self.interface.set_window(self.view.WindowVal)
@@ -261,10 +263,36 @@ class GenericModel(QWidget):
         _save_kb_shortcut.activated.connect(lambda : logging.info("Save keyboard shortcut used"))
         _save_kb_shortcut.activated.connect(self.save_all)
 
-        _annotation_cleaner = QShortcut(QKeySequence('Ctrl+q'), self)
-        _annotation_cleaner.activated.connect(lambda : logging.info("RUN ANNOTATION CLEANER"))
-        _annotation_cleaner.activated.connect(self.view.convert_zcoords)
-
     # TODO REMOVE
     def FIXER(self):
-        self.view.convert_zcoords()
+        _zlist = self.view.convert_zcoords()
+        _coords = np.copy(self.view.MPRpoints.get_coordinates_as_array())
+
+        _slice_index_based = self.view.z_coords
+
+        # print(_coords)
+
+        _list = []
+        for pt in _coords:
+            for k, bad_z in enumerate(_slice_index_based):
+                if np.isclose(pt[2], bad_z):
+                    print(f"replace {bad_z} with {_zlist[k]}")
+                    _list.append(_zlist[k])
+
+        print(_coords.shape)
+        print(np.array(_list).shape)
+
+        _coords[:, 2] = np.array(_list)
+
+        print(_coords)
+
+        self.interface.initialize_points(_coords)
+        self.interface.set_level(self.view.LevelVal)
+        self.interface.set_window(self.view.WindowVal)
+
+        self.centerline_panel = CenterlinePanel(image=self.view.imageData, interface=self.interface,
+                                                parent=self)
+        self.layout.addWidget(self.centerline_panel)
+
+    def FIXER2(self):
+        self.view.run_cleaner()

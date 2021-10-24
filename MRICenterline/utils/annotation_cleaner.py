@@ -42,7 +42,7 @@ def convert(imagedata, bad_z_coords, model):
                     _list.append([pt[0], pt[1], fixed_z_coords[k]])
         # _fix.append({i + ' fix': _list})
 
-        _save_formatter.add_generic_data(i + "_fix", _list)
+        _save_formatter.add_generic_data(i, _list)
 
     _save_formatter.save_data()
 
