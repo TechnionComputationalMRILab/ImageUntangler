@@ -21,8 +21,13 @@ class CenterlineWidgets:
 
     def get_actor(self):
         self.actor.GetMapper().SetInputData(self.model.calculate_input_data())
-        self.actor.GetProperty().SetColorLevel(self.model.interface.level)
-        self.actor.GetProperty().SetColorWindow(self.model.interface.window)
+
+        try:
+            self.actor.GetProperty().SetColorLevel(self.model.interface.level)
+            self.actor.GetProperty().SetColorWindow(self.model.interface.window)
+        except Exception as e:
+            logging.warning(e)
+
         return self.actor
 
 # ------------------------------ toolbar widgets ------------------------------

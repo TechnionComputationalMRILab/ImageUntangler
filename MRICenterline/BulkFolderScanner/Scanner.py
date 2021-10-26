@@ -116,31 +116,35 @@ def generate_time_report(folder):
     _to_csv = []
 
     for di in _data_directories:
+        print(di)
+
         _centerline_annotation_data = [Path(file) for file in glob(f"{di}/*.centerline.annotation.json")]
         if not _centerline_annotation_data:
+            logging.debug(f"No CL data found for {di}. Continuing...")
             continue
 
         _annotation_data = list(set([Path(file) for file in glob(f"{di}/*.annotation.json")]) - set(
             _centerline_annotation_data))
 
         # get the latest dated annotation and centerline.annotation file
-        _latest_annotation = max(_annotation_data, key=os.path.getctime)
-        _latest_centerline_annotation = max(_centerline_annotation_data, key=os.path.getctime)
+        _latest_annotation = max(_annotation_data, key=os.path.getmtime)
+        _latest_centerline_annotation = max(_centerline_annotation_data, key=os.path.getmtime)
 
-        # get the time measurements
-        _dict = {}
-        with open(_latest_annotation, 'r') as annotation_file, \
-                open(_latest_centerline_annotation, 'r') as centerline_file:
-            _json_file = json.load(annotation_file)
-            _dict['Annotation time measurement'] = _json_file['Time measurement']
-            _dict['Centerline Annotation time measurement'] = _json_file['Time measurement']
+        if os.path.getmtime(_latest_centerline_annotation) > os.path.getmtime(_latest_annotation):
+            logging.debug("Matching annotation/CL file found")
+            # get the time measurements
+            _dict = {}
+            with open(_latest_annotation, 'r') as annotation_file, \
+                    open(_latest_centerline_annotation, 'r') as centerline_file:
+                _dict['Annotation time measurement'] = json.load(annotation_file)['Time measurement']
+                _dict['Centerline Annotation time measurement'] = json.load(centerline_file)['Time measurement']
 
-            # get measured lengths
-            # if "VERSION_NUMBER" in _json_file.keys():
-            #     _dict["measured length"] =
+                # get measured lengths
+                # if "VERSION_NUMBER" in _json_file.keys():
+                #     _dict["measured length"] =
 
-        _dict['Case Number'] = [int(s) for s in di.split('/') if s.isdigit()][0]
-        _dict['Path'] = di
-        _to_csv.append(_dict)
+            _dict['Case Number'] = [int(s) for s in str(Path(di)).split('\\') if s.isdigit()][0]
+            _dict['Path'] = di
+            _to_csv.append(_dict)
 
     return _to_csv

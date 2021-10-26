@@ -278,6 +278,7 @@ class GenericModel(QWidget):
                 if np.isclose(pt[2], bad_z):
                     print(f"replace {bad_z} with {_zlist[k]}")
                     _list.append(_zlist[k])
+                    break
 
         print(_coords.shape)
         print(np.array(_list).shape)
@@ -289,6 +290,7 @@ class GenericModel(QWidget):
         self.interface.initialize_points(_coords)
         self.interface.set_level(self.view.LevelVal)
         self.interface.set_window(self.view.WindowVal)
+        print(self.interface.level)
 
         self.centerline_panel = CenterlinePanel(image=self.view.imageData, interface=self.interface,
                                                 parent=self)
