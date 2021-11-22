@@ -1,6 +1,6 @@
 import csv
 import os
-import json
+from pathlib import Path
 from glob import glob
 from PyQt5.QtWidgets import QWidget, QProgressBar, QPushButton, QVBoxLayout, QLabel, \
                             QGridLayout, QTextEdit, QFileDialog, QGroupBox, QCheckBox
@@ -195,6 +195,14 @@ class ProgressWidget(QWidget):
                 fc = csv.DictWriter(output_file, fieldnames=_to_csv[0].keys())
                 fc.writeheader()
                 fc.writerows(_to_csv)
+
+        json_files = [Path(file) for file in glob(f"{self.folder_path}/**/seqdict.json", recursive=True)]
+        if json_files:
+            [os.remove(file) for file in json_files]
+
+        data_dirs = [Path(file) for file in glob(f"{self.folder_path}/**/data/", recursive=True)]
+        if data_dirs:
+            [os.rmdir(file) for file in data_dirs]
 
             self._add_to_textbox(f"Done! Report is saved to {os.path.join(self.folder_path, 'report.csv')}. "
                                  f"You can close this tab now",
