@@ -11,7 +11,7 @@ logging.getLogger(__name__)
 
 
 def get_directories(folder):
-    return glob(f"{folder}/*/")
+    return glob(f"{folder}/**/", recursive=True)
 
 
 def generate_seq_dict(folder):
@@ -32,7 +32,10 @@ def generate_report(folder):
         filled_out_dict = {}
         filled_out_dict['Sequences'] = _dicomreader.get_sequence_list()
         for item in required_fields:
-            filled_out_dict[item] = patient_data[item].value
+            try:
+                filled_out_dict[item] = patient_data[item].value
+            except:
+                filled_out_dict[item] = " "
 
         return filled_out_dict
     else:
@@ -116,7 +119,7 @@ def generate_time_report(folder):
     _to_csv = []
 
     for di in _data_directories:
-        print(di)
+        logging.debug(f"Scanning {di}")
 
         _centerline_annotation_data = [Path(file) for file in glob(f"{di}/*.centerline.annotation.json")]
         if not _centerline_annotation_data:
