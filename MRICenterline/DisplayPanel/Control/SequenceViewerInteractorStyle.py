@@ -91,6 +91,9 @@ class SequenceViewerInteractorStyle(vtkInteractorStyleImage):
         (lastX, lastY) = self.parent.GetLastEventPosition()
         (mouseX, mouseY) = self.parent.GetEventPosition()
 
+        displayed_coords = SequenceViewerInteractorStyle.pickImagePoint(self, "None", mouseX, mouseY, query=True)
+        self.model.updateDisplayedCoords(displayed_coords)
+
         if self.actions["Slicing"] == 1:
             deltaY = mouseY - lastY
             self.model.changeSliceIndex(deltaY)

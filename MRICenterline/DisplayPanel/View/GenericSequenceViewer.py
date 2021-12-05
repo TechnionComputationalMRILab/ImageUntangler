@@ -45,6 +45,8 @@ class GenericSequenceViewer:
         self.reslice = vtkImageReslice()
 
         self.Cursor = vtkCursor2D()
+        self.setCoordsText()
+
         self.performReslice()
         self.connectActor()
         self.renderImage()
@@ -129,6 +131,20 @@ class GenericSequenceViewer:
         self.textActorWindow.SetInput("Window: " + str(self.WindowVal))
         self.panel_renderer.AddActor(self.textActorWindow)
 
+    def setCoordsText(self):
+        _display_color = CFG.get_color('display')
+        _window_size = self.window.GetSize()
+
+        self.textActorCoords = vtkTextActor()
+        self.textActorCoords.GetTextProperty().SetFontSize(int(CFG.get_config_data('display', 'font-size')))
+        self.textActorCoords.GetTextProperty().SetColor(_display_color[0], _display_color[1], _display_color[2])
+        self.textActorCoords.SetInput(" ")
+
+        print(_window_size)
+        self.textActorCoords.SetDisplayPosition(0, 4*int(CFG.get_config_data('display', 'font-size')))
+
+        self.panel_renderer.AddActor(self.textActorCoords)
+
     def setLevelText(self):
         _display_color = CFG.get_color('display')
         _order = CONST.ORDER_OF_CONTROLS.index('Level')
@@ -212,6 +228,11 @@ class GenericSequenceViewer:
         curParallelScale = self.panel_renderer.GetActiveCamera().GetParallelScale()
         newZoomFactor = curParallelScale / self.imageData.getParallelScale()
         self.panel_renderer.GetActiveCamera().SetParallelScale(self.imageData.getParallelScale() * newZoomFactor)
+        self.window.Render()
+
+    def updateDisplayedCoords(self, coords):
+        # self.textActorCoords.SetInput(str(coords))
+        self.textActorCoords.SetInput(f'x: {round(coords[0], 2)}, y: {round(coords[1], 2)}, z: {round(coords[2], 2)}')
         self.window.Render()
 
     def moveBullsEye(self, newCoordinates):

@@ -141,6 +141,9 @@ class GenericModel(QWidget):
     def updateZoomFactor(self):
         self.view.updateZoomFactor()
 
+    def updateDisplayedCoords(self, coords):
+        self.view.updateDisplayedCoords(coords)
+
     def clearCursor(self):
         self.view.Cursor.AllOff()
         self.view.window.Render()
