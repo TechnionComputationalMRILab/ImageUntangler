@@ -4,6 +4,7 @@ from typing import List
 import json
 from glob import glob
 import numpy as np
+from pathlib import Path
 
 from MRICenterline.utils import message as MSG
 import logging
@@ -39,7 +40,9 @@ def create_sequence_file(path, seq_dict):
     # path = os.path.dirname(files[0])
     # grouped_files = generate_seqlist_dict(files)
 
-    with open(os.path.join(path, 'data', 'seqdict.json'), 'w') as f:
+    save_to = os.path.join(path, 'data', 'seqdict.json')
+
+    with open(save_to, 'w') as f:
         json.dump(seq_dict, f, indent=4, sort_keys=True)
 
 

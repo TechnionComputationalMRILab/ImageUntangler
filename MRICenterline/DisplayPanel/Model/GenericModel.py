@@ -6,6 +6,7 @@ from PyQt5.QtWidgets import QWidget, QVBoxLayout, QGroupBox, QFileDialog, QShort
 from PyQt5.Qt import QSizePolicy
 from PyQt5.QtGui import QKeySequence
 
+from MRICenterline.DisplayPanel.Model.ConvertToNRRD import save_as_nrrd
 from MRICenterline.DisplayPanel.View.Toolbar import DisplayPanelToolbar
 from MRICenterline.DisplayPanel.Model.GenericViewerManager import GenericViewerManager
 from MRICenterline.DisplayPanel.View.SlidersAndSpinboxLayout import SlidersAndSpinboxLayout
@@ -47,13 +48,15 @@ class GenericModel(QWidget):
         self.sequenceManager = GenericViewerManager(self, self.images)
 
         if use_sequence in self.images.get_sequences():
+            self.current_sequence = -1
             logging.debug(f"Loading single image using sequence {use_sequence}")
             _index = self.images.get_sequences().index(use_sequence)
             self.view = self.sequenceManager.load_single_sequence(self.interactor, self.interactorStyle, self.images[_index])
             self.widgets.freeze_sequence_list(use_sequence)
         else:
             logging.debug("Loading multiple sequences...")
-            self.view = self.sequenceManager.loadSequence(0, self.interactor, self.interactorStyle)
+            self.current_sequence = 0
+            self.view = self.sequenceManager.loadSequence(self.current_sequence, self.interactor, self.interactorStyle)
 
         self.sliderspinboxLayout = SlidersAndSpinboxLayout(window_widgets=self.widgets.window_widgets,
                                                            level_widgets=self.widgets.level_widgets,
@@ -91,6 +94,9 @@ class GenericModel(QWidget):
                                    windowValue=int(self.view.WindowVal), levelValue=int(self.view.LevelVal))
         except Exception as err:
             logging.critical(f"Error: {err}")
+        else:
+            if self.current_sequence >= 0:
+                self.current_sequence = sequenceIndex
 
     def setListWidgetIndex(self, index):
         # sets index of sequences in list of sequences; used in case of illegitimate selected file
@@ -301,3 +307,16 @@ class GenericModel(QWidget):
 
     def FIXER2(self):
         self.view.run_cleaner()
+
+    def save_as_nrrd(self):
+        _numpy = self.images.get_numpy(self.current_sequence)
+        print(_numpy.shape)
+
+        header = dict()
+        header['spacings'] = self.images[self.current_sequence].spacing
+        header['space origin'] = self.images[self.current_sequence].origin
+        header['space dimension'] = len(self.images[self.current_sequence].dimensions)
+
+        print(header)
+
+        save_as_nrrd(_numpy, "test.nrrd", header=header)

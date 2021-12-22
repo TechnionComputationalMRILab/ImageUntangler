@@ -151,6 +151,11 @@ class DICOMReader:
                                                         direction=_prop['direction'],
                                                         size=_prop['size'])
 
+    def get_numpy(self, seq):
+        _prop, _ = NumpyToVTK.get_image_properties([pix[0] for pix in self[seq]])
+        _arr = np.array([pix[2] for pix in self[seq]])
+        return _arr
+
     def get_z_coords_list(self, seq):
         return [pix[1] for pix in self[seq]]
 

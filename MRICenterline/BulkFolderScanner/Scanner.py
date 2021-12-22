@@ -11,7 +11,14 @@ logging.getLogger(__name__)
 
 
 def get_directories(folder):
-    return glob(f"{folder}/**/", recursive=True)
+    _list = [Path(i) for i in glob(f"{folder}/**/", recursive=True)]
+
+    for i in _list:
+        if i.stem == 'data':
+            _list.remove(i)
+
+    # _list.remove(folder)
+    return _list
 
 
 def generate_seq_dict(folder):
@@ -76,7 +83,7 @@ def generate_directory_report(folder, get_only_latest, also_show_centerline):
                     _dict['# len points'] = -999
                     _dict['Time measurement'] = _file['Time measurement'] if 'Time measurement' in _file.keys() else -999
                     _dict['length'] = _file['measured length'] if 'measured length' in _file.keys() else -999
-                    _dict['path'] = str(di)
+                    _dict['path'] = os.path.dirname(di)
                     _dict['filename'] = os.path.basename(_latest_annotation)
 
                     if not _centerline_annotation_data:
@@ -105,7 +112,7 @@ def generate_directory_report(folder, get_only_latest, also_show_centerline):
                         _dict['# len points'] = -999
                         _dict['Time measurement'] = _file['Time measurement'] if 'Time measurement' in _file.keys() else -999
                         # _dict['length'] = _file['length'] if 'measured length' in _file.keys() else -999
-                        _dict['path'] = di
+                        _dict['path'] = os.path.dirname(di)
                         _dict['filename'] = os.path.basename(_latest_centerline_annotation)
                         _to_csv.append(_dict)
         else:

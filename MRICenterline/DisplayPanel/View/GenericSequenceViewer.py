@@ -26,6 +26,7 @@ class GenericSequenceViewer:
         self.manager = manager
         self.interactor = interactor
         self.imageData = image
+
         self.z_coords = self.imageData.z_coords
         self.panel_actor = vtkImageActor()
         self.panel_renderer = vtkRenderer()
@@ -231,8 +232,10 @@ class GenericSequenceViewer:
         self.window.Render()
 
     def updateDisplayedCoords(self, coords):
-        # self.textActorCoords.SetInput(str(coords))
-        self.textActorCoords.SetInput(f'x: {round(coords[0], 2)}, y: {round(coords[1], 2)}, z: {round(coords[2], 2)}')
+        try:
+            self.textActorCoords.SetInput(f'x: {round(coords[0], 2)}, y: {round(coords[1], 2)}, z: {round(coords[2], 2)}')
+        except TypeError:  # it's out of bounds
+            pass
         self.window.Render()
 
     def moveBullsEye(self, newCoordinates):

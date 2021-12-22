@@ -2,6 +2,7 @@ import csv
 import os
 from pathlib import Path
 from glob import glob
+from copy import deepcopy
 from PyQt5.QtWidgets import QWidget, QProgressBar, QPushButton, QVBoxLayout, QLabel, \
                             QGridLayout, QTextEdit, QFileDialog, QGroupBox, QCheckBox
 
@@ -18,6 +19,7 @@ class ProgressWidget(QWidget):
 
         self.folder_path = folder_path
         self.directories = Scanner.get_directories(self.folder_path)
+        self.directories.remove(Path(self.folder_path))
         self._grid_layout = QGridLayout(self)
         self.status_text = f"<font color='red'>Found {len(self.directories)} directories in "\
                            f"{self.folder_path}</font>"
@@ -97,7 +99,7 @@ class ProgressWidget(QWidget):
         _preprocess_options_layout.addWidget(self._preprocess_options['move_dicom'], 1, 1)
         _preprocess_options_layout.addWidget(self._preprocess_options['time_report'], 2, 0)
         _preprocess_options_layout.addWidget(self._preprocess_options['rebuild_directory'], 2, 1)
-        _preprocess_options_layout.addWidget(self._preprocess_options['directory'], 3 ,0)
+        _preprocess_options_layout.addWidget(self._preprocess_options['directory'], 3, 0)
 
         _preprocess_button = QPushButton("Start")
         _preprocess_button.setStatusTip("Generates sequence dictionary + folder report")
@@ -165,7 +167,10 @@ class ProgressWidget(QWidget):
         self._add_to_textbox("Done! You can close this tab now", color='blue')
 
     def _generate_report(self):
-        logging.info("Starting folder scan for reporting")
+        """
+        creates a report.csv with metadata on the folders, sequence names, etc
+        """
+        logging.info("Starting folder scan for metadata reporting")
 
         try:
             os.remove(os.path.join(self.folder_path, 'report.csv'))
@@ -196,13 +201,13 @@ class ProgressWidget(QWidget):
                 fc.writeheader()
                 fc.writerows(_to_csv)
 
-        json_files = [Path(file) for file in glob(f"{self.folder_path}/**/seqdict.json", recursive=True)]
-        if json_files:
-            [os.remove(file) for file in json_files]
-
-        data_dirs = [Path(file) for file in glob(f"{self.folder_path}/**/data/", recursive=True)]
-        if data_dirs:
-            [os.rmdir(file) for file in data_dirs]
+        # json_files = [Path(file) for file in glob(f"{self.folder_path}/**/seqdict.json", recursive=True)]
+        # if json_files:
+        #     [os.remove(file) for file in json_files]
+        #
+        # data_dirs = [Path(file) for file in glob(f"{self.folder_path}/**/data/", recursive=True)]
+        # if data_dirs:
+        #     [os.rmdir(file) for file in data_dirs]
 
             self._add_to_textbox(f"Done! Report is saved to {os.path.join(self.folder_path, 'report.csv')}. "
                                  f"You can close this tab now",

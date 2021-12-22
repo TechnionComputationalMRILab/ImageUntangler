@@ -1,5 +1,7 @@
 import os
+from pathlib import Path
 from vtkmodules.all import vtkImageData
+from glob import glob
 
 from MRICenterline.FileReaders.DICOMReader import DICOMReader
 from MRICenterline.FileReaders.NRRDReader import NRRDReader
@@ -13,7 +15,7 @@ class Imager:
     def __init__(self, directory):
         self.image_list = dict()
 
-        self.directory = directory
+        self.directory = Path(directory)
 
         self.dicom_list, self.nrrd_list, self.valid_folders = self._group_by_type()
 
@@ -28,12 +30,11 @@ class Imager:
         it returns a tuple of lists: dicom, nrrd, where the items in each list is a reader class,
         and the list of the folders that have dicom/nrrd files
         """
-        _folder_list = [item
+        _folder_list = [Path(item)
                         for sublist in
-                            [[os.path.join(root, name) for name in dirs]
-                             for root, dirs, files in os.walk(self.directory)]
+                        [[os.path.join(root, name) for name in dirs]
+                         for root, dirs, files in os.walk(self.directory)]
                         for item in sublist]
-        _folder_list.append(self.directory)
 
         _dicom = list()
         _nrrd = list()
@@ -89,6 +90,16 @@ class Imager:
                                            z_coords=self.image_list[item].get_z_coords(),
                                            path=self.image_list[item].reader.folder)
 
+    def get_numpy(self, item):
+        if isinstance(item, int):
+            _seq = self.get_sequences()[item]
+            return self.get_numpy(_seq)
+        else:
+            if item not in self.get_sequences():
+                raise KeyError(f"{item} not found in Imager class")
+            else:
+                return self.image_list[item].get_numpy()
+
     def get_sequences(self):
         return self.sequences + self.files
 
@@ -127,6 +138,9 @@ class Image:
         self.header = self.reader.get_header(sequence)
         self.window, self.level = self.reader.get_window_and_level(sequence)
         self.z_coords = self.reader.get_z_coords_list(sequence)
+
+    def get_numpy(self):
+        return self.reader.get_numpy(self._param)
 
     def get_image(self) -> vtkImageData:
         """ the items are the slices """
