@@ -35,13 +35,16 @@ class CustomOpenTable(QTableWidget):
                         _columns[k].append(v)  # append the value into the appropriate list
                         # based on column name k
 
-            [_columns.pop(i) for i in ['PatientName', 'PatientID', 'ManufacturerModelName', 'ProtocolName', 'StudyTime']]
+            # remove these columns
+            [_columns.pop(i) for i
+             in ['PatientName', 'PatientID', 'ManufacturerModelName', 'ProtocolName', 'StudyTime']]
 
             _columns["Path"] = [file.replace('\\', '/') for file in _columns["Path"]]
             self.path_list = copy(_columns['Path'])
             _columns["Path"] = [i.split("/")[-2] for i in _columns["Path"]]
 
             self.data = {k: _columns[k] for k in ['Path', 'StudyDate', 'Manufacturer', 'Sequences']}
+
             # self.data = _columns
 
         self.setRowCount(_num_of_rows)

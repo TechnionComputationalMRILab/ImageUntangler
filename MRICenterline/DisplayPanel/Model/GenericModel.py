@@ -6,7 +6,6 @@ from PyQt5.QtWidgets import QWidget, QVBoxLayout, QGroupBox, QFileDialog, QShort
 from PyQt5.Qt import QSizePolicy
 from PyQt5.QtGui import QKeySequence
 
-from MRICenterline.DisplayPanel.Model.ConvertToNRRD import save_as_nrrd
 from MRICenterline.DisplayPanel.View.Toolbar import DisplayPanelToolbar
 from MRICenterline.DisplayPanel.Model.GenericViewerManager import GenericViewerManager
 from MRICenterline.DisplayPanel.View.SlidersAndSpinboxLayout import SlidersAndSpinboxLayout
@@ -240,8 +239,9 @@ class GenericModel(QWidget):
 
     def showPatientInfoTable(self):
         logging.info("Showing patient table")
-        # _patient_info_panel = PatientInfoPanel(parent=self)
+        _patient_info_panel = PatientInfoPanel(parent=self)
         # self.layout.addWidget(_patient_info_panel)
+        _patient_info_panel.show()
 
     def start_timer(self):
         self.view.start_timer()
@@ -306,17 +306,5 @@ class GenericModel(QWidget):
         self.layout.addWidget(self.centerline_panel)
 
     def FIXER2(self):
-        self.view.run_cleaner()
-
-    def save_as_nrrd(self):
-        _numpy = self.images.get_numpy(self.current_sequence)
-        print(_numpy.shape)
-
-        header = dict()
-        header['spacings'] = self.images[self.current_sequence].spacing
-        header['space origin'] = self.images[self.current_sequence].origin
-        header['space dimension'] = len(self.images[self.current_sequence].dimensions)
-
-        print(header)
-
-        save_as_nrrd(_numpy, "test.nrrd", header=header)
+        folder = self.images.dicom_list[0].get_folder()
+        self.view.sitk_conv(folder)

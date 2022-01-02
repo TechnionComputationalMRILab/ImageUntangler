@@ -91,8 +91,11 @@ class SequenceViewerInteractorStyle(vtkInteractorStyleImage):
         (lastX, lastY) = self.parent.GetLastEventPosition()
         (mouseX, mouseY) = self.parent.GetEventPosition()
 
-        displayed_coords = SequenceViewerInteractorStyle.pickImagePoint(self, "None", mouseX, mouseY, query=True)
-        self.model.updateDisplayedCoords(displayed_coords)
+        try:
+            displayed_coords = SequenceViewerInteractorStyle.pickImagePoint(self, "None", mouseX, mouseY, query=True)
+            self.model.updateDisplayedCoords(displayed_coords)
+        except:
+            pass
 
         if self.actions["Slicing"] == 1:
             deltaY = mouseY - lastY
@@ -156,7 +159,8 @@ class SequenceViewerInteractorStyle(vtkInteractorStyleImage):
                 return 0
 
     def pickImagePoint(self, pointType: str, mouseX, mouseY, query=False):
-        if self.pointPicker.Pick(mouseX, mouseY, 0.0, self.model.view.panel_renderer):
+        _pick = self.pointPicker.Pick(mouseX, mouseY, 0.0, self.model.view.panel_renderer)
+        if _pick:
             pickPosition = self.pointPicker.GetPickPosition()
 
             zCoordinate = self.model.view.z_coords[self.model.view.sliceIdx]

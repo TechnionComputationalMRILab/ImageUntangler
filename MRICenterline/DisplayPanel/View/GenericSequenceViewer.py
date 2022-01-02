@@ -141,7 +141,6 @@ class GenericSequenceViewer:
         self.textActorCoords.GetTextProperty().SetColor(_display_color[0], _display_color[1], _display_color[2])
         self.textActorCoords.SetInput(" ")
 
-        print(_window_size)
         self.textActorCoords.SetDisplayPosition(0, 4*int(CFG.get_config_data('display', 'font-size')))
 
         self.panel_renderer.AddActor(self.textActorCoords)
@@ -271,11 +270,8 @@ class GenericSequenceViewer:
         logging.info('Saving file...')
 
         _save_formatter = SaveFormatter(imagedata=self.imageData, path=self.imageData.path)
-        print("1")
         if len(self.lengthPoints) + len(self.MPRpoints):
-            print("2")
             if len(self.lengthPoints):
-                print("3")
                 _save_formatter.add_pointcollection_data('length points', self.lengthPoints)
                 if len(self.lengthPoints) > 2:
                     logging.debug(f"Also saving total length: {self.lengthPoints.total_length}")
@@ -433,41 +429,16 @@ class GenericSequenceViewer:
         # self.window.Render()
         self.render_panel()
 
-    # TODO REMOVE AFTER COMPLETION
-    def convert_zcoords(self):
-        print("CONVERTING")
+    # TODO: REMOVE
+    def sitk_conv(self, folder):
+        from MRICenterline.Points import ConvertAnnotationToSimpleITK as conv_sitk
+        _replacement = PointArray()
+        for i in self.MPRpoints:
+            _conv = conv_sitk.func(i, self.panel_renderer, folder, self.z_coords.index(i[2]))
+            _replacement.add_point(_conv)
 
-        from MRICenterline.utils import annotation_cleaner
+        print("Done")
 
-        _zlist = []
-        for i in range(self.imageData.extent[5]):
-            self.setSliceIndex(i)
-
-            matrix = self.reslice.GetResliceAxes()
-            center = matrix.MultiplyPoint((0, 0, 0, 1))
-            __zCoordinate = (center[2] - self.imageData.origin[2]) - self.imageData.dimensions[2] \
-                            * self.imageData.spacing[2] / 2
-
-            _zlist.append(__zCoordinate)
-
-        # annotation_cleaner.convert(self.imageData, _zlist, self.manager.manager)
-        return _zlist
-
-    # TODO REMOVE AFTER COMPLETION
-    def run_cleaner(self):
-        print("CONVERTING")
-
-        from MRICenterline.utils import annotation_cleaner
-
-        _zlist = []
-        for i in range(self.imageData.extent[5]):
-            self.setSliceIndex(i)
-
-            matrix = self.reslice.GetResliceAxes()
-            center = matrix.MultiplyPoint((0, 0, 0, 1))
-            __zCoordinate = (center[2] - self.imageData.origin[2]) - self.imageData.dimensions[2] \
-                            * self.imageData.spacing[2] / 2
-
-            _zlist.append(__zCoordinate)
-
-        annotation_cleaner.convert(self.imageData, _zlist, self.manager.manager)
+        np_coords = _replacement.get_coordinates_as_array()
+        print(np.unique(np_coords[:,2]))
+        # self.MPRpoints = _replacement

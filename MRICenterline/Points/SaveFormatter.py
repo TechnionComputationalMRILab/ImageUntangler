@@ -109,7 +109,7 @@ class SaveFormatter:
                               _num_of_len_points,
                               self.output_data['Time measurement'],
                               _measured_length,
-                              self.save_to,
+                              os.path.dirname(self.save_to),
                               self.filename])
 
     def _clean_data(self):

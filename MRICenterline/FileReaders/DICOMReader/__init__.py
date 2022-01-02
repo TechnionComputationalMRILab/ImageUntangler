@@ -29,6 +29,9 @@ class DICOMReader:
         else:
             logging.info(f"No DICOM files found in {self.folder}")
 
+    def get_folder(self):
+        return self.folder
+
     def _check_data_folder(self):
         if str(self.folder).endswith('data'):
             self.folder = str(self.folder).replace('data', '')

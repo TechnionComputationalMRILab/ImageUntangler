@@ -28,14 +28,13 @@ class DisplayPanelToolbar(QToolBar):
         self.addDisablePointPickers()
         self.addUndoButton()
         self.addDeleteAllButton()
-        self.addsaveToNiiGzButton()
 
         self.resetSlidersToDefault()
 
         if CFG.get_boolean('testing', 'show-fixer-button'):
             self.addSeparator(expand=True)
-            self.addFixerButton() #TODO REMOVE
-            self.addFixer2Button() #TODO REMOVE
+            self.addFixerButton()
+            self.addFixer2Button()
 
         self.addSeparator(expand=True)
 
@@ -288,9 +287,3 @@ class DisplayPanelToolbar(QToolBar):
         _fixer_button = QPushButton('FIXER2: POINTS')
         _fixer_button.clicked.connect(self.manager.FIXER2)
         self.addWidget(_fixer_button)
-
-    def addsaveToNiiGzButton(self):
-        _save_as_niigz = QPushButton('Save as nii.gz')
-        _save_as_niigz.setToolTip("Save currently displayed as nii.gz file in the data directory")
-        _save_as_niigz.clicked.connect(self.manager.save_as_nrrd)
-        self.addWidget(_save_as_niigz)

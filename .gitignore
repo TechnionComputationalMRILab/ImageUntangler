@@ -7,3 +7,4 @@ internal_data/*
 venv/*
 *.pyc
 /logs/*
+/notebooks/
