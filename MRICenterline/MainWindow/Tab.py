@@ -118,7 +118,7 @@ class Tab(QWidget):
     def load_images_in_pathname(self, path):
         self.MRIimages: Imager = Imager(path)
         # self.name = path[path.rfind(os.path.sep) + 1:]
-        self.name = str(Path(path)).split("\\")[-2]
+        self.name = str(Path(path)).split("\\")[-2] + " : " + str(Path(path)).split("\\")[-1]
         logging.info(f"Loading {self.name}")
         self.tab_name = os.path.basename(self.name)
 

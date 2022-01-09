@@ -1,5 +1,6 @@
 import csv
 import os
+import shutil
 from pathlib import Path
 from glob import glob
 from copy import deepcopy
@@ -69,21 +70,21 @@ class ProgressWidget(QWidget):
             "seqdict":
                 QCheckBox("Generate sequence directory"),
             "report":
-                QCheckBox("Generate folder report"),
+                QCheckBox("Generate folder metadata report"),
             "directory":
-                QCheckBox("Generate directory report"),
+                QCheckBox("Generate time/directory report"),
             "time_report":
                 QCheckBox("Generate report on timer data as CSV"),
             "rebuild_directory":
-                QCheckBox("Rebuild the data directory file")
+                QCheckBox("Rebuild the data directory file (re-initialize folder, ignores all flags)"),
+            "initialize_new_case_folder":
+                QCheckBox("Initialize new case folder (ignores all flags)")
         }
 
         self._preprocess_options['move_dicom'].setChecked(False)
         self._preprocess_options['move_dicom'].setEnabled(False)
         self._preprocess_options['rename_folders'].setChecked(False)
         self._preprocess_options['rename_folders'].setEnabled(False)
-        self._preprocess_options['rebuild_directory'].setChecked(False)
-        self._preprocess_options['rebuild_directory'].setEnabled(False)
 
         self._preprocess_options['seqdict'].setChecked(True)
         self._preprocess_options['report'].setChecked(True)
@@ -98,8 +99,9 @@ class ProgressWidget(QWidget):
         _preprocess_options_layout.addWidget(self._preprocess_options['rename_folders'], 0, 1)
         _preprocess_options_layout.addWidget(self._preprocess_options['move_dicom'], 1, 1)
         _preprocess_options_layout.addWidget(self._preprocess_options['time_report'], 2, 0)
-        _preprocess_options_layout.addWidget(self._preprocess_options['rebuild_directory'], 2, 1)
+        _preprocess_options_layout.addWidget(self._preprocess_options['rebuild_directory'], 3, 1)
         _preprocess_options_layout.addWidget(self._preprocess_options['directory'], 3, 0)
+        _preprocess_options_layout.addWidget(self._preprocess_options['initialize_new_case_folder'], 2, 1)
 
         _preprocess_button = QPushButton("Start")
         _preprocess_button.setStatusTip("Generates sequence dictionary + folder report")
@@ -115,10 +117,18 @@ class ProgressWidget(QWidget):
         _opts_for_logger = [opt.isChecked() for opt in self._preprocess_options.values()]
         logging.info(f"Running scanner with {_opts_for_logger}")
 
+        if self._preprocess_options['rebuild_directory'].isChecked():
+            self._rebuild_data_directory()
+            return
+
+        if self._preprocess_options['initialize_new_case_folder'].isChecked():
+            self._initialize_new_folder()
+            return
+
         if self._preprocess_options['seqdict'].isChecked():
             self._generate_seqdict()
         if self._preprocess_options['report'].isChecked():
-            self._generate_report()
+            self._generate_metadata_report()
         if self._preprocess_options['time_report'].isChecked():
             self._generate_time_report()
         if self._preprocess_options['directory'].isChecked():
@@ -166,7 +176,7 @@ class ProgressWidget(QWidget):
 
         self._add_to_textbox("Done! You can close this tab now", color='blue')
 
-    def _generate_report(self):
+    def _generate_metadata_report(self):
         """
         creates a report.csv with metadata on the folders, sequence names, etc
         """
@@ -223,6 +233,52 @@ class ProgressWidget(QWidget):
         # if fileName:
         #     logging.info(f"Copying the dicom files to {fileName}")
         #     self._add_to_textbox(f"Copying the dicom files to {fileName}")
+
+    def _rebuild_data_directory(self):
+        self._add_to_textbox("Rebuilding data directories...", color='blue')
+
+        # clear the csv files
+        try:
+            os.remove(os.path.join(self.folder_path, 'report.csv'))
+        except Exception:
+            self._add_to_textbox("metadata report not found")
+        else:
+            self._add_to_textbox(f"Removing report.csv")
+
+        try:
+            os.remove(os.path.join(self.folder_path, 'directory.csv'))
+        except Exception:
+            self._add_to_textbox("annotation directory not found")
+        else:
+            self._add_to_textbox("Removing directory.csv")
+
+        # delete these
+        bad_data_folders = [Path(file) for file in glob(f'{self.folder_path}/*/data/data/')]
+        for i in bad_data_folders:
+            shutil.rmtree(i)
+            self._add_to_textbox(f'Removing bad data folder: {i}')
+
+        # keep these
+        annotation_cl = [Path(file) for file in glob(f"{self.folder_path}/*/data/*.centerline.annotation.json")]
+        annotation_main = [Path(file) for file in glob(f"{self.folder_path}/*/data/*.annotation.json")]
+        all_files_in_data_dir = [Path(file) for file in glob(f"{self.folder_path}/*/data/*")]
+        to_delete = [value for value in all_files_in_data_dir if value not in annotation_cl + annotation_main]
+
+        for i in to_delete:
+            os.remove(i)
+            self._add_to_textbox(f'Removing {i}')
+
+        self._add_to_textbox("Generating sequence dictionaries", color='blue')
+        self._generate_seqdict()
+
+        self._add_to_textbox("Generating folder metadata reports", color='blue')
+        self._generate_metadata_report()
+
+        self._add_to_textbox("Generating annotation directory", color='blue')
+        self._generate_directory_report()
+
+    def _initialize_new_folder(self):
+        pass
 
     def _delete_original_folder(self):
         raise NotImplementedError

@@ -19,7 +19,7 @@ class DICOMReader:
 
         self._check_data_folder()
 
-        self._files_list = [file.replace('\\', '/') for file in glob(f'{self.folder}/*.dcm')]
+        self._files_list = [Path(file) for file in glob(f'{self.folder}/*.dcm')]
         self.sequence_dict = SequenceFile.generate_seqlist_dict(self._files_list)
         self.cached_pixel_data_dict = dict()
 
@@ -100,7 +100,7 @@ class DICOMReader:
 
     def _list_files_in_directory(self):
         """ generates a list of all the files in the directory """
-        return [file.replace('\\', '/') for file in glob(f'{self.folder}/*.dcm')]
+        return [Path(file) for file in glob(f'{self.folder}/*.dcm')]
 
     # def _get_valid_files(self):
     #     _files = self._list_files_in_directory()

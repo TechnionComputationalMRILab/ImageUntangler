@@ -133,7 +133,7 @@ class Image:
         else:
             self._type = 'empty'
 
-    def _process_single_dicom(self, sequence: DICOMReader):
+    def _process_single_dicom(self, sequence):
         self._vtkImageData_array = self.reader.convert_to_vtk(sequence)
         self.header = self.reader.get_header(sequence)
         self.window, self.level = self.reader.get_window_and_level(sequence)

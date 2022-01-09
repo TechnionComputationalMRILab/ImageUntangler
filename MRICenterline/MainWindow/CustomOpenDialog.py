@@ -41,7 +41,7 @@ class CustomOpenTable(QTableWidget):
 
             _columns["Path"] = [file.replace('\\', '/') for file in _columns["Path"]]
             self.path_list = copy(_columns['Path'])
-            _columns["Path"] = [i.split("/")[-2] for i in _columns["Path"]]
+            _columns["Path"] = [i.split("/")[-1] for i in _columns["Path"]]
 
             self.data = {k: _columns[k] for k in ['Path', 'StudyDate', 'Manufacturer', 'Sequences']}
 
