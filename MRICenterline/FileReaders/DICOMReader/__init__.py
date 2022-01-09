@@ -3,6 +3,7 @@ from pydicom.errors import InvalidDicomError
 import numpy as np
 import os
 from glob import glob
+import SimpleITK as sitk
 from pathlib import Path
 
 from . import SequenceFile, NumpyToVTK, Header, GenerateMetadata
@@ -102,19 +103,6 @@ class DICOMReader:
         """ generates a list of all the files in the directory """
         return [Path(file) for file in glob(f'{self.folder}/*.dcm')]
 
-    # def _get_valid_files(self):
-    #     _files = self._list_files_in_directory()
-    #     _valid_dicom = []
-    #     for f in _files:
-    #         try:
-    #             with open(f, 'rb') as infile:
-    #                 pydicom.dcmread(infile)
-    #         except InvalidDicomError:
-    #             pass
-    #         else:
-    #             _valid_dicom.append(f)
-    #     return _valid_dicom
-
     def __len__(self):
         """ returns the number of dicom files in the directory """
         return len(self.sequence_dict)
@@ -122,9 +110,13 @@ class DICOMReader:
     def _generate_pixel_data(self, sequence):
         _list_of_files = [os.path.join(self.folder, i) for i in self.sequence_dict[sequence]]
 
+        # _tuple_list = list(zip(_list_of_files,
+        #                        [float(SequenceFile.get_info('SliceLocation', f)) for f in _list_of_files],
+        #                        [self._get_pixel_array(f) for f in _list_of_files]))
         _tuple_list = list(zip(_list_of_files,
                                [float(SequenceFile.get_info('SliceLocation', f)) for f in _list_of_files],
-                               [self._get_pixel_array(f) for f in _list_of_files]))
+                               self._get_sitk_image_volume(_list_of_files)))
+
         _tuple_list.sort(key=lambda x: x[1])
         return _tuple_list
 
@@ -133,6 +125,21 @@ class DICOMReader:
         with open(filename, 'rb') as f:
             ds = pydicom.dcmread(f)
         return ds.pixel_array  # can't get this using the getinfo function
+
+    @staticmethod
+    def _get_sitk_image_volume(file_list):
+        reader = sitk.ImageSeriesReader()
+        reader.SetFileNames(file_list)
+        image = reader.Execute()
+
+        # print(image.GetDirection())
+        # direction = [1.0, 0.0, 0.0,
+        #              0.0, 0.0, 1.0,
+        #              0.0, -1.0, 0.0]
+        #
+        # image.SetDirection(direction)
+        pixel_data = sitk.GetArrayFromImage(image)
+        return pixel_data
 
     def get_sequence_list(self):
         return list(self.sequence_dict.keys())
