@@ -274,6 +274,7 @@ class GenericModel(QWidget):
 
     # TODO REMOVE
     def FIXER(self):
+        # manual MPR calculation
         _zlist = self.view.convert_zcoords()
         _coords = np.copy(self.view.MPRpoints.get_coordinates_as_array())
 
@@ -306,5 +307,15 @@ class GenericModel(QWidget):
         self.layout.addWidget(self.centerline_panel)
 
     def FIXER2(self):
+        # convert the points to sitk
         folder = self.images.dicom_list[0].get_folder()
         self.view.sitk_conv(folder)
+
+    def FIXER3(self):
+        # print direction matrix
+        image = self.images.dicom_list[0].sitk_image
+        print(np.array(image.GetDirection()).reshape(3,3))
+
+    def FIXER4(self, filename):
+        # load points one at a time
+        self.view.load_one_at_a_time(filename)

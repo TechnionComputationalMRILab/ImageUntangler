@@ -16,6 +16,7 @@ logging.getLogger(__name__)
 class DICOMReader:
     def __init__(self, folder: str, run_clean=False):
         self.folder = folder
+        self.sitk_image = None
         self.run_clean = run_clean  # if set to true, deletes and re-builds the sequence directory
 
         self._check_data_folder()
@@ -126,11 +127,12 @@ class DICOMReader:
             ds = pydicom.dcmread(f)
         return ds.pixel_array  # can't get this using the getinfo function
 
-    @staticmethod
-    def _get_sitk_image_volume(file_list):
+    def _get_sitk_image_volume(self, file_list):
         reader = sitk.ImageSeriesReader()
         reader.SetFileNames(file_list)
         image = reader.Execute()
+        self.sitk_image = image
+        print(self.sitk_image.GetOrigin())
 
         # print(image.GetDirection())
         # direction = [1.0, 0.0, 0.0,

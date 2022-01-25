@@ -159,7 +159,7 @@ class SequenceViewerInteractorStyle(vtkInteractorStyleImage):
                 return 0
 
     def pickImagePoint(self, pointType: str, mouseX, mouseY, query=False):
-        print(mouseX, mouseY)
+        # print(mouseX, mouseY)
         _pick = self.pointPicker.Pick(mouseX, mouseY, 0.0, self.model.view.panel_renderer)
         if _pick:
             pickPosition = self.pointPicker.GetPickPosition()

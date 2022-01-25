@@ -137,6 +137,7 @@ class Tab(QWidget):
             else:
                 logging.info("Opening point data from file")
                 _generic_model.loadAllPoints(self._ldd.path['full_path'])
+                # _generic_model.FIXER4(self._ldd.path['full_path'])
 
             return _generic_model
 

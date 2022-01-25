@@ -32,16 +32,29 @@ class ImageProperties:
         min_z = round(center_z - (self.origin[2] + self.spacing[2] * (self.dimensions[2])), 1)
         max_z = math.ceil((self.dimensions[2] * self.spacing[2]) + min_z)
 
-        self.slice_list = dict(zip(np.arange(self.dimensions[2]), z_coords))
+        # self.slice_list = dict(zip(np.arange(self.dimensions[2]), z_coords))
+        self.slice_list = dict(zip(z_coords, np.arange(self.dimensions[2])))
+        print(self.slice_list)
 
     def getParallelScale(self):
         return 0.5 * self.spacing[0] * (self.extent[1] - self.extent[0])
 
     def convertZCoordsToSlices(self, z_coords: list):
+        print(f'origin {self.origin}')
+        print(f'spacing {self.spacing}')
+
+
         _slice_list = []
+        # for i in z_coords:
+        #     _slice_list.append(self.slice_list[i])
+        #     # for k, v in self.slice_list.items():
+        #         # if round(i, 1) == round(v, 1):
+        #         #     _slice_list.append(k)
+
         for i in z_coords:
-            for k, v in self.slice_list.items():
-                if round(i, 1) == round(v, 1):
-                    _slice_list.append(k)
+            print(f"point: {i}")
+            slice_idx = (i - self.origin[2]) / self.spacing[2]
+            print(slice_idx)
+            _slice_list.append(slice_idx)
 
         return _slice_list

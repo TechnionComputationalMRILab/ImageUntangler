@@ -71,6 +71,8 @@ class GenericSequenceViewer:
         self._resume_time = None
         self._time_gap = []
 
+        self._fixer4_counter = 0
+
     def performReslice(self):
         # Extract a slice in the desired orientation
         x0, y0, z0 = self.imageData.origin
@@ -81,10 +83,17 @@ class GenericSequenceViewer:
                        y0 + y_spacing * 0.5 * (y_min + y_max),
                        z0 + z_spacing * 0.5 * (z_min + z_max)]
         transformation = vtkMatrix4x4()
+
         transformation.DeepCopy((1, 0, 0, center[0],
-                             0, -1, 0, center[1],
-                             0, 0, 1, center[2],
-                             0, 0, 0, 1))
+                                 0, -1, 0, center[1],
+                                 0, 0, 1, center[2],
+                                 0, 0, 0, 1))
+
+        # transformation.DeepCopy((1, 0, 0, center[0],
+        #                          0, 0, 1, center[1],
+        #                          0, -1, 0, center[2],
+        #                          0, 0, 0, 1))
+
         self.reslice.SetInputData(self.imageData.full_data)
         self.reslice.SetOutputDimensionality(2)
         self.reslice.SetResliceAxes(transformation)
@@ -187,10 +196,13 @@ class GenericSequenceViewer:
             logging.debug(f"Loading {len(_loader.point_set['MPR points'].points)} MPR points")
             for key, val in enumerate(_loader.point_set['MPR points'].points):
                 self.loadPoint("MPR", val, _loader.slide_indices[key])
-        if 'length points' in _loader.point_set.keys():
-            logging.debug(f"Loading {len(_loader.point_set['length points'].points)} length points")
-            for key, val in enumerate(_loader.point_set['length points'].points):
-                self.loadPoint("LENGTH", val, _loader.slide_indices[key])
+                print(key, val, _loader.slide_indices[key])
+
+
+        # if 'length points' in _loader.point_set.keys():
+        #     logging.debug(f"Loading {len(_loader.point_set['length points'].points)} length points")
+        #     for key, val in enumerate(_loader.point_set['length points'].points):
+        #         self.loadPoint("LENGTH", val, _loader.slide_indices[key])
 
     def processLoadedPoint(self, pointCollection, pickedCoordinates, sliceIdx):
         pointLocation = [pickedCoordinates[0], pickedCoordinates[1], pickedCoordinates[2], sliceIdx]  # x,y,z,sliceIdx
@@ -351,8 +363,21 @@ class GenericSequenceViewer:
         sliceSpacing = self.reslice.GetOutput().GetSpacing()[2]
         matrix: vtkMatrix4x4 = self.reslice.GetResliceAxes()
         center = matrix.MultiplyPoint((0, 0, changeFactor*sliceSpacing, 1))
-        sliceIdx = int((center[2] - self.imageData.origin[2]) /
-                       self.imageData.spacing[2] - 0.5)  # z - z_orig/(z_spacing - .5). slice idx is z coordinate of slice of image
+        # sliceIdx = int((center[2] - self.imageData.origin[2]) / self.imageData.spacing[2] - 0.5)
+        print("center[2]", center[2])
+        print("self.imageData.origin[2]", self.imageData.origin[2])
+        print("center[2] - self.imageData.origin[2]", center[2] - self.imageData.origin[2])
+        print("self.imageData.spacing[2]", self.imageData.spacing[2])
+        print("self.imageData.spacing[2] - 0.5", self.imageData.spacing[2] - 0.5)
+        print( (center[2] - self.imageData.origin[2]) / (self.imageData.spacing[2] - 0.5) )
+
+        print("center[1]", center[1])
+        print("self.imageData.origin[1]", self.imageData.origin[1])
+        print("self.imageData.spacing[1]", self.imageData.spacing[1])
+
+        # sliceIdx = np.int(np.round((center[2] - self.imageData.origin[2]) / self.imageData.spacing[2] - 0.5))
+        sliceIdx = np.int(np.round((center[2] - self.imageData.origin[2]) / self.imageData.spacing[2] - 0.5))
+        # z - z_orig/(z_spacing - .5). slice idx is z coordinate of slice of image
         if 0 <= sliceIdx <= self.imageData.extent[5]:
             self.pastIndex = sliceIdx
             self.UpdateViewerMatrixCenter(center, sliceIdx)
@@ -442,3 +467,14 @@ class GenericSequenceViewer:
         np_coords = _replacement.get_coordinates_as_array()
         print(np.unique(np_coords[:,2]))
         # self.MPRpoints = _replacement
+
+    def load_one_at_a_time(self, filename):
+        _loader = LoadPoints(filename, self.imageData)
+
+        if 'MPR points' in _loader.point_set.keys():
+            pts = _loader.point_set['MPR points'].points
+            self.loadPoint("MPR", pts[self._fixer4_counter], _loader.slide_indices[self._fixer4_counter])
+
+            print(self._fixer4_counter, pts[self._fixer4_counter], _loader.slide_indices[self._fixer4_counter])
+
+            self._fixer4_counter += 1

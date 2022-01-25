@@ -19,6 +19,7 @@ def get_image_properties(file_list):
     _prop['size'] = list(dicom_itk.GetSize())
     _prop['origin'] = list(dicom_itk.GetOrigin())
     _prop['spacing'] = list(dicom_itk.GetSpacing())
+    print(dicom_itk.GetSpacing())
     _prop['ncomp'] = dicom_itk.GetNumberOfComponentsPerPixel()
     _prop['direction'] = dicom_itk.GetDirection()
 

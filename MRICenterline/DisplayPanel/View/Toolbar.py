@@ -35,6 +35,8 @@ class DisplayPanelToolbar(QToolBar):
             self.addSeparator(expand=True)
             self.addFixerButton()
             self.addFixer2Button()
+            self.addFixer3Button()
+            self.addFixer4Button()
 
         self.addSeparator(expand=True)
 
@@ -276,14 +278,22 @@ class DisplayPanelToolbar(QToolBar):
             self._intermediate_points_button.setText("Show Intermediate MPR points")
             self.manager.hide_intermediate_points()
 
-    #TODO REMOVE
     def addFixerButton(self):
         _fixer_button = QPushButton('FIXER: MPR')
         _fixer_button.clicked.connect(self.manager.FIXER)
         self.addWidget(_fixer_button)
 
-    #TODO REMOVE
     def addFixer2Button(self):
         _fixer_button = QPushButton('FIXER2: POINTS')
         _fixer_button.clicked.connect(self.manager.FIXER2)
+        self.addWidget(_fixer_button)
+
+    def addFixer3Button(self):
+        _fixer_button = QPushButton('FIXER3: DIXMAT')
+        _fixer_button.clicked.connect(self.manager.FIXER3)
+        self.addWidget(_fixer_button)
+
+    def addFixer4Button(self):
+        _fixer_button = QPushButton('FIXER4')
+        _fixer_button.clicked.connect(self.manager.FIXER4)
         self.addWidget(_fixer_button)

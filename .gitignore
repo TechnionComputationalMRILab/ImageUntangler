@@ -8,3 +8,7 @@ venv/*
 *.pyc
 /logs/*
 /notebooks/
+/logs/
+*.spec
+*.ini
+*.csv
