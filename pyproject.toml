@@ -1,0 +1,34 @@
+[tool.poetry]
+name = "imageuntangler"
+version = "0.1.0"
+description = ""
+authors = ["Angeleene Ang <ang.a@technion.ac.il>"]
+
+[tool.poetry.dependencies]
+python = "~3.8"
+vtk = "^9.1.0"
+PyQt5 = "^5.15.6"
+pandas = "^1.4.0"
+icecream = "^2.1.1"
+matplotlib = "^3.5.1"
+numpy = "^1.22.2"
+pydicom = "^2.2.2"
+pyinstaller = "^4.9"
+pynrrd = "^0.4.2"
+PyQt5-stubs = "^5.15.2"
+QtAwesome = "^1.1.1"
+scipy = "^1.8.0"
+SimpleITK = "^2.1.1"
+tqdm = "^4.62.3"
+jupyter = "^1.0.0"
+ipykernel = "^6.9.0"
+flake8 = "^4.0.1"
+black = "^22.1.0"
+psutil = "^5.9.0"
+
+[tool.poetry.dev-dependencies]
+pytest = "^5.2"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
