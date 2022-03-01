@@ -16,3 +16,5 @@ CL_MIN_ANGLE = 0
 CL_MAX_ANGLE = 180
 
 ORDER_OF_CONTROLS = ['Slice Index', "Window", "Level"]
+
+TIMESTAMP_FORMAT = "%d.%m.%Y %H:%M:%S"

@@ -14,7 +14,8 @@ class DefaultTabWidget(QWidget):
         self._grid_layout.setRowStretch(0, 2)
         self._grid_layout.setRowStretch(1, 1)
         self._grid_layout.setRowStretch(2, 1)
-        self._grid_layout.setRowStretch(3, 2)
+        self._grid_layout.setRowStretch(3, 1)
+        self._grid_layout.setRowStretch(4, 2)
 
         self._grid_layout.setColumnStretch(0, 1)
         self._grid_layout.setColumnStretch(1, 2)
@@ -41,6 +42,10 @@ class DefaultTabWidget(QWidget):
 
         self._grid_layout.addLayout(self._bottom_layout, 2, 1, 1, 1)
 
+        self.open_from_folder = QPushButton("Open single MRI image from folder")
+        self.open_from_folder.setMinimumSize(600, 100)
+        self._grid_layout.addWidget(self.open_from_folder, 3, 1, 1, 1)
+
     def connect_add_mri_images_button(self, func):
         self.add_mri_images_button.clicked.connect(func)
 
@@ -52,6 +57,9 @@ class DefaultTabWidget(QWidget):
 
     def connect_load_from_json_button(self, func):
         self.load_from_json_button.clicked.connect(func)
+
+    def connect_open_mri_from_folder_button(self, func):
+        self.open_from_folder.clicked.connect(func)
 
 
 if __name__ == "__main__":

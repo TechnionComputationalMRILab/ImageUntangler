@@ -9,12 +9,12 @@ class PointsToPlaneVectors:
         self.Plot = Plot
         self.Height = height
 
-        self.V = np.asarray(imageData.dicomArray)
-
-
+        self.V = np.asarray(imageData.nparray)
         V_spacing = np.asarray(imageData.spacing)
         V_dim = np.asarray(imageData.dimensions)
 
+        ic(V_dim)
+        ic(V_spacing)
         self.x = np.linspace(-V_dim[0] * V_spacing[0] / 2, (V_dim[0] ) * V_spacing[0]/2, V_dim[0])
         self.y = np.linspace(-V_dim[1] * V_spacing[1] / 2, (V_dim[1] ) * V_spacing[1]/2, V_dim[1])
         self.z = np.linspace(-V_dim[2] * V_spacing[2] / 2, (V_dim[2] ) * V_spacing[2]/2, V_dim[2])

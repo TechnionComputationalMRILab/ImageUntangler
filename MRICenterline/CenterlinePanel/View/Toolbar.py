@@ -1,7 +1,7 @@
 from PyQt5.QtWidgets import QWidget, QToolBar, QSizePolicy
 from PyQt5.Qt import Qt
 
-from MRICenterline.Config import ConfigParserRead as CFG
+from MRICenterline.Config import CFG
 
 import logging
 logging.getLogger(__name__)

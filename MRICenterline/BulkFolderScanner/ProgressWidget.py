@@ -8,7 +8,6 @@ from PyQt5.QtWidgets import QWidget, QProgressBar, QPushButton, QVBoxLayout, QLa
                             QGridLayout, QTextEdit, QFileDialog, QGroupBox, QCheckBox
 
 from . import Scanner
-from MRICenterline.Config import ConfigParserRead as CFG
 
 import logging
 logging.getLogger(__name__)

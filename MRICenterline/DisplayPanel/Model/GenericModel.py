@@ -6,27 +6,34 @@ from PyQt5.QtWidgets import QWidget, QVBoxLayout, QGroupBox, QFileDialog, QShort
 from PyQt5.Qt import QSizePolicy
 from PyQt5.QtGui import QKeySequence
 
-from MRICenterline.DisplayPanel.View.Toolbar import DisplayPanelToolbar
 from MRICenterline.DisplayPanel.Model.GenericViewerManager import GenericViewerManager
+from MRICenterline.DisplayPanel.Model.Imager import Imager
+
+from MRICenterline.DisplayPanel.View.Toolbar import DisplayPanelToolbar
 from MRICenterline.DisplayPanel.View.SlidersAndSpinboxLayout import SlidersAndSpinboxLayout
+
 from MRICenterline.DisplayPanel.Control.SequenceInteractorWidgets import SequenceInteractorWidgets
 from MRICenterline.DisplayPanel.Control.SequenceViewerInteractorStyle import SequenceViewerInteractorStyle
 from MRICenterline.PatientInfo import PatientInfoPanel
 
+from MRICenterline.FileManipulation import DisplayPanel as DPFileManip
+
 from MRICenterline.Interface import DisplayCenterlineInterface
 from MRICenterline.CenterlinePanel import CenterlinePanel
 
-from MRICenterline.Config import ConfigParserRead as CFG
+from MRICenterline.Config import CFG
 from MRICenterline.utils import message as MSG
+from MRICenterline.utils import Timer
 
 import logging
 logging.getLogger(__name__)
 
 
 class GenericModel(QWidget):
-    def __init__(self, MRIimages, parent, use_sequence):
+    def __init__(self, images: Imager, parent, use_sequence):
         super().__init__(parent)
-        self.images = MRIimages
+        self.images = images
+        self.timer = Timer()
 
         self.layout = QVBoxLayout(self)
         self.toolbar = DisplayPanelToolbar(parent=self, manager=self)
@@ -50,12 +57,14 @@ class GenericModel(QWidget):
             self.current_sequence = -1
             logging.debug(f"Loading single image using sequence {use_sequence}")
             _index = self.images.get_sequences().index(use_sequence)
-            self.view = self.sequenceManager.load_single_sequence(self.interactor, self.interactorStyle, self.images[_index])
+            self.view = self.sequenceManager.load_single_sequence(self.interactor, self.interactorStyle,
+                                                                  self.images[_index], _index)
             self.widgets.freeze_sequence_list(use_sequence)
         else:
             logging.debug("Loading multiple sequences...")
             self.current_sequence = 0
-            self.view = self.sequenceManager.loadSequence(self.current_sequence, self.interactor, self.interactorStyle)
+            self.view = self.sequenceManager.loadSequence(self.current_sequence, self.interactor,
+                                                          self.interactorStyle)
 
         self.sliderspinboxLayout = SlidersAndSpinboxLayout(window_widgets=self.widgets.window_widgets,
                                                            level_widgets=self.widgets.level_widgets,
@@ -79,8 +88,8 @@ class GenericModel(QWidget):
         return frame
 
     def set_up_sliders(self):
-        self.widgets.setValues(sliceIdx=int(self.view.sliceIdx), maxSlice=self.view.imageData.extent[5],
-                               windowValue=int(self.view.WindowVal), levelValue=int(self.view.LevelVal))
+        self.widgets.setValues(sliceIdx=int(self.view.sliceIdx), maxSlice=self.view.imageData.size[2],
+                               windowValue=int(self.view.window_val), levelValue=int(self.view.level_val))
 
 #_____________________________________________Interface to Widgets_____________________________________________________
 
@@ -89,8 +98,8 @@ class GenericModel(QWidget):
         self.statusbar.update_memory_usage()
         try:
             self.view = self.sequenceManager.loadSequence(sequenceIndex, self.interactor, self.interactorStyle)
-            self.widgets.setValues(sliceIdx=int(self.view.sliceIdx), maxSlice=self.view.imageData.extent[5],
-                                   windowValue=int(self.view.WindowVal), levelValue=int(self.view.LevelVal))
+            self.widgets.setValues(sliceIdx=int(self.view.sliceIdx), maxSlice=self.view.imageData.size[2],
+                                   windowValue=int(self.view.window_val), levelValue=int(self.view.level_val))
         except Exception as err:
             logging.critical(f"Error: {err}")
         else:
@@ -128,8 +137,8 @@ class GenericModel(QWidget):
             logging.info("Opening Centerline Panel dockable widget")
             print(self.view.MPRpoints.get_coordinates_as_array())
             self.interface.initialize_points(self.view.MPRpoints.get_coordinates_as_array())
-            self.interface.set_level(self.view.LevelVal)
-            self.interface.set_window(self.view.WindowVal)
+            self.interface.set_level(self.view.level_val)
+            self.interface.set_window(self.view.window_val)
 
             self.centerline_panel = CenterlinePanel(image=self.view.imageData, interface=self.interface,
                                                     parent=self)
@@ -166,6 +175,7 @@ class GenericModel(QWidget):
         self.view.addPoint(pointType, pickedCoordinates)
 
 #________________________________________Interface to Toolbar_____________________________________
+
     def reverseMPRpointsStatus(self):
         # self.interactorStyle.actions["PickingMPR"] = int(not self.interactorStyle.actions["PickingMPR"])
         self.interactorStyle.actions["PickingMPR"] = 1
@@ -177,40 +187,25 @@ class GenericModel(QWidget):
     def calculateLengths(self):
         self.view.calculateLengths()
 
-    # def calculateMPR(self):
-    #     self.view.calculateMPR()
-
     def save_all(self):
-        self.view.save_points()
-
-    # def saveLengths(self):
-    #     logging.info("Saving lengths to file...")
-    #     # first argument of qfiledialog needs to be the qwidget itself
-    #     # fileName, _ = QFileDialog.getSaveFileName(self, "Save Length Points As", CFG.get_config_data("folders", 'default-save-to-folder'),
-    #     #         "%s Files (*.%s)" % ("json".upper(), "json"))
-    #     #
-    #     # if fileName:
-    #     self.view.saveLengths()
-    #     # logging.info(f"Saved as {fileName}")
-    #
-    # def saveMPRPoints(self):
-    #     self.view.saveMPRPoints()
+        logging.info('Saving annotations to database...')
+        self.view.save_points(time_elapsed=self.timer.get_total_time_elapsed())
 
     def loadAllPoints(self, filename):
         logging.debug(f"Opening points from {filename}")
         self.view.loadAllPoints(filename)
 
-    def loadLengthPoints(self):
-        fileName, _ = QFileDialog.getOpenFileName(self, "Load length points")
-        if fileName:
-            logging.info(f"Loading length points from {fileName}")
-            self.view.loadLengthPoints(fileName)
-
-    def loadMPRPoints(self):
-        fileName, _ = QFileDialog.getOpenFileName(self, "Load MPR points")
-        if fileName:
-            logging.info(f"Loading MPR points from {fileName}")
-            self.view.loadMPRPoints(fileName)
+    # def loadLengthPoints(self):
+    #     fileName, _ = QFileDialog.getOpenFileName(self, "Load length points")
+    #     if fileName:
+    #         logging.info(f"Loading length points from {fileName}")
+    #         self.view.loadLengthPoints(fileName)
+    #
+    # def loadMPRPoints(self):
+    #     fileName, _ = QFileDialog.getOpenFileName(self, "Load MPR points")
+    #     if fileName:
+    #         logging.info(f"Loading MPR points from {fileName}")
+    #         self.view.loadMPRPoints(fileName)
 
     def disablePointPicker(self):
         self.interactorStyle.actions["PickingMPR"] = 0
@@ -243,38 +238,18 @@ class GenericModel(QWidget):
         # self.layout.addWidget(_patient_info_panel)
         _patient_info_panel.show()
 
-    def start_timer(self):
-        self.view.start_timer()
-
-    def stop_timer(self):
-        self.view.stop_timer()
-
-    def pause_timer(self):
-        self.view.pause_timer()
-
-    def resume_timer(self):
-        self.view.resume_timer()
-
     def show_intermediate_points(self):
         self.view.show_intermediate_points()
 
     def hide_intermediate_points(self):
         self.view.hide_intermediate_points()
 
-# _________________________________________Keyboard Shortcuts_______________________________________
+    def export_one_sequence(self):
+        logging.info(f"Exporting {self.images.get_sequences()[self.sequenceManager.seq_idx]}...")
+        file_list = self.images.get_files(self.images.get_sequences()[self.sequenceManager.seq_idx])
+        DPFileManip.export_single_sequence(file_list)
 
-    def set_up_keyboard_shortcuts(self):
-        _undo_kb_shortcut = QShortcut(QKeySequence('Ctrl+z'), self)
-        _undo_kb_shortcut.activated.connect(lambda : logging.info("Undo keyboard shortcut used"))
-        _undo_kb_shortcut.activated.connect(self.view.undoAnnotation)
-
-        _save_kb_shortcut = QShortcut(QKeySequence('Ctrl+s'), self)
-        _save_kb_shortcut.activated.connect(lambda : logging.info("Save keyboard shortcut used"))
-        _save_kb_shortcut.activated.connect(self.save_all)
-
-    # TODO REMOVE
-    def FIXER(self):
-        # manual MPR calculation
+    def calculate_mpr(self):
         _zlist = self.view.convert_zcoords()
         _coords = np.copy(self.view.MPRpoints.get_coordinates_as_array())
 
@@ -306,16 +281,29 @@ class GenericModel(QWidget):
                                                 parent=self)
         self.layout.addWidget(self.centerline_panel)
 
-    def FIXER2(self):
-        # convert the points to sitk
-        folder = self.images.dicom_list[0].get_folder()
-        self.view.sitk_conv(folder)
+    ######################################################################
+    #                           timer functions                          #
+    ######################################################################
 
-    def FIXER3(self):
-        # print direction matrix
-        image = self.images.dicom_list[0].sitk_image
-        print(np.array(image.GetDirection()).reshape(3,3))
+    def start_timer(self):
+        self.timer.start_timer()
 
-    def FIXER4(self, filename):
-        # load points one at a time
-        self.view.load_one_at_a_time(filename)
+    def stop_timer(self):
+        self.timer.stop_timer()
+
+    def pause_timer(self):
+        self.timer.pause_timer()
+
+    def resume_timer(self):
+        self.timer.resume_timer()
+
+# _________________________________________Keyboard Shortcuts_______________________________________
+
+    def set_up_keyboard_shortcuts(self):
+        _undo_kb_shortcut = QShortcut(QKeySequence('Ctrl+z'), self)
+        _undo_kb_shortcut.activated.connect(lambda : logging.info("Undo keyboard shortcut used"))
+        _undo_kb_shortcut.activated.connect(self.view.undoAnnotation)
+
+        _save_kb_shortcut = QShortcut(QKeySequence('Ctrl+s'), self)
+        _save_kb_shortcut.activated.connect(lambda : logging.info("Save keyboard shortcut used"))
+        _save_kb_shortcut.activated.connect(self.save_all)

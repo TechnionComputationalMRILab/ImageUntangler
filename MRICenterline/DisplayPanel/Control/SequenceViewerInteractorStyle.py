@@ -149,7 +149,7 @@ class SequenceViewerInteractorStyle(vtkInteractorStyleImage):
 
     def cursorInBullsEye(self) -> int:
         (mouseX, mouseY) = self.parent.GetEventPosition()
-        if self.pointPicker.Pick(mouseX, mouseY, 0.0, self.model.view.panel_renderer): #REMOVE
+        if self.pointPicker.Pick(mouseX, mouseY, 0.0, self.model.view.panel_renderer):
             StartCursorPickedCoordinates = self.pointPicker.GetPickPosition()
             cursorFocalPoint = self.model.view.Cursor.GetFocalPoint()
             if (abs(StartCursorPickedCoordinates[0]-cursorFocalPoint[0]) <= 3*self.model.view.Cursor.GetRadius())\
@@ -164,7 +164,8 @@ class SequenceViewerInteractorStyle(vtkInteractorStyleImage):
         if _pick:
             pickPosition = self.pointPicker.GetPickPosition()
 
-            zCoordinate = self.model.view.z_coords[self.model.view.sliceIdx]
+            # zCoordinate = self.model.view.z_coords[self.model.view.sliceIdx]
+            zCoordinate = 1 + self.model.view.imageData.size[2] - self.model.view.sliceIdx
             pickedCoordinates = (pickPosition[0], pickPosition[1], zCoordinate)
 
             if query:

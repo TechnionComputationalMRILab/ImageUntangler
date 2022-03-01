@@ -2,7 +2,7 @@ from PyQt5.QtWidgets import QStatusBar, QProgressBar, QFrame, QLabel
 import os
 import psutil
 
-from MRICenterline.Config import ConfigParserRead as CFG
+from MRICenterline.Config import CFG
 
 
 class VLine(QFrame):

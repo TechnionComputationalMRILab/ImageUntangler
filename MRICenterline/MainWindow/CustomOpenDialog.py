@@ -4,7 +4,7 @@ from copy import copy
 from collections import defaultdict
 from PyQt5.QtWidgets import QDialog, QTableWidget, QTableWidgetItem, QVBoxLayout, \
     QAbstractScrollArea, QAbstractItemView, QDialogButtonBox
-from MRICenterline.Config import ConfigParserRead as CFG
+from MRICenterline.Config import CFG
 from MRICenterline.utils import message as MSG
 
 import logging

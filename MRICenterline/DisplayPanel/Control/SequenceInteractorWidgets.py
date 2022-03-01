@@ -43,18 +43,11 @@ class SequenceInteractorWidgets:
         sizePolicy.setHeightForWidth(sequenceListBox.sizePolicy().hasHeightForWidth())
         return sizePolicy
 
-    def addImages(self, sequenceList, MRIimages):
-        for i in range(len(MRIimages)):
-            basename = os.path.basename(MRIimages[i])
-            suffix_index = basename.rfind(".")
-            if suffix_index != -1:
-                basename = basename[:suffix_index]
-            sequenceList.addItem(basename)
-
-    def addSequenceList(self, MRIimages, parent) -> QComboBox:
+    def addSequenceList(self, seq_list, parent) -> QComboBox:
         sequenceList = QComboBox(parent=parent)
         sequenceList.setSizePolicy(self._buildSizePolicy(sequenceList))
-        self.addImages(sequenceList, MRIimages)
+
+        [sequenceList.addItem(name) for name in seq_list]
         return sequenceList
 
     def addActions(self):
@@ -70,11 +63,11 @@ class SequenceInteractorWidgets:
 
     def setValues(self, sliceIdx: int, maxSlice: int, windowValue: int, levelValue: int) -> None:
 
-        self.indexSlider.setMinimum(0) # setValue() must be last
+        self.indexSlider.setMinimum(1) # setValue() must be last
         self.indexSlider.setMaximum(maxSlice)
         self.indexSlider.setValue(sliceIdx)
 
-        self.indexSpinbox.setMinimum(0) # setValue() must be last
+        self.indexSpinbox.setMinimum(1) # setValue() must be last
         self.indexSpinbox.setMaximum(maxSlice)
         self.indexSpinbox.setValue(sliceIdx)
 

@@ -3,7 +3,7 @@ from PyQt5.QtWidgets import QWidget, QToolBar, QSizePolicy, QPushButton, QMenu, 
 from PyQt5.Qt import Qt, QAction
 import qtawesome as qta
 
-from MRICenterline.Config import ConfigParserRead as CFG
+from MRICenterline.Config import CFG
 
 import logging
 logging.getLogger(__name__)
@@ -31,12 +31,9 @@ class DisplayPanelToolbar(QToolBar):
 
         self.resetSlidersToDefault()
 
-        if CFG.get_boolean('testing', 'show-fixer-button'):
-            self.addSeparator(expand=True)
-            self.addFixerButton()
-            self.addFixer2Button()
-            self.addFixer3Button()
-            self.addFixer4Button()
+        self.addSeparator()
+
+        self.add_export_menu()
 
         self.addSeparator(expand=True)
 
@@ -119,30 +116,27 @@ class DisplayPanelToolbar(QToolBar):
     def addMPRcalculation(self):
         MPRcalculation = QAction("Calculate MPR", self)
         MPRcalculation.setStatusTip("Calculate MPR from available points")
-        # MPRcalculation.triggered.connect(self.manager.drawMPRSpline)
-        # MPRcalculation.triggered.connect(self.manager.showCenterlinePanel)
-        # self.addAction(MPRcalculation)
-        MPRcalculation.triggered.connect(self.manager.FIXER)
+        MPRcalculation.triggered.connect(self.manager.showCenterlinePanel)
         return MPRcalculation
 
-    def addMPRSave(self):
-        MPRSave = QAction("Save MPR Points", self)
-        MPRSave.setStatusTip("Save the MPR points as a file")
-        MPRSave.triggered.connect(self.manager.saveMPRPoints)
-        return MPRSave
-
-    def loadMPR(self):
-        MPRLoad = QAction("Load MPR Points from file", self)
-        MPRLoad.setStatusTip("Load the MPR points from file")
-        MPRLoad.triggered.connect(self.manager.loadMPRPoints)
-        # MPRLoad.triggered.connect(self.manager.calculateMPR)
-        return MPRLoad
-
-    def loadLength(self):
-        LengthLoad = QAction("Load length points from file", self)
-        LengthLoad.setStatusTip("Load length points from file")
-        LengthLoad.triggered.connect(self.manager.loadLengthPoints)
-        return LengthLoad
+    # def addMPRSave(self):
+    #     MPRSave = QAction("Save MPR Points", self)
+    #     MPRSave.setStatusTip("Save the MPR points as a file")
+    #     MPRSave.triggered.connect(self.manager.saveMPRPoints)
+    #     return MPRSave
+    #
+    # def loadMPR(self):
+    #     MPRLoad = QAction("Load MPR Points from file", self)
+    #     MPRLoad.setStatusTip("Load the MPR points from file")
+    #     MPRLoad.triggered.connect(self.manager.loadMPRPoints)
+    #     # MPRLoad.triggered.connect(self.manager.calculateMPR)
+    #     return MPRLoad
+    #
+    # def loadLength(self):
+    #     LengthLoad = QAction("Load length points from file", self)
+    #     LengthLoad.setStatusTip("Load length points from file")
+    #     LengthLoad.triggered.connect(self.manager.loadLengthPoints)
+    #     return LengthLoad
 
     # def editAnnotation(self):
     #     LengthLoad = QAction("Edit annotation", self)
@@ -278,22 +272,16 @@ class DisplayPanelToolbar(QToolBar):
             self._intermediate_points_button.setText("Show Intermediate MPR points")
             self.manager.hide_intermediate_points()
 
-    def addFixerButton(self):
-        _fixer_button = QPushButton('FIXER: MPR')
-        _fixer_button.clicked.connect(self.manager.FIXER)
-        self.addWidget(_fixer_button)
+    def add_export_menu(self):
+        export_button = QPushButton("Export...")
+        export_button.adjustSize()
+        export_button.setIcon(qta.icon('fa5s.file-export'))
 
-    def addFixer2Button(self):
-        _fixer_button = QPushButton('FIXER2: POINTS')
-        _fixer_button.clicked.connect(self.manager.FIXER2)
-        self.addWidget(_fixer_button)
+        export_one_action = QAction("Export single sequence", self)
+        export_one_action.triggered.connect(self.manager.export_one_sequence)
 
-    def addFixer3Button(self):
-        _fixer_button = QPushButton('FIXER3: DIXMAT')
-        _fixer_button.clicked.connect(self.manager.FIXER3)
-        self.addWidget(_fixer_button)
+        menu = QMenu()
+        menu.addAction(export_one_action)
 
-    def addFixer4Button(self):
-        _fixer_button = QPushButton('FIXER4')
-        _fixer_button.clicked.connect(self.manager.FIXER4)
-        self.addWidget(_fixer_button)
+        export_button.setMenu(menu)
+        self.addWidget(export_button)

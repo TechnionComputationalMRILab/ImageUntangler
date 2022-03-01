@@ -3,7 +3,7 @@ import vtkmodules.all as vtk
 
 
 class Point:
-    def __init__(self, image_coordinates, color=(1, 1, 1), size=1):
+    def __init__(self, image_coordinates, color=(1, 1, 1), size=0.1):
         self.image_coordinates = image_coordinates[0:3]
         self.slice_idx = image_coordinates[-1]
         self.point_color = color

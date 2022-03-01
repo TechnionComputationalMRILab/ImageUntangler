@@ -12,7 +12,7 @@ from MRICenterline.CenterlinePanel.View.Toolbar import CenterlinePanelToolbar
 from MRICenterline.Points import PointArray
 
 from MRICenterline.utils import program_constants as CONST
-from MRICenterline.Config import ConfigParserRead as CFG
+from MRICenterline.Config import CFG
 from MRICenterline.utils import message as MSG
 
 import logging
@@ -27,7 +27,7 @@ class CenterlineViewer(QWidget):
         self.control = control
         self.toolbar = CenterlinePanelToolbar(parent=self, manager=self.model)
 
-        self.lengthPoints = PointArray(point_color=(0, 1, 0))
+        # self.lengthPoints = PointArray(point_color=(0, 1, 0))
 
         self.vl = QVBoxLayout(parent)
         self.setLayout(self.vl)
@@ -82,23 +82,23 @@ class CenterlineViewer(QWidget):
 
     def set_text_actors(self):
         logging.debug("Setting text actors")
-        _font_size = int(CFG.get_config_data('display', 'font-size'))
-        _display_color = CFG.get_color('display')
-        _order = CONST.ORDER_OF_CONTROLS
-
-        self.textActorLevel = vtk.vtkTextActor()
-        self.textActorLevel.GetTextProperty().SetFontSize(_font_size)
-        self.textActorLevel.GetTextProperty().SetColor(_display_color[0], _display_color[1], _display_color[2])
-        self.textActorLevel.SetDisplayPosition(0, _order.index('Level')*_font_size)
-        self.textActorLevel.SetInput(f"Level: {self.model.interface.level}")
-        self.renderer.AddActor(self.textActorLevel)
-
-        self.textActorWindow = vtk.vtkTextActor()
-        self.textActorWindow.GetTextProperty().SetFontSize(_font_size)
-        self.textActorWindow.GetTextProperty().SetColor(_display_color[0], _display_color[1], _display_color[2])
-        self.textActorWindow.SetDisplayPosition(0, _order.index('Window')*_font_size)
-        self.textActorWindow.SetInput(f"Window: {self.model.interface.window}")
-        self.renderer.AddActor(self.textActorWindow)
+        # _font_size = int(CFG.get_config_data('display', 'font-size'))
+        # _display_color = CFG.get_color('display')
+        # _order = CONST.ORDER_OF_CONTROLS
+        #
+        # self.textActorLevel = vtk.vtkTextActor()
+        # self.textActorLevel.GetTextProperty().SetFontSize(_font_size)
+        # self.textActorLevel.GetTextProperty().SetColor(_display_color[0], _display_color[1], _display_color[2])
+        # self.textActorLevel.SetDisplayPosition(0, _order.index('Level')*_font_size)
+        # self.textActorLevel.SetInput(f"Level: {self.model.interface.level}")
+        # self.renderer.AddActor(self.textActorLevel)
+        #
+        # self.textActorWindow = vtk.vtkTextActor()
+        # self.textActorWindow.GetTextProperty().SetFontSize(_font_size)
+        # self.textActorWindow.GetTextProperty().SetColor(_display_color[0], _display_color[1], _display_color[2])
+        # self.textActorWindow.SetDisplayPosition(0, _order.index('Window')*_font_size)
+        # self.textActorWindow.SetInput(f"Window: {self.model.interface.window}")
+        # self.renderer.AddActor(self.textActorWindow)
 
         # _angle_text_actor_order = _order.index('Angle') if 'Angle' in _order else _order.index('Slice Index')
         # self.textActorAngle = vtk.vtkTextActor()
@@ -167,12 +167,12 @@ class CenterlineViewer(QWidget):
 
     def save_file(self):
         logging.info(f'Saving length with MPR points')
-        _save_formatter = SaveFormatter(self.model.image_data, suffix="centerline",
-                                        append_to_directory=False, path=self.model.image_data.path)
-        _save_formatter.add_pointcollection_data('length in mpr points', self.lengthPoints)
-        _save_formatter.add_timestamps(self._start_time, self._stop_time, self._time_gap)
-        _save_formatter.add_generic_data("mpr points", self.model.points)
-        _save_formatter.save_data()
+        # _save_formatter = SaveFormatter(self.model.image_data, suffix="centerline",
+        #                                 append_to_directory=False, path=self.model.image_data.path)
+        # _save_formatter.add_pointcollection_data('length in mpr points', self.lengthPoints)
+        # _save_formatter.add_timestamps(self._start_time, self._stop_time, self._time_gap)
+        # _save_formatter.add_generic_data("mpr points", self.model.points)
+        # _save_formatter.save_data()
 
 # ___________________ TOOLBAR ___________________
 

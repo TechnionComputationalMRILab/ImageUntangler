@@ -2,7 +2,7 @@ import os
 from PyQt5.QtWidgets import QFileDialog
 
 from .ProgressWidget import ProgressWidget
-from MRICenterline.Config import ConfigParserRead as CFG
+from MRICenterline.Config import CFG
 
 import logging
 logging.getLogger(__name__)

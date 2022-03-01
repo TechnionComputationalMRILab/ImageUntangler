@@ -2,7 +2,7 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from PyQt5.Qt import *
 
-from MRICenterline.Config import ConfigParserRead as CFG
+from MRICenterline.Config import CFG
 
 
 class PreferencesWidget(QWidget):

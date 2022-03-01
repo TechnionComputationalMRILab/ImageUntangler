@@ -5,7 +5,7 @@ from itertools import groupby
 
 from PyQt5.QtWidgets import QDialog, QTableWidget, QTableWidgetItem, QVBoxLayout, \
     QAbstractScrollArea, QAbstractItemView, QDialogButtonBox, QCheckBox, QHBoxLayout
-from MRICenterline.Config import ConfigParserRead as CFG
+from MRICenterline.Config import CFG
 from MRICenterline.utils import message as MSG
 
 import logging

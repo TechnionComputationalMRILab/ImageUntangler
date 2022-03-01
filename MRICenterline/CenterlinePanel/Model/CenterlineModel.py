@@ -6,7 +6,6 @@ from MRICenterline.utils.CalculateCenterline import PointsToPlaneVectors
 from MRICenterline.Points.SaveFormatter import SaveFormatter
 
 from MRICenterline.utils import program_constants as CONST
-from MRICenterline.Config import ConfigParserRead as CFG
 
 import logging
 logging.getLogger(__name__)
