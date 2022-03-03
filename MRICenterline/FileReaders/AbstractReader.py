@@ -13,7 +13,7 @@ class AbstractReader:
     def get_sequences(self):
         return self.sequence_list
 
-    def __getitem__(self, item) -> np.ndarray:
+    def __getitem__(self, item):
         raise NotImplementedError
 
     def __len__(self):

@@ -12,7 +12,6 @@ logging.getLogger(__name__)
 class PatientInfoPanel(QDialog):
     def __init__(self, parent):
         super().__init__(parent=parent)
-        self.data_folder = os.path.join(parent.images.dicom_list[0].get_folder(), "data")
         self._comment_parser = CommentParser(parent=self)
         self.unsaved_text = ""
         self._set_up_widgets()
@@ -54,9 +53,6 @@ class PatientInfoPanel(QDialog):
 
     def _set_comment_box_text(self):
         logging.info("Setting comment box text")
-
-        # if self.current_sequence == -1:
-        #     self._comment_box.setHtml('NOT SUPPORTED')
 
         if self._comment_parser.is_empty:
             self._comment_box.setPlaceholderText("No previous comments found")

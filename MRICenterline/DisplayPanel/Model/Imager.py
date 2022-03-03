@@ -1,8 +1,10 @@
 import os
 import sqlite3
-from pathlib import Path
-from vtkmodules.all import vtkImageData
-from glob import glob
+
+import numpy as np
+import SimpleITK as sitk
+import vtkmodules.all as vtk
+from vtkmodules.util import numpy_support
 
 from MRICenterline.FileReaders.DICOMReader import DICOMReader
 from MRICenterline.FileReaders.NRRDReader import NRRDReader
@@ -54,16 +56,55 @@ class Imager:
         if isinstance(item, int):
             return self[self.get_sequences()[item]]
         else:
-            sitk_image = self.reader[item]
-            return ImageProperties(sitk_image)
+            self.sitk_image = self.reader[item]
+            self.size = np.array(self.sitk_image.GetSize())
+            self.spacing = np.array(self.sitk_image.GetSpacing())
+            vtk_data = self.get_vtk_data(self.sitk_image)
+            return ImageProperties(vtk_data)
 
     def get_files(self, seq):
-        ic(seq)
         return self.reader.get_file_list(seq)
 
     ##############################################
     #             private functions              #
     ##############################################
+
+    @staticmethod
+    def get_vtk_data(sitk_image):
+
+        spacing = np.array(sitk_image.GetSpacing())
+        size = np.array(sitk_image.GetSize())
+        origin = np.array(sitk_image.GetOrigin())
+        extent = (0, size[0] - 1,
+                  0, size[1] - 1,
+                  0, size[2] - 1)
+
+        nparray = sitk.GetArrayFromImage(sitk_image)
+        nparray = np.flipud(nparray)
+        nparray = np.reshape(nparray, newshape=size)
+
+        vtkVolBase = vtk.vtkImageData()
+        vtkVolBase.SetDimensions(*size)
+        vtkVolBase.SetOrigin(*origin)
+        vtkVolBase.SetSpacing(*spacing)
+        vtkVolBase.SetExtent(*extent)
+
+        image_array = numpy_support.numpy_to_vtk(nparray.ravel(), deep=True, array_type=vtk.VTK_TYPE_UINT16)
+        vtkVolBase.GetPointData().SetScalars(image_array)
+        vtkVolBase.Modified()
+
+        # return vtkVolBase
+
+        # flip the image in Y direction
+        flip = vtk.vtkImageReslice()
+        flip.SetInputData(vtkVolBase)
+        flip.SetResliceAxesDirectionCosines(1, 0, 0, 0, -1, 0, 0, 0, 1)
+        flip.Update()
+
+        vtkVol = flip.GetOutput()
+        vtkVol.SetOrigin(*origin)
+
+        return vtkVol
 
     def database_check(self):
         """

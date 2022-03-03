@@ -75,8 +75,6 @@ class DisplayPanelToolbar(QToolBar):
         lengthPointAction.setStatusTip("Set Length Points")
         lengthPointAction.triggered.connect(self.manager.disablePointPicker)
         lengthPointAction.triggered.connect(self.manager.reverseLengthPointsStatus)
-        # lengthPointAction.triggered.connect(lambda: self.changePickerStatus("length"))
-        # self.addAction(lengthPointAction)
         return lengthPointAction
 
     def addLengthCalculation(self):
@@ -86,20 +84,12 @@ class DisplayPanelToolbar(QToolBar):
         lengthCalculation.triggered.connect(self.manager.calculateLengths)
         return lengthCalculation
 
-    def addLengthSave(self):
-        lengthSave = QAction("Save Length", self)
-        lengthSave.setStatusTip("Save the length as a file")
-        lengthSave.triggered.connect(self.manager.saveLengths)
-        return lengthSave
-
     def addLengthMenu(self):
         LengthPushButton = QPushButton("Length")
         menu = QMenu()
         LengthPushButton.setIcon(qta.icon('fa5s.ruler'))
         menu.addAction(self.addLengthPointsAction())
         menu.addAction(self.addLengthCalculation())
-        # menu.addAction(self.addLengthSave())
-        # menu.addAction(self.loadLength())
 
         LengthPushButton.setMenu(menu)
         self.addWidget(LengthPushButton)
@@ -109,8 +99,6 @@ class DisplayPanelToolbar(QToolBar):
         MPRpointsAction.setStatusTip("Set MPR Points")
         MPRpointsAction.triggered.connect(self.manager.disablePointPicker)
         MPRpointsAction.triggered.connect(self.manager.reverseMPRpointsStatus)
-        # MPRpointsAction.triggered.connect(lambda: self.changePickerStatus("MPR"))
-        # self.addAction(MPRpointsAction)
         return MPRpointsAction
 
     def addMPRcalculation(self):
@@ -118,31 +106,6 @@ class DisplayPanelToolbar(QToolBar):
         MPRcalculation.setStatusTip("Calculate MPR from available points")
         MPRcalculation.triggered.connect(self.manager.showCenterlinePanel)
         return MPRcalculation
-
-    # def addMPRSave(self):
-    #     MPRSave = QAction("Save MPR Points", self)
-    #     MPRSave.setStatusTip("Save the MPR points as a file")
-    #     MPRSave.triggered.connect(self.manager.saveMPRPoints)
-    #     return MPRSave
-    #
-    # def loadMPR(self):
-    #     MPRLoad = QAction("Load MPR Points from file", self)
-    #     MPRLoad.setStatusTip("Load the MPR points from file")
-    #     MPRLoad.triggered.connect(self.manager.loadMPRPoints)
-    #     # MPRLoad.triggered.connect(self.manager.calculateMPR)
-    #     return MPRLoad
-    #
-    # def loadLength(self):
-    #     LengthLoad = QAction("Load length points from file", self)
-    #     LengthLoad.setStatusTip("Load length points from file")
-    #     LengthLoad.triggered.connect(self.manager.loadLengthPoints)
-    #     return LengthLoad
-
-    # def editAnnotation(self):
-    #     LengthLoad = QAction("Edit annotation", self)
-    #     LengthLoad.setStatusTip("TESTING: Edit annotation")
-    #     LengthLoad.triggered.connect(self.manager.modifyAnnotation)
-    #     return LengthLoad
 
     def addMPRMenu(self):
         MPRPushButton = QPushButton("MPR Calculations")
@@ -152,19 +115,9 @@ class DisplayPanelToolbar(QToolBar):
         menu = QMenu()
         menu.addAction(self.addMPRpointsAction())
         menu.addAction(self.addMPRcalculation())
-        # menu.addAction(self.addMPRSave())
-        # menu.addAction(self.loadMPR())
 
         MPRPushButton.setMenu(menu)
         self.addWidget(MPRPushButton)
-
-    def showPickerStatus(self):
-        self.PickerStatus = QLabel("EMPTY")
-        font = QFont()
-        font.setBold(True)
-        self.PickerStatus.setFont(font)
-        self.PickerStatus.clear()
-        self.addWidget(self.PickerStatus)
 
     def addDisablePointPickers(self):
         _disable_picker_button = QPushButton("Disable point picking")
@@ -280,8 +233,16 @@ class DisplayPanelToolbar(QToolBar):
         export_one_action = QAction("Export single sequence", self)
         export_one_action.triggered.connect(self.manager.export_one_sequence)
 
+        export_entire_case = QAction("Export all sequences in case", self)
+        # export_entire_case.triggered.connect(self.manager.export_entire_case)
+
+        export_sequence_and_points = QAction("Export sequence with points", self)
+        export_sequence_and_points.triggered.connect(self.manager.export_seq_and_pts)
+
         menu = QMenu()
         menu.addAction(export_one_action)
+        menu.addAction(export_one_action)
+        menu.addAction(export_sequence_and_points)
 
         export_button.setMenu(menu)
         self.addWidget(export_button)

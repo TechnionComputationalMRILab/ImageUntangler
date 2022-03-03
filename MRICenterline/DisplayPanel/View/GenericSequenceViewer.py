@@ -51,10 +51,10 @@ class GenericSequenceViewer:
         self.MPRpoints = PointArray(point_color=(1, 0, 0),
                                     size=int(CFG.get_config_data('mpr-display-style', 'marker-size')),
                                     highlight_last=True,
-                                    image=self.imageData)
+                                    image=self.manager.imager)
         self.lengthPoints = PointArray(point_color=(0, 1, 0),
                                        size=int(CFG.get_config_data('length-display-style', 'marker-size')),
-                                       image=self.imageData)
+                                       image=self.manager.imager)
         self._point_order = []
 
         self.presentCursor()
@@ -71,7 +71,8 @@ class GenericSequenceViewer:
 
     def connect_actor(self):
         self.reslice = vtk.vtkImageReslice()
-        self.reslice.SetInputData(self.imageData.get_vtk_data())
+        # self.reslice.SetInputData(self.imageData.get_vtk_data())
+        self.reslice.SetInputData(self.imageData.full_data)
         self.reslice.SetOutputDimensionality(2)
         self.reslice.SetResliceAxes(self.imageData.transformation)
         self.reslice.SetInterpolationModeToLinear()

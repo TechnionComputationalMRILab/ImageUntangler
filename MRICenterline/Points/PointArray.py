@@ -1,6 +1,6 @@
 import numpy as np
 from typing import List
-from MRICenterline.DisplayPanel.Model.ImageProperties import ImageProperties
+from MRICenterline.DisplayPanel.Model.Imager import Imager
 from MRICenterline.Points.Point import Point
 from MRICenterline.Points.LineActor import generate_lines
 from MRICenterline.Points.SplineActor import generate_spline
@@ -8,7 +8,7 @@ from MRICenterline.Points.LengthCalculation import length_actor, temp_length_cal
 
 
 class PointArray:
-    def __init__(self, image: ImageProperties, point_color=(1, 1, 1), size=1, highlight_last=False, highlight_color=(0, 1, 1)):
+    def __init__(self, image: Imager, point_color=(1, 1, 1), size=1, highlight_last=False, highlight_color=(0, 1, 1)):
         self.image = image
         self.itk_index_points: List[Point] = []
         self.physical_points: List[Point] = []

@@ -28,7 +28,7 @@ class DICOMReader(AbstractReader):
     def __repr__(self):
         return f"DICOMReader for case with ID [{self.case_id}], with [{len(self)}] sequences."
 
-    def __getitem__(self, item) -> np.ndarray:
+    def __getitem__(self, item):
         if type(item) is int:
             return self[self.sequence_list[item]]
         elif (type(item) is str) and (item in self.sequence_list):
@@ -63,7 +63,7 @@ class DICOMReader(AbstractReader):
 
     @staticmethod
     def generate_simple_itk_image(file_list):
-        # TODO: remove dependency on tempdir , it's a temporary fix to a possible sITK bug
+        """ TempDir dependency is due to an sITK issue, see: https://github.com/SimpleITK/SimpleITK/issues/1609 """
         reader = sitk.ImageSeriesReader()
 
         with tempfile.TemporaryDirectory() as temp_dir:

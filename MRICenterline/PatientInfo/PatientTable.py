@@ -18,30 +18,22 @@ class PatientTable(QTableWidget):
         self.selected_item = None
         self._raw_data = []
 
-        self._directory = os.path.join(CFG.get_config_data("folders", 'default-folder'), 'directory.csv')
-        if not os.path.exists(self._directory):
-            MSG.msg_box_warning("Saved Points Directory does not exist yet!")
-            logging.critical("Tried to load without directory")
-            raise FileNotFoundError
-        else:
-            logging.info("Opening directory.csv")
+        _columns = defaultdict(list)
+        _num_of_rows = 0
 
-            _columns = defaultdict(list)
-            _num_of_rows = 0
+        with open(self._directory, 'r') as f:
+            _reader = csv.DictReader(f)
+            for row in _reader:                 # read a row as {column1: value1, column2: value2,...}
 
-            with open(self._directory, 'r') as f:
-                _reader = csv.DictReader(f)
-                for row in _reader:                 # read a row as {column1: value1, column2: value2,...}
-
-                    self._raw_data.append(row.items())
-                    _num_of_rows += 1
-                    for (k, v) in row.items():      # go over each column name and value
-                        _columns[k].append(v)       # append the value into the appropriate list
-                                                    # based on column name k
-            self.file_list = _columns.pop('filename')
-            self.path_list = _columns.pop('path')
-            self.data = {k: _columns[k] for k in ['case number', "date", 'has CL',
-                                                  '# MPR points', '# len points', 'sequence name']}
+                self._raw_data.append(row.items())
+                _num_of_rows += 1
+                for (k, v) in row.items():      # go over each column name and value
+                    _columns[k].append(v)       # append the value into the appropriate list
+                                                # based on column name k
+        self.file_list = _columns.pop('filename')
+        self.path_list = _columns.pop('path')
+        self.data = {k: _columns[k] for k in ['case number', "date", 'has CL',
+                                              '# MPR points', '# len points', 'sequence name']}
 
         self.setRowCount(_num_of_rows)
         self.setColumnCount(6)

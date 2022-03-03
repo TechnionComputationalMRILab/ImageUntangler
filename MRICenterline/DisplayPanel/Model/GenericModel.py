@@ -32,20 +32,35 @@ logging.getLogger(__name__)
 class GenericModel(QWidget):
     def __init__(self, images: Imager, parent, use_sequence):
         super().__init__(parent)
+        self.use_sequence = use_sequence
         self.images = images
+        self.interface = DisplayCenterlineInterface()
         self.timer = Timer()
+        self.pickingLengthPoints = False
+        self.pickingMPRpoints = False
+        self.statusbar = parent.parent().parent().parent().parent().statusBar()  # TODO: thanks i hate it
 
         self.layout = QVBoxLayout(self)
         self.toolbar = DisplayPanelToolbar(parent=self, manager=self)
 
-        self.statusbar = parent.parent().parent().parent().parent().statusBar()  # TODO: thanks i hate it
+        self.set_up_display_panel()
+        self.set_up_sliders()
+        self.set_up_keyboard_shortcuts()
 
-        # self.toolbar.setGeometry(QRect(0, 0, 500, 22))
-        self.pickingLengthPoints = False
-        self.pickingMPRpoints = False
-        self.interface = DisplayCenterlineInterface()
+        self.layout.addWidget(self.toolbar)
+        self.layout.addWidget(self.widgets.sequenceList)
+        self.layout.addWidget(self.interactor)
+        self.layout.addLayout(self.sliderspinboxLayout)
 
-        frame = self.buildFrame()
+    def set_up_display_panel(self):
+
+        def build_frame():
+            """ creates a maximized frame for the QVTK Window"""
+            _frame = QGroupBox()
+            _frame.showMaximized()
+            return _frame
+
+        frame = build_frame()
         self.interactor = QVTKRenderWindowInteractor(frame)
         self.interactorStyle = SequenceViewerInteractorStyle(parent=self.interactor, model=self)
         self.interactor.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
@@ -53,13 +68,13 @@ class GenericModel(QWidget):
         self.widgets = SequenceInteractorWidgets(self.images.get_sequences(), self)
         self.sequenceManager = GenericViewerManager(self, self.images)
 
-        if use_sequence in self.images.get_sequences():
+        if self.use_sequence in self.images.get_sequences():
             self.current_sequence = -1
-            logging.debug(f"Loading single image using sequence {use_sequence}")
-            _index = self.images.get_sequences().index(use_sequence)
+            logging.debug(f"Loading single image using sequence {self.use_sequence}")
+            _index = self.images.get_sequences().index(self.use_sequence)
             self.view = self.sequenceManager.load_single_sequence(self.interactor, self.interactorStyle,
                                                                   self.images[_index], _index)
-            self.widgets.freeze_sequence_list(use_sequence)
+            self.widgets.freeze_sequence_list(self.use_sequence)
         else:
             logging.debug("Loading multiple sequences...")
             self.current_sequence = 0
@@ -70,28 +85,13 @@ class GenericModel(QWidget):
                                                            level_widgets=self.widgets.level_widgets,
                                                            index_widgets=self.widgets.index_widgets)
 
-        self.set_up_sliders()
-        self.set_up_keyboard_shortcuts()
-
-        self.layout.addWidget(self.toolbar)
-        self.layout.addWidget(self.widgets.sequenceList)
-        self.layout.addWidget(self.interactor)
-        self.layout.addLayout(self.sliderspinboxLayout)
-
-        # self.view.convert_zcoords()
-
-#_________________________________________Constructor functions_____________________________________
-    @staticmethod
-    def buildFrame():
-        frame = QGroupBox()
-        frame.showMaximized()
-        return frame
-
     def set_up_sliders(self):
         self.widgets.setValues(sliceIdx=int(self.view.sliceIdx), maxSlice=self.view.imageData.size[2],
                                windowValue=int(self.view.window_val), levelValue=int(self.view.level_val))
 
-#_____________________________________________Interface to Widgets_____________________________________________________
+    ###########################################################################
+    #                             widget functions                            #
+    ###########################################################################
 
     def changeSequence(self, sequenceIndex: int):
         logging.info(f"Sequence changed {sequenceIndex}")
@@ -144,7 +144,9 @@ class GenericModel(QWidget):
                                                     parent=self)
             self.layout.addWidget(self.centerline_panel)
 
-#__________________________________________ Interface to InteractorStyle ________________________________
+    ###########################################################################
+    #                         interactor callbacks                            #
+    ###########################################################################
 
     def moveBullsEye(self, coordinates: Tuple[int]):
         self.view.moveBullsEye(coordinates)
@@ -174,7 +176,9 @@ class GenericModel(QWidget):
     def addPoint(self, pointType: str, pickedCoordinates: Tuple[int]):
         self.view.addPoint(pointType, pickedCoordinates)
 
-#________________________________________Interface to Toolbar_____________________________________
+    ###########################################################################
+    #                            toolbar functions                            #
+    ###########################################################################
 
     def reverseMPRpointsStatus(self):
         # self.interactorStyle.actions["PickingMPR"] = int(not self.interactorStyle.actions["PickingMPR"])
@@ -194,18 +198,6 @@ class GenericModel(QWidget):
     def loadAllPoints(self, filename):
         logging.debug(f"Opening points from {filename}")
         self.view.loadAllPoints(filename)
-
-    # def loadLengthPoints(self):
-    #     fileName, _ = QFileDialog.getOpenFileName(self, "Load length points")
-    #     if fileName:
-    #         logging.info(f"Loading length points from {fileName}")
-    #         self.view.loadLengthPoints(fileName)
-    #
-    # def loadMPRPoints(self):
-    #     fileName, _ = QFileDialog.getOpenFileName(self, "Load MPR points")
-    #     if fileName:
-    #         logging.info(f"Loading MPR points from {fileName}")
-    #         self.view.loadMPRPoints(fileName)
 
     def disablePointPicker(self):
         self.interactorStyle.actions["PickingMPR"] = 0
@@ -235,7 +227,7 @@ class GenericModel(QWidget):
     def showPatientInfoTable(self):
         logging.info("Showing patient table")
         _patient_info_panel = PatientInfoPanel(parent=self)
-        # self.layout.addWidget(_patient_info_panel)
+        self.layout.addWidget(_patient_info_panel)
         _patient_info_panel.show()
 
     def show_intermediate_points(self):
@@ -249,41 +241,12 @@ class GenericModel(QWidget):
         file_list = self.images.get_files(self.images.get_sequences()[self.sequenceManager.seq_idx])
         DPFileManip.export_single_sequence(file_list)
 
-    def calculate_mpr(self):
-        _zlist = self.view.convert_zcoords()
-        _coords = np.copy(self.view.MPRpoints.get_coordinates_as_array())
+    def export_seq_and_pts(self):
+        pass
 
-        _slice_index_based = self.view.z_coords
-
-        # print(_coords)
-
-        _list = []
-        for pt in _coords:
-            for k, bad_z in enumerate(_slice_index_based):
-                if np.isclose(pt[2], bad_z):
-                    print(f"replace {bad_z} with {_zlist[k]}")
-                    _list.append(_zlist[k])
-                    break
-
-        print(_coords.shape)
-        print(np.array(_list).shape)
-
-        _coords[:, 2] = np.array(_list)
-
-        print(_coords)
-
-        self.interface.initialize_points(_coords)
-        self.interface.set_level(self.view.LevelVal)
-        self.interface.set_window(self.view.WindowVal)
-        print(self.interface.level)
-
-        self.centerline_panel = CenterlinePanel(image=self.view.imageData, interface=self.interface,
-                                                parent=self)
-        self.layout.addWidget(self.centerline_panel)
-
-    ######################################################################
-    #                           timer functions                          #
-    ######################################################################
+    ###########################################################################
+    #                              timer functions                            #
+    ###########################################################################
 
     def start_timer(self):
         self.timer.start_timer()
@@ -297,7 +260,9 @@ class GenericModel(QWidget):
     def resume_timer(self):
         self.timer.resume_timer()
 
-# _________________________________________Keyboard Shortcuts_______________________________________
+    ###########################################################################
+    #                           keyboard shortcuts                            #
+    ###########################################################################
 
     def set_up_keyboard_shortcuts(self):
         _undo_kb_shortcut = QShortcut(QKeySequence('Ctrl+z'), self)
