@@ -59,8 +59,8 @@ class Imager:
             self.sitk_image = self.reader[item]
             self.size = np.array(self.sitk_image.GetSize())
             self.spacing = np.array(self.sitk_image.GetSpacing())
-            vtk_data = self.get_vtk_data(self.sitk_image)
-            return ImageProperties(vtk_data)
+            np_data, vtk_data = self.get_np_and_vtk_data(self.sitk_image)
+            return ImageProperties(vtk_data, np_data)
 
     def get_files(self, seq):
         return self.reader.get_file_list(seq)
@@ -70,8 +70,8 @@ class Imager:
     ##############################################
 
     @staticmethod
-    def get_vtk_data(sitk_image):
-
+    def get_np_and_vtk_data(sitk_image):
+        dimensions = sitk_image.GetNumberOfComponentsPerPixel()
         spacing = np.array(sitk_image.GetSpacing())
         size = np.array(sitk_image.GetSize())
         origin = np.array(sitk_image.GetOrigin())
@@ -89,7 +89,10 @@ class Imager:
         vtkVolBase.SetSpacing(*spacing)
         vtkVolBase.SetExtent(*extent)
 
-        image_array = numpy_support.numpy_to_vtk(nparray.ravel(), deep=True, array_type=vtk.VTK_TYPE_UINT16)
+        # image_array = numpy_support.numpy_to_vtk(nparray.ravel(), deep=True, array_type=vtk.VTK_TYPE_UINT16)
+        image_array = numpy_support.numpy_to_vtk(nparray.ravel())
+        image_array.SetNumberOfComponents(dimensions)
+
         vtkVolBase.GetPointData().SetScalars(image_array)
         vtkVolBase.Modified()
 
@@ -104,7 +107,7 @@ class Imager:
         vtkVol = flip.GetOutput()
         vtkVol.SetOrigin(*origin)
 
-        return vtkVol
+        return nparray, vtkVol
 
     def database_check(self):
         """
