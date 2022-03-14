@@ -72,7 +72,7 @@ class GenericSequenceViewer:
     def connect_actor(self):
         self.reslice = vtk.vtkImageReslice()
         # self.reslice.SetInputData(self.imageData.get_vtk_data())
-        self.reslice.SetInputData(self.imageData.full_data)
+        self.reslice.SetInputData(self.imageData.vtk_data)
         self.reslice.SetOutputDimensionality(2)
         self.reslice.SetResliceAxes(self.imageData.transformation)
         self.reslice.SetInterpolationModeToLinear()

@@ -56,11 +56,12 @@ class Imager:
         if isinstance(item, int):
             return self[self.get_sequences()[item]]
         else:
+            self.sequence = item
             self.sitk_image = self.reader[item]
-            self.size = np.array(self.sitk_image.GetSize())
-            self.spacing = np.array(self.sitk_image.GetSpacing())
-            np_data, vtk_data = self.get_np_and_vtk_data(self.sitk_image)
-            return ImageProperties(vtk_data, np_data)
+            self.properties = ImageProperties(self.sitk_image)
+            self.z_coord_dict = self.properties.get_z_coords(self.reader, item)
+            # np_data, vtk_data = self.get_np_and_vtk_data(self.sitk_image)
+            return self.properties
 
     def get_files(self, seq):
         return self.reader.get_file_list(seq)

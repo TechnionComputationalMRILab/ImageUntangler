@@ -3,6 +3,7 @@ import math
 import vtkmodules.all as vtk
 from vtkmodules.util import numpy_support
 
+from SimpleITK import GetArrayFromImage
 import numpy as np
 
 from MRICenterline.Config import CFG
@@ -13,13 +14,16 @@ logging.getLogger(__name__)
 
 
 class ImageProperties:
-    def __init__(self, full_data: vtk.vtkImageData, np_array):
-        self.full_data = full_data
-        self.spacing = full_data.GetSpacing()
-        self.dimensions = full_data.GetDimensions()
-        self.extent = full_data.GetExtent()
-        self.origin = full_data.GetOrigin()
-        self.size = full_data.GetDimensions()
+    def __init__(self, sitk_image):
+        self.sitk_image = sitk_image
+        self.nparray = GetArrayFromImage(sitk_image)
+        self.spacing = np.array(sitk_image.GetSpacing())
+        self.dimensions = int(sitk_image.GetDimension())
+        self.size = np.array(sitk_image.GetSize())
+        self.origin = np.array(sitk_image.GetOrigin())
+        self.extent = (0, self.size[0] - 1,
+                       0, self.size[1] - 1,
+                       0, self.size[2] - 1)
 
         def calculate_center():
             it = iter(self.extent)
@@ -33,18 +37,18 @@ class ImageProperties:
         center = calculate_center()
         self.sliceIdx = np.int(np.round(((center[2]-self.origin[2])/self.spacing[2]))) + 1
 
-        # self.nparray = numpy_support.vtk_to_numpy(full_data.GetPointData().GetArray(0))
-        self.nparray = np_array
-        self.nparray = self.nparray.reshape(self.dimensions, order='F')
-
         self.window_value, self.level_value = self.calculate_window_and_level()
+
+        self.vtk_data = self.get_vtk_data()
         self.transformation = transformation_matrix(center)
+
+        self.direction_matrix = sitk_image.GetDirection()
 
     def __repr__(self):
         return f"""
         ImageProperties instance
         Spacing: {self.spacing}
-        Dimensions: {self.dimensions}
+        Size: {self.size}
         Origin: {self.origin}
         """
 
@@ -58,4 +62,38 @@ class ImageProperties:
         return 0.5 * self.spacing[0] * (self.extent[1] - self.extent[0])
 
     def convert_itk_to_slice(self, itk_z):
-        return 1 + self.dimensions[2] - itk_z
+        return 1 + self.size[2] - itk_z
+
+    def get_vtk_data(self):
+        vtkVolBase = vtk.vtkImageData()
+        vtkVolBase.SetDimensions(*self.size)
+        vtkVolBase.SetOrigin(*self.origin)
+        vtkVolBase.SetSpacing(*self.spacing)
+        vtkVolBase.SetExtent(*self.extent)
+
+        image_array = numpy_support.numpy_to_vtk(self.nparray.ravel(), deep=True, array_type=vtk.VTK_TYPE_UINT16)
+        vtkVolBase.GetPointData().SetScalars(image_array)
+        vtkVolBase.Modified()
+
+        # return vtkVolBase
+
+        # flip the image in Y direction
+        flip = vtk.vtkImageReslice()
+        flip.SetInputData(vtkVolBase)
+        flip.SetResliceAxesDirectionCosines(1, 0, 0, 0, -1, 0, 0, 0, 1)
+        flip.Update()
+
+        vtkVol = flip.GetOutput()
+        vtkVol.SetOrigin(*self.origin)
+
+        return vtkVol
+
+    def get_z_coords(self, reader, seq_name):
+        d: dict = reader.get_z_coords(seq_name).copy()
+        transformed_d = dict()
+
+        for k, v in d.items():
+            new_key = k
+            transformed_d[new_key] = v
+
+        return transformed_d

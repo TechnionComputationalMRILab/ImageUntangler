@@ -69,10 +69,10 @@ class PointArray:
         self.add_point(image_point_location)
 
     def add_point(self, image_point_location):
-        viewer_origin = self.image.size / 2.0
+        viewer_origin = self.image.properties.size / 2.0
 
-        itk_index_x = round(image_point_location[0]/self.image.spacing[0] + viewer_origin[0])
-        itk_index_y = round(self.image.size[1] - (image_point_location[1] / self.image.spacing[1] + viewer_origin[1]))
+        itk_index_x = round(image_point_location[0]/self.image.properties.spacing[0] + viewer_origin[0])
+        itk_index_y = round(self.image.properties.size[1] - (image_point_location[1] / self.image.properties.spacing[1] + viewer_origin[1]))
         itk_index_z = image_point_location[2]
         itk_index = (int(itk_index_x), int(itk_index_y), int(itk_index_z))
 
@@ -143,7 +143,22 @@ class PointArray:
         [renderer.RemoveActor(actor) for actor in _actor_list]
 
     def get_coordinates_as_array(self) -> np.array:
-        return np.asarray([point.image_coordinates for point in self.physical_points])
+        # # using the physical ITK points
+        # points = np.array([point.image_coordinates for point in self.physical_points])
+        # direction_matrix = np.reshape(self.image.properties.direction_matrix,
+        #                               (self.image.properties.dimensions, self.image.properties.dimensions))
+        # transformed_points = np.array([np.matmul(direction_matrix, i) for i in points])
+
+        # using the SliceLocation
+        points = np.array([point.image_coordinates for point in self.display_points])
+        zcoord = self.image.z_coord_dict
+        ic(zcoord)
+        transformed_points = np.copy(points)
+
+        for t_pt, pt in zip(transformed_points, points):
+            t_pt[2] = zcoord[pt[2]]
+
+        return transformed_points
 
     def extend(self, point_array):
         self.display_points.extend(point_array.points)

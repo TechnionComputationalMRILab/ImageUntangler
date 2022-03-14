@@ -1,14 +1,9 @@
 import shutil
 import tempfile
 import sqlite3
-import pydicom
-import numpy as np
 import os
-from glob import glob
 import SimpleITK as sitk
-from pathlib import Path
 
-from . import SequenceFile, NumpyToVTK, Header, GenerateMetadata
 from . import InitialDatabaseBuild
 from MRICenterline.FileReaders.AbstractReader import AbstractReader
 from MRICenterline.Config import CFG
@@ -60,6 +55,12 @@ class DICOMReader(AbstractReader):
             return self.get_file_list(self.sequence_list[seq])
         else:
             raise KeyError("Sequence not found in database")
+
+    def get_z_coords(self, seq):
+        from pydicom import dcmread
+
+        file_list = self.get_file_list(seq)
+        return {slice_idx: float(dcmread(filename).SliceLocation) for slice_idx, filename in enumerate(file_list)}
 
     @staticmethod
     def generate_simple_itk_image(file_list):
