@@ -1,6 +1,7 @@
 __author__ = "Yael Zaffrani and Avraham Kahan and Angeleene Ang"
 
-from MRICenterline.MainWindow import App
+# from MRICenterline.MainWindow import App
+from MRICenterline.app import IUMainWindow as App #TODO
 from MRICenterline.Config.initial_config import Config
 from PyQt5.QtWidgets import QApplication
 from sys import exit

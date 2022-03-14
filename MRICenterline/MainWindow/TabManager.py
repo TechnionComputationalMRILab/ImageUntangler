@@ -1,4 +1,5 @@
 from .Tab import Tab
+from .DefaultTabWidget import DefaultTabWidget
 
 import sys
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QTabWidget, QTabBar
@@ -35,8 +36,13 @@ class TabsBar(QTabWidget):
     def build_initial_tab(self):
         logging.debug("Building initial tab")
         self.setUpdatesEnabled(True)
-        initial_tab = Tab(parent=self)
-        self.insertTab(0, initial_tab, initial_tab.get_name())
+
+        # initial_tab = Tab(parent=self)
+        # self.insertTab(0, initial_tab, initial_tab.get_name())
+
+        initial_tab = DefaultTabWidget(parent=self)
+        self.insertTab(0, initial_tab, "test")
+
         self.insertTab(1, QWidget(), ' + ')
         self.tabBar().setTabButton(1, QTabBar.RightSide, None)
         self.currentChanged.connect(self.tab_addition)

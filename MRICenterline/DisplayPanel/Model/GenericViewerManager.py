@@ -71,8 +71,6 @@ class GenericViewerManager:
         case_id = self.imager.get_case_id()
         timestamp = datetime.now(timezone.utc).astimezone().strftime(CONST.TIMESTAMP_FORMAT)
 
-        ic(datetime.now(timezone.utc).astimezone())
-
         con = sqlite3.connect(CFG.get_db())
         with con:
             con.execute('insert into case_access_history (case_id, seq_id, timestamp) values (?, ?, ?)',

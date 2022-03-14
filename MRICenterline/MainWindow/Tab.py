@@ -73,7 +73,9 @@ class Tab(QWidget):
 
     def finalize_tab_connection(self, tab_name):
         """ clear the default tab and connects the components to the tab """
-        self.clear_default()
+        self.mainLayout.removeWidget(self._defaultTabMainWidget)
+        self._defaultTabMainWidget.deleteLater()
+
         self.tab_name = tab_name
         self.Tab_Bar.change_tab_name(self)
         QMetaObject.connectSlotsByName(self)
@@ -131,10 +133,6 @@ class Tab(QWidget):
         logging.info(f"Loading {self.name}")
         self.tab_name = os.path.basename(self.name)
 
-    def clear_default(self):
-        self.mainLayout.removeWidget(self._defaultTabMainWidget)
-        self._defaultTabMainWidget.deleteLater()
-
     def get_viewer(self, sequence=None):
         try:
             _generic_model = GenericModel(self.MRIimages, parent=self, use_sequence=sequence)
@@ -146,7 +144,6 @@ class Tab(QWidget):
             else:
                 logging.info("Opening point data from file")
                 _generic_model.loadAllPoints(self._ldd.path['full_path'])
-                # _generic_model.FIXER4(self._ldd.path['full_path'])
 
             return _generic_model
 

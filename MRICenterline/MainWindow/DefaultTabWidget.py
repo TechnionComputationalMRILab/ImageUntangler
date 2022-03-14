@@ -1,4 +1,5 @@
 from PyQt5.QtWidgets import QWidget, QGridLayout, QPushButton, QHBoxLayout
+from MRICenterline.MainWindow import MWFunctions
 
 
 class DefaultTabWidget(QWidget):
@@ -9,6 +10,7 @@ class DefaultTabWidget(QWidget):
 
         self.set_up_main_layout()
         self.add_bottom_buttons()
+        self.connect_buttons()
 
     def set_up_main_layout(self):
         self._grid_layout.setRowStretch(0, 2)
@@ -60,6 +62,9 @@ class DefaultTabWidget(QWidget):
 
     def connect_open_mri_from_folder_button(self, func):
         self.open_from_folder.clicked.connect(func)
+
+    def connect_buttons(self):
+        self.preferences_button.clicked.connect(lambda: MWFunctions.show_preferences_dialog(self))
 
 
 if __name__ == "__main__":
