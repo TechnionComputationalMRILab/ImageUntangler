@@ -1,9 +1,4 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
-"""
-documentation
-"""
-
-if __name__ == '__main__': 
-    pass
+from .organize_data import run_organize_data
+from .time_report import run_time_report
+from .metadata_scan import run_metadata_scan
+from .sequence_scan import run_sequence_scan
