@@ -1,5 +1,5 @@
 import qtawesome as qta
-from PyQt5.QtWidgets import QToolBar, QPushButton
+from PyQt5.QtWidgets import QToolBar, QPushButton, QWidget, QSizePolicy
 
 from MRICenterline.gui.window import toolbar_connect
 
@@ -10,14 +10,12 @@ class IUToolbar(QToolBar):
 
         self.setMovable(False)
 
-        button = QPushButton("Settings")
-        button.setFlat(True)
-        self.addWidget(button)
-        button.clicked.connect(lambda: toolbar_connect.show_preferences_dialog(self))
-        button.setIcon(qta.icon('fa.gear'))
+        setting_button = QPushButton(qta.icon('fa.gear'), "Settings")
+        setting_button.setFlat(True)
+        self.addWidget(setting_button)
+        setting_button.clicked.connect(lambda: toolbar_connect.show_preferences_dialog(self))
 
-        button = QPushButton("Help")
-        button.setFlat(True)
-        self.addWidget(button)
-        button.clicked.connect(lambda: toolbar_connect.open_help_dialog(self))
-        button.setIcon(qta.icon('fa5s.info-circle'))
+        help_button = QPushButton(qta.icon('fa5s.info-circle'), "Help")
+        help_button.setFlat(True)
+        self.addWidget(help_button)
+        help_button.clicked.connect(lambda: toolbar_connect.open_help_dialog(self))

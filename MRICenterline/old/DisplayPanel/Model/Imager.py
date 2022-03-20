@@ -21,7 +21,7 @@ logging.getLogger(__name__)
 class Imager:
     """
     takes a directory for one case and processes it independent of its reader type so that
-    GenericModel can use it for GenericSequenceViewer and other classes
+    CaseModel can use it for GenericSequenceViewer and other classes
     """
     def __init__(self, directory):
         self.image_list = dict()

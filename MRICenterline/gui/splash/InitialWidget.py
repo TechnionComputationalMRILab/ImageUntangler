@@ -56,3 +56,4 @@ class IUInitialWidget(QWidget):
         ########################################
         open_using_file_dialog = QShortcut(QKeySequence('Ctrl+q'), self)
         open_using_file_dialog.activated.connect(lambda: connect.open_using_file_dialog(self))
+

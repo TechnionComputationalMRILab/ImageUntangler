@@ -1,7 +1,7 @@
 from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QSlider, QComboBox, QSizePolicy, QSpinBox, QGridLayout, QLabel
+from PyQt5.QtWidgets import QSlider, QComboBox, QHBoxLayout, QSpinBox, QGridLayout, QLabel, QPushButton
 
-from MRICenterline.app.config.internal_config import ORDER_OF_CONTROLS
+from MRICenterline import CFG, CONST
 
 import logging
 logging.getLogger(__name__)
@@ -13,39 +13,34 @@ class SequenceInteractorWidgets:
         self.model = model
         sequence_list = self.model.sequence_list
 
-        # initialize sequence combo box
+        # initialize sequence
         self.sequence_combo_box = QComboBox(parent=self.parent)
         [self.sequence_combo_box.addItem(name) for name in sequence_list]
 
-        combo_box_size_policy = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
-        combo_box_size_policy.setHorizontalStretch(0)
-        combo_box_size_policy.setVerticalStretch(0)
-        combo_box_size_policy.setHeightForWidth(self.sequence_combo_box.sizePolicy().hasHeightForWidth())
+        self.sequence_add_button = QPushButton("+", parent=self.parent)
 
-        # initialize sliders
-        self.index_slider = QSlider(Qt.Horizontal, parent=self.parent)
-        self.window_slider = QSlider(Qt.Horizontal, parent=self.parent)
-        self.level_slider = QSlider(Qt.Horizontal, parent=self.parent)
+        if CFG.get_testing_status("show-sliders"):
+            # initialize sliders
+            self.index_slider = QSlider(Qt.Horizontal, parent=self.parent)
+            self.window_slider = QSlider(Qt.Horizontal, parent=self.parent)
+            self.level_slider = QSlider(Qt.Horizontal, parent=self.parent)
 
-        # initialize spin boxes
-        self.index_spinbox = QSpinBox(parent=self.parent)
-        self.window_spinbox = QSpinBox(parent=self.parent)
-        self.level_spinbox = QSpinBox(parent=self.parent)
+            # initialize spin boxes
+            self.index_spinbox = QSpinBox(parent=self.parent)
+            self.window_spinbox = QSpinBox(parent=self.parent)
+            self.level_spinbox = QSpinBox(parent=self.parent)
 
-        self.index_widgets = {"Slider": self.index_slider,
-                              "Spinbox": self.index_spinbox
-                              }
-        self.window_widgets = {"Slider": self.window_slider,
-                               "Spinbox": self.window_spinbox
-                              }
-        self.level_widgets = {"Slider": self.level_slider,
-                              "Spinbox": self.level_spinbox
-                              }
+            self.index_widgets = {"Slider": self.index_slider,
+                                  "Spinbox": self.index_spinbox
+                                  }
+            self.window_widgets = {"Slider": self.window_slider,
+                                   "Spinbox": self.window_spinbox
+                                  }
+            self.level_widgets = {"Slider": self.level_slider,
+                                  "Spinbox": self.level_spinbox
+                                  }
 
         self.add_actions()
-
-    def setParent(self, parent):
-        self.parent = parent
 
     def set_index(self, index):
         self.index_slider.setValue(index)
@@ -64,15 +59,16 @@ class SequenceInteractorWidgets:
         self.sequence_combo_box.setItemText(0, text)
 
     def add_actions(self):
-        self.sequence_combo_box.currentIndexChanged.connect(self.model.change_sequence)
+        self.sequence_combo_box.currentIndexChanged.connect(self.parent.change_sequence)
 
-        self.index_slider.sliderMoved.connect(self.model.change_index)
-        self.window_slider.sliderMoved.connect(self.model.change_window)
-        self.level_slider.sliderMoved.connect(self.model.change_level)
+        if CFG.get_testing_status("show-sliders"):
+            self.index_slider.sliderMoved.connect(self.parent.change_index)
+            self.window_slider.sliderMoved.connect(self.parent.change_window)
+            self.level_slider.sliderMoved.connect(self.parent.change_level)
 
-        self.index_spinbox.valueChanged.connect(self.model.change_index)
-        self.window_spinbox.valueChanged.connect(self.model.change_window)
-        self.level_spinbox.valueChanged.connect(self.model.change_level)
+            self.index_spinbox.valueChanged.connect(self.parent.change_index)
+            self.window_spinbox.valueChanged.connect(self.parent.change_window)
+            self.level_spinbox.valueChanged.connect(self.parent.change_level)
 
     def initialize_values(self, slice_index: int, max_slice: int, window_value: int, level_value: int) -> None:
         self.index_slider.setMinimum(1)
@@ -108,19 +104,28 @@ class SequenceInteractorWidgets:
         self.level_slider.setMaximum(int(level_value * 2.5))
         self.level_slider.setValue(level_value)
 
-    def build_group_box(self):
+    def build_slider_group_box(self):
         group_box = QGridLayout()
 
         list_of_widgets = [("Window", self.window_widgets),
                                 ("Level", self.level_widgets),
                                 ("Slice Index", self.index_widgets)]
 
-        for row, label in enumerate(ORDER_OF_CONTROLS):
+        for row, label in enumerate(CONST.ORDER_OF_CONTROLS):
             group_box.addWidget(QLabel(label), row, 0)
 
             for widget in list_of_widgets:
                 if widget[0] == label:
                     group_box.addWidget(widget[1]['Slider'], row, 1)
                     group_box.addWidget(widget[1]['Spinbox'], row, 2)
+
+        return group_box
+
+    def build_sequence_group_box(self):
+        group_box = QHBoxLayout()
+
+        group_box.addWidget(QLabel("Sequence: "))
+        group_box.addWidget(self.sequence_combo_box, 1)
+        group_box.addWidget(self.sequence_add_button)
 
         return group_box

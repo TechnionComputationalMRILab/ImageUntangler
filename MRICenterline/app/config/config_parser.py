@@ -57,13 +57,8 @@ class ConfigParser:
         with open(self.config_file_path, 'w') as f:
             self.config_file.write(f)
 
-    def get_color(self, section):
-        if section == 'display':
-            color_str = self.config_file['display']['text-color']
-        elif 'color' not in self.config_file[section]:
-            return 1, 1, 1
-        else:
-            color_str = self.config_file[section]['color']
+    def get_color(self, section, key):
+        color_str = self.config_file[section][key]
         rgb_str = color_str.split(", ")
         as_list = [int(i) / 255 for i in rgb_str]
         return tuple(as_list)
@@ -95,3 +90,7 @@ class ConfigParser:
 
     def get_db(self):
         return self.get_folder("script", "metadata.db")
+
+    def get_icon(self):
+        from PyQt5.QtGui import QIcon
+        return QIcon(self.get_folder("script", "static", "labIcon.png"))

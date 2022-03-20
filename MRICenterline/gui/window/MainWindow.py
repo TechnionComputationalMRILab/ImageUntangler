@@ -1,25 +1,27 @@
 from PyQt5.QtCore import QSize
-from PyQt5.QtWidgets import QMainWindow, QStackedWidget, QWidget
+from PyQt5.QtWidgets import QMainWindow, QStackedWidget, QWidget, QToolBar
 
 from MRICenterline.gui.window.Toolbar import IUToolbar
 from MRICenterline.gui.splash.InitialWidget import IUInitialWidget
 
-from MRICenterline import CFG
+from MRICenterline import CFG, CONST
 
 
 class IUMainWindow(QMainWindow):
     widget_directory = dict()
-    EXIT_CODE_REBOOT = -9303635
-    singleton: 'IUMainWindow' = None
 
     """Main Window."""
     def __init__(self, parent=None):
         """Initializer."""
         super().__init__(parent)
 
+        self.setWindowTitle(CONST.WINDOW_NAME)
+        self.setWindowIcon(CFG.get_icon())
+
         self.setMinimumSize(QSize(int(CFG.get_config_data('display', 'display-width')),
                                   int(CFG.get_config_data('display', 'display-height'))))
-        self.addToolBar(IUToolbar(self))
+        self.toolbar = IUToolbar(self)
+        self.addToolBar(self.toolbar)
 
         if CFG.get_boolean('display', 'start-maximized'):
             self.showMaximized()

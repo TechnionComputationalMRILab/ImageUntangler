@@ -20,10 +20,35 @@ def build(folder):
     build_sequence_tables(folder, case_id)
     build_metadata_table(folder, case_id)
 
+    if CFG.get_testing_status('use-slice-location'):
+        build_slice_location_table(folder, case_id)
+
 
 def build_slice_location_table(folder, case_id):
     db_file = CFG.get_db()
     con = sqlite3.connect(db_file)
+
+    complete_file_list = f"""
+                            SELECT filename, file_id FROM 'sequence_files'
+                                 inner join sequences
+                                 on sequences.seq_id = sequence_files.seq_id
+                                 where sequences.name != "INVALID" 
+                                 and sequences.case_id={case_id};
+                           """
+
+    file_cursor = con.cursor().execute(complete_file_list)
+    for filename, file_id in file_cursor:
+        filename = os.path.join(folder, filename)
+        dcm_read = pydicom.dcmread(filename)
+
+        try:
+            slice_loc = dcm_read['SliceLocation'].value
+        except KeyError:
+            slice_loc = None
+
+        with con:
+            con.execute('insert into slice_locations (slice_location, file_id) values (?, ?)',
+                                                     (slice_loc, file_id))
 
     con.close()
 

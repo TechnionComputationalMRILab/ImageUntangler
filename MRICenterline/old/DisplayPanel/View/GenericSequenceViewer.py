@@ -327,7 +327,7 @@ class GenericSequenceViewer:
     def save_points(self, time_elapsed):
         """
         SaveFormatter is initialized here so that it has access to the MRI and length points arrays,
-        and then it's passed to GenericModel so that it has access to the timers and the case ID
+        and then it's passed to CaseModel so that it has access to the timers and the case ID
         """
         sf = SaveFormatter(parent=self, imager=self.manager.imager)
         sf.set_time_gap(time_elapsed)

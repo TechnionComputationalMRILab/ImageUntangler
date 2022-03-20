@@ -1,8 +1,7 @@
 APP_NAME = "ImageUntangler"
 APP_BYLINE = "TCML"
 VER_NUMBER = '4.0.0'
-
-LAB_ICON = 'labIcon.png'
+WINDOW_NAME = f'{APP_NAME} by {APP_BYLINE} v-{VER_NUMBER}'
 
 BG_COLOR = (204 / 255, 204 / 255, 204 / 255)
 

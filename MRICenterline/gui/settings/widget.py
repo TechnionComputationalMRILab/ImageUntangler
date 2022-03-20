@@ -69,7 +69,7 @@ class PreferencesWidget(QWidget):
         self.start_maximized = CFG.get_boolean('display', 'start-maximized')
 
         # text-color = 0, 34, 158
-        self.panel_text_color = [255*i for i in CFG.get_color('display')]
+        self.panel_text_color = [255*i for i in CFG.get_color('display', 'text-color')]
 
         # horizontal-number-of-panels = 1
         self.hpanel_number = CFG.get_config_data('display', 'horizontal-number-of-panels')
@@ -117,7 +117,7 @@ class PreferencesWidget(QWidget):
         return _display_widget
 
     def length_display_style(self):
-        self.length_color = [255*i for i in CFG.get_color('length-display-style')]
+        self.length_color = [255*i for i in CFG.get_color('length-display-style', 'color')]
         self.length_marker_size = int(CFG.get_config_data('length-display-style', 'marker-size'))
 
         def change_color():
@@ -176,7 +176,7 @@ class PreferencesWidget(QWidget):
         return _length_widget
 
     def centerline_style(self):
-        self.centerline_color = [255*i for i in CFG.get_color('mpr-display-style')]
+        self.centerline_color = [255*i for i in CFG.get_color('mpr-display-style', 'color')]
         self.centerline_marker_size = int(CFG.get_config_data('mpr-display-style', 'marker-size'))
 
         def change_color():
