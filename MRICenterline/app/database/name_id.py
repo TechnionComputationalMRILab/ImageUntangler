@@ -40,3 +40,11 @@ def get_sequence_id(seq_name: str, case):
     con.close()
 
     return sequence_id
+
+
+def from_session_id(session_id: int):
+    con = sqlite3.connect(CFG.get_db())
+    seq_id, case_id, lengths_id, cl_id = con.cursor().execute(f"select seq_id, case_id, lengths_id, cl_id from 'sessions' where session_id={session_id}").fetchone()
+    con.close()
+
+    return seq_id, case_id, lengths_id, cl_id

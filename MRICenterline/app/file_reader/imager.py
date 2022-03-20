@@ -74,7 +74,6 @@ class Imager:
         elif self.file_type.upper() == "NRRD":
             pass
         else:
-            MSG.msg_box_warning("Either that format is not yet implemented or there are no MRI images there.")
             raise NotImplementedError
 
         logging.debug(f"Assigning reader as {self.file_type}")

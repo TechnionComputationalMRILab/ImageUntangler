@@ -16,6 +16,7 @@ class SequenceInteractorWidgets:
         # initialize sequence
         self.sequence_combo_box = QComboBox(parent=self.parent)
         [self.sequence_combo_box.addItem(name) for name in sequence_list]
+        self.sequence_combo_box.setCurrentIndex(self.model.active_sequence_index)
 
         self.sequence_add_button = QPushButton("+", parent=self.parent)
 

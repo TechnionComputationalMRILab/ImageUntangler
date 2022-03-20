@@ -16,10 +16,8 @@ class ScannerWidget(QWidget):
     preprocess_options = {
         "organize_data":
             QCheckBox("Reorganize the data (generic case names, flat structure)"),
-        "sequence_scan":
-            QCheckBox("Scan the files for sequences and commits to database"),
-        "metadata_scan":
-            QCheckBox("Scan the files for metadata and commits to database")
+        "metadata_sequence_scan":
+            QCheckBox("Scan the files for metadata and sequences and commits to database")
     }
 
     def __init__(self, parent=None):
@@ -51,16 +49,14 @@ class ScannerWidget(QWidget):
         self.preprocess_options['organize_data'].setChecked(False)
         self.preprocess_options['organize_data'].setEnabled(False)
 
-        self.preprocess_options['sequence_scan'].setChecked(True)
-        self.preprocess_options['metadata_scan'].setChecked(True)
+        self.preprocess_options['metadata_sequence_scan'].setChecked(True)
 
         preprocess_options_group_box = QGroupBox("Bulk Scanner Options")
         preprocess_options_layout = QVBoxLayout()
         preprocess_options_group_box.setLayout(preprocess_options_layout)
 
         preprocess_options_layout.addWidget(self.preprocess_options['organize_data'])
-        preprocess_options_layout.addWidget(self.preprocess_options['sequence_scan'])
-        preprocess_options_layout.addWidget(self.preprocess_options['metadata_scan'])
+        preprocess_options_layout.addWidget(self.preprocess_options['metadata_sequence_scan'])
 
         preprocess_button = QPushButton("Start")
         preprocess_options_layout.addWidget(preprocess_button)
@@ -108,10 +104,8 @@ class ScannerWidget(QWidget):
 
         if self.preprocess_options['organize_data'].isChecked():
             scanner.run_organize_data("", "", parent_widget=self)
-        if self.preprocess_options['sequence_scan'].isChecked():
-            scanner.run_sequence_scan("", parent_widget=self)
-        if self.preprocess_options['metadata_scan'].isChecked():
-            scanner.run_metadata_scan("", parent_widget=self)
+        if self.preprocess_options['metadata_sequence_scan'].isChecked():
+            scanner.run_metadata_sequence_scan(self.directories, parent_widget=self)
 
     def add_to_textbox(self, text, color=None):
         if color:

@@ -10,31 +10,35 @@ logging.getLogger(__name__)
 class AnnotationLoadDialogBox(QDialog):
     def __init__(self, parent=None):
         super().__init__(parent)
+        self.selected_session = None
 
         self.table = AnnotationLoadTable(parent=self)
         buttons = QDialogButtonBox(QDialogButtonBox.Open | QDialogButtonBox.Cancel)
         buttons.accepted.connect(self.accept)
         buttons.rejected.connect(self.reject)
 
-        bottom_layout = QHBoxLayout()
-        show_most_recent_checkbox = QCheckBox("Show only most recent")
-        show_most_recent_checkbox.setEnabled(True)
-        show_most_recent_checkbox.clicked.connect(self.show_most_recent)
-        bottom_layout.addWidget(show_most_recent_checkbox)
-        bottom_layout.addWidget(buttons)
+        self.toggle_style = QCheckBox("Show only most recent")
+        self.toggle_style.clicked.connect(self.toggle_table)
 
-        main_layout = QVBoxLayout(self)
-        main_layout.addWidget(self.table)
-        main_layout.addLayout(bottom_layout)
+        layout = QVBoxLayout(self)
+        layout.addWidget(self.table)
+        layout.addWidget(buttons)
+        layout.addWidget(self.toggle_style)
 
-    def show_most_recent(self, s):
+    def toggle_table(self, s):
         if s:
-            print('showing recents')
+            self.toggle_style.setText("Show all annotations")
         else:
-            print('showing all')
+            self.toggle_style.setText("Show only most recent")
 
     def accept(self):
-        super().accept()
+        if type(self.table.selected_item) is int:
 
-    def get_file(self):
-        return "aaa"
+            self.selected_session = self.table.get_data_for_selected()
+            super().accept()
+        else:
+            logging.debug("None selected")
+            super().reject()
+
+    def get_session(self):
+        return self.selected_session

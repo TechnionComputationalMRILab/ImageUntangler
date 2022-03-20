@@ -18,7 +18,7 @@ def intermediate_points(parent: CaseModel, show: bool):
     parent.intermediate_points(show)
 
 
-def timer_status(parent: CaseModel, status: TimerStatus):
+def timer_status(parent: CaseModel, status):
     parent.timer_status(status)
 
 

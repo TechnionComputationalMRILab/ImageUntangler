@@ -12,3 +12,4 @@ venv/*
 *.spec
 *.ini
 *.csv
+/metadata.db

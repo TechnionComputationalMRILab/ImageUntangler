@@ -5,13 +5,14 @@ from MRICenterline import CFG
 
 
 class PointArray:
-    point_array: List[Point] = []
-    lengths: List[float] = []
-    total_length: float = 0.0
-
     def __init__(self,
                  point_status: PointStatus):
         self.point_type = point_status
+        self.point_array: List[Point] = []
+        self.lengths: List[float] = []
+        self.length_actors = []
+        self.total_length: float = 0.0
+
         if point_status == PointStatus.MPR:
             key = 'mpr-display-style'
         elif point_status == PointStatus.LENGTH:
@@ -26,7 +27,6 @@ class PointArray:
         self.line_style = CFG.get_config_data(key, 'line-style')
 
     def add_point(self, point: Point):
-        print(self.point_type)
         self.point_array.append(point)
         self.set_size(self.point_size)
         self.set_color(self.point_color)
@@ -36,7 +36,15 @@ class PointArray:
 
             distance = self.point_array[-2].distance(self.point_array[-1])
             self.lengths.append(distance)
+            self.length_actors.append(self.generate_line_actor(self.point_array[-2].image_coordinates,
+                                                               self.point_array[-1].image_coordinates))
         self.total_length = sum(self.lengths)
+
+    def generate_line_actor(self, point_a, point_b):
+        from MRICenterline.gui.vtk.line_actor import generate_line_actor
+        return generate_line_actor(point_a, point_b,
+                                   color=self.point_color,
+                                   width=self.line_thickness)
 
     def get_last_actor(self):
         if len(self) == 1:
@@ -65,7 +73,12 @@ class PointArray:
 
     def delete(self, item):
         self.point_array[item].actor.SetVisibility(False)
-        del self.point_array[item]
+        self.point_array.pop(item)
+
+        # recalculate lengths
+        if len(self):
+            self.lengths.pop(item)
+            self.total_length = sum(self.lengths)
 
     def show(self, item):
         self.point_array[item].set_visibility(True)
@@ -126,8 +139,12 @@ class PointArray:
             for pt in self.point_array:
                 pt.set_size(size)
 
-    def get_line_actor(self, color=(0, 1, 0), width=4):
+    def get_line_actors(self):
         pass
+        # from MRICenterline.gui.vtk.line_actor import generate_line_actor
+        # generate_line_actor()
+        # self.length_actors.append()
+
         # return generate_lines(self.point_array, color, width)
 
     def get_spline_actor(self, color=(0, 1, 0), width=4):
@@ -140,3 +157,18 @@ class PointArray:
 
     def extend(self, point_array):
         self.point_array.extend(point_array.point_array)
+
+    def generate_table_data(self) -> dict:
+        img_coords_list = [[round(c, 2) for c in pt.image_coordinates] for pt in self.point_array]
+        physical_coords_list = [[round(c, 2) for c in pt.physical_coords] for pt in self.point_array]
+        itk_index_list = [[round(c) for c in pt.itk_index_coords] for pt in self.point_array]
+
+        return {
+            "physical coords": physical_coords_list,
+            "itk indices": itk_index_list,
+            "image coords": img_coords_list
+        }
+
+    def get_as_np_array(self):
+        import numpy as np
+        return np.asarray([pt.physical_coords for pt in self.point_array])

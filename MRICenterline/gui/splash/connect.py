@@ -22,8 +22,8 @@ def custom_open(parent):
 
     file_open_dialog = FileOpenDialogBox(parent=parent)
     if file_open_dialog.exec():
-        selected_file = file_open_dialog.get_file()
-        configure_main_widget(path=selected_file, parent_widget=parent)
+        selected_file, selected_sequence = file_open_dialog.get_file()
+        configure_main_widget(path=str(selected_file), parent_widget=parent, selected_sequence=selected_sequence)
 
 
 def bulk_scanner(parent):
@@ -36,12 +36,13 @@ def bulk_scanner(parent):
 
 def load_previous_annotation(parent):
     from MRICenterline.gui.loader.annotation.dialog_box import AnnotationLoadDialogBox
+    from MRICenterline.gui.display.configure import configure_main_widget_from_session
     check_database()
 
     annotation_load_dialog_box = AnnotationLoadDialogBox(parent=parent)
     if annotation_load_dialog_box.exec():
-        # build build build
-        pass
+        selected_session = annotation_load_dialog_box.get_session()
+        configure_main_widget_from_session(parent, selected_session)
 
 
 def open_using_file_dialog(parent):

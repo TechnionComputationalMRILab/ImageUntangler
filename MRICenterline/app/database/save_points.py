@@ -5,7 +5,7 @@ from MRICenterline.app.database import name_id
 from MRICenterline.app.points.point_array import PointArray
 from MRICenterline.app.points.timer import Timer
 
-from MRICenterline import CFG, CONST
+from MRICenterline import CFG, CONST, MSG
 
 import logging
 logging.getLogger(__name__)
@@ -17,8 +17,8 @@ def save_points(case_name: str,
                 mpr_points: PointArray,
                 timer_data: Timer):
 
-    case_id = names.get_case_id(case_name)
-    seq_id = names.get_sequence_id(sequence_name, case_id)
+    case_id = name_id.get_case_id(case_name)
+    seq_id = name_id.get_sequence_id(sequence_name, case_id)
     timestamp = datetime.now(timezone.utc).astimezone().strftime(CONST.TIMESTAMP_FORMAT)
     time_gap = timer_data.calculate_time_gap()
 
@@ -83,3 +83,4 @@ def save_points(case_name: str,
     session_id = con.cursor().execute("select count(*) from 'sessions'").fetchone()[0]
     con.close()
     logging.info(f"Saved session with id [{session_id}] successfully.")
+    MSG.msg_box_info(f"Saved session with id [{session_id}] successfully.")

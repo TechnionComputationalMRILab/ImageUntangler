@@ -1,17 +1,19 @@
 import numpy as np
 from vtkmodules.all import vtkSphereSource, vtkPolyDataMapper, vtkActor
 
+from MRICenterline.app.gui_data_handling.image_properties import ImageProperties
+
 
 class Point:
     def __init__(self,
                  picked_coords,
-                 slice_index,
-                 model,
+                 slice_index: int,
+                 image_properties: ImageProperties,
                  color=(1, 1, 1),
                  size=3):
         self.image_coordinates = picked_coords[0:3]
         self.slice_idx = slice_index
-        self.image_properties = model.image[model.active_sequence_index]
+        self.image_properties = image_properties
 
         self.point_color = color
         self.point_size = size
@@ -19,6 +21,10 @@ class Point:
 
         self.actor = self.generate_actor()
         self.itk_index_coords, self.physical_coords = self.calculate_itk()
+
+    @classmethod
+    def point_from_physical(cls, physical_coords, image_properties, color=(1, 1, 1), size=3):
+        pass #TODO
 
     def generate_actor(self):
         source = vtkSphereSource()

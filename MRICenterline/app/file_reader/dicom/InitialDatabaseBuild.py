@@ -33,17 +33,17 @@ def build_slice_location_table(folder, case_id):
                                  inner join sequences
                                  on sequences.seq_id = sequence_files.seq_id
                                  where sequences.name != "INVALID" 
-                                 and sequences.case_id={case_id};
+                                 and sequence_files.case_id = {case_id};
                            """
 
     file_cursor = con.cursor().execute(complete_file_list)
     for filename, file_id in file_cursor:
         filename = os.path.join(folder, filename)
-        dcm_read = pydicom.dcmread(filename)
 
         try:
+            dcm_read = pydicom.dcmread(filename)
             slice_loc = dcm_read['SliceLocation'].value
-        except KeyError:
+        except (PermissionError, KeyError):
             slice_loc = None
 
         with con:
@@ -65,7 +65,7 @@ def build_metadata_table(folder, case_id):
                                  inner join sequences
                                  on sequences.seq_id = sequence_files.seq_id
                                  where sequences.name != "INVALID"
-                                 and sequences.case_id = {case_id}
+                                 and sequence_files.case_id = {case_id}
                                  order by random()
                                  limit 1
                                  """

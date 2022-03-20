@@ -117,21 +117,21 @@ class DisplayPanelToolbarButtons(QWidget):
             timer_pause.setText("Pause timer")
             timer_pause.setIcon(qta.icon("mdi.pause"))
             if s:
-                toolbar_connect.timer_status(model, TimerStatus.RUNNING)
+                toolbar_connect.timer_status(model, "START")
                 timer_button.setIcon(qta.icon('mdi.timer-outline'))
                 timer_button.setText("Stop timer")
             else:
-                toolbar_connect.timer_status(model, TimerStatus.STOPPED)
+                toolbar_connect.timer_status(model, "STOP")
                 timer_button.setIcon(qta.icon('mdi.timer-off-outline'))
                 timer_button.setText("Start Timer")
 
         def timer_pause_resume(s):
             if s:
-                toolbar_connect.timer_status(model, TimerStatus.PAUSED)
+                toolbar_connect.timer_status(model, "PAUSE")
                 timer_pause.setIcon(qta.icon("mdi.play"))
                 timer_pause.setText("Resume timer")
             else:
-                toolbar_connect.timer_status(model, TimerStatus.RUNNING)
+                toolbar_connect.timer_status(model, "RESUME")
                 timer_pause.setIcon(qta.icon("mdi.pause"))
                 timer_pause.setText("Pause timer")
 
