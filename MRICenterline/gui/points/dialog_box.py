@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import QDialog, QDialogButtonBox, QHBoxLayout, QVBoxLayout
+from PyQt5.QtWidgets import QDialog, QDialogButtonBox, QCheckBox, QVBoxLayout
 from PyQt5.Qt import Qt
 
 from MRICenterline.gui.points.table import PointsToTableView
@@ -13,11 +13,22 @@ logging.getLogger(__name__)
 class PointDialogBox(QDialog):
     def __init__(self, model: SequenceModel, parent=None):
         super().__init__(parent)
-        self.model = model
-        self.length_data = model.length_point_array.generate_table_data()
-        self.mpr_data = model.mpr_point_array.generate_table_data()
+
+        self.table = PointsToTableView(model, self)
+
+        self.toggle = QCheckBox("Show MPR points")
+        self.toggle.clicked.connect(self.toggle_table)
 
         layout = QVBoxLayout(self)
+        layout.addWidget(self.table)
+        layout.addWidget(self.toggle)
 
-        length_table_widget = PointsToTableView(self.length_data, len(model.length_point_array), 3)
-        layout.addWidget(length_table_widget)
+    def toggle_table(self, s):
+        if s:
+            self.toggle.setText("Show Length points")
+            self.table.clear_table()
+            self.table.show_mpr()
+        else:
+            self.toggle.setText("Show MPR points")
+            self.table.clear_table()
+            self.table.show_length()

@@ -4,7 +4,7 @@ from PyQt5.QtGui import QKeySequence
 
 from MRICenterline.app.gui_data_handling.case_model import CaseModel
 from MRICenterline.gui.display.sequence_interactor_widgets import SequenceInteractorWidgets
-from MRICenterline.gui.vtk.interactor_style import SequenceViewerInteractorStyle
+from MRICenterline.gui.vtk.sequence_interactor_style import SequenceViewerInteractorStyle
 
 from MRICenterline import CFG
 
@@ -15,7 +15,7 @@ class MainDisplayWidget(QWidget):
         self.model = model
         self.set_up_keyboard_shortcuts()
 
-        self.main_layout = QVBoxLayout(self)
+        layout = QVBoxLayout(self)
 
         self._frame = QGroupBox()
         self.interactor = QVTKRenderWindowInteractor(self._frame)
@@ -28,11 +28,11 @@ class MainDisplayWidget(QWidget):
                                                                    self.interactor,
                                                                    self.interactor_style)
 
-        self.main_layout.addLayout(self.sequence_widgets.build_sequence_group_box())
-        self.main_layout.addWidget(self.interactor)
+        layout.addLayout(self.sequence_widgets.build_sequence_group_box())
+        layout.addWidget(self.interactor)
 
         if CFG.get_testing_status("show-sliders"):
-            self.main_layout.addLayout(self.sequence_widgets.build_slider_group_box())
+            layout.addLayout(self.sequence_widgets.build_slider_group_box())
 
     def change_sequence(self, s):
         self.model.change_sequence(s)

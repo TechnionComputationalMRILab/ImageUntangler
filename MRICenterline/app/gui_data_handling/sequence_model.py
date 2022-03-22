@@ -8,7 +8,7 @@ from MRICenterline.app.database.save_points import save_points
 from MRICenterline.app.points.status import PickerStatus, PointStatus
 from MRICenterline.app.gui_data_handling.sequence_viewer import SequenceViewer
 from MRICenterline.app.gui_data_handling.image_properties import ImageProperties
-from MRICenterline.gui.vtk.interactor_style import SequenceViewerInteractorStyle
+from MRICenterline.gui.vtk.sequence_interactor_style import SequenceViewerInteractorStyle
 
 from MRICenterline.app.points.point import Point
 from MRICenterline.app.points.point_array import PointArray
@@ -81,13 +81,10 @@ class SequenceModel:
                     timer_data=self.model.timer)
 
     def calculate(self, status: PointStatus):
-        from MRICenterline.app.centerline.calculate import PointsToPlaneVectors
-
-        if status == PointStatus.MPR: #TODO
-            self.centerline_data = 0.0
-            # ppv = PointsToPlaneVectors(self.mpr_point_array.get_as_np_array(),
-            #                      self.current_image_properties)
-            # print(ppv.MPR_M)
+        if status == PointStatus.MPR:
+            self.model.centerline_model.set_points_and_image(self.mpr_point_array,
+                                                             self.current_image_properties)
+            self.model.centerline_model.update_widget()
 
         elif status == PointStatus.LENGTH:
             print(self.length_point_array.lengths)
@@ -121,8 +118,6 @@ class SequenceModel:
         self.current_sequence_viewer.render_panel()
 
     def pick(self, pick_coords: tuple):
-
-
         slice_index = self.current_sequence_viewer.slice_idx
         point = Point(pick_coords, slice_index, self.current_image_properties)
         logging.debug(f"{self.model.picker_status} | {point}")
@@ -143,5 +138,23 @@ class SequenceModel:
         pdb.exec()
 
     def load_points(self, length_id, mpr_id):
-        print(f"loading {length_id}")
-        print(f"loading {mpr_id}")
+        from MRICenterline.app.database.load_points import read_points
+
+        if length_id:
+            logging.info(f"Reading from LENGTH [{length_id}]")
+            pt_array = read_points(length_id, PointStatus.LENGTH, self.current_image_properties)
+            self.length_point_array.extend(pt_array)
+
+            for pt in self.length_point_array.get_actor_list():
+                self.current_sequence_viewer.add_actor(pt)
+
+        if mpr_id:
+            logging.info(f"Reading from MPR [{mpr_id}]")
+            pt_array = read_points(mpr_id, PointStatus.MPR, self.current_image_properties)
+            self.mpr_point_array.extend(pt_array)
+
+            for pt in self.mpr_point_array.get_actor_list():
+                self.current_sequence_viewer.add_actor(pt)
+
+        print(len(self.length_point_array))
+        print(len(self.mpr_point_array))

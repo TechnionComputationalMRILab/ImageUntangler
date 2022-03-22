@@ -1,7 +1,6 @@
 from PyQt5.QtWidgets import QMainWindow
 from PyQt5.QtCore import QSize, QCoreApplication
 from PyQt5.QtGui import QIcon, QCloseEvent
-from vtkmodules.all import vtkOutputWindow
 
 from .TabManager import TabManager
 from .MenuBar import create_external_menu_bar

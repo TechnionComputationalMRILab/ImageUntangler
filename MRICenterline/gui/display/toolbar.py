@@ -146,9 +146,3 @@ class DisplayPanelToolbarButtons(QWidget):
         timer_pause.setEnabled(False)
         layout.addWidget(timer_pause, 1, 6, 1, 1)
         timer_pause.clicked.connect(timer_pause_resume)
-
-    def add_separator(self, expand=False):
-        if expand:
-            spacer = QWidget()
-            spacer.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
-            self.addWidget(spacer)

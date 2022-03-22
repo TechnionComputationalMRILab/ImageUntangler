@@ -156,7 +156,8 @@ class PointArray:
         [renderer.RemoveActor(actor) for actor in _actor_list]
 
     def extend(self, point_array):
-        self.point_array.extend(point_array.point_array)
+        for pt in point_array:
+            self.add_point(pt)
 
     def generate_table_data(self) -> dict:
         img_coords_list = [[round(c, 2) for c in pt.image_coordinates] for pt in self.point_array]

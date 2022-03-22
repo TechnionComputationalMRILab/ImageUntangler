@@ -24,7 +24,20 @@ class Point:
 
     @classmethod
     def point_from_physical(cls, physical_coords, image_properties, color=(1, 1, 1), size=3):
-        pass #TODO
+        #TODO
+        sitk_image = image_properties.sitk_image
+        viewer_origin = image_properties.size / 2
+
+        itx_coords = sitk_image.TransformPhysicalPointToIndex(physical_coords)
+
+        image_coordinates = np.zeros(3)
+        image_coordinates[0] = round(image_properties.spacing[0] * (itx_coords[0] + image_properties.origin[0]))
+        # image_coordinates[1] = round(viewer_origin[1] - (image_properties.spacing[1] * itx_coords[1]) + image_properties.origin[1])
+        image_coordinates[1] = image_properties.size[1] + (image_properties.spacing[1]*(viewer_origin[1] - itx_coords[1]))
+        image_coordinates[2] = itx_coords[2]
+        slice_idx = itx_coords[2]
+
+        return cls(image_coordinates, slice_idx, image_properties, color, size)
 
     def generate_actor(self):
         source = vtkSphereSource()

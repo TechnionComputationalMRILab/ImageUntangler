@@ -11,6 +11,7 @@ class CaseModel:
     timer = Timer()
     picker_status = PickerStatus.NOT_PICKING
     sequence_viewer = None
+    centerline_model = None
 
     def __init__(self, path, initial_sequence=None):
         self.path = path
@@ -27,6 +28,9 @@ class CaseModel:
 
     def set_sequence_viewer(self, sequence_viewer):
         self.sequence_viewer = sequence_viewer
+
+    def set_centerline_model(self, centerline_model):
+        self.centerline_model = centerline_model
 
     #########
     # callbacks

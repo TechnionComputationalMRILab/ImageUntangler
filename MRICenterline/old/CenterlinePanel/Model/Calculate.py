@@ -7,21 +7,17 @@ from vtkmodules.util import numpy_support
 
 
 def calculate_input_data(mpr_properties):
-    print("a")
     _mpr_m = mpr_properties.MPR_M
     _delta = mpr_properties.delta
 
-    print("a")
     n = _mpr_m.shape[0]
     m = _mpr_m.shape[1]
 
-    print("a")
     _image_data = vtkImageData()
     _image_data.SetDimensions(n, m, 1)
     _image_data.SetOrigin(0, 0, 0)
     _image_data.SetSpacing(_delta, _delta, _delta)
 
-    print("a")
     vtk_type_by_numpy_type = {
         np.uint8: VTK_UNSIGNED_CHAR,
         np.uint16: VTK_UNSIGNED_SHORT,

@@ -4,7 +4,7 @@ from vtkmodules.all import vtkImageActor, vtkImageReslice, vtkRenderer, vtkTextA
     vtkActor, vtkCursor2D, vtkMatrix4x4
 
 from MRICenterline.gui.help.help_text import InteractorHelpText
-from MRICenterline.gui.vtk.interactor_style import SequenceViewerInteractorStyle
+from MRICenterline.gui.vtk.sequence_interactor_style import SequenceViewerInteractorStyle
 from MRICenterline.app.gui_data_handling.image_properties import ImageProperties
 from MRICenterline import CFG, CONST
 
