@@ -31,9 +31,10 @@ class Point:
         itx_coords = sitk_image.TransformPhysicalPointToIndex(physical_coords)
 
         image_coordinates = np.zeros(3)
-        image_coordinates[0] = round(image_properties.spacing[0] * (itx_coords[0] + image_properties.origin[0]))
-        # image_coordinates[1] = round(viewer_origin[1] - (image_properties.spacing[1] * itx_coords[1]) + image_properties.origin[1])
-        image_coordinates[1] = image_properties.size[1] + (image_properties.spacing[1]*(viewer_origin[1] - itx_coords[1]))
+        # image_coordinates[0] = (image_properties.spacing[0] * itx_coords[0]) + image_properties.origin[0]
+        # image_coordinates[1] = viewer_origin[1] - ((image_properties.spacing[1] * itx_coords[1]) - image_properties.origin[1])
+        image_coordinates[0] = (image_properties.spacing[0] * itx_coords[0]) + (image_properties.spacing[0] * image_properties.origin[0])
+        image_coordinates[1] = viewer_origin[1] - (image_properties.spacing[1] * itx_coords[1]) + (image_properties.origin[1] / 2)
         image_coordinates[2] = itx_coords[2]
         slice_idx = itx_coords[2]
 
@@ -85,10 +86,18 @@ class Point:
     def calculate_itk(self):
         viewer_origin = self.image_properties.size / 2.0
 
-        itk_index_x = round(self.image_coordinates[0]/self.image_properties.spacing[0] + viewer_origin[0])
-        itk_index_y = round(self.image_properties.size[1] - (self.image_coordinates[1] / self.image_properties.spacing[1] + viewer_origin[1]))
+        itk_index_x = ((self.image_coordinates[0]/self.image_properties.spacing[0]) + viewer_origin[0])
+        # round(shape[1] - (coords[1] / spacing[1] + viewerOrigin[1]))
+        itk_index_y = (
+            self.image_properties.size[1] -
+            (
+                    (self.image_coordinates[1] / self.image_properties.spacing[1])
+                    + viewer_origin[1]
+            )
+        )
         itk_index_z = self.slice_idx
-        itk_index = (int(itk_index_x), int(itk_index_y), int(itk_index_z))
+        itk_index = ((itk_index_x + 1), (itk_index_y + 1), (itk_index_z + 1)) #TODO: check if +1 is needed
 
-        physical_coords = self.image_properties.sitk_image.TransformIndexToPhysicalPoint(itk_index)
+        physical_coords = self.image_properties.sitk_image.TransformContinuousIndexToPhysicalPoint(itk_index)
+        # TODO: check TransformContinuousIndexToPhysicalPoint, it produces different results
         return itk_index, physical_coords
