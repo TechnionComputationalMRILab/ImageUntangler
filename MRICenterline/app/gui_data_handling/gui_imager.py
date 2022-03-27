@@ -13,5 +13,5 @@ class GraphicalImager(Imager):
         else:
             self.sequence = item
             self.sitk_image = self.reader[item]
-            self.properties = ImageProperties(self.sitk_image)
+            self.properties = ImageProperties(self.sitk_image, parent=self)
             return self.properties

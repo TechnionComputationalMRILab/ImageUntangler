@@ -64,10 +64,27 @@ class DICOMReader(AbstractReader):
             raise KeyError("Sequence not found in database")
 
     def get_z_coords(self, seq):
-        from pydicom import dcmread
+        if CFG.get_testing_status("use-slice-location"):
+            con = sqlite3.connect(CFG.get_db())
 
-        file_list = self.get_file_list(seq)
-        return {slice_idx: float(dcmread(filename).SliceLocation) for slice_idx, filename in enumerate(file_list)}
+            if type(seq) is str:
+                query = f"""
+                         select slice_location from slice_locations
+                         inner join sequence_files
+                         on sequence_files.file_id = slice_locations.file_id
+                         inner join sequences
+                         on sequences.seq_id = sequence_files.seq_id
+                         where sequences.name = '{seq}'
+                         and sequence_files.case_id = {self.case_id};
+                         """
+                z_list = [float(item[0]) for item in con.cursor().execute(query).fetchall()]
+                con.close()
+                return z_list
+            elif type(seq) is int:
+                return self.get_z_coords(self.sequence_list[seq])
+
+        else:
+            raise NotImplementedError("Slice Locations not used")
 
     @staticmethod
     def generate_simple_itk_image(file_list):

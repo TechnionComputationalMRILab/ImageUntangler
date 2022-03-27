@@ -37,6 +37,9 @@ class Imager:
     def get_files(self, seq):
         return self.reader.get_file_list(seq)
 
+    def get_z_coords(self, seq):
+        return self.reader.get_z_coords(seq)
+
     ##############################################
     #             private functions              #
     ##############################################

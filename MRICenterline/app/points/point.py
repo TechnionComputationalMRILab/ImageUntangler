@@ -86,18 +86,27 @@ class Point:
     def calculate_itk(self):
         viewer_origin = self.image_properties.size / 2.0
 
-        itk_index_x = ((self.image_coordinates[0]/self.image_properties.spacing[0]) + viewer_origin[0])
+        itk_coords = np.zeros(3)
+
+        # round(coords[0]/spacing[0] + viewerOrigin[0])
+        itk_coords[0] = (
+                self.image_coordinates[0]/self.image_properties.spacing[0]
+                + viewer_origin[0]
+        )
+
         # round(shape[1] - (coords[1] / spacing[1] + viewerOrigin[1]))
-        itk_index_y = (
+        itk_coords[1] = (
             self.image_properties.size[1] -
             (
-                    (self.image_coordinates[1] / self.image_properties.spacing[1])
+                    self.image_coordinates[1] / self.image_properties.spacing[1]
                     + viewer_origin[1]
             )
         )
-        itk_index_z = self.slice_idx
-        itk_index = ((itk_index_x + 1), (itk_index_y + 1), (itk_index_z + 1)) #TODO: check if +1 is needed
 
-        physical_coords = self.image_properties.sitk_image.TransformContinuousIndexToPhysicalPoint(itk_index)
+        itk_coords[2] = self.slice_idx + 1
+
+        itk_coords = np.int32(itk_coords)
+
+        physical_coords = self.image_properties.sitk_image.TransformIndexToPhysicalPoint([int(itk_coords[0]), int(itk_coords[1]), int(itk_coords[2])])
         # TODO: check TransformContinuousIndexToPhysicalPoint, it produces different results
-        return itk_index, physical_coords
+        return itk_coords, physical_coords

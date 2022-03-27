@@ -12,11 +12,11 @@ logging.getLogger(__name__)
 
 
 class ImageProperties:
-    def __init__(self, sitk_image):
+    def __init__(self, sitk_image, parent=None):
         self.sitk_image = sitk_image
         self.nparray = GetArrayFromImage(sitk_image)
         self.spacing = np.array(sitk_image.GetSpacing())
-        self.dimensions = int(sitk_image.GetDimension())
+        self.dimensions = np.int32(sitk_image.GetDimension())
         self.size = np.array(sitk_image.GetSize())
         self.origin = np.array(sitk_image.GetOrigin())
         self.extent = (0, self.size[0] - 1,
@@ -41,6 +41,9 @@ class ImageProperties:
         self.transformation = transformation_matrix(center)
 
         self.direction_matrix = sitk_image.GetDirection()
+
+        if CFG.get_testing_status("use-slice-location"):
+            self.z_coords = parent.get_z_coords(parent.sequence)
 
     def __repr__(self):
         return f"""
@@ -86,12 +89,3 @@ class ImageProperties:
 
         return vtkVol
 
-    def get_z_coords(self, reader, seq_name):
-        d: dict = reader.get_z_coords(seq_name).copy()
-        transformed_d = dict()
-
-        for k, v in d.items():
-            new_key = k
-            transformed_d[new_key] = v
-
-        return transformed_d
