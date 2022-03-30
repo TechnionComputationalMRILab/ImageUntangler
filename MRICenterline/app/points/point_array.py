@@ -1,5 +1,6 @@
 from typing import List
 
+from MRICenterline.gui.vtk.line_actor import IULineActor
 from MRICenterline.app.points.point import Point
 from MRICenterline.app.points.status import PointStatus
 from MRICenterline import CFG
@@ -13,6 +14,7 @@ class PointArray:
         self.lengths: List[float] = []
         self.length_actors = []
         self.total_length: float = 0.0
+        self.line_visible = CFG.get_testing_status('draw-connecting-lines')
 
         if point_status == PointStatus.MPR:
             key = 'mpr-display-style'
@@ -29,6 +31,14 @@ class PointArray:
         self.line_thickness = float(CFG.get_config_data(key, 'line-thickness'))
         self.line_style = CFG.get_config_data(key, 'line-style')
 
+    ######################################################################
+    #                        array manipulation                          #
+    ######################################################################
+
+    def extend(self, point_array):
+        for pt in point_array:
+            self.add_point(pt)
+
     def add_point(self, point: Point):
         self.point_array.append(point)
         self.set_size(self.point_size)
@@ -39,28 +49,32 @@ class PointArray:
 
             distance = self.point_array[-2].distance(self.point_array[-1])
             self.lengths.append(distance)
-            self.length_actors.append(self.generate_line_actor(self.point_array[-2].image_coordinates,
-                                                               self.point_array[-1].image_coordinates))
+            self.length_actors.append(self.generate_line_actor(self.point_array[-2],
+                                                               self.point_array[-1]))
         self.total_length = sum(self.lengths)
 
     def generate_line_actor(self, point_a, point_b):
         if CFG.get_testing_status('draw-connecting-lines'):
-            from MRICenterline.gui.vtk.line_actor import generate_line_actor
-            return generate_line_actor(point_a, point_b,
-                                       color=self.point_color,
-                                       width=self.line_thickness)
+            return IULineActor(point_a, point_b,
+                               color=self.point_color,
+                               width=self.line_thickness)
 
-    def get_last_actor(self):
-        if len(self) == 1:
-            return self.point_array[0].get_actor()
-        else:
-            return self.point_array[-1].get_actor()
+    def delete(self, item):
+        self.point_array[item].actor.SetVisibility(False)
+        self.point_array.pop(item)
 
-    def get_last_line_actor(self):
-        if len(self.length_actors) == 1:
-            return self.length_actors[0]
-        else:
-            return self.length_actors[-1]
+        # recalculate lengths
+        if len(self):
+            if CFG.get_testing_status('draw-connecting-lines'):
+                self.length_actors[item].hide()
+                self.length_actors.pop(item)
+
+            self.lengths.pop(item)
+            self.total_length = sum(self.lengths)
+
+    ######################################################################
+    #                               dunder                               #
+    ######################################################################
 
     def __len__(self):
         return len(self.point_array)
@@ -81,65 +95,9 @@ class PointArray:
             string_list.append(string)
         return str(string_list)
 
-    def delete(self, item):
-        self.point_array[item].actor.SetVisibility(False)
-        self.point_array.pop(item)
-
-        # recalculate lengths
-        if len(self):
-            self.lengths.pop(item)
-            self.total_length = sum(self.lengths)
-
-    def show(self, item):
-        self.point_array[item].set_visibility(True)
-        self.point_array[item].actor.SetVisibility(True)
-
-    def hide(self, item):
-        self.point_array[item].set_visibility(False)
-        self.point_array[item].actor.SetVisibility(False)
-
-    def hide_intermediate_points(self):
-        for i in range(len(self)):
-            if i == 0 or i == len(self)-1:
-                self.set_color(color=self.point_color, item=i)
-            else:
-                self.point_array[i].set_visibility(False)
-                self.hide(i)
-
-    def show_intermediate_points(self):
-        for i in range(len(self)):
-            if i == 0 or i == len(self)-1:
-                self.set_color(color=self.point_color, item=i)
-            else:
-                self.point_array[i].set_visibility(True)
-                self.show(i)
-
-    def get_actor_list(self):
-        return [i.get_actor() for i in self.point_array]
-
-    def get_actor_list_for_slice(self, slice_idx):
-        return [i.get_actor() for i in self.point_array if i.slice_idx == slice_idx]
-
-    def displayed_points(self, slice_idx):
-        return [i for i in self.point_array if i.slice_idx == slice_idx]
-
-    def hidden_points(self, slice_idx):
-        return [i for i in self.point_array if i.slice_idx != slice_idx]
-
-    def show_points_for_slice(self, slice_index):
-        for i, pt in enumerate(self.point_array):
-            if pt.slice_idx == slice_index:
-                self.show(i)
-            else:
-                self.hide(i)
-
-    def set_color(self, color, item=None):
-        self.point_color = color
-        if item:
-            self.point_array[item].set_color(color)
-        else:
-            for pt in self.point_array:
-                pt.set_color(color)
+    ######################################################################
+    #                                 set                                #
+    ######################################################################
 
     def set_size(self, size, item=None):
         self.point_size = size
@@ -149,6 +107,33 @@ class PointArray:
             for pt in self.point_array:
                 pt.set_size(size)
 
+    def set_color(self, color, item=None):
+        self.point_color = color
+        if item:
+            self.point_array[item].set_color(color)
+        else:
+            for pt in self.point_array:
+                pt.set_color(color)
+
+    ######################################################################
+    #                                 get                                #
+    ######################################################################
+
+    def get_last_actor(self):
+        if len(self) == 1:
+            return self.point_array[0].get_actor()
+        else:
+            return self.point_array[-1].get_actor()
+
+    def get_last_line_actor(self):
+        if len(self.length_actors) == 1:
+            return self.length_actors[0]
+        else:
+            return self.length_actors[-1]
+
+    def get_actor_list(self):
+        return [i.get_actor() for i in self.point_array]
+
     def get_line_actors(self):
         return self.length_actors
 
@@ -156,16 +141,48 @@ class PointArray:
         pass
         # return generate_spline(self.point_array, color, width)
 
-    def clear_actors(self, renderer):
-        _actor_list = self.get_actor_list()
-        [renderer.RemoveActor(actor) for actor in _actor_list]
+    ######################################################################
+    #                        actor manipulation                          #
+    ######################################################################
 
-        if CFG.get_testing_status('draw-connecting-lines'):
-            [renderer.RemoveActor(actor) for actor in self.get_line_actors()]
+    def show_point(self, item):
+        self.point_array[item].set_visibility(True)
+        self.point_array[item].actor.SetVisibility(True)
 
-    def extend(self, point_array):
-        for pt in point_array:
-            self.add_point(pt)
+    def hide_point(self, item):
+        self.point_array[item].set_visibility(False)
+        self.point_array[item].actor.SetVisibility(False)
+
+    def hide_intermediate_points(self):
+        for i in range(len(self)):
+            if i == 0 or i == len(self)-1:
+                self.set_color(color=self.point_color, item=i)
+            else:
+                self.point_array[i].set_visibility(False)
+                self.hide_point(i)
+
+    def show_intermediate_points(self):
+        for i in range(len(self)):
+            if i == 0 or i == len(self)-1:
+                self.set_color(color=self.point_color, item=i)
+            else:
+                self.point_array[i].set_visibility(True)
+                self.show_point(i)
+
+    def show_for_slice(self, slice_index):
+        for i, pt in enumerate(self.point_array):
+            if pt.slice_idx == slice_index:
+                self.show_point(i)
+            else:
+                self.hide_point(i)
+
+    def toggle_line_visibility(self):
+        self.line_visible = not self.line_visible
+        [actor.SetVisibility(self.line_visible) for actor in self.length_actors]
+
+    ######################################################################
+    #                         data point functions                       #
+    ######################################################################
 
     def generate_table_data(self) -> dict:
         img_coords_list = [[round(c, 2) for c in pt.image_coordinates] for pt in self.point_array]

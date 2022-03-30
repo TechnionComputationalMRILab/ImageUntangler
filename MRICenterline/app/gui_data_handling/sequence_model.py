@@ -130,7 +130,7 @@ class SequenceModel:
             self.length_point_array.add_point(point)
             self.current_sequence_viewer.add_actor(self.length_point_array.get_last_actor())
 
-            if len(self.length_point_array) >= 2:
+            if len(self.length_point_array) >= 2 and CFG.get_boolean('length-display-style', 'show-line'):
                 self.current_sequence_viewer.add_actor(self.length_point_array.get_last_line_actor())
 
         logging.debug(f"[{len(self.length_point_array)}] length points, [{len(self.mpr_point_array)}] MPR points")

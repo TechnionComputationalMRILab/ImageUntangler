@@ -1,28 +1,26 @@
-import vtkmodules.all as vtk
+from typing import Tuple
+from vtkmodules.all import vtkTextActor, vtkPolyDataMapper, vtkActor, vtkLineSource
+
+from MRICenterline.app.points.point import Point
 
 
-def generate_line_actor(point_a, point_b, color=(1, 0, 0), width=2):
-    pts = vtk.vtkPoints()
-    pts.InsertNextPoint(point_a)
-    pts.InsertNextPoint(point_b)
+class IULineActor(vtkActor):
+    def __init__(self, point_a: Point, point_b: Point, color: Tuple[float] = (1, 0, 0), width: float = 2):
+        super().__init__()
 
-    lines_poly_data = vtk.vtkPolyData()
-    lines_poly_data.SetPoints(pts)
+        pta = [point_a.image_coordinates[0], point_a.image_coordinates[1], 0.0]
+        ptb = [point_b.image_coordinates[0], point_b.image_coordinates[1], 0.0]
 
-    line = vtk.vtkLine()
-    line.GetPointIds().SetId(0, 1)
-    line.GetPointIds().SetId(1, 2)
+        line1 = vtkLineSource()
+        line1.SetPoint1(*pta)
+        line1.SetPoint2(*ptb)
 
-    lines = vtk.vtkCellArray()
-    lines.InsertNextCell(line)
-    lines_poly_data.SetLines(lines)
+        mapper = vtkPolyDataMapper()
+        mapper.SetInputConnection(line1.GetOutputPort())
 
-    mapper = vtk.vtkPolyDataMapper()
-    mapper.SetInputData(lines_poly_data)
+        self.SetMapper(mapper)
+        self.GetProperty().SetColor(*color)
+        self.GetProperty().SetLineWidth(width)
 
-    actor = vtk.vtkActor()
-    actor.SetMapper(mapper)
-    actor.GetProperty().SetColor(color)
-    actor.GetProperty().SetLineWidth(width)
-
-    return actor
+    def hide(self):
+        self.GetProperty().SetOpacity(0)

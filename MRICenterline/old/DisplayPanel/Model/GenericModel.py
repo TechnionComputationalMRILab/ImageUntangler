@@ -228,7 +228,7 @@ class GenericModel(QWidget):
         logging.info("Showing patient table")
         _patient_info_panel = PatientInfoPanel(parent=self)
         self.layout.addWidget(_patient_info_panel)
-        _patient_info_panel.show()
+        _patient_info_panel.show_point()
 
     def show_intermediate_points(self):
         self.view.show_intermediate_points()

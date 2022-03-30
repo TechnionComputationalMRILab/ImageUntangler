@@ -60,7 +60,7 @@ class CenterlineModel:
             self.length_point_array.add_point(point)
             self.centerline_viewer.add_actor(self.length_point_array.get_last_actor())
 
-            if CFG.get_testing_status('draw-connecting-lines') and len(self.length_point_array) >= 2:
+            if CFG.get_boolean('mpr-length-display-style', 'show-line') and len(self.length_point_array) >= 2:
                 self.centerline_viewer.add_actor(self.length_point_array.get_last_line_actor())
 
     def calculate_length(self):

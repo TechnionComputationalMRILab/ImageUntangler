@@ -224,5 +224,5 @@ class SequenceViewer:
         self.render_panel()
 
     def display_points_in_slice(self, slice_index):
-        self.model.length_point_array.show_points_for_slice(slice_index)
-        self.model.mpr_point_array.show_points_for_slice(slice_index)
+        self.model.length_point_array.show_for_slice(slice_index)
+        self.model.mpr_point_array.show_for_slice(slice_index)
