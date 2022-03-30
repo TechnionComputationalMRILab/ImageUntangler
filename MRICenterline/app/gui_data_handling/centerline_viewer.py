@@ -1,11 +1,8 @@
-from typing import List
 from vtkmodules.qt.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
-from vtkmodules.all import vtkImageActor, vtkImageReslice, vtkRenderer, vtkTextActor, vtkPolyDataMapper,\
-    vtkActor, vtkCursor2D, vtkMatrix4x4
+from vtkmodules.all import vtkImageActor, vtkImageReslice, vtkRenderer, vtkTextActor
 
-from MRICenterline.gui.help.help_text import InteractorHelpText
+from MRICenterline.gui.vtk.text_actor import IUTextActor
 from MRICenterline.gui.vtk.sequence_interactor_style import SequenceViewerInteractorStyle
-from MRICenterline.app.gui_data_handling.image_properties import ImageProperties
 from MRICenterline import CFG, CONST
 
 import logging
@@ -26,6 +23,9 @@ class CenterlineViewer:
         self.reslice = vtkImageReslice()
         self.panel_actor = vtkImageActor()
         self.panel_renderer = vtkRenderer()
+
+        self.height_text_actor = IUTextActor("Height: " + str(self.model.height), True, 0)
+        self.angle_text_actor = IUTextActor("Angle: " + str(self.model.angle), True, 1)
 
     def connect_panel_actor(self):
         self.reslice.SetInputData(self.model.vtk_data)
@@ -49,7 +49,30 @@ class CenterlineViewer:
         self.panel_renderer.ResetCamera()
         self.panel_renderer.GetActiveCamera().SetParallelScale(self.model.parallel_scale)
 
-    def refresh_panel(self):
+    def initialize_panel(self):
         self.connect_panel_actor()
+
+        self.panel_renderer.AddActor(self.height_text_actor)
+        self.panel_renderer.AddActor(self.angle_text_actor)
+
         self.reslice.Update()
+        self.window.Render()
+
+    def add_actor(self, actor):
+        self.panel_renderer.AddActor(actor)
+        self.refresh_panel()
+
+    def refresh_panel(self, angle_change=None, height_change=None):
+        logging.debug(f"Current number of actors: {self.panel_renderer.GetActors().GetNumberOfItems()}")
+
+        if angle_change:
+            self.angle_text_actor.SetInput("Angle: " + str(self.model.angle))
+        if height_change:
+            self.height_text_actor.SetInput("Height: " + str(self.model.height))
+
+        self.window.Render()
+
+    def set_window_level(self, window, level):
+        self.panel_actor.GetProperty().SetColorWindow(window)
+        self.panel_actor.GetProperty().SetColorLevel(level)
         self.window.Render()

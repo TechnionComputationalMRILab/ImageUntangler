@@ -49,15 +49,24 @@ class CaseModel:
     def save(self):
         self.sequence_manager.save()
 
+        if self.centerline_model:
+            self.centerline_model.save()
+
     def set_picker_status(self, status: PickerStatus):
-        logging.debug(f"Setting picker status to {status}")
+        logging.debug(f"Setting display panel picker status to {status}")
         self.picker_status = status
+
+        if self.centerline_model and not (status == PickerStatus.PICKING_MPR or status == PickerStatus.MODIFYING_MPR):
+            self.centerline_model.set_picker_status(status)
 
     def calculate(self, status: PointStatus):
         self.sequence_manager.calculate(status)
 
+        if self.centerline_model:
+            self.centerline_model.calculate_length()
+
     def intermediate_points(self, show: bool):
-        self.sequence_manager.intermediate_points(show)
+        self.sequence_manager.intermediate_points(not show)
 
     def timer_status(self, status):
         logging.info(f"Timer set to {status}")

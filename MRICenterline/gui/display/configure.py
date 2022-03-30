@@ -4,7 +4,7 @@ from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QSplitter
 
 from MRICenterline.app.gui_data_handling.case_model import CaseModel
-from MRICenterline.app.centerline.centerline_model import CenterlineModel
+from MRICenterline.app.gui_data_handling.centerline_model import CenterlineModel
 from MRICenterline.gui.display.main_widget import MainDisplayWidget
 from MRICenterline.gui.centerline.widget import CenterlineWidget
 from MRICenterline.gui.display.toolbar import DisplayPanelToolbarButtons

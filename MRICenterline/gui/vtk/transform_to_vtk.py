@@ -7,21 +7,17 @@ from vtkmodules.util import numpy_support
 
 
 def vtk_transform(mpr_properties):
-    print("a")
-    _mpr_m = mpr_properties.MPR_M
-    _delta = mpr_properties.delta
+    mpr_m = mpr_properties.MPR_M
+    delta = mpr_properties.delta
 
-    print("a")
-    n = _mpr_m.shape[0]
-    m = _mpr_m.shape[1]
+    n = mpr_m.shape[0]
+    m = mpr_m.shape[1]
 
-    print("a")
-    _image_data = vtkImageData()
-    _image_data.SetDimensions(n, m, 1)
-    _image_data.SetOrigin(0, 0, 0)
-    _image_data.SetSpacing(_delta, _delta, _delta)
+    image_data = vtkImageData()
+    image_data.SetDimensions(n, m, 1)
+    image_data.SetOrigin(0, 0, 0)
+    image_data.SetSpacing(delta, delta, delta)
 
-    print("a")
     vtk_type_by_numpy_type = {
         np.uint8: VTK_UNSIGNED_CHAR,
         np.uint16: VTK_UNSIGNED_SHORT,
@@ -35,11 +31,11 @@ def vtk_transform(mpr_properties):
         np.float64: VTK_DOUBLE
     }
 
-    vtk_datatype = vtk_type_by_numpy_type[_mpr_m.dtype.type]
-    _mpr_m = np.transpose(_mpr_m)
-    scalars = numpy_support.numpy_to_vtk(num_array=_mpr_m.ravel(), deep=True, array_type=vtk_datatype)
+    vtk_datatype = vtk_type_by_numpy_type[mpr_m.dtype.type]
+    mpr_m = np.transpose(mpr_m)
+    scalars = numpy_support.numpy_to_vtk(num_array=mpr_m.ravel(), deep=True, array_type=vtk_datatype)
 
-    _image_data.GetPointData().SetScalars(scalars)
-    _image_data.Modified()
+    image_data.GetPointData().SetScalars(scalars)
+    image_data.Modified()
 
-    return _image_data
+    return image_data

@@ -7,7 +7,7 @@ from MRICenterline.app.gui_data_handling.image_properties import ImageProperties
 
 class PointsToPlaneVectors:
     def __init__(self, all_points: List[np.array], image_data: ImageProperties,
-                 height: int = 10, angle_degrees: int = 0):
+                 height: int = 50, angle_degrees: int = 0):
         # Height in cm, Angle in deg
 
         self.Height = height

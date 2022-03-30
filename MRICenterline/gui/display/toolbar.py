@@ -1,7 +1,7 @@
-from PyQt5.QtWidgets import QWidget, QGridLayout, QPushButton, QSizePolicy
+from PyQt5.QtWidgets import QWidget, QGridLayout, QPushButton
 import qtawesome as qta
 
-from MRICenterline.app.points.status import PickerStatus, TimerStatus, PointStatus
+from MRICenterline.app.points.status import PickerStatus, PointStatus
 from MRICenterline.app.gui_data_handling.case_model import CaseModel
 from MRICenterline.gui.display import toolbar_connect
 

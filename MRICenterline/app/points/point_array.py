@@ -1,4 +1,5 @@
 from typing import List
+
 from MRICenterline.app.points.point import Point
 from MRICenterline.app.points.status import PointStatus
 from MRICenterline import CFG
@@ -17,6 +18,8 @@ class PointArray:
             key = 'mpr-display-style'
         elif point_status == PointStatus.LENGTH:
             key = 'length-display-style'
+        elif point_status == PointStatus.LENGTH_IN_MPR:
+            key = 'mpr-length-display-style'
         else:
             raise KeyError("Point status not defined")
 
@@ -41,16 +44,23 @@ class PointArray:
         self.total_length = sum(self.lengths)
 
     def generate_line_actor(self, point_a, point_b):
-        from MRICenterline.gui.vtk.line_actor import generate_line_actor
-        return generate_line_actor(point_a, point_b,
-                                   color=self.point_color,
-                                   width=self.line_thickness)
+        if CFG.get_testing_status('draw-connecting-lines'):
+            from MRICenterline.gui.vtk.line_actor import generate_line_actor
+            return generate_line_actor(point_a, point_b,
+                                       color=self.point_color,
+                                       width=self.line_thickness)
 
     def get_last_actor(self):
         if len(self) == 1:
             return self.point_array[0].get_actor()
         else:
             return self.point_array[-1].get_actor()
+
+    def get_last_line_actor(self):
+        if len(self.length_actors) == 1:
+            return self.length_actors[0]
+        else:
+            return self.length_actors[-1]
 
     def __len__(self):
         return len(self.point_array)
@@ -140,20 +150,18 @@ class PointArray:
                 pt.set_size(size)
 
     def get_line_actors(self):
-        pass
-        # from MRICenterline.gui.vtk.line_actor import generate_line_actor
-        # generate_line_actor()
-        # self.length_actors.append()
+        return self.length_actors
 
-        # return generate_lines(self.point_array, color, width)
-
-    def get_spline_actor(self, color=(0, 1, 0), width=4):
+    def get_spline_actor(self):
         pass
         # return generate_spline(self.point_array, color, width)
 
     def clear_actors(self, renderer):
         _actor_list = self.get_actor_list()
         [renderer.RemoveActor(actor) for actor in _actor_list]
+
+        if CFG.get_testing_status('draw-connecting-lines'):
+            [renderer.RemoveActor(actor) for actor in self.get_line_actors()]
 
     def extend(self, point_array):
         for pt in point_array:
@@ -172,4 +180,8 @@ class PointArray:
 
     def get_as_np_array(self):
         import numpy as np
-        return np.asarray([pt.physical_coords for pt in self.point_array])
+
+        if CFG.get_testing_status("use-slice-location"):
+            return np.asarray([pt.image_coordinates for pt in self.point_array])
+        else:
+            return np.asarray([pt.physical_coords for pt in self.point_array])

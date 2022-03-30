@@ -1,3 +1,5 @@
+import math
+
 import vtkmodules.all as vtk
 from vtkmodules.util import numpy_support
 
@@ -14,7 +16,9 @@ logging.getLogger(__name__)
 class ImageProperties:
     def __init__(self, sitk_image, parent=None):
         self.sitk_image = sitk_image
+
         self.nparray = GetArrayFromImage(sitk_image)
+
         self.spacing = np.array(sitk_image.GetSpacing())
         self.dimensions = np.int32(sitk_image.GetDimension())
         self.size = np.array(sitk_image.GetSize())
@@ -35,15 +39,13 @@ class ImageProperties:
         center = calculate_center()
         self.sliceIdx = np.int(np.round(((center[2]-self.origin[2])/self.spacing[2]))) + 1
 
-        self.window_value, self.level_value = self.calculate_window_and_level()
-
         self.vtk_data = self.get_vtk_data()
         self.transformation = transformation_matrix(center)
 
         self.direction_matrix = sitk_image.GetDirection()
 
-        if CFG.get_testing_status("use-slice-location"):
-            self.z_coords = parent.get_z_coords(parent.sequence)
+        self.window_value, self.level_value = self.calculate_window_and_level()
+        self.z_coords = []
 
     def __repr__(self):
         return f"""
@@ -66,26 +68,26 @@ class ImageProperties:
         return 1 + self.size[2] - itk_z
 
     def get_vtk_data(self):
-        vtkVolBase = vtk.vtkImageData()
-        vtkVolBase.SetDimensions(*self.size)
-        vtkVolBase.SetOrigin(*self.origin)
-        vtkVolBase.SetSpacing(*self.spacing)
-        vtkVolBase.SetExtent(*self.extent)
+            vtkVolBase = vtk.vtkImageData()
+            vtkVolBase.SetDimensions(*self.size)
+            vtkVolBase.SetOrigin(*self.origin)
+            vtkVolBase.SetSpacing(*self.spacing)
+            vtkVolBase.SetExtent(*self.extent)
 
-        image_array = numpy_support.numpy_to_vtk(self.nparray.ravel(), deep=True, array_type=vtk.VTK_TYPE_UINT16)
-        vtkVolBase.GetPointData().SetScalars(image_array)
-        vtkVolBase.Modified()
+            image_array = numpy_support.numpy_to_vtk(self.nparray.ravel(), deep=True, array_type=vtk.VTK_TYPE_UINT16)
+            vtkVolBase.GetPointData().SetScalars(image_array)
+            vtkVolBase.Modified()
 
-        # return vtkVolBase
+            # return vtkVolBase
 
-        # flip the image in Y direction
-        flip = vtk.vtkImageReslice()
-        flip.SetInputData(vtkVolBase)
-        flip.SetResliceAxesDirectionCosines(1, 0, 0, 0, -1, 0, 0, 0, 1)
-        flip.Update()
+            # flip the image in Y direction
+            flip = vtk.vtkImageReslice()
+            flip.SetInputData(vtkVolBase)
+            flip.SetResliceAxesDirectionCosines(1, 0, 0, 0, -1, 0, 0, 0, 1)
+            flip.Update()
 
-        vtkVol = flip.GetOutput()
-        vtkVol.SetOrigin(*self.origin)
+            vtkVol = flip.GetOutput()
+            vtkVol.SetOrigin(*self.origin)
 
-        return vtkVol
+            return vtkVol
 

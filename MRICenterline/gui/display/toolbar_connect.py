@@ -1,4 +1,4 @@
-from MRICenterline.app.points.status import PickerStatus, TimerStatus, PointStatus
+from MRICenterline.app.points.status import PickerStatus, PointStatus
 from MRICenterline.app.gui_data_handling.case_model import CaseModel
 
 

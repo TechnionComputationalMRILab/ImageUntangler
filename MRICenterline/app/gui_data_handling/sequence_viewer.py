@@ -1,10 +1,11 @@
-from typing import List
+from typing import Tuple, List
 from vtkmodules.qt.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
-from vtkmodules.all import vtkImageActor, vtkImageReslice, vtkRenderer, vtkTextActor, vtkPolyDataMapper,\
+from vtkmodules.all import vtkImageActor, vtkImageReslice, vtkRenderer, vtkPolyDataMapper,\
     vtkActor, vtkCursor2D, vtkMatrix4x4
 
 from MRICenterline.gui.help.help_text import InteractorHelpText
 from MRICenterline.gui.vtk.sequence_interactor_style import SequenceViewerInteractorStyle
+from MRICenterline.gui.vtk.text_actor import IUTextActor
 from MRICenterline.app.gui_data_handling.image_properties import ImageProperties
 from MRICenterline import CFG, CONST
 
@@ -13,7 +14,7 @@ logging.getLogger(__name__)
 
 
 class SequenceViewer:
-    def __init__(self, 
+    def __init__(self,
                  viewer_manger,
                  image_properties: ImageProperties,  
                  interactor: QVTKRenderWindowInteractor,
@@ -35,17 +36,30 @@ class SequenceViewer:
         self.connect_panel_actor()
 
         self.cursor = vtkCursor2D()
-        self.show_cursor = True
+        self.show_cursor = CFG.get_boolean('display', 'show-interactor-cursor')
         self.initialize_cursor()
 
-        self.index_text_actor = vtkTextActor()
-        self.window_text_actor = vtkTextActor()
-        self.level_text_actor = vtkTextActor()
-        self.coords_text_actor = vtkTextActor()
-        self.help_text_actor = vtkTextActor()
-        self.debug_text_actor = vtkTextActor()
-        self.show_help, self.show_debug = True, False
-        self.initialize_text_actors()
+        # self.index_text_actor, self.window_text_actor, self.level_text_actor, \
+        #     self.coords_text_actor, self.help_text_actor, self.debug_text_actor = (vtkTextActor(),)*6
+
+        self.show_help = CFG.get_boolean('display', 'show-interactor-help')
+        self.show_debug = CFG.get_boolean('display', 'show-interactor-debug')
+
+        # initialize_text_actors
+        self.index_text_actor = IUTextActor("SliceIdx: " + str(self.slice_idx), True, 0)
+        self.window_text_actor = IUTextActor("Window: " + str(self.window_val), True, 1)
+        self.level_text_actor = IUTextActor("Level: " + str(self.level_val), True, 2)
+        self.coords_text_actor = IUTextActor(" ", True, 3)
+        self.help_text_actor = IUTextActor(InteractorHelpText.text_out, self.show_help,
+                                           InteractorHelpText.text_length + 1, InteractorHelpText.text_color)
+        self.debug_text_actor = IUTextActor(" ", self.show_debug, InteractorHelpText.text_length + 10)
+
+        self.panel_renderer.AddActor(self.index_text_actor)
+        self.panel_renderer.AddActor(self.window_text_actor)
+        self.panel_renderer.AddActor(self.level_text_actor)
+        self.panel_renderer.AddActor(self.coords_text_actor)
+        self.panel_renderer.AddActor(self.help_text_actor)
+        self.panel_renderer.AddActor(self.debug_text_actor)
 
         self.window.Render()
         
@@ -65,7 +79,7 @@ class SequenceViewer:
 
         cursor_actor = vtkActor()
         cursor_actor.SetMapper(cursor_mapper)
-        cursor_actor.GetProperty().SetColor(1, 0, 0)
+        cursor_actor.GetProperty().SetColor(CFG.get_color('display', 'cursor-color'))
         self.panel_renderer.AddActor(cursor_actor)
 
     def update_cursor_location(self, coords):
@@ -86,53 +100,6 @@ class SequenceViewer:
     #                               text actors                               #
     ###########################################################################
 
-    def initialize_text_actors(self):
-        color = CFG.get_color('display', 'text-color')
-
-        slice_index_loc = 0
-        self.index_text_actor.GetTextProperty().SetFontSize(int(CFG.get_config_data('display', 'font-size')))
-        self.index_text_actor.GetTextProperty().SetColor(color[0], color[1], color[2])
-        self.index_text_actor.SetDisplayPosition(0, slice_index_loc*int(CFG.get_config_data('display', 'font-size')))
-        self.index_text_actor.SetInput("SliceIdx: " + str(self.slice_idx))
-        self.panel_renderer.AddActor(self.index_text_actor)
-
-        window_loc = 1
-        self.window_text_actor.GetTextProperty().SetFontSize(int(CFG.get_config_data('display', 'font-size')))
-        self.window_text_actor.GetTextProperty().SetColor(color[0], color[1], color[2])
-        self.window_text_actor.SetDisplayPosition(0, window_loc*int(CFG.get_config_data('display', 'font-size')))
-        self.window_text_actor.SetInput("Window: " + str(self.window_val))
-        self.panel_renderer.AddActor(self.window_text_actor)
-
-        level_loc = 2
-        self.level_text_actor.GetTextProperty().SetFontSize(int(CFG.get_config_data('display', 'font-size')))
-        self.level_text_actor.GetTextProperty().SetColor(color[0], color[1], color[2])
-        self.level_text_actor.SetDisplayPosition(0, level_loc*int(CFG.get_config_data('display', 'font-size')))
-        self.level_text_actor.SetInput("Level: " + str(self.level_val))
-        self.panel_renderer.AddActor(self.level_text_actor)
-
-        coords_loc = 3
-        self.coords_text_actor.GetTextProperty().SetFontSize(int(CFG.get_config_data('display', 'font-size')))
-        self.coords_text_actor.GetTextProperty().SetColor(color[0], color[1], color[2])
-        self.coords_text_actor.SetInput(" ")
-        self.coords_text_actor.SetDisplayPosition(0, coords_loc*int(CFG.get_config_data('display', 'font-size')))
-        self.panel_renderer.AddActor(self.coords_text_actor)
-
-        help_loc = InteractorHelpText.text_length + 1
-        self.help_text_actor.GetTextProperty().SetFontSize(int(CFG.get_config_data('display', 'font-size')))
-        self.help_text_actor.GetTextProperty().SetColor(*InteractorHelpText.text_color)
-        self.help_text_actor.SetInput(InteractorHelpText.text_out)
-        self.help_text_actor.SetDisplayPosition(0, help_loc*int(CFG.get_config_data('display', 'font-size')))
-        self.help_text_actor.SetVisibility(self.show_help)
-        self.panel_renderer.AddActor(self.help_text_actor)
-
-        debug_loc = help_loc + 5
-        self.debug_text_actor.GetTextProperty().SetFontSize(int(CFG.get_config_data('display', 'font-size')))
-        self.debug_text_actor.GetTextProperty().SetColor(1, 0, 0)
-        self.debug_text_actor.SetInput("DEBUG TEXT HERE")
-        self.debug_text_actor.SetDisplayPosition(0, debug_loc*int(CFG.get_config_data('display', 'font-size')))
-        self.debug_text_actor.SetVisibility(self.show_debug)
-        self.panel_renderer.AddActor(self.debug_text_actor)
-
     def toggle_help(self):
         self.help_text_actor.SetVisibility(self.show_help)
         if self.show_help:
@@ -149,7 +116,13 @@ class SequenceViewer:
 
     def update_displayed_coords(self, coords):
         try:
-            self.coords_text_actor.SetInput(f'x: {round(coords[0], 2)}, y: {round(coords[1], 2)}, z: {round(coords[2], 2)}')
+            if CFG.get_testing_status("use-slice-location"):
+                z_coords = self.image.z_coords
+                z = z_coords[self.slice_idx]
+
+                self.coords_text_actor.SetInput(f'x: {round(coords[0], 2)}, y: {round(coords[1], 2)}, z: {round(z, 2)}')
+            else:
+                self.coords_text_actor.SetInput(f'x: {round(coords[0], 2)}, y: {round(coords[1], 2)}')
         except TypeError:  # it's out of bounds
             pass
         self.window.Render()
@@ -221,7 +194,6 @@ class SequenceViewer:
         matrix: vtkMatrix4x4 = self.reslice.GetResliceAxes()
         center = matrix.MultiplyPoint((0, 0, delta*spacing, 1))
 
-        # sliceIdx = np.int(np.round((center[2] - self.imageData.origin[2]) / self.imageData.spacing[2] - 0.5))
         slice_idx = 1 + np.int(np.round(((center[2] - self.image.origin[2]) / self.image.spacing[2])))
 
         if 1 <= slice_idx <= self.image.size[2]:

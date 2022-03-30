@@ -50,7 +50,6 @@ class SequenceViewerInteractorStyle(vtkInteractorStyleImage):
             self.model.sequence_viewer.update_displayed_coords(coords)
             self.model.sequence_viewer.update_cursor_location(coords)
 
-
     def MiddleButtonEvent(self, obj, event):
         if event == "MiddleButtonPressEvent":
             vtkInteractorStyleImage.OnMiddleButtonDown(self)

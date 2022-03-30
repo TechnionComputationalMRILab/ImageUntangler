@@ -1,5 +1,5 @@
 import qtawesome as qta
-from PyQt5.QtWidgets import QToolBar, QPushButton, QWidget, QSizePolicy
+from PyQt5.QtWidgets import QToolBar, QPushButton
 
 from MRICenterline.gui.window import toolbar_connect
 

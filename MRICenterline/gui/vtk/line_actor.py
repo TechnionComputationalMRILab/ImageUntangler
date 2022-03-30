@@ -1,7 +1,7 @@
 import vtkmodules.all as vtk
 
 
-def generate_line_actor(point_a, point_b, color=(1,0,0), width=2):
+def generate_line_actor(point_a, point_b, color=(1, 0, 0), width=2):
     pts = vtk.vtkPoints()
     pts.InsertNextPoint(point_a)
     pts.InsertNextPoint(point_b)

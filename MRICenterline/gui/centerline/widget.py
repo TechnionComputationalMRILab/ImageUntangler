@@ -1,16 +1,17 @@
 from vtkmodules.qt.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QGroupBox, QLabel
 
-from MRICenterline.app.centerline.centerline_model import CenterlineModel
+from MRICenterline.app.gui_data_handling.centerline_model import CenterlineModel
 from MRICenterline.gui.vtk.centerline_interactor_style import CenterlineInteractorStyle
 from MRICenterline.app.gui_data_handling.centerline_viewer import CenterlineViewer
 
 
 class CenterlineWidget(QWidget):
-    text = "test"
+    text = "No points selected"
 
     def __init__(self, model: CenterlineModel, parent=None):
         super().__init__(parent)
+        self.parent = parent
         self.model = model
         layout = QVBoxLayout(self)
 
@@ -25,3 +26,5 @@ class CenterlineWidget(QWidget):
         layout.addWidget(self.label)
         layout.addWidget(self.interactor)
 
+    def change_widget_text(self, text):
+        self.label.setText(text)
