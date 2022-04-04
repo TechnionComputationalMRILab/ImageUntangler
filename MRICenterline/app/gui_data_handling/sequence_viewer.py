@@ -1,11 +1,11 @@
 from typing import Tuple, List
 from vtkmodules.qt.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
 from vtkmodules.all import vtkImageActor, vtkImageReslice, vtkRenderer, vtkPolyDataMapper,\
-    vtkActor, vtkCursor2D, vtkMatrix4x4
+    vtkActor, vtkCursor2D, vtkMatrix4x4, vtkCornerAnnotation
 
 from MRICenterline.gui.help.help_text import InteractorHelpText
 from MRICenterline.gui.vtk.sequence_interactor_style import SequenceViewerInteractorStyle
-from MRICenterline.gui.vtk.text_actor import IUTextActor
+from MRICenterline.gui.vtk.IUCornerAnnotation import IUCornerAnnotation, CornerLoc
 from MRICenterline.app.gui_data_handling.image_properties import ImageProperties
 from MRICenterline import CFG, CONST
 
@@ -39,27 +39,23 @@ class SequenceViewer:
         self.show_cursor = CFG.get_boolean('display', 'show-interactor-cursor')
         self.initialize_cursor()
 
-        # self.index_text_actor, self.window_text_actor, self.level_text_actor, \
-        #     self.coords_text_actor, self.help_text_actor, self.debug_text_actor = (vtkTextActor(),)*6
-
         self.show_help = CFG.get_boolean('display', 'show-interactor-help')
         self.show_debug = CFG.get_boolean('display', 'show-interactor-debug')
 
-        # initialize_text_actors
-        self.index_text_actor = IUTextActor("SliceIdx: " + str(self.slice_idx), True, 0)
-        self.window_text_actor = IUTextActor("Window: " + str(self.window_val), True, 1)
-        self.level_text_actor = IUTextActor("Level: " + str(self.level_val), True, 2)
-        self.coords_text_actor = IUTextActor(" ", True, 3)
-        self.help_text_actor = IUTextActor(InteractorHelpText.text_out, self.show_help,
-                                           InteractorHelpText.text_length + 1, InteractorHelpText.text_color)
-        self.debug_text_actor = IUTextActor(" ", self.show_debug, InteractorHelpText.text_length + 10)
+        # initialize texts
+        self.status_texts = {
+            "Slice Index": self.slice_idx,
+            "Window Value": self.window_val,
+            "Level Value": self.level_val
+        }
+        self.length_texts = dict()
 
-        self.panel_renderer.AddActor(self.index_text_actor)
-        self.panel_renderer.AddActor(self.window_text_actor)
-        self.panel_renderer.AddActor(self.level_text_actor)
-        self.panel_renderer.AddActor(self.coords_text_actor)
-        self.panel_renderer.AddActor(self.help_text_actor)
-        self.panel_renderer.AddActor(self.debug_text_actor)
+        self.status_text_actor = IUCornerAnnotation(CornerLoc.LOWER_LEFT)
+        self.help_text_actor = IUCornerAnnotation(CornerLoc.LOWER_RIGHT)
+        self.debug_text_actor = IUCornerAnnotation(CornerLoc.UPPER_RIGHT)
+        self.length_text_actor = IUCornerAnnotation(CornerLoc.UPPER_LEFT)
+
+        self.initialize_text()
 
         self.window.Render()
         
@@ -100,6 +96,35 @@ class SequenceViewer:
     #                               text actors                               #
     ###########################################################################
 
+    def initialize_text(self):
+        self.status_text_actor.SetInput(self.status_texts)
+        self.status_text_actor.SetColor(CFG.get_color('display', 'text-color'))
+
+        self.length_text_actor.SetInput(self.length_texts)
+        self.length_text_actor.SetColor(CFG.get_color('display', 'text-color'))
+
+        self.help_text_actor.SetInput(InteractorHelpText.text_out)
+        self.help_text_actor.SetColor(CFG.get_color('display', 'help-text-color'))
+
+        self.debug_text_actor.SetInput("NONE")
+        self.debug_text_actor.SetColor(CFG.get_color('display', 'debug-text-color'))
+
+        self.help_text_actor.SetVisibility(self.show_help)
+        self.debug_text_actor.SetVisibility(self.show_debug)
+
+        self.panel_renderer.AddViewProp(self.status_text_actor)
+        self.panel_renderer.AddViewProp(self.length_text_actor)
+        self.panel_renderer.AddViewProp(self.help_text_actor)
+        self.panel_renderer.AddViewProp(self.debug_text_actor)
+
+    def update_length_text(self, val):
+        self.length_texts = val
+        self.length_text_actor.SetInput(self.length_texts)
+
+    def update_status_text(self, key, val):
+        self.status_texts[key] = val
+        self.status_text_actor.SetInput(self.status_texts)
+
     def toggle_help(self):
         self.help_text_actor.SetVisibility(self.show_help)
         if self.show_help:
@@ -120,9 +145,12 @@ class SequenceViewer:
                 z_coords = self.image.z_coords
                 z = z_coords[self.slice_idx]
 
-                self.coords_text_actor.SetInput(f'x: {round(coords[0], 2)}, y: {round(coords[1], 2)}, z: {round(z, 2)}')
+                if CFG.get_boolean('display', 'show-interactor-coords'):
+                    self.update_status_text("Coordinates", f'x: {round(coords[0], 2)}, y: {round(coords[1], 2)}, z: {round(z, 2)}')
+
             else:
-                self.coords_text_actor.SetInput(f'x: {round(coords[0], 2)}, y: {round(coords[1], 2)}')
+                if CFG.get_boolean('display', 'show-interactor-coords'):
+                    self.update_status_text("Coordinates", f'x: {round(coords[0], 2)}, y: {round(coords[1], 2)}')
         except TypeError:  # it's out of bounds
             pass
         self.window.Render()
@@ -167,18 +195,23 @@ class SequenceViewer:
     def adjust_window(self, window: int):
         self.panel_actor.GetProperty().SetColorWindow(window)
         self.window_val = window
-        self.window_text_actor.SetInput("Window: " + str(int(self.window_val)))
+        self.update_status_text("Window Value", int(self.window_val))
         self.window.Render()
 
     def adjust_level(self, level: int):
         self.panel_actor.GetProperty().SetColorLevel(level)
         self.level_val = level
-        self.level_text_actor.SetInput("Level: " + str(int(self.level_val)))
+        self.update_status_text("Level Value", int(self.level_val))
         self.window.Render()
 
     def update_window_level(self):
-        self.model.change_window(self.panel_actor.GetProperty().GetColorWindow())
-        self.model.change_level(self.panel_actor.GetProperty().GetColorLevel())
+        self.level_val = self.panel_actor.GetProperty().GetColorLevel()
+        self.window_val = self.panel_actor.GetProperty().GetColorWindow()
+        self.update_status_text("Level Value", int(self.level_val))
+        self.update_status_text("Window Value", int(self.window_val))
+        self.window.Render()
+
+        return self.window_val, self.level_val
 
     def update_zoom_factor(self):
         current_scale = self.panel_renderer.GetActiveCamera().GetParallelScale()
@@ -212,7 +245,7 @@ class SequenceViewer:
                 self.image.sliceIdx = slice_idx
                 self.display_points_in_slice(slice_idx)
 
-            self.index_text_actor.SetInput("SliceIdx: " + str(1 + self.image.size[2] - self.slice_idx))
+            self.update_status_text("Slice Index", 1 + self.image.size[2] - self.slice_idx)
             self.render_panel()
 
     ######################################################################

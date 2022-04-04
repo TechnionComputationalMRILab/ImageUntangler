@@ -16,6 +16,7 @@ class CaseModel:
     def __init__(self, path, initial_sequence=None):
         self.path = path
         self.image = GraphicalImager(path)
+        self.window_value, self.level_value = 0, 0
 
         self.sequence_list = self.image.get_sequences()
 
@@ -42,6 +43,12 @@ class CaseModel:
 
     def get_case_name(self):
         return self.image.case_name
+
+    def update_window_level(self):
+        self.window_value, self.level_value = self.sequence_manager.update_window_level()
+
+        if self.centerline_model:
+            self.centerline_model.set_window_level(self.window_value, self.level_value)
 
     #########
     # toolbar

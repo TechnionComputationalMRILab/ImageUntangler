@@ -18,6 +18,7 @@ class CenterlineModel:
 
     def __init__(self, case_model):
         self.case_model = case_model
+        self.window_value, self.level_value = self.case_model.window_value, self.case_model.level_value
         self.widget = None
         self.point_array = None
         self.image_properties = None
@@ -29,6 +30,11 @@ class CenterlineModel:
         self.angle = 0
 
         self.vtk_data = vtkImageData()
+
+    def set_window_level(self, wval, lval):
+        self.window_value = wval
+        self.level_value = lval
+        self.centerline_viewer.set_window_level()
 
     def set_points_and_image(self, points, image):
         self.point_array = points
@@ -92,10 +98,11 @@ class CenterlineModel:
     def calculate_centerline(self):
         input_points = self.point_array.get_as_np_array()
 
-        self.ppv = PointsToPlaneVectors(input_points,
+        ppv = PointsToPlaneVectors(input_points,
                                         self.image_properties,
                                         height=self.height,
                                         angle_degrees=self.angle)
 
-        self.vtk_data = vtk_transform(self.ppv)
-        self.parallel_scale = self.parallel_scale * self.ppv.delta * (self.vtk_data.GetExtent()[1] - self.vtk_data.GetExtent()[0])
+        self.vtk_data = vtk_transform(ppv)
+        self.parallel_scale = self.parallel_scale * ppv.delta * \
+                              (self.vtk_data.GetExtent()[1] - self.vtk_data.GetExtent()[0])

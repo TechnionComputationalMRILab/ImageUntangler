@@ -141,6 +141,13 @@ class PointArray:
         pass
         # return generate_spline(self.point_array, color, width)
 
+    def get_length_for_display(self):
+        out_dict = dict()
+        for i, length in enumerate(self.lengths):
+            out_dict[f'{i}: '] = round(length, 2)
+        out_dict['Total Length:'] = round(self.total_length, 2)
+        return out_dict
+
     ######################################################################
     #                        actor manipulation                          #
     ######################################################################

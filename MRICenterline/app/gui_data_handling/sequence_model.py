@@ -22,6 +22,7 @@ logging.getLogger(__name__)
 
 class SequenceModel:
     def __init__(self, model):
+        self.window_value, self.level_value = 0, 0
         self.seq_idx = -1
         self.model = model
         self.image = self.model.image
@@ -32,16 +33,12 @@ class SequenceModel:
         self.mpr_point_array = PointArray(PointStatus.MPR)
         self.length_point_array = PointArray(PointStatus.LENGTH)
 
-    def change_window(self, window):
-        pass
-        # self.model.change_window(window)
-
-    def change_level(self, level):
-        pass
-        # self.model.change_level(level)
-
     def __repr__(self):
         return f"Viewer Manager with index {self.seq_idx}"
+
+    def update_window_level(self):
+        self.window_value, self.level_value = self.current_sequence_viewer.update_window_level()
+        return self.window_value, self.level_value
 
     def load_sequence(self, seq_idx: int, interactor: QVTKRenderWindowInteractor,
                       interactor_style: SequenceViewerInteractorStyle):
@@ -58,6 +55,7 @@ class SequenceModel:
         self.model.set_sequence_viewer(sequence_viewer)
         self.current_sequence_viewer = sequence_viewer
         self.model.change_sequence(self.seq_idx)
+        self.window_value, self.level_value = image_properties.window_value, image_properties.level_value
         return sequence_viewer
 
     def append_to_case_history(self):
@@ -107,12 +105,19 @@ class SequenceModel:
             while len(self.mpr_point_array) > 0:
                 self.mpr_point_array.delete(-1)
 
+            self.current_sequence_viewer.update_length_text(" ")
+
         else:
             logging.info("Undo last point")
             if (self.model.picker_status == PickerStatus.PICKING_LENGTH) and (len(self.length_point_array) > 0):
                 self.length_point_array.delete(-1)
             if (self.model.picker_status == PickerStatus.PICKING_MPR) and (len(self.mpr_point_array) > 0):
                 self.mpr_point_array.delete(-1)
+
+            if len(self.length_point_array) >= 2:
+                self.current_sequence_viewer.update_length_text(self.length_point_array.get_length_for_display())
+            else:
+                self.current_sequence_viewer.update_length_text(" ")
 
         # refresh the renderer
         self.current_sequence_viewer.render_panel()
@@ -132,6 +137,9 @@ class SequenceModel:
 
             if len(self.length_point_array) >= 2 and CFG.get_boolean('length-display-style', 'show-line'):
                 self.current_sequence_viewer.add_actor(self.length_point_array.get_last_line_actor())
+
+            if len(self.length_point_array) >= 2:
+                self.current_sequence_viewer.update_length_text(self.length_point_array.get_length_for_display())
 
         logging.debug(f"[{len(self.length_point_array)}] length points, [{len(self.mpr_point_array)}] MPR points")
 

@@ -32,6 +32,7 @@ class SequenceViewerInteractorStyle(vtkInteractorStyleImage):
             if event == 'LeftButtonPressEvent':
                 vtkInteractorStyleImage.OnLeftButtonDown(self)
             elif event == 'LeftButtonReleaseEvent':
+                self.model.update_window_level()
                 vtkInteractorStyleImage.OnLeftButtonUp(self)
         else:
             if event == 'LeftButtonPressEvent':
