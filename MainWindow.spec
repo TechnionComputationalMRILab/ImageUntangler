@@ -5,7 +5,7 @@ block_cipher = None
 
 
 a = Analysis(['main.py'],
-             pathex=['C:\\Users\\ang.a\\OneDrive - Technion\\Documents\\GitHub\\ImageUntangler'],
+             pathex=['C:\\Users\\ang.a\\Documents\\ImageUntangler'],
              binaries=[],
              datas=[('config.ini', '.')],
              hiddenimports=['configparser', 'vtkmodules','vtkmodules.all','vtkmodules.qt.QVTKRenderWindowInteractor','vtkmodules.util','vtkmodules.util.numpy_support'],

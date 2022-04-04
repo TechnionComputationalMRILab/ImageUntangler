@@ -1,6 +1,7 @@
 from vtkmodules.qt.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
 from vtkmodules.all import vtkImageActor, vtkImageReslice, vtkRenderer, vtkTextActor
 
+from MRICenterline.gui.vtk.IUCornerAnnotation import IUCornerAnnotation, CornerLoc
 from MRICenterline.gui.vtk.text_actor import IUTextActor
 from MRICenterline.gui.vtk.sequence_interactor_style import SequenceViewerInteractorStyle
 from MRICenterline import CFG, CONST
