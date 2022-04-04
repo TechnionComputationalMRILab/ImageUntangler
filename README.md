@@ -45,4 +45,13 @@ To compile with PyInstaller, use the `MainWindow.spec` file for a one-folder ins
 
 ### Keyboard shortcuts
 
-`c` - Disable bullseye
+`c` - Disable cursor
+
+#### Debug shortcuts
+
+On main screen:
+Ctrl+q - open folder using File Dialog
+
+With an opened case:
+Ctrl+d - show coordinates of all points in a dialog box
+Ctrl+p - import points from version 3 of ImageUntangler
