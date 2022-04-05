@@ -247,11 +247,8 @@ class GenericSequenceViewer:
         logging.info('Saving file...')
 
         _save_formatter = SaveFormatter(imagedata=self.imageData, path=self.imageData.path)
-        print("1")
         if len(self.lengthPoints) + len(self.MPRpoints):
-            print("2")
             if len(self.lengthPoints):
-                print("3")
                 _save_formatter.add_pointcollection_data('length points', self.lengthPoints)
                 if len(self.lengthPoints) > 2:
                     logging.debug(f"Also saving total length: {self.lengthPoints.total_length}")

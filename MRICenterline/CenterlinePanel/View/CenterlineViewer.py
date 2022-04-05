@@ -148,10 +148,14 @@ class CenterlineViewer(QWidget):
             # pointsPositions = np.asarray(pointsPositions)
 
             pointsPositions = np.asarray(self.lengthPoints.get_coordinates_as_array())
-            allLengths = [np.linalg.norm(pointsPositions[j, :] - pointsPositions[j + 1, :]) for j in
+
+            point_pairs = [(pointsPositions[j, :], pointsPositions[j + 1, :]) for j in
                           range(len(pointsPositions) - 1)]
+            allLengths = [np.linalg.norm(i-j) for i, j in point_pairs]
+
+            allVertLengths = [np.abs(np.dot((0,1,0), i-j)) for i, j in point_pairs]
             totalDistance = np.sum(allLengths)
-            return totalDistance, allLengths
+            return totalDistance, allLengths, allVertLengths
         else:
             MSG.msg_box_warning("Not enough points clicked to calculate length")
 
@@ -160,14 +164,18 @@ class CenterlineViewer(QWidget):
         self._length_results_label.setText("The lengths [mm] are:\n\n {0} \n\nThe total length:\n\n {1}".format(' , '.join(strdis),"{0:.2f}".format(total_distance)))
 
     def processNewPoint(self, pickedCoordinates):
-        pointLocation = [pickedCoordinates[0], pickedCoordinates[1], pickedCoordinates[2], 0]  # x,y,z,sliceIdx
-        self.lengthPoints.add_point(pointLocation)
-        self.renderer.AddActor(self.lengthPoints[-1].actor)
-        self.renderWindow.Render()
+        if len(self.lengthPoints) == 2:
+            raise ValueError
+        else:
+            pointLocation = [pickedCoordinates[0], pickedCoordinates[1], pickedCoordinates[2], 0]  # x,y,z,sliceIdx
+            self.lengthPoints.add_point(pointLocation)
+            self.renderer.AddActor(self.lengthPoints[-1].actor)
+            self.renderWindow.Render()
 
     def save_file(self):
         logging.info(f'Saving length with MPR points')
-        _save_formatter = SaveFormatter(self.model.image_data, suffix="centerline", append_to_directory=False)
+        _save_formatter = SaveFormatter(imagedata=self.model.image_data, path=self.model.image_data.path,
+                                        prefix="centerline", append_to_directory=False)
         _save_formatter.add_pointcollection_data('length in mpr points', self.lengthPoints)
         _save_formatter.add_timestamps(self._start_time, self._stop_time, self._time_gap)
         _save_formatter.add_generic_data("mpr points", self.model.points)
@@ -223,10 +231,17 @@ class CenterlineViewer(QWidget):
         self.renderWindow.Render()
 
     def calculate_length(self):
-        totalDistance, all_lengths = self.calculateDistances()
-        strdis = ["{0:.2f}".format(all_lengths[i]) for i in range(len(all_lengths))]
+        totalDistance, all_lengths, allVertLengths = self.calculateDistances()
+        str_all = ["{0:.2f}".format(all_lengths[i]) for i in range(len(all_lengths))]
+        str_vert = ["{0:.2f}".format(allVertLengths[i]) for i in range(len(allVertLengths))]
         MSG.msg_box_info("Calculated length",
-                         info="The lengths [mm] are:\n\n {0} \n\nThe total length:\n\n {1}".format(' , '.join(strdis),"{0:.2f}".format(totalDistance)))
+                         info=f"""
+                                The lengths [mm] are:
+                                {str_all}
+                                Vertical lengths:
+                                {str_vert}
+                                Total distance: {round(float(totalDistance), 2)}
+                                """)
 
 
 # # redundant functions, subject for deletion

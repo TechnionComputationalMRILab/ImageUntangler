@@ -15,12 +15,15 @@ def get_image_properties(file_list):
     _prop = dict()
 
     dicom_itk = ReadImage(file_list)
+    print(ReadImage(file_list).GetSpacing())
 
     _prop['size'] = list(dicom_itk.GetSize())
     _prop['origin'] = list(dicom_itk.GetOrigin())
     _prop['spacing'] = list(dicom_itk.GetSpacing())
     _prop['ncomp'] = dicom_itk.GetNumberOfComponentsPerPixel()
     _prop['direction'] = dicom_itk.GetDirection()
+
+    print(_prop)
 
     return _prop, dicom_itk
 

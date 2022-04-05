@@ -139,7 +139,7 @@ class LoadDirDialog(QDialog):
 
             self.path = {'path': self._table.path_list[self._table.selected_item],
                          'file': self._table.file_list[self._table.selected_item],
-                         'full_path': os.path.join(self._table.path_list[self._table.selected_item], self._table.file_list[self._table.selected_item])
+                         'full_path': os.path.join(self._table.path_list[self._table.selected_item], "data", self._table.file_list[self._table.selected_item])
                          }
 
             super(LoadDirDialog, self).accept()

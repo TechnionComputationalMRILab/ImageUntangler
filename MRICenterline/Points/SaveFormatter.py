@@ -18,11 +18,12 @@ logging.getLogger(__name__)
 
 class SaveFormatter:
     """ handles the formatting and saving of the files """
-    def __init__(self, imagedata: ImageProperties, path, suffix: str = "",
+    def __init__(self, imagedata: ImageProperties, path, prefix: str = "",
                  append_to_directory=True, use_data_folder=True):
         self.path = Path(path)
+        self.imagedata = imagedata
         self.append_to_directory = append_to_directory
-        self.filename = datetime.now(timezone.utc).astimezone().strftime("%d.%m.%Y__%H_%M") + "." + suffix + ".annotation.json"
+        self.filename = datetime.now(timezone.utc).astimezone().strftime("%d.%m.%Y__%H_%M") + "." + prefix + ".annotation"
         self.case_number = os.path.basename(self.path)
 
         if use_data_folder:
@@ -83,7 +84,7 @@ class SaveFormatter:
     def save_data(self):
         self._clean_data()
         logging.info(f"Saving to {os.path.join(self.save_to, self.filename)}")
-        with open(os.path.join(self.save_to, self.filename), 'w') as f:
+        with open(os.path.join(self.save_to, self.filename + ".json"), 'w') as f:
             json.dump(self.output_data, f,
                       indent=4)
 
@@ -107,11 +108,31 @@ class SaveFormatter:
                               _num_of_mpr_points,
                               _num_of_len_points,
                               self.output_data['Time measurement'],
-                              round(self.output_data['measured length'], 2),
+                              round(0, 2),
                               self.save_to,
-                              self.filename])
+                              self.filename + ".json"])
 
     def _clean_data(self):
+        def transform(pts):
+            viewerOrigin = [i / 2 for i in self.imagedata.dimensions]
+
+            coords_arr_numpy = np.zeros(pts.shape)
+            for i, coords in enumerate(pts):
+                imageCoords = np.zeros(3, dtype=np.int32)
+                imageCoords[0] = round(coords[0] / self.imagedata.spacing[0] + viewerOrigin[0])
+                imageCoords[1] = round(self.imagedata.dimensions[1] - (coords[1] / self.imagedata.spacing[1] + viewerOrigin[1]))
+                imageCoords[2] = np.argmin(np.abs(self.imagedata.z_coords - coords[2]))
+
+                coords_arr_numpy[i, :] = imageCoords
+
+            return coords_arr_numpy
+
+        npzdict = self.output_data.copy()
+        for k, v in self.output_data.items():
+            if type(v) is np.ndarray:
+                npzdict[k] = transform(v)
+        np.savez(file=os.path.join(self.save_to, self.filename), **npzdict)
+
         for i in self.output_data:
             if type(self.output_data[i]) is np.ndarray:
                 self.output_data[i] = self.output_data[i].tolist()

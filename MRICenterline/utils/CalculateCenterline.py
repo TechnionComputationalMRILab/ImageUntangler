@@ -6,6 +6,7 @@ from typing import List
 
 class PointsToPlaneVectors:
     def __init__(self, allPoints: List[np.array], imageData, height = 10, viewAngle = 0, Plot = False):
+
         self.Plot = Plot
         self.Height = height
 
