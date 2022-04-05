@@ -33,13 +33,16 @@ def save_points(case_name: str,
                                               from 'length_coordinates'
                                               )""").fetchone()[0] + 1
         for pt in length_points:
+            length_insert_query = """insert into 'length_coordinates'
+                                     (lengths_id, x, y, z)
+                                     values
+                                     (?, ?, ?, ?)
+                                  """
             with con:
-                con.execute("""insert into 'length_coordinates'
-                               (lengths_id, x, y, z)
-                               values
-                               (?, ?, ?, ?)
-                            """,
-                            (lengths_id, *pt.physical_coords))
+                if CFG.get_testing_status("use-slice-location"):
+                    con.execute(length_insert_query, (lengths_id, *pt.image_coordinates))
+                else:
+                    con.execute(length_insert_query, (lengths_id, *pt.physical_coords))
     else:
         lengths_id = None
 
@@ -52,13 +55,16 @@ def save_points(case_name: str,
                                          from 'centerline_coordinates'
                                          )""").fetchone()[0] + 1
         for pt in mpr_points:
+            cl_insert_query = """insert into centerline_coordinates
+                                 (cl_id, x, y, z)
+                                 values
+                                 (?, ?, ?, ?)
+                            """
             with con:
-                con.execute("""insert into centerline_coordinates
-                               (cl_id, x, y, z)
-                               values
-                               (?, ?, ?, ?)
-                            """,
-                            (cl_id, *pt.physical_coords))
+                if CFG.get_testing_status("use-slice-location"):
+                    con.execute(cl_insert_query, (cl_id, *pt.image_coordinates))
+                else:
+                    con.execute(cl_insert_query, (cl_id, *pt.physical_coords))
     else:
         cl_id = None
 

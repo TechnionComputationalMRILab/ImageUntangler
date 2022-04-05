@@ -1,11 +1,6 @@
 __author__ = "Yael Zaffrani and Avraham Kahan and Angeleene Ang"
 
 import sys
-
-from icecream import ic, install
-install()
-ic.configureOutput(includeContext=True)
-
 from vtkmodules.all import vtkOutputWindow
 
 # move VTK warnings/errors to terminal
@@ -19,4 +14,6 @@ if len(sys.argv) == 1:
     start()
 else:
     # run as CLI application
-    pass
+    from MRICenterline.cli import arg_setup
+    arg_setup()
+

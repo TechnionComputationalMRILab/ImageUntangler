@@ -167,5 +167,7 @@ class SequenceModel:
             for pt in self.mpr_point_array.get_actor_list():
                 self.current_sequence_viewer.add_actor(pt)
 
+        logging.info(f"Reading from MPR [{mpr_id}]")
+
         print(len(self.length_point_array))
         print(len(self.mpr_point_array))

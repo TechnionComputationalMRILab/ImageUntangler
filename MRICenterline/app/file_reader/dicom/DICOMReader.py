@@ -51,7 +51,7 @@ class DICOMReader(AbstractReader):
 
             if type(seq) is str:
                 query = f"""
-                         select distinct filename from slice_locations
+                         select distinct filename, slice_location from slice_locations
                          inner join sequence_files
                          on sequence_files.file_id = slice_locations.file_id
                          inner join sequences
@@ -60,9 +60,9 @@ class DICOMReader(AbstractReader):
                          and sequence_files.case_id = {self.case_id}
                          order by slice_location asc;
                          """
-                file_list = [item[0] for item in con.cursor().execute(query).fetchall()]
+                file_and_slice_list = [(item[0], item[1]) for item in con.cursor().execute(query).fetchall()]
                 con.close()
-                return [os.path.join(self.folder, i) for i in file_list]
+                return [(os.path.join(self.folder, f), loc) for f, loc in file_and_slice_list]
             elif type(seq) is int:
                 return self.get_file_list(self.sequence_list[seq])
 
@@ -114,14 +114,16 @@ class DICOMReader(AbstractReader):
             import pydicom
             import numpy as np
 
+            file_list.sort(key=lambda x: x[1])
+
             def get_pixel_array(f):
                 with open(f, 'rb') as f:
                     ds = pydicom.dcmread(f)
                 return ds.pixel_array
 
-            np_out = np.array([get_pixel_array(f) for f in file_list])
+            np_out = np.array([get_pixel_array(f) for f, _ in file_list])
 
-            return np_out, file_list
+            return np_out, [f for f, _ in file_list]
         else:
             reader = sitk.ImageSeriesReader()
 

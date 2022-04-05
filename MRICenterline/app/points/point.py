@@ -47,6 +47,11 @@ class Point:
 
         return cls(image_coordinates, slice_idx, image_properties, color, size)
 
+    @classmethod
+    def point_from_vtk_coords(cls, image_coordinates, image_properties, color=(1, 1, 1), size=3):
+        slice_idx = int(np.argmin(np.abs(np.array(image_properties.z_coords) - image_coordinates[2])))
+        return cls(image_coordinates, slice_idx, image_properties, color, size)
+
     def generate_actor(self):
         source = vtkSphereSource()
         source.SetCenter(self.image_coordinates[0], self.image_coordinates[1], 0)
@@ -96,26 +101,10 @@ class Point:
     def calculate_itk(self):
         viewer_origin = self.image_properties.size / 2.0
 
-        itk_coords = np.zeros(3)
-
-        # round(coords[0]/spacing[0] + viewerOrigin[0])
-        itk_coords[0] = (
-                self.image_coordinates[0]/self.image_properties.spacing[0]
-                + viewer_origin[0]
-        )
-
-        # round(shape[1] - (coords[1] / spacing[1] + viewerOrigin[1]))
-        itk_coords[1] = (
-            self.image_properties.size[1] -
-            (
-                    self.image_coordinates[1] / self.image_properties.spacing[1]
-                    + viewer_origin[1]
-            )
-        )
-
-        itk_coords[2] = self.slice_idx + 1
-
-        itk_coords = np.int32(itk_coords)
+        itk_coords = np.zeros(3, dtype=np.int32)
+        itk_coords[0] = round(self.image_coordinates[0] / self.image_properties.spacing[0] + viewer_origin[0])
+        itk_coords[1] = round(self.image_properties.dimensions[1] - (self.image_coordinates[1] / self.image_properties.spacing[1] + viewer_origin[1]))
+        itk_coords[2] = np.argmin(np.abs(np.array(self.image_properties.z_coords) - self.image_coordinates[2]))
 
         physical_coords = self.image_properties.sitk_image.TransformIndexToPhysicalPoint([int(itk_coords[0]), int(itk_coords[1]), int(itk_coords[2])])
         # TODO: check TransformContinuousIndexToPhysicalPoint, it produces different results

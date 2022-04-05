@@ -11,6 +11,9 @@ from MRICenterline.gui.display.toolbar import DisplayPanelToolbarButtons
 
 from MRICenterline import CONST, CFG
 
+import logging
+logging.getLogger(__name__)
+
 
 def configure_main_widget(path, parent_widget, selected_sequence=None):
     window = parent_widget.window()
@@ -56,6 +59,7 @@ def configure_main_widget_from_session(parent_widget, session_id):
     centerline_model.connect_widget(centerline_widget)
 
     case_model.load_points(lengths_id, cl_id)
+    logging.info(f"Loaded points from session with ID [{session_id}]")
 
     splitter = QSplitter(window)
     splitter.setOrientation(Qt.Vertical)

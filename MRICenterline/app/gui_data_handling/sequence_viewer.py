@@ -229,7 +229,7 @@ class SequenceViewer:
 
         slice_idx = 1 + np.int(np.round(((center[2] - self.image.origin[2]) / self.image.spacing[2])))
 
-        if 1 <= slice_idx <= self.image.size[2]:
+        if 1 <= slice_idx < self.image.size[2]:
             matrix = self.reslice.GetResliceAxes()
             matrix.SetElement(0, 3, center[0])
             matrix.SetElement(1, 3, center[1])
@@ -245,7 +245,10 @@ class SequenceViewer:
                 self.image.sliceIdx = slice_idx
                 self.display_points_in_slice(slice_idx)
 
-            self.update_status_text("Slice Index", 1 + self.image.size[2] - self.slice_idx)
+            if CFG.get_testing_status("use-slice-location"):
+                self.update_status_text("Slice Index", self.slice_idx)
+            else:
+                self.update_status_text("Slice Index", 1 + self.image.size[2] - self.slice_idx)
             self.render_panel()
 
     ######################################################################

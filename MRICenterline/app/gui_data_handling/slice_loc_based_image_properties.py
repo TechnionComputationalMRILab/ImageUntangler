@@ -36,17 +36,27 @@ class SliceLocImageProperties(ImageProperties):
         self.nparray = numpy_support.vtk_to_numpy(self.vtk_data.GetPointData().GetArray(0))
         self.nparray = self.nparray.reshape(self.dimensions, order='F')
 
-        min_z = round(center_z - (self.origin[2] + self.spacing[2] * (self.dimensions[2])), 1)
-        max_z = math.ceil((self.dimensions[2] * self.spacing[2]) + min_z)
-
         self.z_coords = sorted(list(set(z_coords)))
+
+        x0, y0, z0 = self.origin
+        x_spacing, y_spacing, z_spacing = self.spacing
+        x_min, x_max, y_min, y_max, z_min, z_max = self.extent
+
+        center = [x0 + x_spacing * 0.5 * (x_min + x_max),
+                       y0 + y_spacing * 0.5 * (y_min + y_max),
+                       z0 + z_spacing * 0.5 * (z_min + z_max)]
+
+        self.transformation = vtk.vtkMatrix4x4()
+        self.transformation.DeepCopy((1, 0, 0, center[0],
+                             0, -1, 0, center[1],
+                             0, 0, 1, center[2],
+                             0, 0, 0, 1))
 
     @staticmethod
     def get_vtk_data_old(np_arr, origin, spacing, ncomp, direction, size):
         """ adapted from https://github.com/dave3d/dicom2stl/blob/main/utils/sitk2vtk.py """
 
         np_arr = np.flipud(np_arr)  # either this, or reshape with order F? TODO: check this
-        np_arr = np.fliplr(np_arr)
         vtk_image = vtk.vtkImageData()
 
         size = list(size)
@@ -85,12 +95,5 @@ class SliceLocImageProperties(ImageProperties):
         vtk_image.GetPointData().SetScalars(depth_array)
 
         vtk_image.Modified()
-
-        print("Volume object inside sitk2vtk")
-        # print(vtk_image)
-        print(size)
-        print(origin)
-        print(spacing)
-        # print(vtk_image.GetScalarComponentAsFloat(0, 0, 0, 0))
 
         return vtk_image
