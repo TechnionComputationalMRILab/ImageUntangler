@@ -1,5 +1,4 @@
 from PyQt5.QtWidgets import QTableWidget, QTableWidgetItem, QAbstractScrollArea, QAbstractItemView
-
 from MRICenterline.app.database.openable_files import get_openable_sequences, get_openable_cases
 
 import logging

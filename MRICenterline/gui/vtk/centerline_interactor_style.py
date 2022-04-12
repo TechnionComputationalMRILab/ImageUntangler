@@ -43,12 +43,11 @@ class CenterlineInteractorStyle(vtkInteractorStyleImage):
     def MouseMoveCallback(self, obj, event):
         self.OnMouseMove()
 
-        # renderer = self.model.sequence_viewer.panel_renderer
+        # renderer = self.model.centerline_viewer.panel_renderer
         # mouse_location = self.parent.GetEventPosition()
         # if self.point_picker.Pick(*mouse_location, 0.0, renderer):
         #     coords = self.point_picker.GetPickPosition()
-        #     self.model.sequence_viewer.update_displayed_coords(coords)
-        #     self.model.sequence_viewer.update_cursor_location(coords)
+        #     print(coords)
 
     def MiddleButtonEvent(self, obj, event):
         if event == "MiddleButtonPressEvent":

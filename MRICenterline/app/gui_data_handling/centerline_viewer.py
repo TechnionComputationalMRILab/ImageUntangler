@@ -1,5 +1,5 @@
 from vtkmodules.qt.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
-from vtkmodules.all import vtkImageActor, vtkImageReslice, vtkRenderer, vtkTextActor
+from vtkmodules.all import vtkImageActor, vtkImageReslice, vtkRenderer
 
 from MRICenterline.gui.vtk.IUCornerAnnotation import IUCornerAnnotation, CornerLoc
 from MRICenterline.gui.vtk.text_actor import IUTextActor
@@ -53,9 +53,12 @@ class CenterlineViewer:
         self.panel_renderer.ResetCamera()
         self.panel_renderer.GetActiveCamera().SetParallelScale(self.model.parallel_scale)
 
+        for line in self.model.point_markers:
+            self.panel_renderer.AddActor(line)
+
     def initialize_panel(self):
-        self.set_window_level()
         self.connect_panel_actor()
+        self.set_window_level()
 
         self.panel_renderer.AddActor(self.height_text_actor)
         self.panel_renderer.AddActor(self.angle_text_actor)
@@ -78,3 +81,6 @@ class CenterlineViewer:
             self.height_text_actor.SetInput("Height: " + str(self.model.height))
 
         self.window.Render()
+
+    def highlight_line_marker(self, index):
+        self.model.point_markers[index].change_color(CFG.get_color('mpr-length-display-style', 'highlighted-color'))

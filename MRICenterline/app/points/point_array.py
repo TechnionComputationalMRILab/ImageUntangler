@@ -45,7 +45,7 @@ class PointArray:
         self.set_color(self.point_color)
 
         if len(self) >= 2:
-            self.set_color(self.highlight_color, -1)
+            self.point_array[-1].set_color(self.highlight_color)
 
             distance = self.point_array[-2].distance(self.point_array[-1])
             self.lengths.append(distance)
@@ -151,6 +151,9 @@ class PointArray:
     ######################################################################
     #                        actor manipulation                          #
     ######################################################################
+
+    def highlight_specific_point(self, item):
+        self.point_array[item].set_color(self.highlight_color)
 
     def show_point(self, item):
         self.point_array[item].set_visibility(True)

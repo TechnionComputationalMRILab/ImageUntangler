@@ -6,6 +6,7 @@ from MRICenterline.gui.vtk.transform_to_vtk import vtk_transform
 
 from MRICenterline.app.points.point import Point
 from MRICenterline.app.points.point_array import PointArray
+from MRICenterline.gui.vtk.line_actor import VerticalLine, VerticalLineArray
 
 from MRICenterline import CFG
 
@@ -30,6 +31,7 @@ class CenterlineModel:
         self.angle = 0
 
         self.vtk_data = vtkImageData()
+        self.point_markers = VerticalLineArray()
 
     def set_window_level(self, wval, lval):
         self.window_value = wval
@@ -106,3 +108,18 @@ class CenterlineModel:
         self.vtk_data = vtk_transform(ppv)
         self.parallel_scale = self.parallel_scale * ppv.delta * \
                               (self.vtk_data.GetExtent()[1] - self.vtk_data.GetExtent()[0])
+
+        self.generate_vertical_line_array()
+
+    def generate_vertical_line_array(self):
+        vl = VerticalLine(0)
+        self.point_markers.add(vl)
+
+        current_location = 0
+        for length in self.point_array.lengths:
+            current_location += length
+            vl = VerticalLine(current_location)
+            self.point_markers.add(vl)
+
+    def highlight_selected_point(self, index):
+        self.centerline_viewer.highlight_line_marker(index)

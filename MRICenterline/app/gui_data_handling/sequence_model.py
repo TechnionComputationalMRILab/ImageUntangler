@@ -146,7 +146,19 @@ class SequenceModel:
     def get_points(self):
         from MRICenterline.gui.points.dialog_box import PointDialogBox
         pdb = PointDialogBox(self)
-        pdb.exec()
+        if pdb.exec():
+            self.highlight_point(pdb.selected_point_index, pdb.selected_point_type)
+            if self.model.centerline_model:
+                self.model.centerline_model.highlight_selected_point(pdb.selected_point_index)
+
+    def highlight_point(self, point_index, point_type):
+        if point_type == PointStatus.LENGTH:
+            self.length_point_array.highlight_specific_point(point_index)
+        elif point_type == PointStatus.MPR:
+            self.mpr_point_array.highlight_specific_point(point_index)
+
+        # refresh the renderer
+        self.current_sequence_viewer.render_panel()
 
     def load_points(self, length_id, mpr_id):
         from MRICenterline.app.database.load_points import read_points

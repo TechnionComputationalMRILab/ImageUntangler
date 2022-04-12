@@ -239,6 +239,7 @@ class PointsToPlaneVectors:
         V = np.flip(V, 1)
         interpolatingFunction = RegularGridInterpolator((x, y, z), V, method='linear')
         MPR_indexs_np_reshape = np.reshape(MPR_indexs_np, (MPR_indexs_np.shape[0] * MPR_indexs_np.shape[1], 3))
+
         """
         ic(MPR_indexs_np_reshape.shape)
 

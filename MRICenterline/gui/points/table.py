@@ -1,14 +1,22 @@
+from PyQt5.QtWidgets import QTableWidget, QTableWidgetItem, QAbstractScrollArea, QAbstractItemView
 from MRICenterline.app.points.status import PointStatus
 
-from PyQt5.QtWidgets import QTableWidget, QTableWidgetItem, QAbstractScrollArea
+import logging
+logging.getLogger(__name__)
 
 
 class PointsToTableView(QTableWidget):
     def __init__(self, model, parent=None):
         QTableWidget.__init__(self, parent)
+        self.selected_item = None
         self.show = PointStatus.LENGTH
         self.model = model
 
+        self.resizeRowsToContents()
+        self.setSelectionBehavior(QAbstractItemView.SelectRows)
+        self.setSizeAdjustPolicy(QAbstractScrollArea.AdjustToContents)
+
+        self.clicked.connect(self.log_clicked_item)
         self.show_length()
 
     def show_length(self):
@@ -41,3 +49,13 @@ class PointsToTableView(QTableWidget):
 
     def clear_table(self):
         self.setRowCount(0)
+
+    def log_clicked_item(self, item):
+        self.selected_item = item.row()
+        logging.debug(f"Clicked {item.row()}")
+
+    def get_data_for_selected(self):
+        return self.data['physical coords'][self.selected_item], \
+               self.data['itk indices'][self.selected_item], \
+               self.data['image coords'][self.selected_item], \
+               self.selected_item
