@@ -1,4 +1,6 @@
 import argparse
+from glob import glob
+from pathlib import Path
 
 from MRICenterline.app import scanner
 
@@ -23,10 +25,9 @@ def arg_setup():
         parser.add_argument(sh, lo, action='store_true', help=he)
 
     args = parser.parse_args()
+    directories = [Path(i) for i in glob(f"{args.folder}/**/", recursive=True)]
 
-    logging.info(f"Starting scan: {args.folder}")
-
-    # TODO: create a temporary CFG file for the scanner to use
+    logging.info(f"Starting scan: {args.folder}, found {len(directories)} folders.")
 
     if args.scan:
         logging.info("Generate sequence/metadata report")
@@ -36,5 +37,5 @@ def arg_setup():
         logging.info("Generate timing report")
     if args.ver3:
         logging.info("Load points from v3")
-        scanner.run_metadata_sequence_scan(args.folder)
-        scanner.load_v3_points(args.folder)
+        scanner.run_metadata_sequence_scan(directories, running_for_v3_scanner=True)
+        scanner.load_v3_points(directories)

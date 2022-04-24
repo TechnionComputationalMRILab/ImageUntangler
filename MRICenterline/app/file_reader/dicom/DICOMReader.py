@@ -14,11 +14,11 @@ logging.getLogger(__name__)
 
 
 class DICOMReader(AbstractReader):
-    def __init__(self, case_id, folder, is_new_case):
-        super().__init__(case_id, folder, is_new_case)
+    def __init__(self, case_id, case_name, folder, is_new_case):
+        super().__init__(case_id, case_name, folder, is_new_case)
 
         if self.is_new_case:
-            InitialDatabaseBuild.build(self.folder)
+            InitialDatabaseBuild.build(self.folder, case_name)
         self.read_from_database()
 
     def __repr__(self):

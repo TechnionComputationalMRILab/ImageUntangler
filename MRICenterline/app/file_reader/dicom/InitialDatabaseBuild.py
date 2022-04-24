@@ -7,8 +7,8 @@ import pydicom
 from MRICenterline import CFG
 
 
-def build(folder):
-    case_name = os.path.relpath(folder, CFG.get_folder('raw'))
+def build(folder, case_name):
+    # case_name = os.path.relpath(folder, CFG.get_folder('raw'))
 
     # get case_id
     con = sqlite3.connect(CFG.get_db())

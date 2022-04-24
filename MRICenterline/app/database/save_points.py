@@ -1,4 +1,5 @@
 import sqlite3
+import pytz
 from datetime import datetime, timezone
 
 from MRICenterline.app.database import name_id
@@ -15,11 +16,18 @@ def save_points(case_name: str,
                 sequence_name: str,
                 length_points: PointArray,
                 mpr_points: PointArray,
-                timer_data: Timer):
+                timer_data: Timer,
+                timestamp: datetime or None = None):
 
     case_id = name_id.get_case_id(case_name)
     seq_id = name_id.get_sequence_id(sequence_name, case_id)
-    timestamp = datetime.now(timezone.utc).astimezone().strftime(CONST.TIMESTAMP_FORMAT)
+
+    if timestamp:
+        # convert timestamp to UTC and then to string
+        timestamp_string = timestamp.astimezone(pytz.utc).strftime(CONST.TIMESTAMP_FORMAT)
+    else:
+        # use timezone now
+        timestamp_string = datetime.utcnow().strftime(CONST.TIMESTAMP_FORMAT)
     time_gap = timer_data.calculate_time_gap()
 
     con = sqlite3.connect(CFG.get_db())
@@ -69,7 +77,7 @@ def save_points(case_name: str,
         cl_id = None
 
     session_data = {
-        'timestamp': timestamp,
+        'timestamp': timestamp_string,
         'time_elapsed_seconds': time_gap,
         'lengths_id': lengths_id,
         'cl_id': cl_id,
@@ -88,5 +96,7 @@ def save_points(case_name: str,
 
     session_id = con.cursor().execute("select count(*) from 'sessions'").fetchone()[0]
     con.close()
-    logging.info(f"Saved session with id [{session_id}] successfully.")
-    MSG.msg_box_info(f"Saved session with id [{session_id}] successfully.")
+
+    session_saved_message = f"Saved session with id [{session_id}] successfully."
+    logging.info(session_saved_message)
+    MSG.msg_box_info(session_saved_message)

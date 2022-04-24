@@ -2,8 +2,9 @@ import numpy as np
 
 
 class AbstractReader:
-    def __init__(self, case_id: int, folder: str, is_new_case: bool = False):
+    def __init__(self, case_id: int, case_name: str, folder: str, is_new_case: bool = False):
         self.case_id = case_id
+        self.case_name = case_name
         self.folder = folder
         self.sitk_image = None
         self.is_new_case = is_new_case

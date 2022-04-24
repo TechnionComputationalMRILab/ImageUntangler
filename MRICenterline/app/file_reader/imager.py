@@ -11,9 +11,13 @@ logging.getLogger(__name__)
 
 
 class Imager:
-    def __init__(self, directory):
+    def __init__(self, directory, root_folder=None):
         self.directory = directory
-        self.case_name = os.path.relpath(directory, CFG.get_folder('raw'))
+
+        if root_folder:
+            self.case_name = os.path.relpath(directory, root_folder)
+        else:
+            self.case_name = os.path.relpath(directory, CFG.get_folder('raw'))
 
         self.database_check()
         self.assign_reader()
@@ -73,7 +77,7 @@ class Imager:
 
     def assign_reader(self):
         if self.file_type.upper() == "DICOM":
-            self.reader = DICOMReader(self.case_id, self.directory, self.new_case_flag)
+            self.reader = DICOMReader(self.case_id, self.case_name, self.directory, self.new_case_flag)
         elif self.file_type.upper() == "NRRD":
             pass
         else:
@@ -84,7 +88,7 @@ class Imager:
     def initialize_folder(self):
         logging.debug("Checking folder type")
         self.file_type = read_folder(self.directory)
-        logging.debug(f"Folder {self.directory} is type {self.file_type}")
+        logging.debug(f"Folder {self.directory} is type {self.file_type}, adding with case name [{self.case_name}]")
 
         # add the folder to the case_list table
         con = sqlite3.connect(CFG.get_db())
