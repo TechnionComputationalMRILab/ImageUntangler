@@ -82,6 +82,7 @@ class SequenceModel:
         if status == PointStatus.MPR:
             self.model.centerline_model.set_points_and_image(self.mpr_point_array,
                                                              self.current_image_properties)
+            self.model.centerline_model.set_window_level(self.window_value, self.level_value)
             self.model.centerline_model.update_widget()
 
         elif status == PointStatus.LENGTH:

@@ -55,7 +55,7 @@ class SequenceViewerInteractorStyle(vtkInteractorStyleImage):
         if event == "MiddleButtonPressEvent":
             vtkInteractorStyleImage.OnMiddleButtonDown(self)
         elif event == "MiddleButtonReleaseEvent":
-                vtkInteractorStyleImage.OnMiddleButtonUp(self)
+            vtkInteractorStyleImage.OnMiddleButtonUp(self)
 
     def MouseWheelEvent(self, obj, event):
         shift = self.parent.GetShiftKey()

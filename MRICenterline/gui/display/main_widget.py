@@ -59,6 +59,3 @@ class MainDisplayWidget(QWidget):
     def set_up_keyboard_shortcuts(self):
         show_points = QShortcut(QKeySequence('Ctrl+d'), self)
         show_points.activated.connect(self.model.get_points)
-
-        import_v3_points = QShortcut(QKeySequence('Ctrl+p'), self)
-        import_v3_points.activated.connect(self.model.import_from_v3)

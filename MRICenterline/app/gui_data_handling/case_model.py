@@ -92,8 +92,5 @@ class CaseModel:
     def get_points(self):
         self.sequence_manager.get_points()
 
-    def import_from_v3(self):
-        pass
-
     def load_points(self, length_id, mpr_id):
         self.sequence_manager.load_points(length_id, mpr_id)
