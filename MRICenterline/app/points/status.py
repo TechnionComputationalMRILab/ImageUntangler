@@ -13,6 +13,7 @@ class PickerStatus(Enum):
     PICKING_LENGTH = auto()
     MODIFYING_MPR = auto()
     MODIFYING_LENGTH = auto()
+    FIND_MPR = auto()
 
 
 class PointStatus(Enum):

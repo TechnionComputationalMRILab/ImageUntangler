@@ -36,3 +36,7 @@ def comment(model, parent):
     from MRICenterline.gui.comment.dialog_box import CommentDialogBox
     comment_db = CommentDialogBox(model=model, parent=parent)
     comment_db.show()
+
+
+def find_point(model):
+    model.find_point()

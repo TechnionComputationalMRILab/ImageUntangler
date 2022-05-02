@@ -98,6 +98,9 @@ class Point:
             ITK Index Coordinates: {str([i for i in self.itk_index_coords])}
         """
 
+    def __eq__(self, other):
+        return all([self.physical_coords[i] == other.physical_coords[i] for i in range(3)])
+
     def calculate_itk(self):
         viewer_origin = self.image_properties.size / 2.0
 

@@ -86,6 +86,9 @@ class CaseModel:
     # points
     #########
 
+    def find_point(self):
+        self.picker_status = PickerStatus.FIND_MPR
+
     def pick(self, pick_coords: tuple):
         self.sequence_manager.pick(pick_coords)
 

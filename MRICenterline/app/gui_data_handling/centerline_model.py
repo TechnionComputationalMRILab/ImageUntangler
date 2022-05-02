@@ -122,4 +122,5 @@ class CenterlineModel:
             self.point_markers.add(vl)
 
     def highlight_selected_point(self, index):
+        self.point_markers.reset_color()
         self.centerline_viewer.highlight_line_marker(index)

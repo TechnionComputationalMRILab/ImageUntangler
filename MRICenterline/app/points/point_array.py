@@ -31,6 +31,8 @@ class PointArray:
         self.line_thickness = float(CFG.get_config_data(key, 'line-thickness'))
         self.line_style = CFG.get_config_data(key, 'line-style')
 
+        self.has_highlight = False
+
     ######################################################################
     #                        array manipulation                          #
     ######################################################################
@@ -148,12 +150,25 @@ class PointArray:
         out_dict['Total Length:'] = round(self.total_length, 2)
         return out_dict
 
+    def get_point_index(self, point: Point) -> int:
+        for key, pt in enumerate(self.point_array):
+            if pt == point:
+                return key
+
+    def get_points_in_slice(self, slice_index: int) -> List[Point]:
+        return [pt for pt in self.point_array if slice_index == pt.slice_idx]
+
     ######################################################################
     #                        actor manipulation                          #
     ######################################################################
 
     def highlight_specific_point(self, item):
+        if self.has_highlight:
+            # if a point is already highlighted, set the color of all the points to the point color
+            self.set_color(self.point_color)
+
         self.point_array[item].set_color(self.highlight_color)
+        self.has_highlight = True
 
     def show_point(self, item):
         self.point_array[item].set_visibility(True)
@@ -212,3 +227,13 @@ class PointArray:
             return np.asarray([pt.image_coordinates for pt in self.point_array])
         else:
             return np.asarray([pt.physical_coords for pt in self.point_array])
+
+    def find_nearest_point(self, other: Point, get_index: bool = False) -> Point or int:
+        point_and_distances = []
+        for i in self.get_points_in_slice(other.slice_idx):
+            point_and_distances.append((other.distance(i), i))
+
+        if get_index:
+            return self.get_point_index(sorted(point_and_distances)[0][1])
+        else:
+            return sorted(point_and_distances)[0][1]

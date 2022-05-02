@@ -13,12 +13,15 @@ class DisplayPanelToolbarButtons(QWidget):
         super().__init__(parent)
         layout = QGridLayout(self)
 
+        column = 0
+
         save_button = QPushButton(qta.icon('fa.save'), "Save")
         save_button.setFlat(True)
-        layout.addWidget(save_button, 0, 0, 2, 1)
+        layout.addWidget(save_button, 0, column, 2, 1)
         save_button.clicked.connect(lambda: toolbar_connect.save(model))
 
-        # column 1
+        column += 1  # NEW COLUMN
+
         def enable_length_picking(s):
             if s:
                 toolbar_connect.set_picker_status(model, PickerStatus.PICKING_LENGTH)
@@ -31,16 +34,17 @@ class DisplayPanelToolbarButtons(QWidget):
         length_button = QPushButton(qta.icon('mdi.ruler'), "Length")
         length_button.setCheckable(True)
         length_button.setChecked(False)
-        layout.addWidget(length_button, 0, 1, 1, 1)
+        layout.addWidget(length_button, 0, column, 1, 1)
         length_button.clicked.connect(enable_length_picking)
 
         measure_length_button = QPushButton(qta.icon('mdi.tape-measure'), "Measure Length")
         measure_length_button.setFlat(True)
         measure_length_button.setEnabled(True)
-        layout.addWidget(measure_length_button, 1, 1, 1, 1)
+        layout.addWidget(measure_length_button, 1, column, 1, 1)
         measure_length_button.clicked.connect(lambda: toolbar_connect.calculate(model, PointStatus.LENGTH))
 
-        # column 2
+        column += 1  # NEW COLUMN
+
         def enable_mpr_picking(s):
             if s:
                 toolbar_connect.set_picker_status(model, PickerStatus.PICKING_MPR)
@@ -51,35 +55,44 @@ class DisplayPanelToolbarButtons(QWidget):
 
         mpr_button = QPushButton(qta.icon('mdi.image-filter-center-focus-strong'), "MPR")
         mpr_button.setCheckable(True)
-        layout.addWidget(mpr_button, 0, 2, 1, 1)
+        layout.addWidget(mpr_button, 0, column, 1, 1)
         mpr_button.clicked.connect(enable_mpr_picking)
 
         calculate_mpr_button = QPushButton(qta.icon('mdi.calculator'), "Calculate MPR")
         calculate_mpr_button.setFlat(True)
         calculate_mpr_button.setEnabled(True)
-        layout.addWidget(calculate_mpr_button, 1, 2, 1, 1)
+        layout.addWidget(calculate_mpr_button, 1, column, 1, 1)
         calculate_mpr_button.clicked.connect(lambda: toolbar_connect.calculate(model, PointStatus.MPR))
 
-        # column 3
+        column += 1  # NEW COLUMN
+
+        select_point_button = QPushButton(qta.icon("mdi.select-search"), "Select MPR point")
+        layout.addWidget(select_point_button, 0, column, 2, 1)
+        select_point_button.setFlat(True)
+        select_point_button.clicked.connect(lambda: toolbar_connect.find_point(model))
+
+        column += 1  # NEW COLUMN
+
         undo_button = QPushButton(qta.icon('mdi.undo'), "Undo")
         undo_button.setFlat(True)
-        layout.addWidget(undo_button, 0, 3, 1, 1)
+        layout.addWidget(undo_button, 0, column, 1, 1)
         undo_button.clicked.connect(lambda: toolbar_connect.undo(model))
 
         clear_all_button = QPushButton(qta.icon('mdi.restart'), "Clear All")
         clear_all_button.setFlat(True)
-        layout.addWidget(clear_all_button, 1, 3, 1, 1)
+        layout.addWidget(clear_all_button, 1, column, 1, 1)
         clear_all_button.clicked.connect(lambda: toolbar_connect.undo(model, undo_all=True))
 
-        # column 4
+        column += 1  # NEW COLUMN
+
         patient_info_button = QPushButton(qta.icon('mdi.folder-information'), "Patient Info")
         patient_info_button.setFlat(True)
-        layout.addWidget(patient_info_button, 0, 4, 1, 1)
+        layout.addWidget(patient_info_button, 0, column, 1, 1)
         patient_info_button.clicked.connect(lambda: toolbar_connect.patient_info(model, parent))
 
         comment_button = QPushButton(qta.icon('mdi.comment-edit'), "Add Comment")
         comment_button.setFlat(True)
-        layout.addWidget(comment_button, 1, 4, 1, 1)
+        layout.addWidget(comment_button, 1, column, 1, 1)
         comment_button.clicked.connect(lambda: toolbar_connect.comment(model, parent))
 
         def reset_other_picker_buttons(s):
@@ -89,11 +102,12 @@ class DisplayPanelToolbarButtons(QWidget):
                 length_button.setChecked(not s)
                 mpr_button.setChecked(not s)
 
-        # column 5
+        column += 1  # NEW COLUMN
+
         winlev_button = QPushButton(qta.icon('mdi.lock-reset'), "Window/level")
         winlev_button.setCheckable(True)
         winlev_button.setChecked(True)
-        layout.addWidget(winlev_button, 0, 5, 1, 1)
+        layout.addWidget(winlev_button, 0, column, 1, 1)
         winlev_button.clicked.connect(reset_other_picker_buttons)
 
         def show_hide_intermediate_points(s):
@@ -108,10 +122,11 @@ class DisplayPanelToolbarButtons(QWidget):
         intermediate_points_button = QPushButton(qta.icon('mdi.middleware-outline'), "Hide intermediate points")
         intermediate_points_button.setCheckable(True)
         intermediate_points_button.setChecked(False)
-        layout.addWidget(intermediate_points_button, 1, 5, 1, 1)
+        layout.addWidget(intermediate_points_button, 1, column, 1, 1)
         intermediate_points_button.clicked.connect(show_hide_intermediate_points)
 
-        # column 6
+        column += 1  # NEW COLUMN
+
         def timer_start(s):
             timer_pause.setEnabled(s)
             timer_pause.setText("Pause timer")
@@ -137,12 +152,12 @@ class DisplayPanelToolbarButtons(QWidget):
 
         timer_button = QPushButton(qta.icon('mdi.timer-off-outline'), "Start Timer")
         timer_button.setCheckable(True)
-        layout.addWidget(timer_button, 0, 6, 1, 1)
+        layout.addWidget(timer_button, 0, column, 1, 1)
         timer_button.clicked.connect(timer_start)
 
         timer_pause = QPushButton(qta.icon("mdi.pause"), "Timer not started")
         timer_pause.setCheckable(True)
         timer_pause.setChecked(False)
         timer_pause.setEnabled(False)
-        layout.addWidget(timer_pause, 1, 6, 1, 1)
+        layout.addWidget(timer_pause, 1, column, 1, 1)
         timer_pause.clicked.connect(timer_pause_resume)

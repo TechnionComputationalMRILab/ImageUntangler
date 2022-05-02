@@ -84,3 +84,4 @@ class CenterlineViewer:
 
     def highlight_line_marker(self, index):
         self.model.point_markers[index].change_color(CFG.get_color('mpr-length-display-style', 'highlighted-color'))
+        self.window.Render()

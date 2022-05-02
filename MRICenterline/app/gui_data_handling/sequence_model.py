@@ -142,6 +142,12 @@ class SequenceModel:
             if len(self.length_point_array) >= 2:
                 self.current_sequence_viewer.update_length_text(self.length_point_array.get_length_for_display())
 
+        if self.model.picker_status == PickerStatus.FIND_MPR:
+            closest_point_index = self.mpr_point_array.find_nearest_point(point, get_index=True)
+            self.highlight_point(closest_point_index, PointStatus.MPR)
+            if self.model.centerline_model:
+                self.model.centerline_model.highlight_selected_point(closest_point_index)
+
         logging.debug(f"[{len(self.length_point_array)}] length points, [{len(self.mpr_point_array)}] MPR points")
 
     def get_points(self):

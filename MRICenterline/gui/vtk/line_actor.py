@@ -56,5 +56,9 @@ class VerticalLineArray:
         for line in self.line_array:
             line.change_color(color)
 
+    def reset_color(self):
+        for line in self.line_array:
+            line.change_color(tuple([1.0, 0.0, 0.0]))
+
     def __getitem__(self, item):
         return self.line_array[item]
