@@ -25,6 +25,9 @@ class IULineActor(vtkActor):
     def hide(self):
         self.GetProperty().SetOpacity(0)
 
+    def show(self):
+        self.GetProperty().SetOpacity(100)
+
 
 class VerticalLine(IULineActor):
     def __init__(self, x_coord: Point or float, color: Tuple[float] = (1, 0, 0), width: float = 2):
@@ -59,6 +62,17 @@ class VerticalLineArray:
     def reset_color(self):
         for line in self.line_array:
             line.change_color(tuple([1.0, 0.0, 0.0]))
+
+    def hide_lines_except_index(self, index: int):
+        for idx, line in enumerate(self.line_array):
+            if index == idx:
+                pass
+            else:
+                line.hide()
+
+    def show_all(self):
+        for line in self.line_array:
+            line.show()
 
     def __getitem__(self, item):
         return self.line_array[item]

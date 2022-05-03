@@ -33,6 +33,8 @@ class CenterlineModel:
         self.vtk_data = vtkImageData()
         self.point_markers = VerticalLineArray()
 
+        self.has_highlight = False
+
     def set_window_level(self, wval, lval):
         self.window_value = wval
         self.level_value = lval
@@ -122,5 +124,10 @@ class CenterlineModel:
             self.point_markers.add(vl)
 
     def highlight_selected_point(self, index):
-        self.point_markers.reset_color()
-        self.centerline_viewer.highlight_line_marker(index)
+        if self.has_highlight:
+            self.point_markers.show_all()
+
+        self.point_markers.hide_lines_except_index(index)
+        self.refresh_panel()
+
+        self.has_highlight = True
