@@ -4,6 +4,10 @@ from typing import List
 
 from MRICenterline.app.gui_data_handling.image_properties import ImageProperties
 
+"""
+The original centerline calculation from v1, virtually untouched
+"""
+
 
 class PointsToPlaneVectors:
     def __init__(self, all_points: List[np.array], image_data: ImageProperties,

@@ -74,6 +74,18 @@ class PointArray:
             self.lengths.pop(item)
             self.total_length = sum(self.lengths)
 
+    def clear(self):
+        for idx, _ in enumerate(self.point_array):
+            self.point_array[idx].actor.SetVisibility(False)
+
+        for idx, _ in enumerate(self.length_actors):
+            self.length_actors[idx].hide()
+
+        self.lengths = []
+        self.point_array = []
+        self.length_actors = []
+        self.total_length = 0.0
+
     ######################################################################
     #                               dunder                               #
     ######################################################################
@@ -237,3 +249,13 @@ class PointArray:
             return self.get_point_index(sorted(point_and_distances)[0][1])
         else:
             return sorted(point_and_distances)[0][1]
+
+    def get_vertical_distance(self):
+        import numpy as np
+
+        points_positions = np.asarray(self.get_as_np_array())
+        point_pairs = [(points_positions[j, :], points_positions[j + 1, :]) for j in
+                       range(len(points_positions) - 1)]
+        vertical_lengths = [np.abs(np.dot((0, 1, 0), i - j)) for i, j in point_pairs]
+
+        return vertical_lengths

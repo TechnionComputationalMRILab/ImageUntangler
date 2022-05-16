@@ -59,6 +59,9 @@ class CaseModel:
         if self.centerline_model:
             self.centerline_model.save()
 
+    def export(self):
+        pass
+
     def set_picker_status(self, status: PickerStatus):
         logging.debug(f"Setting display panel picker status to {status}")
         self.picker_status = status

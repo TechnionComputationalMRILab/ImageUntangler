@@ -55,7 +55,7 @@ class Point:
     def generate_actor(self):
         source = vtkSphereSource()
         source.SetCenter(self.image_coordinates[0], self.image_coordinates[1], 0)
-        source.SetRadius(self.point_size)
+        source.SetRadius(self.point_size/2)
 
         # Create a mapper
         mapper = vtkPolyDataMapper()
@@ -82,7 +82,7 @@ class Point:
         self.point_color = color
 
     def set_size(self, size):
-        self.point_size = size if size >= 4 else 4
+        self.point_size = size
 
     def distance(self, other):
         if self.image_properties:

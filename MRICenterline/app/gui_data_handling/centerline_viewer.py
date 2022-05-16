@@ -1,7 +1,6 @@
 from vtkmodules.qt.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
-from vtkmodules.all import vtkImageActor, vtkImageReslice, vtkRenderer
+from vtkmodules.all import vtkImageActor, vtkImageReslice, vtkRenderer, vtkActor2D, vtkTextMapper, vtkTextProperty
 
-from MRICenterline.gui.vtk.IUCornerAnnotation import IUCornerAnnotation, CornerLoc
 from MRICenterline.gui.vtk.text_actor import IUTextActor
 from MRICenterline.gui.vtk.sequence_interactor_style import SequenceViewerInteractorStyle
 from MRICenterline import CFG, CONST
@@ -24,6 +23,7 @@ class CenterlineViewer:
         self.reslice = vtkImageReslice()
         self.panel_actor = vtkImageActor()
         self.panel_renderer = vtkRenderer()
+        self.removable_actor_list = []
 
         self.height_text_actor = IUTextActor("Height: " + str(self.model.height), True, 0)
         self.angle_text_actor = IUTextActor("Angle: " + str(self.model.angle), True, 1)
@@ -51,7 +51,7 @@ class CenterlineViewer:
 
         self.panel_renderer.GetActiveCamera().ParallelProjectionOn()
         self.panel_renderer.ResetCamera()
-        self.panel_renderer.GetActiveCamera().SetParallelScale(self.model.parallel_scale)
+        self.panel_renderer.GetActiveCamera().SetParallelScale(self.model.parallel_scale*0.1)
 
         for line in self.model.point_markers:
             self.panel_renderer.AddActor(line)
@@ -67,7 +67,26 @@ class CenterlineViewer:
         self.window.Render()
 
     def add_actor(self, actor):
+        self.removable_actor_list.append(actor)
         self.panel_renderer.AddActor(actor)
+        self.refresh_panel()
+
+    def add_actor_annotation(self, x, y, pt_num):
+        text_property = vtkTextProperty()
+        text_property.SetFontSize(30)
+        text_property.SetJustificationToCentered()
+        text_property.SetColor(0, 1, 0)
+
+        text_mappers = vtkTextMapper()
+        text_mappers.SetInput(str(pt_num))
+        text_mappers.SetTextProperty(text_property)
+
+        text_actor = vtkActor2D()
+        text_actor.SetMapper(text_mappers)
+        text_actor.SetPosition(x, y)
+
+        self.removable_actor_list.append(text_actor)
+        self.panel_renderer.AddActor(text_actor)
         self.refresh_panel()
 
     def refresh_panel(self, angle_change=None, height_change=None):
@@ -81,6 +100,11 @@ class CenterlineViewer:
             self.height_text_actor.SetInput("Height: " + str(self.model.height))
 
         self.window.Render()
+
+    def clear_removable_actors(self):
+        for actor in self.removable_actor_list:
+            self.panel_renderer.RemoveActor(actor)
+        self.refresh_panel()
 
     def highlight_line_marker(self, index):
         self.model.point_markers[index].change_color(CFG.get_color('mpr-length-display-style', 'highlighted-color'))

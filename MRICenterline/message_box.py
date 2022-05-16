@@ -3,6 +3,7 @@ from PyQt5.QtWidgets import QMessageBox
 
 
 class MessageBox:
+    """ Creates simple error boxes for the GUI, or prints the error straight to the terminal if on CLI """
     is_gui = False if len(sys.argv) > 1 else True
 
     @classmethod
