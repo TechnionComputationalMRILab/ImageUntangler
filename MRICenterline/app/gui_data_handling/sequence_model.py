@@ -190,3 +190,12 @@ class SequenceModel:
 
         print(len(self.length_point_array))
         print(len(self.mpr_point_array))
+
+    def export(self):
+        from MRICenterline.app.export import export
+
+        case_id = self.image.get_case_id()
+        seq_id = self.image.get_sequences()[self.seq_idx]
+
+        logging.info(f"Exporting {case_id} / {seq_id} to FORMAT")
+        export(self.current_image_properties, self.mpr_point_array, self.length_point_array)

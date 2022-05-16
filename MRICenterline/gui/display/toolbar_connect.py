@@ -40,3 +40,7 @@ def comment(model, parent):
 
 def find_point(model):
     model.find_point()
+
+
+def export(model):
+    model.export_data()
