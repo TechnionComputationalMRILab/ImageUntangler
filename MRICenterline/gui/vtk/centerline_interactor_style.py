@@ -37,8 +37,10 @@ class CenterlineInteractorStyle(vtkInteractorStyleImage):
             if event == 'LeftButtonPressEvent':
                 renderer = self.model.centerline_viewer.panel_renderer
                 mouse_location = self.parent.GetEventPosition()
+                print(mouse_location)
                 if self.point_picker.Pick(*mouse_location, 0.0, renderer):
                     self.model.pick(self.point_picker.GetPickPosition())
+                    self.model.add_actor_annotation(mouse_location[0], mouse_location[1])
 
     def MouseMoveCallback(self, obj, event):
         self.OnMouseMove()

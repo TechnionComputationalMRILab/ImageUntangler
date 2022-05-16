@@ -24,7 +24,7 @@ class CenterlineModel:
         self.point_array = None
         self.image_properties = None
         self.centerline_viewer = None
-        self.parallel_scale = 0.1
+        self.parallel_scale = 1
         self.length_point_array = PointArray(PointStatus.LENGTH_IN_MPR)
 
         self.height = 30
@@ -34,6 +34,8 @@ class CenterlineModel:
         self.point_markers = VerticalLineArray()
 
         self.has_highlight = False
+        self.previous_mouse_coords = None
+        self.two_points_set = False
 
     def set_window_level(self, wval, lval):
         self.window_value = wval
@@ -65,18 +67,48 @@ class CenterlineModel:
 
     def pick(self, pick_coords):
         point = Point(pick_coords, 0, None)
+        if self.picker_status == PickerStatus.PICKING_LENGTH:
+            if len(self.length_point_array) < 2:
+                self.length_point_array.add_point(point)
+                self.centerline_viewer.add_actor(self.length_point_array.get_last_actor())
+
+                if CFG.get_boolean('mpr-length-display-style', 'show-line') and len(self.length_point_array) >= 2:
+                    self.centerline_viewer.add_actor(self.length_point_array.get_last_line_actor())
+            else:
+                print("adding extra point")
+                self.length_point_array.clear()
+                self.centerline_viewer.clear_removable_actors()
+
+    def add_actor_annotation(self, mouse_x, mouse_y):
+        if not self.previous_mouse_coords:
+            self.previous_mouse_coords = mouse_x, mouse_y
 
         if self.picker_status == PickerStatus.PICKING_LENGTH:
-            self.length_point_array.add_point(point)
-            self.centerline_viewer.add_actor(self.length_point_array.get_last_actor())
+            # self.centerline_viewer.add_actor_annotation(mouse_x, mouse_y, len(self.length_point_array))
 
-            if CFG.get_boolean('mpr-length-display-style', 'show-line') and len(self.length_point_array) >= 2:
-                self.centerline_viewer.add_actor(self.length_point_array.get_last_line_actor())
+            if len(self.length_point_array) == 2:
+                print(mouse_x, mouse_y, self.previous_mouse_coords)
+
+                x = self.previous_mouse_coords[0]
+
+                if self.previous_mouse_coords[1] < mouse_y:
+                    y = int((mouse_y - self.previous_mouse_coords[1])/2)
+                else:
+                    y = int((self.previous_mouse_coords[1] - mouse_y)/2)
+
+                vertical_length = round(self.length_point_array.get_vertical_distance()[0], 2)
+                total_length = round(self.length_point_array.total_length, 2)
+                self.centerline_viewer.add_actor_annotation(x, y,
+                                                            f'vert: {vertical_length} \n '
+                                                            f'total: {total_length}')
+
+                self.previous_mouse_coords = None
 
     def calculate_length(self):
         if len(self.length_point_array) >= 2:
             print(self.length_point_array.lengths)
             print(self.length_point_array.total_length)
+            print(self.length_point_array.get_vertical_distance())
 
     def set_picker_status(self, status: PickerStatus):
         logging.debug(f"Setting centerline panel picker status to {status}")

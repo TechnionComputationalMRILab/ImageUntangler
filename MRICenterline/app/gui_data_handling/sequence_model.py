@@ -86,8 +86,9 @@ class SequenceModel:
             self.model.centerline_model.update_widget()
 
         elif status == PointStatus.LENGTH:
-            print(self.length_point_array.lengths)
-            print(self.length_point_array.total_length)
+            pass
+            # print(self.length_point_array.lengths)
+            # print(self.length_point_array.total_length)
 
     def intermediate_points(self, show: bool):
         if show:
@@ -188,8 +189,8 @@ class SequenceModel:
 
         logging.info(f"Reading from MPR [{mpr_id}]")
 
-        print(len(self.length_point_array))
-        print(len(self.mpr_point_array))
+        # print(len(self.length_point_array))
+        # print(len(self.mpr_point_array))
 
     def export(self):
         from MRICenterline.app.export import export
