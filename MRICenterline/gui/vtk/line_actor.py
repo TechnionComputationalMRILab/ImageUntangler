@@ -52,6 +52,12 @@ class VerticalLine(IULineActor):
     def __repr__(self):
         return f"Vertical line at x={self.loc}"
 
+    def __gt__(self, other):
+        return self.loc > other.loc
+
+    def __lt__(self, other):
+        return self.loc < other.loc
+
 
 class VerticalLineArray:
     def __init__(self):

@@ -59,6 +59,9 @@ class CaseModel:
             Centerline: {True if self.centerline_model else False}
         ''')
 
+    def mpr_marker_highlight(self, index: int):
+        self.sequence_manager.highlight_point(index, PointStatus.MPR)
+
     #########
     # toolbar
     #########

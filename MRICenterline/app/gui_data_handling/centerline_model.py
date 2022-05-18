@@ -145,7 +145,7 @@ class CenterlineModel:
 
         self.vtk_data = vtk_transform(ppv)
         self.parallel_scale = self.parallel_scale * ppv.delta * \
-                              (self.vtk_data.GetExtent()[1] - self.vtk_data.GetExtent()[0])
+            (self.vtk_data.GetExtent()[1] - self.vtk_data.GetExtent()[0])
 
         self.generate_vertical_line_array()
 
@@ -167,6 +167,7 @@ class CenterlineModel:
         self.refresh_panel()
 
         self.has_highlight = True
+        self.case_model.mpr_marker_highlight(index)
 
     def toggle_mpr_marker(self, show: bool):
         logging.info(f"Toggle MPR marker {show}")
