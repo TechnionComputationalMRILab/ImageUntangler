@@ -78,6 +78,11 @@ class SequenceViewer:
         cursor_actor.GetProperty().SetColor(CFG.get_color('display', 'cursor-color'))
         self.panel_renderer.AddActor(cursor_actor)
 
+        if self.show_cursor:
+            pass
+        else:
+            self.cursor.AllOff()
+
     def update_cursor_location(self, coords):
         self.cursor.SetFocalPoint(coords[0], coords[1], 0)
 

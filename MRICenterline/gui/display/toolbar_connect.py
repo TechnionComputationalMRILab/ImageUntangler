@@ -44,3 +44,7 @@ def find_point(model):
 
 def export(model):
     model.export_data()
+
+
+def toggle_mpr_marker(model, show: bool):
+    model.toggle_mpr_marker_visibility(show)

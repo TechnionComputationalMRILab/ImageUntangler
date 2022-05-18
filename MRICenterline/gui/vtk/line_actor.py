@@ -2,6 +2,7 @@ from typing import Tuple, List
 from vtkmodules.all import vtkTextActor, vtkPolyDataMapper, vtkActor, vtkLineSource
 
 from MRICenterline.app.points.point import Point
+from MRICenterline import CONST
 
 
 class IULineActor(vtkActor):
@@ -33,11 +34,12 @@ class VerticalLine(IULineActor):
     def __init__(self, x_coord: Point or float, color: Tuple[float] = (1, 0, 0), width: float = 2):
 
         if type(x_coord) is Point:
-            coord_a = [x_coord.image_coordinates[0], -10000, 0.0]
-            coord_b = [x_coord.image_coordinates[0], 10000, 0.0]
+            self.loc = x_coord.image_coordinates[0]
         else:
-            coord_a = [x_coord, -10000, 0.0]
-            coord_b = [x_coord, 10000, 0.0]
+            self.loc = x_coord
+
+        coord_a = [self.loc, -CONST.MPR_VLINE_LENGTH, 0.0]
+        coord_b = [self.loc, CONST.MPR_VLINE_LENGTH, 0.0]
 
         point_a = Point(coord_a, 0, None)
         point_b = Point(coord_b, 0, None)
@@ -46,6 +48,9 @@ class VerticalLine(IULineActor):
 
     def change_color(self, color: Tuple[float]):
         self.GetProperty().SetColor(*color)
+
+    def __repr__(self):
+        return f"Vertical line at x={self.loc}"
 
 
 class VerticalLineArray:
@@ -74,5 +79,22 @@ class VerticalLineArray:
         for line in self.line_array:
             line.show()
 
+    def hide_all(self):
+        for line in self.line_array:
+            line.hide()
+
     def __getitem__(self, item):
         return self.line_array[item]
+
+    def find_nearest_line(self, picked_x, get_index: bool = False) -> VerticalLine or int:
+        lines_and_distances = []
+        for line in self.line_array:
+            distance = abs(line.loc - picked_x)
+            lines_and_distances.append((distance, line))
+
+        min_dist = min(lines_and_distances)
+
+        if get_index:
+            return lines_and_distances.index(min_dist)
+        else:
+            return lines_and_distances[0]

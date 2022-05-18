@@ -14,6 +14,10 @@ CL_MAX_HEIGHT = 100
 CL_MIN_ANGLE = 0
 CL_MAX_ANGLE = 180
 
+# Half-length of the vertical lines displayed as MPR markers.
+# Making this too large can cause slowdowns
+MPR_VLINE_LENGTH = 1000
+
 ORDER_OF_CONTROLS = ['Slice Index', "Window", "Level"]
 
 TIMESTAMP_FORMAT = "%d.%m.%Y %H:%M:%S"
