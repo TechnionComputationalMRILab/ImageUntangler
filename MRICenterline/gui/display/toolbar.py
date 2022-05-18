@@ -23,7 +23,7 @@ class DisplayPanelToolbarButtons(QWidget):
         export_button = QPushButton(qta.icon("fa5s.file-export"), "Export")
         export_button.setFlat(True)
         layout.addWidget(export_button, 1, column, 1, 1)
-        export_button.clicked.connect(lambda: toolbar_connect.export(model))
+        export_button.clicked.connect(lambda: toolbar_connect.export(model, parent))
 
         column += 1  # NEW COLUMN
 
