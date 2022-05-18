@@ -79,6 +79,10 @@ class CenterlineModel:
                 self.length_point_array.clear()
                 self.centerline_viewer.clear_removable_actors()
 
+        if self.picker_status == PickerStatus.FIND_MPR:
+            self.highlight_selected_point(self.point_markers.find_nearest_line(point.image_coordinates[0],
+                                                                               get_index=True))
+
     def add_actor_annotation(self, mouse_x, mouse_y):
         if not self.previous_mouse_coords:
             self.previous_mouse_coords = mouse_x, mouse_y
@@ -141,7 +145,7 @@ class CenterlineModel:
 
         self.vtk_data = vtk_transform(ppv)
         self.parallel_scale = self.parallel_scale * ppv.delta * \
-                              (self.vtk_data.GetExtent()[1] - self.vtk_data.GetExtent()[0])
+            (self.vtk_data.GetExtent()[1] - self.vtk_data.GetExtent()[0])
 
         self.generate_vertical_line_array()
 
@@ -163,3 +167,12 @@ class CenterlineModel:
         self.refresh_panel()
 
         self.has_highlight = True
+        self.case_model.mpr_marker_highlight(index)
+
+    def toggle_mpr_marker(self, show: bool):
+        logging.info(f"Toggle MPR marker {show}")
+        if show:
+            self.point_markers.hide_all()
+        else:
+            self.point_markers.show_all()
+        self.refresh_panel()

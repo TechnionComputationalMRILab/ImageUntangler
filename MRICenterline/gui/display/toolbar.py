@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import QWidget, QGridLayout, QPushButton
+from PyQt5.QtWidgets import QWidget, QGridLayout, QPushButton, QSpacerItem, QSizePolicy, QLabel
 import qtawesome as qta
 
 from MRICenterline.app.points.status import PickerStatus, PointStatus
@@ -72,9 +72,22 @@ class DisplayPanelToolbarButtons(QWidget):
         column += 1  # NEW COLUMN
 
         select_point_button = QPushButton(qta.icon("mdi.select-search"), "Select MPR point")
-        layout.addWidget(select_point_button, 0, column, 2, 1)
+        layout.addWidget(select_point_button, 0, column, 1, 1)
         select_point_button.setFlat(True)
         select_point_button.clicked.connect(lambda: toolbar_connect.find_point(model))
+
+        def show_hide_mpr_markers(s):
+            toolbar_connect.toggle_mpr_marker(model, s)
+            if s:
+                mpr_markers_button.setText("Show MPR markers")
+            else:
+                mpr_markers_button.setText("Hide MPR markers")
+
+        mpr_markers_button = QPushButton("Hide MPR markers")
+        layout.addWidget(mpr_markers_button, 1, column, 1, 1)
+        mpr_markers_button.setCheckable(True)
+        mpr_markers_button.setChecked(False)
+        mpr_markers_button.clicked.connect(show_hide_mpr_markers)
 
         column += 1  # NEW COLUMN
 

@@ -50,6 +50,18 @@ class CaseModel:
         if self.centerline_model:
             self.centerline_model.set_window_level(self.window_value, self.level_value)
 
+    def print_status_to_terminal(self):
+        logging.info(f'''
+            Image path: {self.path}
+            Case name: {self.get_case_name()}
+            Picker status: {self.picker_status}
+            Window/Level: {self.window_value, self.level_value}
+            Centerline: {True if self.centerline_model else False}
+        ''')
+
+    def mpr_marker_highlight(self, index: int):
+        self.sequence_manager.highlight_point(index, PointStatus.MPR)
+
     #########
     # toolbar
     #########
@@ -85,12 +97,19 @@ class CaseModel:
     def undo(self, undo_all: bool = False):
         self.sequence_manager.undo(undo_all)
 
+    def toggle_mpr_marker_visibility(self, show: bool):
+        if self.centerline_model:
+            self.centerline_model.toggle_mpr_marker(show)
+
     #########
     # points
     #########
 
     def find_point(self):
         self.picker_status = PickerStatus.FIND_MPR
+
+        if self.centerline_model:
+            self.centerline_model.set_picker_status(PickerStatus.FIND_MPR)
 
     def pick(self, pick_coords: tuple):
         self.sequence_manager.pick(pick_coords)
