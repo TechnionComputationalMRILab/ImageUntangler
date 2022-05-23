@@ -24,6 +24,9 @@ class SequenceViewer:
         self.interactor_style = interactor_style
         self.image = image_properties
 
+        self.test_slice_idx_flag = 0
+        self.test_slice_ok = True
+
         self.slice_idx = self.image.sliceIdx
         self.level_val = self.image.level_value
         self.window_val = self.image.window_value
@@ -111,7 +114,7 @@ class SequenceViewer:
         self.help_text_actor.SetInput(InteractorHelpText.text_out)
         self.help_text_actor.SetColor(CFG.get_color('display', 'help-text-color'))
 
-        self.debug_text_actor.SetInput("NONE")
+        self.debug_text_actor.SetInput(" ")
         self.debug_text_actor.SetColor(CFG.get_color('display', 'debug-text-color'))
 
         self.help_text_actor.SetVisibility(self.show_help)
@@ -160,6 +163,9 @@ class SequenceViewer:
             pass
         self.window.Render()
 
+    def update_debug_text(self, text):
+        self.debug_text_actor.SetInput(text)
+
     ###########################################################################
     #                              panel actors                               #
     ###########################################################################
@@ -190,6 +196,7 @@ class SequenceViewer:
     def render_panel(self):
         logging.debug(f"Rendering slice: {self.slice_idx} / ITK zindex: {1 + self.image.size[2] - self.slice_idx}")
         logging.debug(f"Current number of actors: {self.panel_renderer.GetActors().GetNumberOfItems()}")
+        logging.debug(f"DEBUG Case Flag: {self.test_slice_idx_flag}")
 
         self.window.Render()
 
@@ -224,13 +231,23 @@ class SequenceViewer:
         self.panel_renderer.GetActiveCamera().SetParallelScale(self.image.get_parallel_scale() * new_zoom_factor)
         self.window.Render()
 
+    def go_to_first_slice_index(self, reverse: bool = False):
+        """ Mainly used for testing. Forces the viewer to go to the first slice (or last, if reverse=True)"""
+        if reverse:
+            while self.slice_idx < self.image.size[2]-1:
+                self.adjust_slice_idx(1)
+        else:
+            while self.slice_idx > 1:
+                self.adjust_slice_idx(-1)
+
     def adjust_slice_idx(self, delta: int):
         import numpy as np
 
-        self.reslice.Update()
+        # self.reslice.Update()
         spacing = self.reslice.GetOutput().GetSpacing()[2]
         matrix: vtkMatrix4x4 = self.reslice.GetResliceAxes()
-        center = matrix.MultiplyPoint((0, 0, delta*spacing, 1))
+        center = [round(i, 1) for i in matrix.MultiplyPoint((0, 0, delta*spacing, 1))]
+        # center = matrix.MultiplyPoint((0, 0, delta * spacing, 1))
 
         slice_idx = 1 + np.int(np.round(((center[2] - self.image.origin[2]) / self.image.spacing[2])))
 
@@ -244,17 +261,30 @@ class SequenceViewer:
                 # sometimes the calculated slice index is the same as the previous one? # TODO
                 self.slice_idx = slice_idx + delta
                 self.image.sliceIdx = slice_idx + delta
-                self.display_points_in_slice(slice_idx + delta)
+                length_count, mpr_count = self.display_points_in_slice(slice_idx + delta)
+                self.test_slice_idx_flag = 1
             else:
                 self.slice_idx = slice_idx
                 self.image.sliceIdx = slice_idx
-                self.display_points_in_slice(slice_idx)
+                length_count, mpr_count = self.display_points_in_slice(slice_idx)
+                self.test_slice_idx_flag = 2
 
             if CFG.get_testing_status("use-slice-location"):
                 self.update_status_text("Slice Index", self.slice_idx)
             else:
                 self.update_status_text("Slice Index", 1 + self.image.size[2] - self.slice_idx)
             self.render_panel()
+
+            self.reslice.Update()
+            self.update_debug_text(f"L {length_count} | M {mpr_count}"
+                                   f"\n ITK z {1 + self.image.size[2] - self.slice_idx}"
+                                   f"\n case_flag {self.test_slice_idx_flag}"
+                                   f"\n center {center}")
+
+            self.test_slice_ok = True
+        else:
+            # slicing failed
+            self.test_slice_ok = False
 
     ######################################################################
     #                       point-related functions                      #
@@ -265,5 +295,6 @@ class SequenceViewer:
         self.render_panel()
 
     def display_points_in_slice(self, slice_index):
-        self.model.length_point_array.show_for_slice(slice_index)
-        self.model.mpr_point_array.show_for_slice(slice_index)
+        length_count = self.model.length_point_array.show_for_slice(slice_index)
+        mpr_count = self.model.mpr_point_array.show_for_slice(slice_index)
+        return length_count, mpr_count

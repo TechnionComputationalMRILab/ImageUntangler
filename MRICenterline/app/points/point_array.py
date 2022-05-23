@@ -207,11 +207,15 @@ class PointArray:
                 self.show_point(i)
 
     def show_for_slice(self, slice_index):
+        count = 0
         for i, pt in enumerate(self.point_array):
             if pt.slice_idx == slice_index:
                 self.show_point(i)
+                count += 1
             else:
                 self.hide_point(i)
+
+        return count
 
     def toggle_line_visibility(self):
         self.line_visible = not self.line_visible

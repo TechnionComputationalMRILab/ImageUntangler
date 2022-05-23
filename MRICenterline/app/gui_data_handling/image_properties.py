@@ -68,26 +68,26 @@ class ImageProperties:
         return 1 + self.size[2] - itk_z
 
     def get_vtk_data(self):
-            vtkVolBase = vtk.vtkImageData()
-            vtkVolBase.SetDimensions(*self.size)
-            vtkVolBase.SetOrigin(*self.origin)
-            vtkVolBase.SetSpacing(*self.spacing)
-            vtkVolBase.SetExtent(*self.extent)
+        vtkVolBase = vtk.vtkImageData()
+        vtkVolBase.SetDimensions(*self.size)
+        vtkVolBase.SetOrigin(*self.origin)
+        vtkVolBase.SetSpacing(*self.spacing)
+        vtkVolBase.SetExtent(*self.extent)
 
-            image_array = numpy_support.numpy_to_vtk(self.nparray.ravel(), deep=True, array_type=vtk.VTK_TYPE_UINT16)
-            vtkVolBase.GetPointData().SetScalars(image_array)
-            vtkVolBase.Modified()
+        image_array = numpy_support.numpy_to_vtk(self.nparray.ravel(), deep=True, array_type=vtk.VTK_TYPE_UINT16)
+        vtkVolBase.GetPointData().SetScalars(image_array)
+        vtkVolBase.Modified()
 
-            # return vtkVolBase
+        # return vtkVolBase
 
-            # flip the image in Y direction
-            flip = vtk.vtkImageReslice()
-            flip.SetInputData(vtkVolBase)
-            flip.SetResliceAxesDirectionCosines(1, 0, 0, 0, -1, 0, 0, 0, 1)
-            flip.Update()
+        # flip the image in Y direction
+        flip = vtk.vtkImageReslice()
+        flip.SetInputData(vtkVolBase)
+        flip.SetResliceAxesDirectionCosines(1, 0, 0, 0, -1, 0, 0, 0, 1)
+        flip.Update()
 
-            vtkVol = flip.GetOutput()
-            vtkVol.SetOrigin(*self.origin)
+        vtkVol = flip.GetOutput()
+        vtkVol.SetOrigin(*self.origin)
 
-            return vtkVol
+        return vtkVol
 
