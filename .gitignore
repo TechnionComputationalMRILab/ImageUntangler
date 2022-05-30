@@ -16,3 +16,5 @@ venv/*
 /MRICenterline/old/
 /MRICenterline/testing/.pytest_cache/
 /MRICenterline/testing/logs/
+/build/
+/dist/

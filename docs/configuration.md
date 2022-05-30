@@ -63,26 +63,26 @@ show-sliders = off
 ## In detail
 
 ### folders
-* `data-folder` - Where the MRI data is located
-* `script-folder` - Filled automatically, location of the script
+* `data-folder` - Where the MRI data is located. The program needs this to build the complete file paths
+* `script-folder` - Location of the script. This is filled automatically during runtime
 
 ### display
 * `start-maximized` - self-explanatory. Recommended to start maximized
 * `horizontal-number-of-panels` - option to have multiple panels horizontally. **NOT IMPLEMENTED**
 * `vertical-number-of-panels` - option to have multiple panels vertically. **NOT IMPLEMENTED**
-* display-width = Default: 1920
-* display-height = Default: 1080
-* toolbar-style = Default: icon-and-text **NOT IMPLEMENTED**
-* font-size = 30 
-* window-percentile = 90 
-* show-interactor-coords = off 
-* text-color = 0, 34, 158 
-* show-interactor-help = on 
-* help-text-color = 230, 0, 0 
-* show-interactor-debug = off 
-* debug-text-color = 0, 0, 0 
-* show-interactor-cursor = on 
-* cursor-color = Color of the cursor. Default: 255, 0, 0
+* `display-width` = Default: 1920
+* `display-height` = Default: 1080
+* `toolbar-style` = Default: icon-and-text **NOT IMPLEMENTED**
+* `font-size` = Size of the font in the main display interactor. Default: 30 
+* `window-percentile` = Default: 90 
+* `show-interactor-coords` = Show the coordinates in the main display interactor as the mouse is moved. **May cause slowdown**. Default: off 
+* `text-color` = Color of the text in the main display interactor. Default: 0, 34, 158 
+* `show-interactor-help` = Shows the help text. Display: on 
+* `help-text-color` = Color of the help text. Default: 230, 0, 0 
+* `show-interactor-debug` = Debugging purposes only. Default: off 
+* `debug-text-color` = Color of debug text. Default: 0, 0, 0 
+* `show-interactor-cursor` = Shows a vertical and horizontal line indicating the location of the mouse. **May cause slowdown**. Default: off 
+* `cursor-color` = Color of the cursor. Default: 255, 0, 0
 
 ### length-display-style and mpr-length-display-style
 
@@ -94,11 +94,11 @@ show-sliders = off
 * line-style = dotted
 
 ### mpr-display-style
-color = 255, 255, 0
-highlighted-color = 255, 255, 0
-marker-size = 1
-line-thickness = 10
-line-style = line
+* color = 255, 255, 0 
+* highlighted-color = 255, 255, 0 
+* marker-size = 1 
+* line-thickness = 10 
+* line-style = line
 
 ### testing
 * `use-slice-location` - Uses the v3 implementation of the slice location calculation.

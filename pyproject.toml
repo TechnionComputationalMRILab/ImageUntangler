@@ -1,8 +1,8 @@
 [tool.poetry]
-name = "imageuntangler"
-version = "0.1.0"
-description = ""
-authors = ["Angeleene Ang <ang.a@technion.ac.il>"]
+name = "ImageUntangler"
+version = "4.0.1"
+description = "Developed by the Technion Computational MRI lab, this program reads DICOM MRI images and presents a user-friendly interface for radiologists to measure lengths and generate centerlines."
+authors = ["Angeleene Ang <ang.a@technion.ac.il>", "Yael Zaffrani", "Avraham Kahan", "Moti Freiman"]
 
 [tool.poetry.dependencies]
 python = "~3.8"
