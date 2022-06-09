@@ -136,4 +136,3 @@ class DICOMReader(AbstractReader):
                 image = reader.Execute()
 
             return image
-

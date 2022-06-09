@@ -96,4 +96,6 @@ class SliceLocImageProperties(ImageProperties):
 
         vtk_image.Modified()
 
+        # print(f"VTK Direction Matrix: \n {vtk_image.GetDirectionMatrix()}")
+
         return vtk_image

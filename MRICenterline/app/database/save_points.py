@@ -100,3 +100,5 @@ def save_points(case_name: str,
     session_saved_message = f"Saved session with id [{session_id}] successfully."
     logging.info(session_saved_message)
     MSG.msg_box_info(session_saved_message)
+
+    return session_id

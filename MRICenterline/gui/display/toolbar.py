@@ -1,3 +1,5 @@
+import time
+from PyQt5.QtCore import QTimer
 from PyQt5.QtWidgets import QWidget, QGridLayout, QPushButton, QSpacerItem, QSizePolicy, QLabel
 import qtawesome as qta
 

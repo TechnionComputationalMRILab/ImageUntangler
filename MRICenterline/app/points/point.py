@@ -96,6 +96,8 @@ class Point:
         return f"""
             ITK Physical Coordinates: {str([i for i in self.physical_coords])}
             ITK Index Coordinates: {str([i for i in self.itk_index_coords])}
+            Image coordinates: {self.image_coordinates[0]}, {self.image_coordinates[1]}
+            Picked Slice index: {self.slice_idx}
         """
 
     def __eq__(self, other):

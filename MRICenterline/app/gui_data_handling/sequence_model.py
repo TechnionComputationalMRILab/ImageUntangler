@@ -72,11 +72,13 @@ class SequenceModel:
 
     def save(self):
         logging.info("Saving points")
-        save_points(case_name=self.image.case_name,
-                    sequence_name=self.image.get_sequences()[self.seq_idx],
-                    length_points=self.length_point_array,
-                    mpr_points=self.mpr_point_array,
-                    timer_data=self.model.timer)
+        session_id = save_points(case_name=self.image.case_name,
+                                 sequence_name=self.image.get_sequences()[self.seq_idx],
+                                 length_points=self.length_point_array,
+                                 mpr_points=self.mpr_point_array,
+                                 timer_data=self.model.timer)
+
+        return session_id
 
     def calculate(self, status: PointStatus):
         if status == PointStatus.MPR:

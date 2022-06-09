@@ -12,6 +12,7 @@ from MRICenterline import CFG
 class MainDisplayWidget(QWidget):
     def __init__(self, model: CaseModel, parent=None):
         super().__init__(parent)
+        self.parent = parent
         self.model = model
         self.set_up_keyboard_shortcuts()
 

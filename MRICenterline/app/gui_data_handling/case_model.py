@@ -68,10 +68,12 @@ class CaseModel:
     # toolbar
     #########
     def save(self):
-        self.sequence_manager.save()
+        session_id = self.sequence_manager.save()
 
         if self.centerline_model:
             self.centerline_model.save()
+
+        return session_id
 
     def export(self, destination: str):
         self.sequence_manager.export(destination)

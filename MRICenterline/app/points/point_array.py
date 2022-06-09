@@ -170,6 +170,9 @@ class PointArray:
     def get_points_in_slice(self, slice_index: int) -> List[Point]:
         return [pt for pt in self.point_array if slice_index == pt.slice_idx]
 
+    def get_slices_with_points(self) -> List[int]:
+        return [pt.slice_idx for pt in self.point_array]
+
     ######################################################################
     #                        actor manipulation                          #
     ######################################################################
@@ -263,3 +266,21 @@ class PointArray:
         vertical_lengths = [np.abs(np.dot((0, 1, 0), i - j)) for i, j in point_pairs]
 
         return vertical_lengths
+
+    def simplify(self):
+        """
+        Mostly used for testing if two point arrays are equal by returning only the attributes
+        that are relevant for comparison
+        """
+        simplified_points = list()
+
+        for pt in self.point_array:
+            d = dict()
+            d['slice_index'] = pt.slice_idx
+            d['image_coords'] = pt.image_coordinates
+            d["itk_index_coords"] = pt.itk_index_coords
+            d['itk_physical_coords'] = pt.physical_coords
+
+            simplified_points.append(d)
+
+        return simplified_points

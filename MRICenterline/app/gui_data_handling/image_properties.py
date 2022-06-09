@@ -16,6 +16,7 @@ logging.getLogger(__name__)
 class ImageProperties:
     def __init__(self, sitk_image, parent=None):
         self.sitk_image = sitk_image
+        # print(f'ITK Direction matrix: \n {np.asarray(self.sitk_image.GetDirection()).reshape((3, 3))}')
 
         self.nparray = GetArrayFromImage(sitk_image)
 

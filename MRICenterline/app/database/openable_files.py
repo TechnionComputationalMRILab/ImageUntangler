@@ -1,6 +1,11 @@
 import sqlite3
 from MRICenterline import CFG
 
+"""
+Helper functions for building the tables shown in the custom load dialogs. This generates the
+tables used by the "Open MRI images" button
+"""
+
 
 def get_openable_sequences():
     con = sqlite3.connect(CFG.get_db())
@@ -51,3 +56,11 @@ def get_openable_cases():
     out_dict.pop('case_id')
 
     return out_dict, len(out_dict.keys()), len(cases)
+
+
+if __name__ == "__main__":
+    import os
+
+    os.path.join(CFG.get_folder('raw_data'), "casename")
+    zipped = list(zip(get_openable_sequences()[0]['case_name'], get_openable_sequences()[0]['sequences']))
+    print(zipped)
