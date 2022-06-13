@@ -104,13 +104,27 @@ class Point:
         return all([self.physical_coords[i] == other.physical_coords[i] for i in range(3)])
 
     def calculate_itk(self):
-        viewer_origin = self.image_properties.size / 2.0
+        if CFG.get_testing_status("use-slice-location"):
+            viewer_origin = self.image_properties.size / 2.0
 
-        itk_coords = np.zeros(3, dtype=np.int32)
-        itk_coords[0] = round(self.image_coordinates[0] / self.image_properties.spacing[0] + viewer_origin[0])
-        itk_coords[1] = round(self.image_properties.dimensions[1] - (self.image_coordinates[1] / self.image_properties.spacing[1] + viewer_origin[1]))
-        itk_coords[2] = np.argmin(np.abs(np.array(self.image_properties.z_coords) - self.image_coordinates[2]))
+            itk_coords = np.zeros(3, dtype=np.int32)
+            itk_coords[0] = round(self.image_coordinates[0] / self.image_properties.spacing[0] + viewer_origin[0])
+            itk_coords[1] = round(self.image_properties.dimensions[1] - (
+                        self.image_coordinates[1] / self.image_properties.spacing[1] + viewer_origin[1]))
+            itk_coords[2] = np.argmin(np.abs(np.array(self.image_properties.z_coords) - self.image_coordinates[2]))
 
-        physical_coords = self.image_properties.sitk_image.TransformIndexToPhysicalPoint([int(itk_coords[0]), int(itk_coords[1]), int(itk_coords[2])])
-        # TODO: check TransformContinuousIndexToPhysicalPoint, it produces different results
+        else:
+            viewer_origin = self.image_properties.size / 2.0
+
+            itk_coords = np.zeros(3, dtype=np.int32)
+            itk_coords[0] = 1 + round((self.image_coordinates[0] / self.image_properties.spacing[0]) + viewer_origin[0])
+            itk_coords[1] = 1 + round((self.image_coordinates[1] / self.image_properties.spacing[1]) + viewer_origin[1])
+            itk_coords[2] = 1 + round(self.image_properties.size[2] - self.slice_idx)
+
+        # ITK coords in this case are indices, so they have to be > 0
+        # assert all([i > 0 for i in itk_coords])
+
+        physical_coords = self.image_properties.sitk_image.TransformIndexToPhysicalPoint(
+            [int(itk_coords[0]), int(itk_coords[1]), int(itk_coords[2])])
+        # TODO: check TransformContinuousIndexToPhysicalPoint, it produces different results (at least for v3)
         return itk_coords, physical_coords

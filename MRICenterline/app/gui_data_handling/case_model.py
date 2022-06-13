@@ -57,6 +57,10 @@ class CaseModel:
             Picker status: {self.picker_status}
             Window/Level: {self.window_value, self.level_value}
             Centerline: {True if self.centerline_model else False}
+            Image details:
+                Origin: {self.image.properties.origin}
+                Spacing: {self.image.properties.spacing}
+                Size: {self.image.properties.size}
         ''')
 
         self.sequence_manager.print_status_to_terminal()

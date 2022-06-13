@@ -3,6 +3,7 @@
 
 """
 scrub through the sequence viewer and get the case flag, see if it changes and if so, how many times
+a changing case flag means that there's something wrong with how the slice index is calculated
 """
 
 import os
@@ -22,7 +23,7 @@ cases = [os.path.join(PATH_FOR_TEST_CASES, name)
 @pytest.mark.parametrize('folder', cases)
 def test(qtbot, folder):
     case_model = CaseModel(folder)
-    print(folder)
+
     widget = MainDisplayWidget(case_model)
     qtbot.addWidget(widget)
 
