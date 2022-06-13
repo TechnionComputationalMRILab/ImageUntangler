@@ -28,6 +28,8 @@ class MainDisplayWidget(QWidget):
                                                                    self.interactor,
                                                                    self.interactor_style)
 
+
+
         layout.addLayout(self.sequence_widgets.build_sequence_group_box())
         layout.addWidget(self.interactor)
 

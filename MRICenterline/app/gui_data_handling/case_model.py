@@ -59,6 +59,8 @@ class CaseModel:
             Centerline: {True if self.centerline_model else False}
         ''')
 
+        self.sequence_manager.print_status_to_terminal()
+
     def mpr_marker_highlight(self, index: int):
         self.sequence_manager.highlight_point(index, PointStatus.MPR)
 
@@ -71,8 +73,8 @@ class CaseModel:
         if self.centerline_model:
             self.centerline_model.save()
 
-    def export(self):
-        pass
+    def export(self, destination: str):
+        self.sequence_manager.export(destination)
 
     def set_picker_status(self, status: PickerStatus):
         logging.debug(f"Setting display panel picker status to {status}")

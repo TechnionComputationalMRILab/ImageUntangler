@@ -42,8 +42,10 @@ def find_point(model):
     model.find_point()
 
 
-def export(model):
-    model.export_data()
+def export(model, parent):
+    from PyQt5.QtWidgets import QFileDialog
+    destination = str(QFileDialog.getExistingDirectory(parent, "Select destination"))
+    model.export(destination)
 
 
 def toggle_mpr_marker(model, show: bool):

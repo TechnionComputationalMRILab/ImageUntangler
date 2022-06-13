@@ -88,3 +88,8 @@ class SequenceViewerInteractorStyle(vtkInteractorStyleImage):
             self.model.sequence_viewer.adjust_slice_idx(1)
         if key_symbol == "Down":
             self.model.sequence_viewer.adjust_slice_idx(-1)
+
+        if key_symbol == "Home":
+            self.model.sequence_viewer.go_to_first_slice_index()
+        if key_symbol == "End":
+            self.model.sequence_viewer.go_to_first_slice_index(reverse=True)

@@ -1,7 +1,7 @@
 from pathlib import Path
 
 from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QSplitter
+from PyQt5.QtWidgets import QSplitter, QHBoxLayout, QWidget, QLabel
 
 from MRICenterline.app.gui_data_handling.case_model import CaseModel
 from MRICenterline.app.gui_data_handling.centerline_model import CenterlineModel
@@ -18,6 +18,7 @@ logging.getLogger(__name__)
 def configure_main_widget(path, parent_widget, selected_sequence=None):
     window = parent_widget.window()
     case_model = CaseModel(path, selected_sequence)
+    # case_model2 = CaseModel(path, selected_sequence)
     centerline_model = CenterlineModel(case_model)
     case_model.set_centerline_model(centerline_model)
 
@@ -27,11 +28,19 @@ def configure_main_widget(path, parent_widget, selected_sequence=None):
     window.toolbar.addWidget(DisplayPanelToolbarButtons(model=case_model, parent=window))
     window.setWindowTitle(case_model.get_case_name() + " | " + CONST.WINDOW_NAME)
 
+    multi_pane_widget = QWidget(window)
+    multi_panel_layout = QHBoxLayout()
+    multi_pane_widget.setLayout(multi_panel_layout)
+
     main_display_widget = MainDisplayWidget(case_model, window)
+    # main_display_widget2 = MainDisplayWidget(case_model2, window)
+    multi_panel_layout.addWidget(main_display_widget)
+    # multi_panel_layout.addWidget(main_display_widget2)
+
     centerline_widget = CenterlineWidget(centerline_model, window)
     centerline_model.connect_widget(centerline_widget)
 
-    splitter.addWidget(main_display_widget)
+    splitter.addWidget(multi_pane_widget)
     splitter.setStretchFactor(0, 3)
 
     splitter.addWidget(centerline_widget)
