@@ -18,8 +18,6 @@ class ImageProperties:
         self.sitk_image = sitk_image
         # print(f'ITK Direction matrix: \n {np.asarray(self.sitk_image.GetDirection()).reshape((3, 3))}')
 
-        self.nparray = GetArrayFromImage(sitk_image)
-
         self.spacing = np.array(sitk_image.GetSpacing())
         self.dimensions = np.int32(sitk_image.GetDimension())
         self.size = np.array(sitk_image.GetSize())
@@ -27,6 +25,8 @@ class ImageProperties:
         self.extent = (0, self.size[0] - 1,
                        0, self.size[1] - 1,
                        0, self.size[2] - 1)
+
+        self.nparray = GetArrayFromImage(sitk_image)
 
         def calculate_center():
             it = iter(self.extent)

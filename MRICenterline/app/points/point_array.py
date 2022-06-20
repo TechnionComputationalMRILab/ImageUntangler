@@ -247,7 +247,11 @@ class PointArray:
         if CFG.get_testing_status("use-slice-location"):
             return np.asarray([pt.image_coordinates for pt in self.point_array])
         else:
-            return np.asarray([pt.image_coordinates for pt in self.point_array])
+            out_array = []
+            for pt in self.point_array:
+                out_array.append(np.array([int(pt.image_coordinates[0]), int(pt.image_coordinates[1]), int(pt.slice_idx)]))
+
+            return out_array
 
     def find_nearest_point(self, other: Point, get_index: bool = False) -> Point or int:
         point_and_distances = []

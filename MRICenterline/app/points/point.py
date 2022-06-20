@@ -65,7 +65,6 @@ class Point:
 
         return cls(image_coordinates, slice_idx, image_properties, color, size)
 
-
     @classmethod
     def point_from_vtk_coords(cls, image_coordinates, image_properties, color=(1, 1, 1), size=3):
         slice_idx = int(np.argmin(np.abs(np.array(image_properties.z_coords) - image_coordinates[2])))
