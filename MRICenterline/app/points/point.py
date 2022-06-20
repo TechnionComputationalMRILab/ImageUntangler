@@ -48,6 +48,25 @@ class Point:
         return cls(image_coordinates, slice_idx, image_properties, color, size)
 
     @classmethod
+    def point_from_itk_index(cls, itk_coords, image_properties, color=(1, 1, 1), size=3):
+        # sitk_image = image_properties.sitk_image
+        viewer_origin = image_properties.size / 2
+
+        image_coordinates = np.zeros(3)
+        image_coordinates[0] = (itk_coords[0] - 1 - viewer_origin[0]) * image_properties.spacing[0]
+        image_coordinates[1] = (itk_coords[1] - 1 - viewer_origin[1]) * image_properties.spacing[1]
+
+        slice_idx = -1 * (itk_coords[2] - 1 - image_properties.size[2])
+        image_coordinates[2] = slice_idx
+
+        # itk_coords[0] = 1 + round((self.image_coordinates[0] / self.image_properties.spacing[0]) + viewer_origin[0])
+        # itk_coords[1] = 1 + round((self.image_coordinates[1] / self.image_properties.spacing[1]) + viewer_origin[1])
+        # itk_coords[2] = 1 + round(self.image_properties.size[2] - self.slice_idx)
+
+        return cls(image_coordinates, slice_idx, image_properties, color, size)
+
+
+    @classmethod
     def point_from_vtk_coords(cls, image_coordinates, image_properties, color=(1, 1, 1), size=3):
         slice_idx = int(np.argmin(np.abs(np.array(image_properties.z_coords) - image_coordinates[2])))
         return cls(image_coordinates, slice_idx, image_properties, color, size)

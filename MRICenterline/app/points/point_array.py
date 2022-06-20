@@ -1,5 +1,7 @@
 from typing import List
 
+import numpy as np
+
 from MRICenterline.gui.vtk.line_actor import IULineActor
 from MRICenterline.app.points.point import Point
 from MRICenterline.app.points.status import PointStatus
@@ -245,7 +247,7 @@ class PointArray:
         if CFG.get_testing_status("use-slice-location"):
             return np.asarray([pt.image_coordinates for pt in self.point_array])
         else:
-            return np.asarray([pt.physical_coords for pt in self.point_array])
+            return np.asarray([pt.image_coordinates for pt in self.point_array])
 
     def find_nearest_point(self, other: Point, get_index: bool = False) -> Point or int:
         point_and_distances = []
