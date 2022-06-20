@@ -125,6 +125,7 @@ class DICOMReader(AbstractReader):
 
             return np_out, [f for f, _ in file_list]
         else:
+
             reader = sitk.ImageSeriesReader()
 
             with tempfile.TemporaryDirectory() as temp_dir:

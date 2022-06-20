@@ -23,8 +23,9 @@ from MRICenterline.testing.test_utils import generate_file_list
 cases = generate_file_list()
 
 
-# @pytest.mark.parametrize('folder', cases)
-def test(qtbot, folder=cases[47]):
+@pytest.mark.parametrize('folder', cases)
+# def test(qtbot, folder=cases[47]): # test one case
+def test(qtbot, folder):
     # move VTK warnings/errors to terminal
     vtk_out = vtkOutputWindow()
     vtk_out.SetDisplayMode(0)
@@ -107,9 +108,19 @@ def test(qtbot, folder=cases[47]):
     loaded_points = loaded_point_array.simplify()
     loaded_slices_with_points = new_case_model.sequence_manager.mpr_point_array.get_slices_with_points()
 
-    for saved_pt, loaded_pt in zip(saved_points, loaded_points):
-        assert saved_pt['slice_index'] == loaded_pt['slice_index']
-        assert saved_pt['image_coords'] == loaded_pt['image_coords']
+    slice_index_comparison = []
+    image_coords_comparison = []
+    # slice_with_points_comparison = []
 
-    for saved_slice, loaded_slice in zip(saved_slices_with_points, loaded_slices_with_points):
-        assert saved_slice == loaded_slice
+    for saved_pt, loaded_pt in zip(saved_points, loaded_points):
+        slice_index_comparison.append(saved_pt['slice_index'] == loaded_pt['slice_index'])
+        image_coords_comparison.append(saved_pt['image_coords'] == loaded_pt['image_coords'])
+
+    print(f'slice: {slice_index_comparison}')
+    print(f'index: {image_coords_comparison}')
+
+    assert all(slice_index_comparison)
+    assert all(image_coords_comparison)
+
+    # for saved_slice, loaded_slice in zip(saved_slices_with_points, loaded_slices_with_points):
+    #     assert saved_slice == loaded_slice

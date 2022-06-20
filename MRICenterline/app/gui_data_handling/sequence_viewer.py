@@ -247,11 +247,12 @@ class SequenceViewer:
         spacing = self.reslice.GetOutput().GetSpacing()[2]
         matrix: vtkMatrix4x4 = self.reslice.GetResliceAxes()
 
+        center = [round(i, 1) for i in matrix.MultiplyPoint((0, 0, delta * spacing, 1))]
         if CFG.get_testing_status("use-slice-location"):
-            center = [round(i, 1) for i in matrix.MultiplyPoint((0, 0, delta * spacing, 1))]
+            # center = [round(i, 1) for i in matrix.MultiplyPoint((0, 0, delta * spacing, 1))]
             slice_idx = 1 + np.int(np.round(((center[2] - self.image.origin[2]) / self.image.spacing[2])))
         else:
-            center = matrix.MultiplyPoint((0, 0, delta * spacing, 1))
+            # center = matrix.MultiplyPoint((0, 0, delta * spacing, 1))
             slice_idx = 1 + np.int(np.round(((center[2] - self.image.origin[2]) / self.image.spacing[2])))
 
         if 1 <= slice_idx <= self.image.size[2]:
@@ -280,7 +281,6 @@ class SequenceViewer:
 
             self.reslice.Update()
             self.update_debug_text(f"L {length_count} | M {mpr_count}"
-                                   f"\n ITK z {1 + self.image.size[2] - self.slice_idx}"
                                    f"\n case_flag {self.test_slice_idx_flag}"
                                    f"\n center {center}")
 

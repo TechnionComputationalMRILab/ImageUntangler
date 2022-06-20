@@ -43,4 +43,6 @@ def test(qtbot, folder):
         qtbot.keyPress(widget.interactor, Qt.Key_Up)
         case_flags.append(case_model.sequence_viewer.test_slice_idx_flag == 2)
 
+    assert case_model.sequence_viewer.slice_idx == case_model.sequence_viewer.image.size[2]
+
     assert all(case_flags)
