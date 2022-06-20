@@ -2,7 +2,7 @@
 dist/*
 build/*
 src/*/__pycache__/*
-*log*.txt
+*log*
 internal_data/*
 venv/*
 *.pyc
