@@ -2,6 +2,7 @@ import os
 import json
 
 from MRICenterline import CFG
+from MRICenterline.app.gui_data_handling.image_properties import ImageProperties
 from MRICenterline.app.points.point import Point
 from MRICenterline.app.points.point_array import PointArray
 from MRICenterline.app.points.status import PointStatus
@@ -77,15 +78,38 @@ class Ver3AnnotationImport:
                                  folder=self.filename.parents[1],
                                  is_new_case=False)
 
-        np_array, file_list = dcm_reader[self.sequence_name]
+        if CFG.get_testing_status("use-slice-location"):
+            np_array, file_list = dcm_reader[self.sequence_name]
 
-        image_properties = SliceLocImageProperties(np_array=np_array,
-                                                   z_coords=dcm_reader.get_z_coords(self.sequence_name),
-                                                   file_list=file_list)
+            image_properties = SliceLocImageProperties(np_array=np_array,
+                                                       z_coords=dcm_reader.get_z_coords(self.sequence_name),
+                                                       file_list=file_list)
 
-        for pt in points_from_json:
-            parsed = Point.point_from_vtk_coords(pt, image_properties)
-            point_array.add_point(parsed)
+            for pt in points_from_json:
+                parsed = Point.point_from_vtk_coords(pt, image_properties)
+                point_array.add_point(parsed)
+        else:
+            image_properties = ImageProperties(dcm_reader[self.sequence_name])
+            v_3_file_list = dcm_reader.get_file_list(self.sequence_name, use_v3=True)
+            v3_np_arr, clean_file_list = DICOMReader.generate(file_list=v_3_file_list, use_v3=True)
+            v3_z_coords = dcm_reader.get_z_coords(seq=self.sequence_name, use_v3=True)
+            v3_image_properties = SliceLocImageProperties(np_array=v3_np_arr,
+                                                          z_coords=v3_z_coords,
+                                                          file_list=clean_file_list)
+
+            if dcm_reader.case_name in ['106', '16']:
+                print(f"SKIPPING {dcm_reader.case_id}")
+            else:
+                assert len(v3_z_coords) == v3_image_properties.size[2], "z_coord list must be same as size of the image"
+
+                for pt in points_from_json:
+                    parsed = Point.point_from_v3(image_coordinates=pt,
+                                                 image_properties=image_properties,
+                                                 v3_image_size=v3_image_properties.size,
+                                                 v3_image_spacing=v3_image_properties.spacing,
+                                                 v3_image_dimensions=v3_image_properties.dimensions,
+                                                 v3_z_coords=v3_z_coords)
+                    point_array.add_point(parsed)
 
     def __repr__(self):
         return f"""

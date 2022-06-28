@@ -45,8 +45,8 @@ class DICOMReader(AbstractReader):
 
         con.close()
 
-    def get_file_list(self, seq):
-        if CFG.get_testing_status("use-slice-location"):
+    def get_file_list(self, seq, use_v3=False):
+        if CFG.get_testing_status("use-slice-location") or use_v3:
             con = sqlite3.connect(CFG.get_db())
 
             if type(seq) is str:
@@ -84,13 +84,13 @@ class DICOMReader(AbstractReader):
             else:
                 raise KeyError("Sequence not found in database")
 
-    def get_z_coords(self, seq):
-        if CFG.get_testing_status("use-slice-location"):
+    def get_z_coords(self, seq, use_v3=False):
+        if CFG.get_testing_status("use-slice-location") or use_v3:
             con = sqlite3.connect(CFG.get_db())
 
             if type(seq) is str:
                 query = f"""
-                         select slice_location from slice_locations
+                         select distinct slice_location from slice_locations
                          inner join sequence_files
                          on sequence_files.file_id = slice_locations.file_id
                          inner join sequences
@@ -108,9 +108,9 @@ class DICOMReader(AbstractReader):
             raise NotImplementedError("Slice Locations not used")
 
     @staticmethod
-    def generate(file_list):
+    def generate(file_list, use_v3=False):
         """ TempDir dependency is due to an sITK issue, see: https://github.com/SimpleITK/SimpleITK/issues/1609 """
-        if CFG.get_testing_status("use-slice-location"):
+        if CFG.get_testing_status("use-slice-location") or use_v3:
             import pydicom
             import numpy as np
 
