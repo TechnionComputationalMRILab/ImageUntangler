@@ -25,6 +25,7 @@ class SliceLocImageProperties(ImageProperties):
                                               direction=sitk_image.GetDirection(),
                                               size=sitk_image.GetSize())
 
+        self.size = sitk_image.GetSize()
         self.spacing = self.vtk_data.GetSpacing()
         self.dimensions = self.vtk_data.GetDimensions()
         self.extent = self.vtk_data.GetExtent()

@@ -9,14 +9,14 @@ def transformation_matrix(center, view='axial'):
 
     if view == 'coronal':
         matrix.DeepCopy((1, 0, 0, center[0],
-                          0, 0, 1, center[1],
-                          0,-1, 0, center[2],
-                          0, 0, 0, 1))
+                         0, 0, 1, center[1],
+                         0,-1, 0, center[2],
+                         0, 0, 0, 1))
     elif view == 'sagittal':
         matrix.DeepCopy((0, 0,-1, center[0],
-                           1, 0, 0, center[1],
-                           0,-1, 0, center[2],
-                           0, 0, 0, 1))
+                         1, 0, 0, center[1],
+                         0,-1, 0, center[2],
+                         0, 0, 0, 1))
     elif view == 'axial':
         matrix.DeepCopy((1, 0, 0, center[0],
                          0, 1, 0, center[1],
