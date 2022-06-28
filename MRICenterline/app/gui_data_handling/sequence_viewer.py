@@ -174,7 +174,7 @@ class SequenceViewer:
         self.reslice.SetInputData(self.image.vtk_data)
         self.reslice.SetOutputDimensionality(2)
         self.reslice.SetResliceAxes(self.image.transformation)
-        self.reslice.SetInterpolationModeToLinear()
+        # self.reslice.SetInterpolationModeToLinear()
         self.reslice.Update()
 
         self.panel_actor.GetMapper().SetInputConnection(self.reslice.GetOutputPort())
