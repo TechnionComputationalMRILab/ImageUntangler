@@ -62,7 +62,7 @@ class Ver3AnnotationImport:
                 logging.info(f"Found no MPR points")
             else:
                 logging.info(f"Found {len(mpr_coords)} MPR points")
-                self.parse_points(mpr_coords, self.mpr_point_array)
+                self.mpr_point_array = self.parse_points(mpr_coords, self.mpr_point_array)
 
             try:
                 length_coords = file['length points']
@@ -70,7 +70,7 @@ class Ver3AnnotationImport:
                 logging.info(f"Found no length points")
             else:
                 logging.info(f"Found {len(length_coords)} length points")
-                self.parse_points(length_coords, self.length_point_array)
+                self.length_point_array = self.parse_points(length_coords, self.length_point_array)
 
     def parse_points(self, points_from_json, point_array: PointArray):
         dcm_reader = DICOMReader(case_name=self.case_name,
@@ -98,7 +98,7 @@ class Ver3AnnotationImport:
                                                           file_list=clean_file_list)
 
             if dcm_reader.case_name in ['106', '16']:
-                print(f"SKIPPING {dcm_reader.case_id}")
+                print(f"SKIPPING {dcm_reader.case_id}")  # known problematic cases
             else:
                 assert len(v3_z_coords) == v3_image_properties.size[2], "z_coord list must be same as size of the image"
 
@@ -110,6 +110,8 @@ class Ver3AnnotationImport:
                                                  v3_image_dimensions=v3_image_properties.dimensions,
                                                  v3_z_coords=v3_z_coords)
                     point_array.add_point(parsed)
+
+        return point_array
 
     def __repr__(self):
         return f"""

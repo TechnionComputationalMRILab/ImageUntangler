@@ -59,9 +59,20 @@ class SequenceViewer:
         self.length_text_actor = IUCornerAnnotation(CornerLoc.UPPER_LEFT)
 
         self.initialize_text()
+        self.adjust_slice_idx(1)
 
         self.window.Render()
-        
+
+        logging.debug(f'Loading {self.slice_idx}')
+
+    def print_status_to_terminal(self):
+        logging.info(f'''
+            Slice index: {self.slice_idx}
+            Window value: {self.window_val}
+            Level value: {self.level_val}
+            Show cursor: {self.show_cursor}
+        ''')
+
     ###########################################################################
     #                            cursor functions                             #
     ###########################################################################
@@ -262,7 +273,6 @@ class SequenceViewer:
             matrix.SetElement(2, 3, center[2])
 
             if slice_idx == self.slice_idx:
-                # sometimes the calculated slice index is the same as the previous one? # TODO
                 self.slice_idx = slice_idx + delta
                 self.image.sliceIdx = slice_idx + delta
                 length_count, mpr_count = self.display_points_in_slice(slice_idx + delta)
@@ -273,10 +283,7 @@ class SequenceViewer:
                 length_count, mpr_count = self.display_points_in_slice(slice_idx)
                 self.test_slice_idx_flag = 2
 
-            if CFG.get_testing_status("use-slice-location"):
-                self.update_status_text("Slice Index", self.slice_idx)
-            else:
-                self.update_status_text("Slice Index", 1 + self.image.size[2] - self.slice_idx)
+            self.update_status_text("Slice Index", self.slice_idx)
             self.render_panel()
 
             self.reslice.Update()

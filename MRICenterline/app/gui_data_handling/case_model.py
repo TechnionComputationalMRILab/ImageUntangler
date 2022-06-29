@@ -127,3 +127,7 @@ class CaseModel:
 
     def load_points(self, length_id, mpr_id):
         self.sequence_manager.load_points(length_id, mpr_id)
+
+    def point_shift(self, direction: str):
+        logging.debug(f"Point shift triggered: {direction}")
+        self.sequence_manager.point_shift(direction)

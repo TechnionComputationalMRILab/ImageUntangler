@@ -96,11 +96,12 @@ class DICOMReader(AbstractReader):
                          inner join sequences
                          on sequences.seq_id = sequence_files.seq_id
                          where sequences.name = '{seq}'
-                         and sequence_files.case_id = {self.case_id};
+                         and sequence_files.case_id = {self.case_id}
+                         order by slice_location desc;
                          """
                 z_list = [float(item[0]) for item in con.cursor().execute(query).fetchall()]
                 con.close()
-                return z_list
+                return sorted(z_list)
             elif type(seq) is int:
                 return self.get_z_coords(self.sequence_list[seq])
 

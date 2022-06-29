@@ -65,3 +65,19 @@ class MainDisplayWidget(QWidget):
 
         status_command = QShortcut(QKeySequence('Ctrl+q'), self)
         status_command.activated.connect(self.model.print_status_to_terminal)
+
+        save_points = QShortcut(QKeySequence('Ctrl+s'), self)
+        save_points.activated.connect(self.model.save)
+
+        overwrite_points = QShortcut(QKeySequence('Ctrl+Shift+s'), self)
+        overwrite_points.activated.connect(lambda : print('overwrite'))
+
+        if CFG.get_testing_status("point-shifter"):
+            shift_points_ahead = QShortcut(QKeySequence('Ctrl+.'), self)
+            shift_points_ahead.activated.connect(lambda: self.model.point_shift("F"))
+
+            shift_points_behind = QShortcut(QKeySequence('Ctrl+,'), self)
+            shift_points_behind.activated.connect(lambda: self.model.point_shift("B"))
+
+            reverse_points = QShortcut(QKeySequence('Ctrl+/'), self)
+            reverse_points.activated.connect(lambda: self.model.point_shift("R"))

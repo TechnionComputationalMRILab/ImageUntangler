@@ -191,9 +191,6 @@ class SequenceModel:
 
         logging.info(f"Reading from MPR [{mpr_id}]")
 
-        # print(len(self.length_point_array))
-        # print(len(self.mpr_point_array))
-
     def export(self, destination):
         from MRICenterline.app.export import export
 
@@ -207,3 +204,16 @@ class SequenceModel:
             Sequence name: {self.image.get_sequences()[self.seq_idx]}
             Sequence ID: {self.seq_idx}
         ''')
+
+        self.current_sequence_viewer.print_status_to_terminal()
+
+    def point_shift(self, direction: str):
+        if direction == "F":  # forward
+            self.length_point_array = self.length_point_array.shift("F")
+            self.mpr_point_array = self.mpr_point_array.shift("F")
+        elif direction == 'B':  # backward
+            self.length_point_array = self.length_point_array.shift("B")
+            self.mpr_point_array = self.mpr_point_array.shift("B")
+        elif direction == "R":  # reverse
+            self.length_point_array.reverse(self.current_image_properties.size[2])
+            self.mpr_point_array.reverse(self.current_image_properties.size[2])
