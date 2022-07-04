@@ -23,7 +23,7 @@ def read_points(pt_id, status: PointStatus, image_properties):
         if CFG.get_testing_status("use-slice-location"):
             point = Point.point_from_vtk_coords(pt, image_properties)
         else:
-            point = Point.point_from_physical(pt, image_properties)
+            point = Point.point_from_itk_index(pt, image_properties)
         out_array.add_point(point)
 
     return out_array

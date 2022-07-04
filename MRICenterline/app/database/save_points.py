@@ -50,7 +50,7 @@ def save_points(case_name: str,
                 if CFG.get_testing_status("use-slice-location"):
                     con.execute(length_insert_query, (lengths_id, *pt.image_coordinates))
                 else:
-                    con.execute(length_insert_query, (lengths_id, *pt.physical_coords))
+                    con.execute(length_insert_query, (lengths_id, *[float(i) for i in pt.itk_index_coords]))
     else:
         lengths_id = None
 
@@ -72,7 +72,7 @@ def save_points(case_name: str,
                 if CFG.get_testing_status("use-slice-location"):
                     con.execute(cl_insert_query, (cl_id, *pt.image_coordinates))
                 else:
-                    con.execute(cl_insert_query, (cl_id, *pt.physical_coords))
+                    con.execute(cl_insert_query, (cl_id, *[float(i) for i in pt.itk_index_coords]))
     else:
         cl_id = None
 

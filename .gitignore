@@ -19,3 +19,4 @@ venv/*
 /build/
 /dist/
 /databases/
+/docs/test_results/

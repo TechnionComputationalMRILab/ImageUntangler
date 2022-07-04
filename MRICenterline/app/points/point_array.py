@@ -1,9 +1,13 @@
 from typing import List
+from copy import deepcopy
 
 from MRICenterline.gui.vtk.line_actor import IULineActor
 from MRICenterline.app.points.point import Point
 from MRICenterline.app.points.status import PointStatus
 from MRICenterline import CFG
+
+import logging
+logging.getLogger(__name__)
 
 
 class PointArray:
@@ -36,6 +40,7 @@ class PointArray:
     ######################################################################
     #                        array manipulation                          #
     ######################################################################
+    # region
 
     def extend(self, point_array):
         for pt in point_array:
@@ -86,9 +91,31 @@ class PointArray:
         self.length_actors = []
         self.total_length = 0.0
 
+    def shift(self, direction: str):
+        logging.debug(f"Array shifted {direction}")
+
+        if direction == "F":
+            for pt in self.point_array:
+                pt.slice_idx += 1
+        elif direction == "B":
+            for pt in self.point_array:
+                pt.slice_idx -= 1
+
+        return self
+
+    def reverse(self, image_z_size):
+        logging.debug("Array reversed")
+        for pt in self.point_array:
+            pt.slice_idx = image_z_size - pt.slice_idx
+
+        return self
+
+    # endregion
+
     ######################################################################
     #                               dunder                               #
     ######################################################################
+    # region
 
     def __len__(self):
         return len(self.point_array)
@@ -109,9 +136,12 @@ class PointArray:
             string_list.append(string)
         return str(string_list)
 
+    # endregion
+
     ######################################################################
     #                                 set                                #
     ######################################################################
+    # region
 
     def set_size(self, size, item=None):
         self.point_size = size
@@ -129,9 +159,12 @@ class PointArray:
             for pt in self.point_array:
                 pt.set_color(color)
 
+    # endregion
+
     ######################################################################
     #                                 get                                #
     ######################################################################
+    # region
 
     def get_last_actor(self):
         if len(self) == 1:
@@ -173,9 +206,12 @@ class PointArray:
     def get_slices_with_points(self) -> List[int]:
         return [pt.slice_idx for pt in self.point_array]
 
+    # endregion
+
     ######################################################################
     #                        actor manipulation                          #
     ######################################################################
+    # region
 
     def highlight_specific_point(self, item):
         if self.has_highlight:
@@ -224,9 +260,12 @@ class PointArray:
         self.line_visible = not self.line_visible
         [actor.SetVisibility(self.line_visible) for actor in self.length_actors]
 
+    # endregion
+
     ######################################################################
     #                         data point functions                       #
     ######################################################################
+    # region
 
     def generate_table_data(self) -> dict:
         img_coords_list = [[round(c, 2) for c in pt.image_coordinates] for pt in self.point_array]
@@ -241,11 +280,7 @@ class PointArray:
 
     def get_as_np_array(self):
         import numpy as np
-
-        if CFG.get_testing_status("use-slice-location"):
-            return np.asarray([pt.image_coordinates for pt in self.point_array])
-        else:
-            return np.asarray([pt.physical_coords for pt in self.point_array])
+        return np.asarray([pt.image_coordinates for pt in self.point_array])
 
     def find_nearest_point(self, other: Point, get_index: bool = False) -> Point or int:
         point_and_distances = []
@@ -284,3 +319,5 @@ class PointArray:
             simplified_points.append(d)
 
         return simplified_points
+
+    # endregion

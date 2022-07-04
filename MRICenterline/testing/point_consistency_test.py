@@ -24,8 +24,8 @@ cases = generate_file_list()
 
 
 @pytest.mark.parametrize('folder', cases)
-# def test(qtbot, folder=cases[47]): # test one case
 def test(qtbot, folder):
+# def test(qtbot, folder=cases[47]):  # test one case
     # move VTK warnings/errors to terminal
     vtk_out = vtkOutputWindow()
     vtk_out.SetDisplayMode(0)
@@ -113,8 +113,22 @@ def test(qtbot, folder):
     # slice_with_points_comparison = []
 
     for saved_pt, loaded_pt in zip(saved_points, loaded_points):
+        # make sure that the z appear in the same slices
         slice_index_comparison.append(saved_pt['slice_index'] == loaded_pt['slice_index'])
-        image_coords_comparison.append(saved_pt['image_coords'] == loaded_pt['image_coords'])
+
+        # only checks the x-y location. since image_coords are calculated as ints, only the integer values are compared
+        saved_x = round(saved_pt['image_coords'][0])
+        saved_y = round(saved_pt['image_coords'][1])
+
+        loaded_x = round(loaded_pt['image_coords'][0])
+        loaded_y = round(loaded_pt['image_coords'][1])
+
+        comp_x = abs(saved_x - loaded_x) <= 1
+        comp_y = abs(saved_y - loaded_y) <= 1
+
+        image_coords_comparison.append(comp_x and comp_y)
+
+        print(saved_x, saved_y, loaded_x, loaded_y)
 
     print(f'slice: {slice_index_comparison}')
     print(f'index: {image_coords_comparison}')
