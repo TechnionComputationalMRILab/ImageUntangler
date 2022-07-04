@@ -58,8 +58,9 @@ class Point:
 
         # slice_idx = 1 + image_properties.size[2] - itk_coords[2]
         slice_idx = itk_coords[2]
-        image_coordinates[2] = slice_idx
+        # image_coordinates[2] = slice_idx
 
+        image_coordinates[2] = image_properties.sitk_image.TransformIndexToPhysicalPoint([0, 0, int(slice_idx)])[1]
         return cls(image_coordinates, slice_idx, image_properties, color, size)
 
     @classmethod
