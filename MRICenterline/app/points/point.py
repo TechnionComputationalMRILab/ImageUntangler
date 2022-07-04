@@ -48,7 +48,46 @@ class Point:
         return cls(image_coordinates, slice_idx, image_properties, color, size)
 
     @classmethod
-    def point_from_vtk_coords(cls, image_coordinates, image_properties, color=(1, 1, 1), size=3):
+    def point_from_itk_index(cls, itk_coords, image_properties, color=(1, 1, 1), size=3):
+        # sitk_image = image_properties.sitk_image
+        viewer_origin = image_properties.size / 2
+
+        image_coordinates = np.zeros(3)
+        image_coordinates[0] = (itk_coords[0] - 1 - viewer_origin[0]) * image_properties.spacing[0]
+        image_coordinates[1] = (itk_coords[1] - 1 - viewer_origin[1]) * image_properties.spacing[1]
+
+        # slice_idx = 1 + image_properties.size[2] - itk_coords[2]
+        slice_idx = itk_coords[2]
+        image_coordinates[2] = slice_idx
+
+        return cls(image_coordinates, slice_idx, image_properties, color, size)
+
+    @classmethod
+    def point_from_v3(cls, image_coordinates, image_properties,
+                      v3_image_size, v3_image_spacing, v3_image_dimensions, v3_z_coords,
+                      color=(1, 1, 1), size=3):
+        viewer_origin = [i / 2.0 for i in v3_image_size]
+
+        itk_coords = np.zeros(3, dtype=np.int32)
+        itk_coords[0] = round(image_coordinates[0] / v3_image_spacing[0] + viewer_origin[0])
+        itk_coords[1] = round(v3_image_dimensions[1] - (
+                image_coordinates[1] / v3_image_spacing[1] + viewer_origin[1]))
+        # itk_coords[2] = v3_image_size[2] - (np.argmin(np.abs(np.array(v3_z_coords) - image_coordinates[2])))
+        itk_coords[2] = np.argmin(np.abs(np.array(v3_z_coords) - image_coordinates[2]))
+
+        assert all([0 <= i for i in itk_coords]), "ITK coords must be positive"
+        assert all([itk_coords[i] <= image_properties.size[i] for i in range(3)]), \
+            "ITK coords must not be greater than the image size"
+
+        # return cls.point_from_itk_index(itk_coords, image_properties, color=color, size=size)
+        return cls(picked_coords=image_coordinates,
+                   slice_index=itk_coords[2] + 1,
+                   image_properties=image_properties,
+                   color=color,
+                   size=size)
+
+    @classmethod
+    def point_from_vtk_coords(cls, image_coordinates, image_properties, color=(1, 1, 1), size=3, v3_to_v4=False):
         slice_idx = int(np.argmin(np.abs(np.array(image_properties.z_coords) - image_coordinates[2])))
         return cls(image_coordinates, slice_idx, image_properties, color, size)
 
@@ -96,19 +135,35 @@ class Point:
         return f"""
             ITK Physical Coordinates: {str([i for i in self.physical_coords])}
             ITK Index Coordinates: {str([i for i in self.itk_index_coords])}
+            Image coordinates: {self.image_coordinates[0]}, {self.image_coordinates[1]}
+            Picked Slice index: {self.slice_idx}
         """
 
     def __eq__(self, other):
         return all([self.physical_coords[i] == other.physical_coords[i] for i in range(3)])
 
     def calculate_itk(self):
-        viewer_origin = self.image_properties.size / 2.0
+        if CFG.get_testing_status("use-slice-location"):
+            viewer_origin = [i / 2.0 for i in self.image_properties.size]
 
-        itk_coords = np.zeros(3, dtype=np.int32)
-        itk_coords[0] = round(self.image_coordinates[0] / self.image_properties.spacing[0] + viewer_origin[0])
-        itk_coords[1] = round(self.image_properties.dimensions[1] - (self.image_coordinates[1] / self.image_properties.spacing[1] + viewer_origin[1]))
-        itk_coords[2] = np.argmin(np.abs(np.array(self.image_properties.z_coords) - self.image_coordinates[2]))
+            itk_coords = np.zeros(3, dtype=np.int32)
+            itk_coords[0] = round(self.image_coordinates[0] / self.image_properties.spacing[0] + viewer_origin[0])
+            itk_coords[1] = round(self.image_properties.dimensions[1] - (
+                        self.image_coordinates[1] / self.image_properties.spacing[1] + viewer_origin[1]))
+            itk_coords[2] = np.argmin(np.abs(np.array(self.image_properties.z_coords) - self.image_coordinates[2]))
 
-        physical_coords = self.image_properties.sitk_image.TransformIndexToPhysicalPoint([int(itk_coords[0]), int(itk_coords[1]), int(itk_coords[2])])
-        # TODO: check TransformContinuousIndexToPhysicalPoint, it produces different results
+        else:
+            viewer_origin = self.image_properties.size / 2.0
+
+            itk_coords = np.zeros(3, dtype=np.int32)
+            itk_coords[0] = 1 + round((self.image_coordinates[0] / self.image_properties.spacing[0]) + viewer_origin[0])
+            itk_coords[1] = 1 + round((self.image_coordinates[1] / self.image_properties.spacing[1]) + viewer_origin[1])
+            # itk_coords[2] = 1 + round(self.image_properties.size[2] - self.slice_idx)
+            itk_coords[2] = 1 + round(self.slice_idx)
+
+        assert all([i >= 0 for i in itk_coords]), "ITK coordinates must be positive"
+
+        physical_coords = self.image_properties.sitk_image.TransformIndexToPhysicalPoint(
+            [int(itk_coords[0]), int(itk_coords[1]), int(itk_coords[2])])
+        # TODO: check TransformContinuousIndexToPhysicalPoint, it produces different results (at least for v3)
         return itk_coords, physical_coords

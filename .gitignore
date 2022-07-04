@@ -2,7 +2,7 @@
 dist/*
 build/*
 src/*/__pycache__/*
-*log*.txt
+*log*
 internal_data/*
 venv/*
 *.pyc
@@ -16,3 +16,7 @@ venv/*
 /MRICenterline/old/
 /MRICenterline/testing/.pytest_cache/
 /MRICenterline/testing/logs/
+/build/
+/dist/
+/databases/
+/docs/test_results/

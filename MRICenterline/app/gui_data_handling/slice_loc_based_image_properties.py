@@ -25,6 +25,7 @@ class SliceLocImageProperties(ImageProperties):
                                               direction=sitk_image.GetDirection(),
                                               size=sitk_image.GetSize())
 
+        self.size = sitk_image.GetSize()
         self.spacing = self.vtk_data.GetSpacing()
         self.dimensions = self.vtk_data.GetDimensions()
         self.extent = self.vtk_data.GetExtent()
@@ -95,5 +96,7 @@ class SliceLocImageProperties(ImageProperties):
         vtk_image.GetPointData().SetScalars(depth_array)
 
         vtk_image.Modified()
+
+        # print(f"VTK Direction Matrix: \n {vtk_image.GetDirectionMatrix()}")
 
         return vtk_image

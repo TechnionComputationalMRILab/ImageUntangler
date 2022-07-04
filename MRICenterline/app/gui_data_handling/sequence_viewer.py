@@ -59,9 +59,20 @@ class SequenceViewer:
         self.length_text_actor = IUCornerAnnotation(CornerLoc.UPPER_LEFT)
 
         self.initialize_text()
+        self.adjust_slice_idx(1)
 
         self.window.Render()
-        
+
+        logging.debug(f'Loading {self.slice_idx}')
+
+    def print_status_to_terminal(self):
+        logging.info(f'''
+            Slice index: {self.slice_idx}
+            Window value: {self.window_val}
+            Level value: {self.level_val}
+            Show cursor: {self.show_cursor}
+        ''')
+
     ###########################################################################
     #                            cursor functions                             #
     ###########################################################################
@@ -174,7 +185,7 @@ class SequenceViewer:
         self.reslice.SetInputData(self.image.vtk_data)
         self.reslice.SetOutputDimensionality(2)
         self.reslice.SetResliceAxes(self.image.transformation)
-        self.reslice.SetInterpolationModeToLinear()
+        # self.reslice.SetInterpolationModeToLinear()
         self.reslice.Update()
 
         self.panel_actor.GetMapper().SetInputConnection(self.reslice.GetOutputPort())
@@ -246,19 +257,22 @@ class SequenceViewer:
         # self.reslice.Update()
         spacing = self.reslice.GetOutput().GetSpacing()[2]
         matrix: vtkMatrix4x4 = self.reslice.GetResliceAxes()
-        center = [round(i, 1) for i in matrix.MultiplyPoint((0, 0, delta*spacing, 1))]
-        # center = matrix.MultiplyPoint((0, 0, delta * spacing, 1))
 
-        slice_idx = 1 + np.int(np.round(((center[2] - self.image.origin[2]) / self.image.spacing[2])))
+        center = [round(i, 1) for i in matrix.MultiplyPoint((0, 0, delta * spacing, 1))]
+        if CFG.get_testing_status("use-slice-location"):
+            # center = [round(i, 1) for i in matrix.MultiplyPoint((0, 0, delta * spacing, 1))]
+            slice_idx = 1 + np.int(np.round(((center[2] - self.image.origin[2]) / self.image.spacing[2])))
+        else:
+            # center = matrix.MultiplyPoint((0, 0, delta * spacing, 1))
+            slice_idx = 1 + np.int(np.round(((center[2] - self.image.origin[2]) / self.image.spacing[2])))
 
-        if 1 <= slice_idx < self.image.size[2]:
+        if 1 <= slice_idx <= self.image.size[2]:
             matrix = self.reslice.GetResliceAxes()
             matrix.SetElement(0, 3, center[0])
             matrix.SetElement(1, 3, center[1])
             matrix.SetElement(2, 3, center[2])
 
             if slice_idx == self.slice_idx:
-                # sometimes the calculated slice index is the same as the previous one? # TODO
                 self.slice_idx = slice_idx + delta
                 self.image.sliceIdx = slice_idx + delta
                 length_count, mpr_count = self.display_points_in_slice(slice_idx + delta)
@@ -269,15 +283,11 @@ class SequenceViewer:
                 length_count, mpr_count = self.display_points_in_slice(slice_idx)
                 self.test_slice_idx_flag = 2
 
-            if CFG.get_testing_status("use-slice-location"):
-                self.update_status_text("Slice Index", self.slice_idx)
-            else:
-                self.update_status_text("Slice Index", 1 + self.image.size[2] - self.slice_idx)
+            self.update_status_text("Slice Index", self.slice_idx)
             self.render_panel()
 
             self.reslice.Update()
             self.update_debug_text(f"L {length_count} | M {mpr_count}"
-                                   f"\n ITK z {1 + self.image.size[2] - self.slice_idx}"
                                    f"\n case_flag {self.test_slice_idx_flag}"
                                    f"\n center {center}")
 

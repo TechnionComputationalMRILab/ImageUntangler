@@ -57,6 +57,10 @@ class CaseModel:
             Picker status: {self.picker_status}
             Window/Level: {self.window_value, self.level_value}
             Centerline: {True if self.centerline_model else False}
+            Image details:
+                Origin: {self.image.properties.origin}
+                Spacing: {self.image.properties.spacing}
+                Size: {self.image.properties.size}
         ''')
 
         self.sequence_manager.print_status_to_terminal()
@@ -68,10 +72,12 @@ class CaseModel:
     # toolbar
     #########
     def save(self):
-        self.sequence_manager.save()
+        session_id = self.sequence_manager.save()
 
         if self.centerline_model:
             self.centerline_model.save()
+
+        return session_id
 
     def export(self, destination: str):
         self.sequence_manager.export(destination)
@@ -121,3 +127,7 @@ class CaseModel:
 
     def load_points(self, length_id, mpr_id):
         self.sequence_manager.load_points(length_id, mpr_id)
+
+    def point_shift(self, direction: str):
+        logging.debug(f"Point shift triggered: {direction}")
+        self.sequence_manager.point_shift(direction)

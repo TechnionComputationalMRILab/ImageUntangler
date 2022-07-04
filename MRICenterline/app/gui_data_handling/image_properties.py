@@ -16,8 +16,7 @@ logging.getLogger(__name__)
 class ImageProperties:
     def __init__(self, sitk_image, parent=None):
         self.sitk_image = sitk_image
-
-        self.nparray = GetArrayFromImage(sitk_image)
+        # print(f'ITK Direction matrix: \n {np.asarray(self.sitk_image.GetDirection()).reshape((3, 3))}')
 
         self.spacing = np.array(sitk_image.GetSpacing())
         self.dimensions = np.int32(sitk_image.GetDimension())
@@ -27,20 +26,23 @@ class ImageProperties:
                        0, self.size[1] - 1,
                        0, self.size[2] - 1)
 
+        self.nparray = GetArrayFromImage(sitk_image)
+
         def calculate_center():
             it = iter(self.extent)
             ext = zip(it, it)
 
             center = []
             for origin, spacing, (extent_min, extent_max) in zip(self.origin, self.spacing, ext):
-                center.append(origin + spacing * 0.5 * (extent_min + extent_max))
+                calculated_center = origin + spacing * 0.5 * (extent_min + extent_max)
+                center.append(round(calculated_center, 1))
             return np.array(center)
 
         center = calculate_center()
         self.sliceIdx = np.int(np.round(((center[2]-self.origin[2])/self.spacing[2]))) + 1
 
         self.vtk_data = self.get_vtk_data()
-        self.transformation = transformation_matrix(center)
+        self.transformation = transformation_matrix(center, view='y_flip_axial')
 
         self.direction_matrix = sitk_image.GetDirection()
 
@@ -83,7 +85,7 @@ class ImageProperties:
         # flip the image in Y direction
         flip = vtk.vtkImageReslice()
         flip.SetInputData(vtkVolBase)
-        flip.SetResliceAxesDirectionCosines(1, 0, 0, 0, -1, 0, 0, 0, 1)
+        # flip.SetResliceAxesDirectionCosines(1, 0, 0, 0, -1, 0, 0, 0, 1)
         flip.Update()
 
         vtkVol = flip.GetOutput()

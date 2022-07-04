@@ -1,0 +1,2 @@
+Case flag test results consistent
+Solved by rounding the calculated center before calculating the slice index
