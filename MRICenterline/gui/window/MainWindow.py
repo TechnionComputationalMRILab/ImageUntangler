@@ -6,6 +6,9 @@ from MRICenterline.gui.splash.InitialWidget import IUInitialWidget
 
 from MRICenterline import CFG, CONST
 
+import logging
+logging.getLogger(__name__)
+
 
 class IUMainWindow(QMainWindow):
     widget_directory = dict()
@@ -35,3 +38,14 @@ class IUMainWindow(QMainWindow):
         index = self.main_widget.addWidget(widget)
         self.main_widget.setCurrentIndex(index)
         self.widget_directory[index] = widget
+
+    def open_new_case(self):
+        if len(self.widget_directory) >= 2:
+            logging.info("New case button clicked")
+            self.main_widget.setCurrentIndex(0)
+            self.main_widget.removeWidget(self.widget_directory[1])
+
+            self.removeToolBar(self.toolbar)
+            self.addToolBar(IUToolbar(self))
+
+            self.setWindowTitle(CONST.WINDOW_NAME)
