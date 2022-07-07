@@ -8,7 +8,7 @@ from MRICenterline.app.points.point import Point
 from MRICenterline.app.points.point_array import PointArray
 from MRICenterline.gui.vtk.line_actor import VerticalLine, VerticalLineArray
 
-from MRICenterline import CFG
+from MRICenterline import CFG, MSG
 
 import logging
 logging.getLogger(__name__)
@@ -62,8 +62,12 @@ class CenterlineModel:
         print("save points")
 
     def refresh_panel(self, angle_change=None, height_change=None):
-        self.calculate_centerline()
-        self.centerline_viewer.refresh_panel(angle_change, height_change)
+        try:
+            self.calculate_centerline()
+            self.centerline_viewer.refresh_panel(angle_change, height_change)
+        except Exception as e:
+            MSG.msg_box_warning(f'Error in calculating centerline: {e}')
+            logging.warning(f'Error in calculating centerline: {e}')
 
     def pick(self, pick_coords):
         point = Point(pick_coords, 0, None)

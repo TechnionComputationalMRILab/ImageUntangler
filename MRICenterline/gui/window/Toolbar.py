@@ -10,6 +10,11 @@ class IUToolbar(QToolBar):
 
         self.setMovable(False)
 
+        new_case_button = QPushButton(qta.icon('fa.gear'), "New Case")
+        new_case_button.setFlat(True)
+        self.addWidget(new_case_button)
+        new_case_button.clicked.connect(parent.open_new_case)
+
         setting_button = QPushButton(qta.icon('fa.gear'), "Settings")
         setting_button.setFlat(True)
         self.addWidget(setting_button)

@@ -1,6 +1,8 @@
 from vtkmodules.qt.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
 from vtkmodules.all import vtkImageActor, vtkImageReslice, vtkRenderer, vtkActor2D, vtkTextMapper, vtkTextProperty
 
+from MRICenterline.gui.help.help_text import CenterlineInteractorHelpText
+from MRICenterline.gui.vtk.IUCornerAnnotation import CornerLoc, IUCornerAnnotation
 from MRICenterline.gui.vtk.text_actor import IUTextActor
 from MRICenterline.gui.vtk.sequence_interactor_style import SequenceViewerInteractorStyle
 from MRICenterline import CFG, CONST
@@ -25,8 +27,27 @@ class CenterlineViewer:
         self.panel_renderer = vtkRenderer()
         self.removable_actor_list = []
 
-        self.height_text_actor = IUTextActor("Height: " + str(self.model.height), True, 0)
-        self.angle_text_actor = IUTextActor("Angle: " + str(self.model.angle), True, 1)
+        self.status_texts = {
+            "Height": self.model.height,
+            "Angle": self.model.angle,
+        }
+        self.status_text_actor = IUCornerAnnotation(CornerLoc.LOWER_LEFT)
+        self.help_text_actor = IUCornerAnnotation(CornerLoc.LOWER_RIGHT)
+
+        self.initialize_text()
+
+        # self.height_text_actor = IUTextActor("Height: " + str(self.model.height), True, 0)
+        # self.angle_text_actor = IUTextActor("Angle: " + str(self.model.angle), True, 1)
+
+    def initialize_text(self):
+        self.status_text_actor.SetInput(self.status_texts)
+        self.status_text_actor.SetColor(CFG.get_color('display', 'text-color'))
+
+        self.help_text_actor.SetInput(CenterlineInteractorHelpText.text_out)
+        self.help_text_actor.SetColor(CFG.get_color('display', 'help-text-color'))
+
+        self.panel_renderer.AddViewProp(self.status_text_actor)
+        self.panel_renderer.AddViewProp(self.help_text_actor)
 
     def set_window_level(self):
         self.panel_actor.GetProperty().SetColorWindow(self.model.window_value)
@@ -60,8 +81,8 @@ class CenterlineViewer:
         self.connect_panel_actor()
         self.set_window_level()
 
-        self.panel_renderer.AddActor(self.height_text_actor)
-        self.panel_renderer.AddActor(self.angle_text_actor)
+        # self.panel_renderer.AddActor(self.height_text_actor)
+        # self.panel_renderer.AddActor(self.angle_text_actor)
 
         self.reslice.Update()
         self.window.Render()
@@ -95,11 +116,17 @@ class CenterlineViewer:
         self.reslice.Update()
 
         if angle_change:
-            self.angle_text_actor.SetInput("Angle: " + str(self.model.angle))
+            self.update_status_text("Angle", str(self.model.angle))
+            # self.angle_text_actor.SetInput("Angle: " + str(self.model.angle))
         if height_change:
-            self.height_text_actor.SetInput("Height: " + str(self.model.height))
+            self.update_status_text("Height", str(self.model.height))
+            # self.height_text_actor.SetInput("Height: " + str(self.model.height))
 
         self.window.Render()
+
+    def update_status_text(self, key, val):
+        self.status_texts[key] = val
+        self.status_text_actor.SetInput(self.status_texts)
 
     def clear_removable_actors(self):
         for actor in self.removable_actor_list:
