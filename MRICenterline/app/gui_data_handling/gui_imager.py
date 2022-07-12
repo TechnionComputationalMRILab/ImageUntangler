@@ -29,4 +29,3 @@ class GraphicalImager(Imager):
                 self.sitk_image = self.reader[item]
                 self.properties = ImageProperties(self.sitk_image, parent=self)
                 return self.properties
-

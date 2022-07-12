@@ -1,4 +1,4 @@
-from MRICenterline.app.points.status import PickerStatus, PointStatus, TimerStatus
+from MRICenterline.app.points.status import PickerStatus, PointStatus
 from MRICenterline.app.points.timer import Timer
 from MRICenterline.app.gui_data_handling.gui_imager import GraphicalImager
 from MRICenterline.app.gui_data_handling.sequence_model import SequenceModel
@@ -33,10 +33,7 @@ class CaseModel:
     def set_centerline_model(self, centerline_model):
         self.centerline_model = centerline_model
 
-    #########
-    # callbacks
-    #########
-
+    # region callbacks
     def change_sequence(self, s):
         logging.info(f"Changing sequence to {self.sequence_list[s]}")
         self.active_sequence_index = s
@@ -68,9 +65,9 @@ class CaseModel:
     def mpr_marker_highlight(self, index: int):
         self.sequence_manager.highlight_point(index, PointStatus.MPR)
 
-    #########
-    # toolbar
-    #########
+    # endregion
+
+    # region toolbar
     def save(self):
         session_id = self.sequence_manager.save()
 
@@ -95,9 +92,6 @@ class CaseModel:
         if self.centerline_model:
             self.centerline_model.calculate_length()
 
-    def intermediate_points(self, show: bool):
-        self.sequence_manager.intermediate_points(not show)
-
     def timer_status(self, status):
         logging.info(f"Timer set to {status}")
         self.timer.command(status)
@@ -109,9 +103,11 @@ class CaseModel:
         if self.centerline_model:
             self.centerline_model.toggle_mpr_marker(show)
 
-    #########
-    # points
-    #########
+    # endregion
+
+    # region points
+    def intermediate_points(self, show: bool):
+        self.sequence_manager.intermediate_points(not show)
 
     def find_point(self):
         self.picker_status = PickerStatus.FIND_MPR
@@ -131,3 +127,4 @@ class CaseModel:
     def point_shift(self, direction: str):
         logging.debug(f"Point shift triggered: {direction}")
         self.sequence_manager.point_shift(direction)
+    # endregion

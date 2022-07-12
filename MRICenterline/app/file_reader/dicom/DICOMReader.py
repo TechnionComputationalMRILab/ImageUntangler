@@ -4,8 +4,8 @@ import sqlite3
 import os
 import SimpleITK as sitk
 
-from MRICenterline.app.file_reader.dicom import InitialDatabaseBuild
-from MRICenterline.app.file_reader.AbstractReader import AbstractReader
+from MRICenterline.app.file_reader.dicom import InitialDatabaseBuild, constants
+from MRICenterline.app.file_reader.AbstractReader import AbstractReader, ImageOrientation
 
 from MRICenterline import CFG
 
@@ -107,6 +107,33 @@ class DICOMReader(AbstractReader):
 
         else:
             raise NotImplementedError("Slice Locations not used")
+
+    def get_image_orientation(self, item) -> ImageOrientation:
+        file = self.get_file_list(item)[0]
+
+        reader = sitk.ImageFileReader()
+
+        reader.SetFileName(file)
+        reader.LoadPrivateTagsOn()
+
+        reader.ReadImageInformation()
+
+        for k in reader.GetMetaDataKeys():
+            v = reader.GetMetaData(k)
+
+            tag1, tag2 = k.split("|")
+
+            if tag1 == "0020" and tag2 == "0037":
+                image_orientation = [round(float(i)) for i in v.split("\\")]
+
+                if image_orientation == constants.CORONAL:
+                    return ImageOrientation.CORONAL
+                elif image_orientation == constants.AXIAL:
+                    return ImageOrientation.AXIAL
+                elif image_orientation == constants.SAGITTAL:
+                    return ImageOrientation.SAGITTAL
+                else:
+                    return ImageOrientation.UNKNOWN
 
     @staticmethod
     def generate(file_list, use_v3=False):
