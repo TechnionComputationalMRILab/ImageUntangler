@@ -1,4 +1,11 @@
-import numpy as np
+from enum import Enum, auto
+
+
+class ImageOrientation(Enum):
+    CORONAL = auto()
+    AXIAL = auto()
+    SAGITTAL = auto()
+    UNKNOWN = auto()
 
 
 class AbstractReader:
@@ -19,3 +26,7 @@ class AbstractReader:
 
     def __len__(self):
         return len(self.sequence_list)
+
+    def get_image_orientation(self, item) -> ImageOrientation:
+        raise NotImplementedError
+

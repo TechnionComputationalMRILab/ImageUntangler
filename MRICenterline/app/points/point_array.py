@@ -311,7 +311,7 @@ class PointArray:
 
         for pt in self.point_array:
             d = dict()
-            d['slice_index'] = pt.slice_idx
+            d['slice_index'] = int(pt.slice_idx)
             d['image_coords'] = pt.image_coordinates
             d["itk_index_coords"] = pt.itk_index_coords
             d['itk_physical_coords'] = pt.physical_coords

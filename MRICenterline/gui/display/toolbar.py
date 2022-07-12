@@ -13,6 +13,7 @@ class DisplayPanelToolbarButtons(QWidget):
         super().__init__(parent)
         layout = QGridLayout(self)
 
+        # region  save/export
         column = 0
 
         save_button = QPushButton(qta.icon('fa.save'), "Save")
@@ -24,14 +25,16 @@ class DisplayPanelToolbarButtons(QWidget):
         export_button.setFlat(True)
         layout.addWidget(export_button, 1, column, 1, 1)
         export_button.clicked.connect(lambda: toolbar_connect.export(model, parent))
+        # endregion
 
+        # region length
         column += 1  # NEW COLUMN
 
         def enable_length_picking(s):
             if s:
                 toolbar_connect.set_picker_status(model, PickerStatus.PICKING_LENGTH)
 
-                winlev_button.setChecked(not s)
+                window_level_button.setChecked(not s)
                 mpr_button.setChecked(not s)
             else:
                 toolbar_connect.set_picker_status(model, PickerStatus.NOT_PICKING)
@@ -47,13 +50,15 @@ class DisplayPanelToolbarButtons(QWidget):
         measure_length_button.setEnabled(True)
         layout.addWidget(measure_length_button, 1, column, 1, 1)
         measure_length_button.clicked.connect(lambda: toolbar_connect.calculate(model, PointStatus.LENGTH))
+        # endregion
 
+        # region MPR
         column += 1  # NEW COLUMN
 
         def enable_mpr_picking(s):
             if s:
                 toolbar_connect.set_picker_status(model, PickerStatus.PICKING_MPR)
-                winlev_button.setChecked(not s)
+                window_level_button.setChecked(not s)
                 length_button.setChecked(not s)
             else:
                 toolbar_connect.set_picker_status(model, PickerStatus.NOT_PICKING)
@@ -68,7 +73,9 @@ class DisplayPanelToolbarButtons(QWidget):
         calculate_mpr_button.setEnabled(True)
         layout.addWidget(calculate_mpr_button, 1, column, 1, 1)
         calculate_mpr_button.clicked.connect(lambda: toolbar_connect.calculate(model, PointStatus.MPR))
+        # endregion
 
+        # region additional MPR functions
         column += 1  # NEW COLUMN
 
         select_point_button = QPushButton(qta.icon("mdi.select-search"), "Select MPR point")
@@ -88,7 +95,9 @@ class DisplayPanelToolbarButtons(QWidget):
         mpr_markers_button.setCheckable(True)
         mpr_markers_button.setChecked(False)
         mpr_markers_button.clicked.connect(show_hide_mpr_markers)
+        # endregion
 
+        # region undo/clear
         column += 1  # NEW COLUMN
 
         undo_button = QPushButton(qta.icon('mdi.undo'), "Undo")
@@ -100,7 +109,9 @@ class DisplayPanelToolbarButtons(QWidget):
         clear_all_button.setFlat(True)
         layout.addWidget(clear_all_button, 1, column, 1, 1)
         clear_all_button.clicked.connect(lambda: toolbar_connect.undo(model, undo_all=True))
+        # endregion
 
+        # region Info/Comments
         column += 1  # NEW COLUMN
 
         patient_info_button = QPushButton(qta.icon('mdi.folder-information'), "Patient Info")
@@ -112,6 +123,10 @@ class DisplayPanelToolbarButtons(QWidget):
         comment_button.setFlat(True)
         layout.addWidget(comment_button, 1, column, 1, 1)
         comment_button.clicked.connect(lambda: toolbar_connect.comment(model, parent))
+        # endregion
+
+        # region window/level + intermediate points
+        column += 1  # NEW COLUMN
 
         def reset_other_picker_buttons(s):
             toolbar_connect.set_picker_status(model, PickerStatus.NOT_PICKING)
@@ -120,13 +135,11 @@ class DisplayPanelToolbarButtons(QWidget):
                 length_button.setChecked(not s)
                 mpr_button.setChecked(not s)
 
-        column += 1  # NEW COLUMN
-
-        winlev_button = QPushButton(qta.icon('mdi.lock-reset'), "Window/level")
-        winlev_button.setCheckable(True)
-        winlev_button.setChecked(True)
-        layout.addWidget(winlev_button, 0, column, 1, 1)
-        winlev_button.clicked.connect(reset_other_picker_buttons)
+        window_level_button = QPushButton(qta.icon('mdi.lock-reset'), "Window/level")
+        window_level_button.setCheckable(True)
+        window_level_button.setChecked(True)
+        layout.addWidget(window_level_button, 0, column, 1, 1)
+        window_level_button.clicked.connect(reset_other_picker_buttons)
 
         def show_hide_intermediate_points(s):
             toolbar_connect.intermediate_points(model, s)
@@ -143,6 +156,9 @@ class DisplayPanelToolbarButtons(QWidget):
         layout.addWidget(intermediate_points_button, 1, column, 1, 1)
         intermediate_points_button.clicked.connect(show_hide_intermediate_points)
 
+        # endregion
+
+        # region timers
         column += 1  # NEW COLUMN
 
         def timer_start(s):
@@ -179,3 +195,5 @@ class DisplayPanelToolbarButtons(QWidget):
         timer_pause.setEnabled(False)
         layout.addWidget(timer_pause, 1, column, 1, 1)
         timer_pause.clicked.connect(timer_pause_resume)
+
+        # endregion
