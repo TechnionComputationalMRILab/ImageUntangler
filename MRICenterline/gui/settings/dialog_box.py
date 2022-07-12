@@ -62,7 +62,7 @@ class SettingsDialogBox(QDialog):
         from MRICenterline.app.config.file_check import reset_config_to_defaults
         logging.info("Preferences: Reset function")
 
-        reset_config_to_defaults()
+        # reset_config_to_defaults()
         CFG.reset_script_folder()
 
         super().accept()

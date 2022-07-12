@@ -18,12 +18,16 @@ def custom_open(parent):
     """ opens the custom open dialog """
     from MRICenterline.gui.loader.file.dialog_box import FileOpenDialogBox
     from MRICenterline.gui.display.configure import configure_main_widget
-    check_raw_data_folder(parent)
+    is_new = check_raw_data_folder(parent)
 
-    file_open_dialog = FileOpenDialogBox(parent=parent)
-    if file_open_dialog.exec():
-        selected_file, selected_sequence = file_open_dialog.get_file()
-        configure_main_widget(path=str(selected_file), parent_widget=parent, selected_sequence=selected_sequence)
+    if is_new:
+        print("new folder")
+
+    else:
+        file_open_dialog = FileOpenDialogBox(parent=parent)
+        if file_open_dialog.exec():
+            selected_file, selected_sequence = file_open_dialog.get_file()
+            configure_main_widget(path=str(selected_file), parent_widget=parent, selected_sequence=selected_sequence)
 
 
 def bulk_scanner(parent):
@@ -62,9 +66,14 @@ def open_using_file_dialog(parent):
 
 
 def check_raw_data_folder(parent):
+    """ if this function returns true, then a new data folder is set and the files need to be pre-processed """
+
     if CFG.get_folder('raw_data') == 'none':
         from MRICenterline.gui.settings.initial_data_folder_dialog import ask_for_data_folder
         ask_for_data_folder(parent)
+
+        return True
+    return False
 
 
 def check_database():

@@ -46,9 +46,12 @@ class InitialConfigDialog(QDialog):
         self.button_box.accepted.connect(self.accept)
 
     def accept(self) -> None:
-        logging.info(f"Setting the data folder as {self.line_edit_text}")
-        CFG.set_config_data('folders', 'data-folder', self.line_edit_text)
-        super().accept()
+        if self.line_edit_text == "No folder selected":
+            self.reject()
+        else:
+            logging.info(f"Setting the data folder as {self.line_edit_text}")
+            CFG.set_config_data('folders', 'data-folder', self.line_edit_text)
+            super().accept()
 
     def reject(self) -> None:
         MSG.msg_box_warning("No folder selected. Program will now close.")

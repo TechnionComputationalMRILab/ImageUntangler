@@ -12,7 +12,7 @@ venv/*
 *.spec
 *.ini
 *.csv
-/metadata.db
+/xmetadata.db
 /MRICenterline/old/
 /MRICenterline/testing/.pytest_cache/
 /MRICenterline/testing/logs/
