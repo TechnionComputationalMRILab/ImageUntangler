@@ -41,12 +41,15 @@ def bulk_scanner(parent):
 def load_previous_annotation(parent):
     from MRICenterline.gui.loader.annotation.dialog_box import AnnotationLoadDialogBox
     from MRICenterline.gui.display.configure import configure_main_widget_from_session
-    check_database()
 
-    annotation_load_dialog_box = AnnotationLoadDialogBox(parent=parent)
-    if annotation_load_dialog_box.exec():
-        selected_session = annotation_load_dialog_box.get_session()
-        configure_main_widget_from_session(parent, selected_session)
+    # check_raw_data_folder(parent)
+    db_status = check_database()
+
+    if db_status:
+        annotation_load_dialog_box = AnnotationLoadDialogBox(parent=parent)
+        if annotation_load_dialog_box.exec():
+            selected_session = annotation_load_dialog_box.get_session()
+            configure_main_widget_from_session(parent, selected_session)
 
 
 def open_using_file_dialog(parent):
@@ -77,4 +80,12 @@ def check_raw_data_folder(parent):
 
 
 def check_database():
-    pass
+    """ if this function returns true, there are no cases found in the database """
+    import sqlite3
+    con = sqlite3.connect(CFG.get_db())
+    len_cases = con.cursor().execute("SELECT COUNT(*) FROM CASE_LIST").fetchone()[0]
+
+    if not len_cases:
+        MSG.msg_box_warning("No cases found in database.")
+        return False
+    return True

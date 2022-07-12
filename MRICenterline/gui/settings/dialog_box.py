@@ -5,6 +5,7 @@ from MRICenterline.gui.settings.widget import PreferencesWidget
 from MRICenterline import CFG
 
 import logging
+
 logging.getLogger(__name__)
 
 
@@ -56,13 +57,14 @@ class SettingsDialogBox(QDialog):
         super().reject()
 
     def help(self):
+        # TODO
         logging.info("Preferences: Help function")
 
     def reset(self) -> None:
         from MRICenterline.app.config.file_check import reset_config_to_defaults
         logging.info("Preferences: Reset function")
 
-        # reset_config_to_defaults()
+        reset_config_to_defaults()
         CFG.reset_script_folder()
 
         super().accept()
