@@ -29,23 +29,22 @@ class Point:
                 z_coords = self.image_properties.z_coords
                 self.image_coordinates[2] = z_coords[self.slice_idx]
 
-    @classmethod
-    def point_from_physical(cls, physical_coords, image_properties, color=(1, 1, 1), size=3):
-        #TODO
-        sitk_image = image_properties.sitk_image
-        viewer_origin = image_properties.size / 2
-
-        itx_coords = sitk_image.TransformPhysicalPointToIndex(physical_coords)
-
-        image_coordinates = np.zeros(3)
-        # image_coordinates[0] = (image_properties.spacing[0] * itx_coords[0]) + image_properties.origin[0]
-        # image_coordinates[1] = viewer_origin[1] - ((image_properties.spacing[1] * itx_coords[1]) - image_properties.origin[1])
-        image_coordinates[0] = (image_properties.spacing[0] * itx_coords[0]) + (image_properties.spacing[0] * image_properties.origin[0])
-        image_coordinates[1] = viewer_origin[1] - (image_properties.spacing[1] * itx_coords[1]) + (image_properties.origin[1] / 2)
-        image_coordinates[2] = itx_coords[2]
-        slice_idx = itx_coords[2]
-
-        return cls(image_coordinates, slice_idx, image_properties, color, size)
+    # @classmethod
+    # def point_from_physical(cls, physical_coords, image_properties, color=(1, 1, 1), size=3):
+    #     sitk_image = image_properties.sitk_image
+    #     viewer_origin = image_properties.size / 2
+    #
+    #     itx_coords = sitk_image.TransformPhysicalPointToIndex(physical_coords)
+    #
+    #     image_coordinates = np.zeros(3)
+    #     # image_coordinates[0] = (image_properties.spacing[0] * itx_coords[0]) + image_properties.origin[0]
+    #     # image_coordinates[1] = viewer_origin[1] - ((image_properties.spacing[1] * itx_coords[1]) - image_properties.origin[1])
+    #     image_coordinates[0] = (image_properties.spacing[0] * itx_coords[0]) + (image_properties.spacing[0] * image_properties.origin[0])
+    #     image_coordinates[1] = viewer_origin[1] - (image_properties.spacing[1] * itx_coords[1]) + (image_properties.origin[1] / 2)
+    #     image_coordinates[2] = itx_coords[2]
+    #     slice_idx = itx_coords[2]
+    #
+    #     return cls(image_coordinates, slice_idx, image_properties, color, size)
 
     @classmethod
     def point_from_itk_index(cls, itk_coords, image_properties, color=(1, 1, 1), size=3):
@@ -166,5 +165,4 @@ class Point:
 
         physical_coords = self.image_properties.sitk_image.TransformIndexToPhysicalPoint(
             [int(itk_coords[0]), int(itk_coords[1]), int(itk_coords[2])])
-        # TODO: check TransformContinuousIndexToPhysicalPoint, it produces different results (at least for v3)
         return itk_coords, physical_coords

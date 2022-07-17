@@ -11,19 +11,23 @@ logging.getLogger(__name__)
 
 
 class ScannerWidget(QWidget):
-    folder_path = CFG.get_folder('raw_data')
-    text_box = QTextEdit()
-    preprocess_options = {
-        "organize_data":
-            QCheckBox("Reorganize the data (generic case names, flat structure)"),
-        "metadata_sequence_scan":
-            QCheckBox("Scan the files for metadata and sequences and commits to database")
-    }
-
     def __init__(self, parent=None):
         super().__init__(parent)
+        self.folder_path = CFG.get_folder('raw_data')
+        self.text_box = QTextEdit()
+        self.preprocess_options = {
+            "organize_data":
+                QCheckBox("Reorganize the data (generic case names, flat structure)"),
+            "metadata_sequence_scan":
+                QCheckBox("Scan the files for metadata and sequences and commits to database")
+        }
+
         self.directories = [Path(i) for i in glob(f"{self.folder_path}/**/", recursive=True)]
-        self.directories.remove(Path(self.folder_path))
+        try:
+            self.directories.remove(Path(self.folder_path))
+        except ValueError:
+            # user selected a directory in a way that the root folder is not in the list
+            pass
 
         main_layout = QGridLayout(self)
         self.status_text = f"<font color='red'>Found {len(self.directories)} directories in "\

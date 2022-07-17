@@ -90,8 +90,8 @@ class Ver3AnnotationImport:
                 point_array.add_point(parsed)
         else:
             image_properties = ImageProperties(dcm_reader[self.sequence_name])
-            v_3_file_list = dcm_reader.get_file_list(self.sequence_name, use_v3=True)
-            v3_np_arr, clean_file_list = DICOMReader.generate(file_list=v_3_file_list, use_v3=True)
+            v3_file_list = dcm_reader.get_file_list(self.sequence_name, use_v3=True)
+            v3_np_arr, clean_file_list = DICOMReader.generate(file_list=v3_file_list, use_v3=True)
             v3_z_coords = dcm_reader.get_z_coords(seq=self.sequence_name, use_v3=True)
             v3_image_properties = SliceLocImageProperties(np_array=v3_np_arr,
                                                           z_coords=v3_z_coords,
