@@ -1,6 +1,7 @@
 import numpy as np
 from vtkmodules.all import vtkSphereSource, vtkPolyDataMapper, vtkActor
 
+from MRICenterline.app.file_reader.AbstractReader import ImageOrientation
 from MRICenterline.app.gui_data_handling.image_properties import ImageProperties
 from MRICenterline import CFG
 
@@ -63,7 +64,7 @@ class Point:
         return cls(image_coordinates, slice_idx, image_properties, color, size)
 
     @classmethod
-    def point_from_v3(cls, image_coordinates, image_properties,
+    def point_from_v3(cls, image_coordinates, image_properties, image_orientation,
                       v3_image_size, v3_image_spacing, v3_image_dimensions, v3_z_coords,
                       color=(1, 1, 1), size=3):
         viewer_origin = [i / 2.0 for i in v3_image_size]
@@ -72,8 +73,19 @@ class Point:
         itk_coords[0] = round(image_coordinates[0] / v3_image_spacing[0] + viewer_origin[0])
         itk_coords[1] = round(v3_image_dimensions[1] - (
                 image_coordinates[1] / v3_image_spacing[1] + viewer_origin[1]))
-        # itk_coords[2] = v3_image_size[2] - (np.argmin(np.abs(np.array(v3_z_coords) - image_coordinates[2])))
-        itk_coords[2] = np.argmin(np.abs(np.array(v3_z_coords) - image_coordinates[2]))
+
+        if image_orientation == ImageOrientation.CORONAL:
+            itk_coords[2] = np.argmin(np.abs(np.array(v3_z_coords) - image_coordinates[2]))
+
+            slice_index = itk_coords[2] + 2
+        elif image_orientation == ImageOrientation.AXIAL:
+            itk_coords[2] = v3_image_dimensions[2] - np.argmin(np.abs(np.array(v3_z_coords) - image_coordinates[2]))
+
+            slice_index = itk_coords[2]
+        else:
+            # We don't have sagittal cases for now
+            itk_coords[2] = 0
+            slice_index = 0
 
         assert all([0 <= i for i in itk_coords]), "ITK coords must be positive"
         assert all([itk_coords[i] <= image_properties.size[i] for i in range(3)]), \
@@ -81,7 +93,7 @@ class Point:
 
         # return cls.point_from_itk_index(itk_coords, image_properties, color=color, size=size)
         return cls(picked_coords=image_coordinates,
-                   slice_index=itk_coords[2] + 2,
+                   slice_index=slice_index,
                    image_properties=image_properties,
                    color=color,
                    size=size)

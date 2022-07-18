@@ -14,7 +14,7 @@ logging.getLogger(__name__)
 
 
 class ImageProperties:
-    def __init__(self, sitk_image, parent=None):
+    def __init__(self, sitk_image, z_coords, parent=None):
         self.sitk_image = sitk_image
         # print(f'ITK Direction matrix: \n {np.asarray(self.sitk_image.GetDirection()).reshape((3, 3))}')
 
@@ -47,7 +47,7 @@ class ImageProperties:
         self.direction_matrix = sitk_image.GetDirection()
 
         self.window_value, self.level_value = self.calculate_window_and_level()
-        self.z_coords = []
+        self.z_coords = z_coords
 
     def __repr__(self):
         return f"""

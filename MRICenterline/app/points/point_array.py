@@ -278,9 +278,28 @@ class PointArray:
             "image coords": img_coords_list
         }
 
-    def get_as_np_array(self):
+    def get_as_array_for_centerline(self, image_properties):
         import numpy as np
-        return np.asarray([pt.image_coordinates for pt in self.point_array])
+
+        cl_array = []
+        for pt in self.point_array:
+            itk_coords = pt.itk_index_coords
+
+            viewer_origin = image_properties.size / 2
+
+            image_coordinates = np.zeros(3)
+            image_coordinates[0] = (itk_coords[0] - 1 - viewer_origin[0]) * image_properties.spacing[0]
+            image_coordinates[1] = (itk_coords[1] - 1 - viewer_origin[1]) * image_properties.spacing[1]
+
+            slice_idx = itk_coords[2] - 1
+
+            v3_z_coords = image_properties.z_coords
+            image_coordinates[2] = v3_z_coords[slice_idx - 2]
+
+            cl_array.append(image_coordinates)
+
+        return np.asarray(cl_array)
+        # return np.asarray([pt.image_coordinates for pt in self.point_array])
 
     def find_nearest_point(self, other: Point, get_index: bool = False) -> Point or int:
         point_and_distances = []

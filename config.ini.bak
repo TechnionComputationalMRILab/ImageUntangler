@@ -1,0 +1,57 @@
+[folders]
+data-folder = C:/Users/ang.a/Database/Rambam/clean_cases_test/100
+script-folder = C:\Users\ang.a\Documents\TCML-repos\ImageUntangler
+
+[display]
+start-maximized = on
+horizontal-number-of-panels = 1
+vertical-number-of-panels = 1
+display-width = 1920
+display-height = 1080
+toolbar-style = icon-and-text
+font-size = 30
+window-percentile = 90
+show-interactor-coords = off
+text-color = 0, 34, 158
+show-interactor-help = on
+help-text-color = 230, 0, 0
+show-interactor-debug = off
+debug-text-color = 0, 0, 0
+show-interactor-cursor = off
+cursor-color = 255, 0, 0
+
+[length-display-style]
+color = 55, 230, 128
+highlighted-color = 55, 150, 128
+marker-size = 1
+show-line = on
+line-thickness = 10
+line-style = dotted
+
+[mpr-display-style]
+color = 255, 0, 0
+highlighted-color = 150, 0, 0
+marker-size = 1
+line-thickness = 10
+line-style = line
+mpr-markers = on
+
+[mpr-length-display-style]
+color = 255, 255, 0
+highlighted-color = 255, 255, 0
+marker-size = 1
+show-line = on
+line-thickness = 10
+line-style = line
+
+[testing]
+use-slice-location = off
+draw-connecting-lines = off
+ignore-uneven-slices = off
+point-editing = off
+show-memory-usage = on
+show-fixer-button = on
+show-sliders = off
+point-shifter = on
+test-mode = off
+

@@ -142,7 +142,7 @@ def build_sequence_tables(folder, case_id, case_name):
         last_seq_id = seq_id + 2
 
     with con:  # insert files to be ignored
-        con.execute('insert into sequences (case_id, name, seq_id, orientation) values (?, ?, ?)',
+        con.execute('insert into sequences (case_id, name, seq_id, orientation) values (?, ?, ?, ?)',
                                            (case_id, "INVALID", last_seq_id, "U"))
         for file in invalid_files:
             con.execute('insert into sequence_files (filename, seq_id, case_id) values (?, ?, ?)',

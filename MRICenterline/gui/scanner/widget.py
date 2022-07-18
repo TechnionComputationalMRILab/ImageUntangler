@@ -1,5 +1,7 @@
 from pathlib import Path
 from glob import glob
+
+from PyQt5.QtCore import QObject, pyqtSignal
 from PyQt5.QtWidgets import QWidget, QFileDialog, QPushButton, QVBoxLayout, QLabel, \
                             QGridLayout, QTextEdit, QGroupBox, QCheckBox
 

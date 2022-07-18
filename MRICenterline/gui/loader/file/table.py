@@ -22,9 +22,9 @@ class SequenceFileOpenTable(QTableWidget):
         self.showing = 'SEQ'
         self.data, rows = get_openable_sequences()
         self.setRowCount(rows)
-        self.setColumnCount(3)
+        self.setColumnCount(4)
         self.set_data()
-        self.setColumnWidth(1, 500)
+        self.setColumnWidth(3, 500)
 
     def use_cases(self):
         self.showing = 'CASE'

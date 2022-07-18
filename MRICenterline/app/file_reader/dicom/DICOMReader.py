@@ -7,7 +7,7 @@ import SimpleITK as sitk
 from MRICenterline.app.file_reader.dicom import InitialDatabaseBuild, constants, DICOMImageOrientation
 from MRICenterline.app.file_reader.AbstractReader import AbstractReader, ImageOrientation
 
-from MRICenterline import CFG
+from MRICenterline import CFG, MSG
 
 import logging
 logging.getLogger(__name__)
@@ -28,7 +28,14 @@ class DICOMReader(AbstractReader):
         if type(item) is int:
             return self[self.sequence_list[item]]
         elif (type(item) is str) and (item in self.sequence_list):
-            return self.generate(self.get_file_list(item))
+            try:
+                return self.generate(self.get_file_list(item))
+            except FileNotFoundError:
+                MSG.msg_box_warning("File not found",
+                                    should_crash=True,
+                                    details="Possible config/database mismatch. Please check config.ini",
+                                    info="Program will now close")
+                logging.error("File not found. Probably an error with the raw-data folder set in config.ini")
         else:
             raise KeyError("Sequence not found in DICOMReader")
 
@@ -85,28 +92,25 @@ class DICOMReader(AbstractReader):
                 raise KeyError("Sequence not found in database")
 
     def get_z_coords(self, seq, use_v3=False):
-        if CFG.get_testing_status("use-slice-location") or use_v3:
-            con = sqlite3.connect(CFG.get_db())
+        con = sqlite3.connect(CFG.get_db())
 
-            if type(seq) is str:
-                query = f"""
-                         select distinct slice_location from slice_locations
-                         inner join sequence_files
-                         on sequence_files.file_id = slice_locations.file_id
-                         inner join sequences
-                         on sequences.seq_id = sequence_files.seq_id
-                         where sequences.name = '{seq}'
-                         and sequence_files.case_id = {self.case_id}
-                         order by slice_location desc;
-                         """
-                z_list = [float(item[0]) for item in con.cursor().execute(query).fetchall()]
-                con.close()
-                return sorted(z_list)
-            elif type(seq) is int:
-                return self.get_z_coords(self.sequence_list[seq])
+        if type(seq) is str:
+            query = f"""
+                     select distinct slice_location from slice_locations
+                     inner join sequence_files
+                     on sequence_files.file_id = slice_locations.file_id
+                     inner join sequences
+                     on sequences.seq_id = sequence_files.seq_id
+                     where sequences.name = '{seq}'
+                     and sequence_files.case_id = {self.case_id}
+                     order by slice_location desc;
+                     """
+            z_list = [float(item[0]) for item in con.cursor().execute(query).fetchall()]
+            con.close()
+            return sorted(z_list)
+        elif type(seq) is int:
+            return self.get_z_coords(self.sequence_list[seq])
 
-        else:
-            raise NotImplementedError("Slice Locations not used")
 
     def get_image_orientation(self, item) -> ImageOrientation:
         file = self.get_file_list(item)[0]

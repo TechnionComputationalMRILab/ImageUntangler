@@ -144,7 +144,7 @@ class CenterlineModel:
         self.refresh_panel(angle_change=self.angle)
 
     def calculate_centerline(self):
-        input_points = self.point_array.get_as_np_array()
+        input_points = self.point_array.get_as_array_for_centerline(self.image_properties)
 
         ppv = PointsToPlaneVectors(input_points,
                                    self.image_properties,

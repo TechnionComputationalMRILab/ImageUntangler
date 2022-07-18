@@ -54,13 +54,14 @@ def load_previous_annotation(parent):
 
 def open_using_file_dialog(parent):
     from MRICenterline.gui.display.configure import configure_main_widget
-    check_raw_data_folder(parent)
+    # check_raw_data_folder(parent)
 
     file_explorer = QFileDialog(directory=CFG.get_config_data("folders", 'data-folder'))
     folder_path = str(file_explorer.getExistingDirectory())
 
     if folder_path:
         logging.info(f"Loading from selected folder {folder_path}")
+        CFG.set_config_data('folders', 'data-folder', folder_path)
 
         configure_main_widget(path=folder_path, parent_widget=parent)
 
