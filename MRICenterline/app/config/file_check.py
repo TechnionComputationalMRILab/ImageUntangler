@@ -24,7 +24,8 @@ def file_checks() -> None:
         logging.info(f"Using configuration file: {config_file_path}")
     else:
         logging.info("Config file not found, creating from default...")
-        shutil.copy(Path(str(Path(__file__).parent) + r'\default_config.ini'), config_file_path)
+
+        shutil.copy(os.path.join(home_path, "default_config.ini"), config_file_path)
 
     # set up database
     db_file_path = os.path.join(home_path, 'metadata.db')
@@ -50,4 +51,4 @@ def reset_config_to_defaults() -> None:
 
     # copy the default config file to the directory
     config_file_path = os.path.join(home_path, 'config.ini')
-    shutil.copy(Path(str(Path(__file__).parent) + r'\default_config.ini'), config_file_path)
+    shutil.copy(os.path.join(home_path, 'default_config.ini'), config_file_path)

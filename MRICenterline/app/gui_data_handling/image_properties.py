@@ -7,6 +7,7 @@ from SimpleITK import GetArrayFromImage
 import numpy as np
 
 from MRICenterline import CFG
+from MRICenterline.app.file_reader.AbstractReader import ImageOrientation
 from MRICenterline.app.file_reader.transformation_matrix import transformation_matrix
 
 import logging
@@ -14,8 +15,9 @@ logging.getLogger(__name__)
 
 
 class ImageProperties:
-    def __init__(self, sitk_image, parent=None):
+    def __init__(self, sitk_image, image_orientation: ImageOrientation, z_coords, parent=None):
         self.sitk_image = sitk_image
+        self.orientation = image_orientation
         # print(f'ITK Direction matrix: \n {np.asarray(self.sitk_image.GetDirection()).reshape((3, 3))}')
 
         self.spacing = np.array(sitk_image.GetSpacing())
@@ -47,7 +49,7 @@ class ImageProperties:
         self.direction_matrix = sitk_image.GetDirection()
 
         self.window_value, self.level_value = self.calculate_window_and_level()
-        self.z_coords = []
+        self.z_coords = z_coords
 
     def __repr__(self):
         return f"""

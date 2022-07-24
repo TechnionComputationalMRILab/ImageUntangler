@@ -29,7 +29,7 @@ def undo(parent: CaseModel, undo_all: bool = False):
 def patient_info(model, parent):
     from MRICenterline.gui.metadata.dialog_box import MetadataDialogBox
     metadata = MetadataDialogBox(model=model, parent=parent)
-    metadata.show()
+    metadata.exec()
 
 
 def comment(model, parent):

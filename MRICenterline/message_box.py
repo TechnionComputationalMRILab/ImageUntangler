@@ -7,7 +7,7 @@ class MessageBox:
     is_gui = False if len(sys.argv) > 1 else True
 
     @classmethod
-    def msg_box_warning(cls, error_text, **kwargs):
+    def msg_box_warning(cls, error_text, should_crash=False, **kwargs):
         if cls.is_gui:
             msg = QMessageBox()
             msg.setIcon(QMessageBox.Warning)
@@ -24,6 +24,9 @@ class MessageBox:
             msg.exec()
         else:
             print(error_text)
+
+        if should_crash:
+            sys.exit(-47)
 
     @classmethod
     def msg_box_info(cls, info_text, **kwargs):

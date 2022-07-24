@@ -89,7 +89,6 @@ def test(qtbot, folder):
     # assert len(mpr_point_array) == 100
 
     saved_points = deepcopy(mpr_point_array.simplify())
-    saved_slices_with_points = deepcopy(mpr_point_array.get_slices_with_points())
     saved_session_id = case_model.save()
 
     # get a new case model and main widget to load everything to
@@ -106,11 +105,9 @@ def test(qtbot, folder):
 
     loaded_point_array = new_case_model.sequence_manager.mpr_point_array
     loaded_points = loaded_point_array.simplify()
-    loaded_slices_with_points = new_case_model.sequence_manager.mpr_point_array.get_slices_with_points()
 
     slice_index_comparison = []
     image_coords_comparison = []
-    # slice_with_points_comparison = []
 
     for saved_pt, loaded_pt in zip(saved_points, loaded_points):
         # make sure that the z appear in the same slices
@@ -128,7 +125,7 @@ def test(qtbot, folder):
 
         image_coords_comparison.append(comp_x and comp_y)
 
-        print(saved_x, saved_y, loaded_x, loaded_y)
+        print(saved_x, saved_y, loaded_x, loaded_y, saved_pt['slice_index'], loaded_pt['slice_index'])
 
     print(f'slice: {slice_index_comparison}')
     print(f'index: {image_coords_comparison}')

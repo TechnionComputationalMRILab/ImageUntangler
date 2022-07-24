@@ -1,6 +1,7 @@
 from typing import List
 from copy import deepcopy
 
+from MRICenterline.app.file_reader.AbstractReader import ImageOrientation
 from MRICenterline.gui.vtk.line_actor import IULineActor
 from MRICenterline.app.points.point import Point
 from MRICenterline.app.points.status import PointStatus
@@ -83,8 +84,9 @@ class PointArray:
         for idx, _ in enumerate(self.point_array):
             self.point_array[idx].actor.SetVisibility(False)
 
-        for idx, _ in enumerate(self.length_actors):
-            self.length_actors[idx].hide()
+        if CFG.get_testing_status('draw-connecting-lines'):
+            for idx, _ in enumerate(self.length_actors):
+                self.length_actors[idx].hide()
 
         self.lengths = []
         self.point_array = []
@@ -278,17 +280,34 @@ class PointArray:
             "image coords": img_coords_list
         }
 
-    def get_as_np_array(self):
+    def get_as_array_for_centerline(self, image_properties):
         import numpy as np
 
-        if CFG.get_testing_status("use-slice-location"):
-            return np.asarray([pt.image_coordinates for pt in self.point_array])
-        else:
-            out_array = []
-            for pt in self.point_array:
-                out_array.append(np.array([int(pt.image_coordinates[0]), int(pt.image_coordinates[1]), int(pt.slice_idx)]))
+        cl_array = []
+        for pt in self.point_array:
+            itk_coords = pt.itk_index_coords
 
-            return out_array
+            viewer_origin = image_properties.size / 2
+
+            image_coordinates = np.zeros(3)
+            image_coordinates[0] = (itk_coords[0] - 1 - viewer_origin[0]) * image_properties.spacing[0]
+            image_coordinates[1] = (itk_coords[1] - 1 - viewer_origin[1]) * image_properties.spacing[1]
+
+            slice_idx = itk_coords[2] - 1
+
+            if image_properties.orientation == ImageOrientation.CORONAL:
+                v3_z_coords = image_properties.z_coords
+                image_coordinates[2] = v3_z_coords[slice_idx - 2]
+            elif image_properties.orientation == ImageOrientation.AXIAL:
+                v3_z_coords = sorted(image_properties.z_coords, reverse=True)
+                image_coordinates[2] = v3_z_coords[slice_idx]
+            else:
+                raise NotImplementedError("Sagittal cases not supported")
+
+            cl_array.append(image_coordinates)
+
+        return np.asarray(cl_array)
+        # return np.asarray([pt.image_coordinates for pt in self.point_array])
 
     def find_nearest_point(self, other: Point, get_index: bool = False) -> Point or int:
         point_and_distances = []
@@ -303,7 +322,7 @@ class PointArray:
     def get_vertical_distance(self):
         import numpy as np
 
-        points_positions = np.asarray(self.get_as_np_array())
+        points_positions = np.asarray([i.image_coordinates for i in self.point_array])
         point_pairs = [(points_positions[j, :], points_positions[j + 1, :]) for j in
                        range(len(points_positions) - 1)]
         vertical_lengths = [np.abs(np.dot((0, 1, 0), i - j)) for i, j in point_pairs]
@@ -319,7 +338,7 @@ class PointArray:
 
         for pt in self.point_array:
             d = dict()
-            d['slice_index'] = pt.slice_idx
+            d['slice_index'] = int(pt.slice_idx)
             d['image_coords'] = pt.image_coordinates
             d["itk_index_coords"] = pt.itk_index_coords
             d['itk_physical_coords'] = pt.physical_coords

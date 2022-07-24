@@ -63,11 +63,16 @@ class ConfigParser:
         as_list = [int(i) / 255 for i in rgb_str]
         return tuple(as_list)
 
-    def get_testing_status(self, testing):
-        if self.config_file['testing'][testing]:
-            return self.config_file.getboolean('testing', testing)
-        else:
+    def get_testing_status(self, testing: str or None):
+        if (self.config_file['testing']['disable-all-testing-features']
+                and self.config_file.getboolean('testing', 'disable-all-testing-features')) \
+                or testing is None:
             return False
+        else:
+            if self.config_file['testing'][testing]:
+                return self.config_file.getboolean('testing', testing)
+            else:
+                return False
 
     def get_boolean(self, section, key):
         return self.config_file.getboolean(section, key)

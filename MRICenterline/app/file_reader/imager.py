@@ -4,7 +4,7 @@ import sqlite3
 from MRICenterline.app.file_reader.dicom.DICOMReader import DICOMReader
 from MRICenterline.app.database.filetype import read_folder
 
-from MRICenterline import CFG, MSG
+from MRICenterline import CFG
 
 import logging
 logging.getLogger(__name__)
@@ -22,9 +22,7 @@ class Imager:
         self.database_check()
         self.assign_reader()
 
-    ##############################################
-    #              public functions              #
-    ##############################################
+    # region public functions
 
     def get_case_id(self) -> int:
         return self.reader.case_id
@@ -44,9 +42,21 @@ class Imager:
     def get_z_coords(self, seq):
         return self.reader.get_z_coords(seq)
 
-    ##############################################
-    #             private functions              #
-    ##############################################
+    def get_metadata(self) -> dict:
+        con = sqlite3.connect(CFG.get_db())
+        cur = con.execute(f"select * from metadata where case_id={self.get_case_id()};")
+
+        column_names = [description[0] for description in cur.description]
+        metadata = cur.fetchone()
+
+        metadata_dict = dict(zip(column_names, metadata))
+        con.close()
+
+        return metadata_dict
+
+    # endregion
+
+    # region private fnc
 
     def database_check(self):
         """
@@ -96,3 +106,5 @@ class Imager:
             con.execute('insert into case_list (case_name, case_type) values (?, ?)', (self.case_name, self.file_type,))
             self.case_id = con.execute('SELECT max(case_id) FROM case_list').fetchone()[0]
         con.close()
+
+    # endregion

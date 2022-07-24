@@ -5,6 +5,7 @@ from MRICenterline.gui.settings.widget import PreferencesWidget
 from MRICenterline import CFG
 
 import logging
+
 logging.getLogger(__name__)
 
 
@@ -56,6 +57,7 @@ class SettingsDialogBox(QDialog):
         super().reject()
 
     def help(self):
+        # TODO
         logging.info("Preferences: Help function")
 
     def reset(self) -> None:

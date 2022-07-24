@@ -5,6 +5,7 @@ from datetime import datetime, timezone
 from vtkmodules.qt.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
 
 from MRICenterline.app.database.save_points import save_points
+from MRICenterline.app.file_reader.AbstractReader import ImageOrientation
 from MRICenterline.app.points.status import PickerStatus, PointStatus
 from MRICenterline.app.gui_data_handling.sequence_viewer import SequenceViewer
 from MRICenterline.app.gui_data_handling.image_properties import ImageProperties
@@ -26,6 +27,7 @@ class SequenceModel:
         self.seq_idx = -1
         self.model = model
         self.image = self.model.image
+        self.orientation = ImageOrientation.UNKNOWN
 
         self.current_sequence_viewer = None
         self.current_image_properties = None
@@ -56,6 +58,7 @@ class SequenceModel:
         self.current_sequence_viewer = sequence_viewer
         self.model.change_sequence(self.seq_idx)
         self.window_value, self.level_value = image_properties.window_value, image_properties.level_value
+        self.orientation = self.image.reader.get_image_orientation(seq_idx)
         return sequence_viewer
 
     def append_to_case_history(self):
