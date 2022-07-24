@@ -39,6 +39,7 @@ create table sequences (
 seq_id,
 name text,
 case_id integer,
+orientation text,
 foreign key (case_id) references case_list(case_id) 
 )
 '''

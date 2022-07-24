@@ -4,12 +4,11 @@ from glob import glob
 import sqlite3
 import pydicom
 
+from MRICenterline.app.file_reader.dicom.DICOMImageOrientation import get_image_orientation
 from MRICenterline import CFG
 
 
 def build(folder, case_name):
-    # case_name = os.path.relpath(folder, CFG.get_folder('raw'))
-
     # get case_id
     con = sqlite3.connect(CFG.get_db())
     cases = {i[1]: i[0] for i in con.cursor().execute("select * from 'case_list'").fetchall()}
@@ -17,11 +16,10 @@ def build(folder, case_name):
 
     case_id = cases[case_name]
 
-    build_sequence_tables(folder, case_id)
-    build_metadata_table(folder, case_id)
+    build_sequence_tables(folder, case_id, case_name)
+    build_metadata_table(folder, case_id, case_name)
 
-    if CFG.get_testing_status('use-slice-location'):
-        build_slice_location_table(folder, case_id)
+    build_slice_location_table(folder, case_id)
 
 
 def build_slice_location_table(folder, case_id):
@@ -53,7 +51,7 @@ def build_slice_location_table(folder, case_id):
     con.close()
 
 
-def build_metadata_table(folder, case_id):
+def build_metadata_table(folder, case_id, case_name):
     """ creates the entry for the metadata of the database """
     db_file = CFG.get_db()
     con = sqlite3.connect(db_file)
@@ -92,7 +90,7 @@ def build_metadata_table(folder, case_id):
     con.close()
 
 
-def build_sequence_tables(folder, case_id):
+def build_sequence_tables(folder, case_id, case_name):
     """
     Builds the sequences and sequence_files tables for the database
     """
@@ -131,10 +129,12 @@ def build_sequence_tables(folder, case_id):
     last_seq_id = 0
     for seq_id, seq_name in enumerate(seq_list):
         seq_files_list = [file_entry[1] for file_entry in sorted_files[seq_name].items()]
+        image_orientation = get_image_orientation(
+            os.path.join(CFG.get_folder('raw_data'), case_name, seq_files_list[0]))
 
         with con:
-            con.execute('insert into sequences (case_id, name, seq_id) values (?, ?, ?)',
-                                               (case_id, seq_name, seq_id + 1))
+            con.execute('insert into sequences (case_id, name, seq_id, orientation) values (?, ?, ?, ?)',
+                                               (case_id, seq_name, seq_id + 1, image_orientation.value))
 
             for file in seq_files_list:
                 con.execute('insert into sequence_files (filename, seq_id, case_id) values (?, ?, ?)',
@@ -142,8 +142,8 @@ def build_sequence_tables(folder, case_id):
         last_seq_id = seq_id + 2
 
     with con:  # insert files to be ignored
-        con.execute('insert into sequences (case_id, name, seq_id) values (?, ?, ?)',
-                                           (case_id, "INVALID", last_seq_id, ))
+        con.execute('insert into sequences (case_id, name, seq_id, orientation) values (?, ?, ?, ?)',
+                                           (case_id, "INVALID", last_seq_id, "U"))
         for file in invalid_files:
             con.execute('insert into sequence_files (filename, seq_id, case_id) values (?, ?, ?)',
                                                     (file, last_seq_id, case_id))
