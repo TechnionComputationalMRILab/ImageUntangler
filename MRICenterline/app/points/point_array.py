@@ -84,8 +84,9 @@ class PointArray:
         for idx, _ in enumerate(self.point_array):
             self.point_array[idx].actor.SetVisibility(False)
 
-        for idx, _ in enumerate(self.length_actors):
-            self.length_actors[idx].hide()
+        if CFG.get_testing_status('draw-connecting-lines'):
+            for idx, _ in enumerate(self.length_actors):
+                self.length_actors[idx].hide()
 
         self.lengths = []
         self.point_array = []
@@ -321,7 +322,7 @@ class PointArray:
     def get_vertical_distance(self):
         import numpy as np
 
-        points_positions = np.asarray(self.get_as_np_array())
+        points_positions = np.asarray([i.image_coordinates for i in self.point_array])
         point_pairs = [(points_positions[j, :], points_positions[j + 1, :]) for j in
                        range(len(points_positions) - 1)]
         vertical_lengths = [np.abs(np.dot((0, 1, 0), i - j)) for i, j in point_pairs]

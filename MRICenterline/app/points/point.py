@@ -136,10 +136,10 @@ class Point:
         self.point_size = size
 
     def distance(self, other):
-        if self.image_properties:
-            c = np.array([((a - b) ** 2) for a, b, in zip(self.physical_coords, other.physical_coords)])
-        else:
-            c = np.array([((a - b) ** 2) for a, b, in zip(self.image_coordinates, other.image_coordinates)])
+        # if self.image_properties:
+        #     c = np.array([((a - b) ** 2) for a, b, in zip(self.physical_coords, other.physical_coords)])
+        # else:
+        c = np.array([((a - b) ** 2) for a, b, in zip(self.image_coordinates, other.image_coordinates)])
         return np.sqrt(np.sum(c))
         # return np.linalg.norm(self - other)
 
