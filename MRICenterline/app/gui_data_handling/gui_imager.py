@@ -15,12 +15,15 @@ class GraphicalImager(Imager):
             return self[self.get_sequences()[item]]
         else:
             z_coords = self.reader.get_z_coords(item)
+            orientation = self.reader.get_image_orientation(item)
+
             if CFG.get_testing_status("use-slice-location"):
 
                 self.sequence = item
                 self.np_array, file_list = self.reader[item]
 
                 self.properties = SliceLocImageProperties(np_array=self.np_array,
+                                                          image_orientation=orientation,
                                                           z_coords=z_coords,
                                                           file_list=file_list)
 
@@ -28,5 +31,7 @@ class GraphicalImager(Imager):
             else:
                 self.sequence = item
                 self.sitk_image = self.reader[item]
-                self.properties = ImageProperties(self.sitk_image, z_coords=z_coords, parent=self)
+
+                self.properties = ImageProperties(self.sitk_image, image_orientation=orientation,
+                                                  z_coords=z_coords, parent=self)
                 return self.properties

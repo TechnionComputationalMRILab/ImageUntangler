@@ -1,6 +1,7 @@
 from typing import List
 from copy import deepcopy
 
+from MRICenterline.app.file_reader.AbstractReader import ImageOrientation
 from MRICenterline.gui.vtk.line_actor import IULineActor
 from MRICenterline.app.points.point import Point
 from MRICenterline.app.points.status import PointStatus
@@ -293,8 +294,14 @@ class PointArray:
 
             slice_idx = itk_coords[2] - 1
 
-            v3_z_coords = image_properties.z_coords
-            image_coordinates[2] = v3_z_coords[slice_idx - 2]
+            if image_properties.orientation == ImageOrientation.CORONAL:
+                v3_z_coords = image_properties.z_coords
+                image_coordinates[2] = v3_z_coords[slice_idx - 2]
+            elif image_properties.orientation == ImageOrientation.AXIAL:
+                v3_z_coords = sorted(image_properties.z_coords, reverse=True)
+                image_coordinates[2] = v3_z_coords[slice_idx]
+            else:
+                raise NotImplementedError("Sagittal cases not supported")
 
             cl_array.append(image_coordinates)
 

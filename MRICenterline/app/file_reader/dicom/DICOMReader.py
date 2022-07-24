@@ -111,7 +111,6 @@ class DICOMReader(AbstractReader):
         elif type(seq) is int:
             return self.get_z_coords(self.sequence_list[seq])
 
-
     def get_image_orientation(self, item) -> ImageOrientation:
         file = self.get_file_list(item)[0]
         return DICOMImageOrientation.get_image_orientation(file)
