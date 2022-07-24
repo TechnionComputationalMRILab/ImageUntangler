@@ -90,12 +90,13 @@ class Ver3AnnotationImport:
                 point_array.add_point(parsed)
         else:
             image_properties = ImageProperties(dcm_reader[self.sequence_name])
-            v_3_file_list = dcm_reader.get_file_list(self.sequence_name, use_v3=True)
-            v3_np_arr, clean_file_list = DICOMReader.generate(file_list=v_3_file_list, use_v3=True)
+            v3_file_list = dcm_reader.get_file_list(self.sequence_name, use_v3=True)
+            v3_np_arr, clean_file_list = DICOMReader.generate(file_list=v3_file_list, use_v3=True)
             v3_z_coords = dcm_reader.get_z_coords(seq=self.sequence_name, use_v3=True)
             v3_image_properties = SliceLocImageProperties(np_array=v3_np_arr,
                                                           z_coords=v3_z_coords,
                                                           file_list=clean_file_list)
+            image_orientation = dcm_reader.get_image_orientation(self.sequence_name)
 
             if dcm_reader.case_name in ['106', '16']:
                 print(f"SKIPPING {dcm_reader.case_id}")  # known problematic cases
@@ -108,7 +109,8 @@ class Ver3AnnotationImport:
                                                  v3_image_size=v3_image_properties.size,
                                                  v3_image_spacing=v3_image_properties.spacing,
                                                  v3_image_dimensions=v3_image_properties.dimensions,
-                                                 v3_z_coords=v3_z_coords)
+                                                 v3_z_coords=v3_z_coords,
+                                                 image_orientation=image_orientation)
                     point_array.add_point(parsed)
 
         return point_array

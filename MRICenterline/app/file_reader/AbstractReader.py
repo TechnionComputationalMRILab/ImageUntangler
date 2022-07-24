@@ -1,11 +1,11 @@
-from enum import Enum, auto
+from enum import Enum
 
 
 class ImageOrientation(Enum):
-    CORONAL = auto()
-    AXIAL = auto()
-    SAGITTAL = auto()
-    UNKNOWN = auto()
+    CORONAL = "C"
+    AXIAL = "A"
+    SAGITTAL = "S"
+    UNKNOWN = "U"
 
 
 class AbstractReader:

@@ -10,7 +10,7 @@ tables used by the "Open MRI images" button
 def get_openable_sequences():
     con = sqlite3.connect(CFG.get_db())
     cases = con.cursor().execute("""
-                                 select case_name, case_type, name 
+                                 select case_name, case_type, name, orientation 
                                  from case_list 
                                  inner join sequences 
                                  on case_list.case_id = sequences.case_id 
@@ -18,15 +18,17 @@ def get_openable_sequences():
                                  """).fetchall()
     con.close()
 
-    names, file_types, seq_names = [], [], []
-    for name, file_type, sequence_name in cases:
+    names, file_types, seq_names, orientation_list = [], [], [], []
+    for name, file_type, sequence_name, orientation in cases:
         names.append(name)
         file_types.append(file_type)
         seq_names.append(sequence_name)
+        orientation_list.append(orientation)
 
     return {"case_name": names,
             "case_type": file_types,
-            "sequences": seq_names}, len(cases)
+            "sequences": seq_names,
+            "orientation": orientation_list}, len(cases)
 
 
 def get_openable_cases():

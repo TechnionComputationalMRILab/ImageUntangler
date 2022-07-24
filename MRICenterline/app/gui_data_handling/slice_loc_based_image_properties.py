@@ -12,11 +12,11 @@ logging.getLogger(__name__)
 
 
 class SliceLocImageProperties(ImageProperties):
-    def __init__(self, np_array, z_coords, file_list, parent=None):
+    def __init__(self, np_array, image_orientation, z_coords, file_list, parent=None):
 
         sitk_image = sitk.ReadImage(file_list)
 
-        super().__init__(sitk_image, parent=parent)
+        super().__init__(sitk_image=sitk_image, image_orientation=image_orientation, parent=parent)
 
         self.vtk_data = self.get_vtk_data_old(np_arr=np_array,
                                               origin=sitk_image.GetOrigin(),
