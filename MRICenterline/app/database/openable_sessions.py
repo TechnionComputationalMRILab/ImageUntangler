@@ -25,6 +25,7 @@ def get_all_sessions():
 
 
 def get_latest_sessions():
+    # TODO: show only latest sessions on custom open dialog
     # select * from 'sessions' group by case_id order by timestamp desc
     pass
 

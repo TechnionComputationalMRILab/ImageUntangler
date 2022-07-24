@@ -62,7 +62,7 @@ class CenterlineModel:
         print("save points")
 
     def refresh_panel(self, angle_change=None, height_change=None):
-        if CFG.get_testing_status("test-mode"):
+        if CFG.get_testing_status("running-for-tests"):
             self.calculate_centerline()
             self.centerline_viewer.refresh_panel(angle_change, height_change)
         else:

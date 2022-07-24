@@ -93,7 +93,9 @@ class CaseModel:
             self.centerline_model.calculate_length()
 
     def timer_status(self, status):
-        logging.info(f"Timer set to {status}")
+        import time
+
+        logging.info(f"Timer set to {status} on {int(time.time())}")
         self.timer.command(status)
 
     def undo(self, undo_all: bool = False):

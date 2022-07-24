@@ -4,6 +4,7 @@ import qtawesome as qta
 from MRICenterline.app.points.status import PickerStatus, PointStatus
 from MRICenterline.app.gui_data_handling.case_model import CaseModel
 from MRICenterline.gui.display import toolbar_connect
+from MRICenterline import CFG
 
 
 class DisplayPanelToolbarButtons(QWidget):
@@ -25,6 +26,8 @@ class DisplayPanelToolbarButtons(QWidget):
         export_button.setFlat(True)
         layout.addWidget(export_button, 1, column, 1, 1)
         export_button.clicked.connect(lambda: toolbar_connect.export(model, parent))
+        export_button.setEnabled(CFG.get_testing_status(testing=None))  # TODO: populate the export functions
+
         # endregion
 
         # region length
@@ -123,6 +126,8 @@ class DisplayPanelToolbarButtons(QWidget):
         comment_button.setFlat(True)
         layout.addWidget(comment_button, 1, column, 1, 1)
         comment_button.clicked.connect(lambda: toolbar_connect.comment(model, parent))
+        comment_button.setEnabled(CFG.get_testing_status(testing=None))  # TODO: implement the comment dialog
+
         # endregion
 
         # region window/level + intermediate points
