@@ -164,11 +164,14 @@ class SequenceModel:
             if self.model.centerline_model:
                 self.model.centerline_model.highlight_selected_point(pdb.selected_point_index)
 
-    def highlight_point(self, point_index, point_type):
+    def highlight_point(self, point_index, point_type, select_from_mpr_panel=False):
         if point_type == PointStatus.LENGTH:
             self.length_point_array.highlight_specific_point(point_index)
         elif point_type == PointStatus.MPR:
-            self.mpr_point_array.highlight_specific_point(point_index)
+            highlighted_slice = self.mpr_point_array.highlight_specific_point(point_index)
+
+            if select_from_mpr_panel:
+                self.current_sequence_viewer.jump_to_index(highlighted_slice)
 
         # refresh the renderer
         self.current_sequence_viewer.render_panel()

@@ -96,7 +96,7 @@ class CenterlineViewer:
         text_property = vtkTextProperty()
         text_property.SetFontSize(30)
         text_property.SetJustificationToCentered()
-        text_property.SetColor(0, 1, 0)
+        text_property.SetColor(0, 0, 1)
 
         text_mappers = vtkTextMapper()
         text_mappers.SetInput(str(pt_num))

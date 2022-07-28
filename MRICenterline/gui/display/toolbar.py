@@ -93,10 +93,10 @@ class DisplayPanelToolbarButtons(QWidget):
             else:
                 mpr_markers_button.setText("Hide MPR markers")
 
-        mpr_markers_button = QPushButton("Hide MPR markers")
+        mpr_markers_button = QPushButton("Show MPR markers")
         layout.addWidget(mpr_markers_button, 1, column, 1, 1)
         mpr_markers_button.setCheckable(True)
-        mpr_markers_button.setChecked(False)
+        mpr_markers_button.setChecked(True)
         mpr_markers_button.clicked.connect(show_hide_mpr_markers)
         # endregion
 
