@@ -22,6 +22,7 @@ class IULineActor(vtkActor):
         self.SetMapper(mapper)
         self.GetProperty().SetColor(*color)
         self.GetProperty().SetLineWidth(width)
+        self.GetProperty().SetOpacity(0)
 
     def hide(self):
         self.GetProperty().SetOpacity(0)

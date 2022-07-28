@@ -15,7 +15,6 @@ class IUToolbar(QToolBar):
         new_case_button.setFlat(True)
         self.addWidget(new_case_button)
         new_case_button.clicked.connect(parent.open_new_case)
-        new_case_button.setEnabled(CFG.get_testing_status(testing=None))  # TODO: fix the new case bug
 
         setting_button = QPushButton(qta.icon('fa.gear'), "Settings")
         setting_button.setFlat(True)

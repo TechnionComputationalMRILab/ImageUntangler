@@ -1,5 +1,4 @@
 from typing import List
-from copy import deepcopy
 
 from MRICenterline.app.file_reader.AbstractReader import ImageOrientation
 from MRICenterline.gui.vtk.line_actor import IULineActor
@@ -8,6 +7,7 @@ from MRICenterline.app.points.status import PointStatus
 from MRICenterline import CFG
 
 import logging
+
 logging.getLogger(__name__)
 
 
@@ -131,9 +131,9 @@ class PointArray:
     def __repr__(self):
         string_list = []
         for pt in self.point_array:
-            string = f"slice index {pt.slice_idx} | "\
-                     f"image: {pt.image_coordinates} | "\
-                     f"itk index: {pt.itk_index_coords} | "\
+            string = f"slice index {pt.slice_idx} | " \
+                     f"image: {pt.image_coordinates} | " \
+                     f"itk index: {pt.itk_index_coords} | " \
                      f"physical coords: {pt.physical_coords}"
             string_list.append(string)
         return str(string_list)
@@ -193,8 +193,8 @@ class PointArray:
     def get_length_for_display(self):
         out_dict = dict()
         for i, length in enumerate(self.lengths):
-            out_dict[f'{i}: '] = round(length, 2)
-        out_dict['Total Length:'] = round(self.total_length, 2)
+            out_dict[f'{i}: '] = f'{round(length, 2)} mm'
+        out_dict['Total Length:'] = f'{round(self.total_length, 2)} mm'
         return out_dict
 
     def get_point_index(self, point: Point) -> int:
@@ -223,6 +223,8 @@ class PointArray:
         self.point_array[item].set_color(self.highlight_color)
         self.has_highlight = True
 
+        return self.point_array[item].slice_idx
+
     def show_point(self, item):
         self.point_array[item].set_visibility(True)
         self.point_array[item].actor.SetVisibility(True)
@@ -233,7 +235,7 @@ class PointArray:
 
     def hide_intermediate_points(self):
         for i in range(len(self)):
-            if i == 0 or i == len(self)-1:
+            if i == 0 or i == len(self) - 1:
                 self.set_color(color=self.point_color, item=i)
             else:
                 self.point_array[i].set_visibility(False)
@@ -241,7 +243,7 @@ class PointArray:
 
     def show_intermediate_points(self):
         for i in range(len(self)):
-            if i == 0 or i == len(self)-1:
+            if i == 0 or i == len(self) - 1:
                 self.set_color(color=self.point_color, item=i)
             else:
                 self.point_array[i].set_visibility(True)
@@ -296,11 +298,11 @@ class PointArray:
             slice_idx = itk_coords[2] - 1
 
             if image_properties.orientation == ImageOrientation.CORONAL:
-                v3_z_coords = image_properties.z_coords
-                image_coordinates[2] = v3_z_coords[slice_idx - 2]
+                image_coordinates[2] = \
+                    image_properties.sitk_image.TransformIndexToPhysicalPoint([0, 0, int(slice_idx + 2)])[1]
             elif image_properties.orientation == ImageOrientation.AXIAL:
-                v3_z_coords = sorted(image_properties.z_coords, reverse=True)
-                image_coordinates[2] = v3_z_coords[slice_idx]
+                image_coordinates[2] = \
+                    image_properties.sitk_image.TransformIndexToPhysicalPoint([0, 0, int(slice_idx)])[2]
             else:
                 raise NotImplementedError("Sagittal cases not supported")
 

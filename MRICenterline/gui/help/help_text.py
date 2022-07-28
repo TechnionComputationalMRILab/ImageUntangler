@@ -16,7 +16,9 @@ class InteractorHelpText:
 class CenterlineInteractorHelpText:
     text_array = ["HELP",
                   'Middle scroll wheel: change angle',
-                  "Shift + Middle scroll wheel: change height"]
+                  "Shift + Middle scroll wheel: change height",
+                  "Alt + Right-click + drag: zoom",
+                  "Shift + Left-click + drag: pan"]
     text_length = len(text_array)
     text_color = CFG.get_color('display', 'help-text-color')
     text_out = "{}".format("\n".join(text_array))

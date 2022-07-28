@@ -59,19 +59,12 @@ class CenterlineModel:
         self.centerline_viewer.initialize_panel()
 
     def save(self):
+        # TODO: save measurements from centerline calculations
         print("save points")
 
     def refresh_panel(self, angle_change=None, height_change=None):
-        if CFG.get_testing_status("running-for-tests"):
-            self.calculate_centerline()
-            self.centerline_viewer.refresh_panel(angle_change, height_change)
-        else:
-            try:
-                self.calculate_centerline()
-                self.centerline_viewer.refresh_panel(angle_change, height_change)
-            except Exception as e:
-                MSG.msg_box_warning(f'Error in calculating centerline: {e}')
-                logging.warning(f'Error in calculating centerline: {e}')
+        self.calculate_centerline()
+        self.centerline_viewer.refresh_panel(angle_change, height_change)
 
     def pick(self, pick_coords):
         point = Point(pick_coords, 0, None)
@@ -111,8 +104,8 @@ class CenterlineModel:
                 vertical_length = round(self.length_point_array.get_vertical_distance()[0], 2)
                 total_length = round(self.length_point_array.total_length, 2)
                 self.centerline_viewer.add_actor_annotation(x, y,
-                                                            f'vert: {vertical_length} \n '
-                                                            f'total: {total_length}')
+                                                            f'vert: {vertical_length} mm \n '
+                                                            f'total: {total_length} mm')
 
                 self.previous_mouse_coords = None
 
@@ -144,18 +137,31 @@ class CenterlineModel:
         self.refresh_panel(angle_change=self.angle)
 
     def calculate_centerline(self):
-        input_points = self.point_array.get_as_array_for_centerline(self.image_properties)
+        def _calculate():
+            input_points = self.point_array.get_as_array_for_centerline(self.image_properties)
 
-        ppv = PointsToPlaneVectors(input_points,
-                                   self.image_properties,
-                                   height=self.height,
-                                   angle_degrees=self.angle)
+            ppv = PointsToPlaneVectors(input_points,
+                                       self.image_properties,
+                                       height=self.height,
+                                       angle_degrees=self.angle)
 
-        self.vtk_data = vtk_transform(ppv)
-        self.parallel_scale = self.parallel_scale * ppv.delta * \
-            (self.vtk_data.GetExtent()[1] - self.vtk_data.GetExtent()[0])
+            self.vtk_data = vtk_transform(ppv)
+            self.parallel_scale = self.parallel_scale * ppv.delta * \
+                                  (self.vtk_data.GetExtent()[1] - self.vtk_data.GetExtent()[0])
 
-        self.generate_vertical_line_array()
+            self.generate_vertical_line_array()
+            # self.point_markers.hide_all()
+
+        if CFG.get_testing_status("running-for-tests"):
+            # if the code is being run for the purposes of running tests,
+            # it should produce and error instead of catching it
+            _calculate()
+        else:
+            try:
+                _calculate()
+            except Exception as e:
+                MSG.msg_box_warning(f'Error in calculating centerline: {e}')
+                logging.warning(f'Error in calculating centerline: {e}')
 
     def generate_vertical_line_array(self):
         vl = VerticalLine(0)

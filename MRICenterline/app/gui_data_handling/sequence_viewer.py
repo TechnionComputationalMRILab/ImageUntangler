@@ -251,6 +251,9 @@ class SequenceViewer:
             while self.slice_idx > 1:
                 self.adjust_slice_idx(-1)
 
+    def jump_to_index(self, move_to: int):
+        self.adjust_slice_idx(move_to - self.slice_idx)
+
     def adjust_slice_idx(self, delta: int):
         import numpy as np
 

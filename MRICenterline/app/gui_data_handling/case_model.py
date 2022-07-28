@@ -63,7 +63,7 @@ class CaseModel:
         self.sequence_manager.print_status_to_terminal()
 
     def mpr_marker_highlight(self, index: int):
-        self.sequence_manager.highlight_point(index, PointStatus.MPR)
+        self.sequence_manager.highlight_point(index, PointStatus.MPR, select_from_mpr_panel=True)
 
     # endregion
 
