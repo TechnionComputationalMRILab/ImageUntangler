@@ -1,5 +1,4 @@
 from typing import List
-from copy import deepcopy
 
 from MRICenterline.app.file_reader.AbstractReader import ImageOrientation
 from MRICenterline.gui.vtk.line_actor import IULineActor

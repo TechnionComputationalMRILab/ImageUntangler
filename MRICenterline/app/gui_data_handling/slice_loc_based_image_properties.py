@@ -57,7 +57,7 @@ class SliceLocImageProperties(ImageProperties):
     def get_vtk_data_old(np_arr, origin, spacing, ncomp, direction, size):
         """ adapted from https://github.com/dave3d/dicom2stl/blob/main/utils/sitk2vtk.py """
 
-        np_arr = np.flipud(np_arr)  # either this, or reshape with order F? TODO: check this
+        np_arr = np.flipud(np_arr)
         vtk_image = vtk.vtkImageData()
 
         size = list(size)

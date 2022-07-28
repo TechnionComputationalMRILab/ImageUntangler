@@ -46,6 +46,7 @@ class IUMainWindow(QMainWindow):
             self.main_widget.removeWidget(self.widget_directory[1])
 
             self.removeToolBar(self.toolbar)
-            self.addToolBar(IUToolbar(self))
+            self.toolbar = IUToolbar(self)
+            self.addToolBar(self.toolbar)
 
             self.setWindowTitle(CONST.WINDOW_NAME)
