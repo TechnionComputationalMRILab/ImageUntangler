@@ -1,3 +1,4 @@
+from pathlib import Path
 from PyQt5.QtWidgets import QFileDialog
 
 from MRICenterline import CFG, MSG
@@ -61,9 +62,9 @@ def open_using_file_dialog(parent):
 
     if folder_path:
         logging.info(f"Loading from selected folder {folder_path}")
-        CFG.set_config_data('folders', 'data-folder', folder_path)
+        CFG.set_config_data('folders', 'data-folder', Path(folder_path).parent)
 
-        configure_main_widget(path=folder_path, parent_widget=parent)
+        configure_main_widget(path=folder_path, parent_widget=parent, file_dialog_open=True)
 
     else:
         MSG.msg_box_warning("No folder selected.")

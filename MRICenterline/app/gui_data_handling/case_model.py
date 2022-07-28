@@ -1,3 +1,4 @@
+from pathlib import Path
 from MRICenterline.app.points.status import PickerStatus, PointStatus
 from MRICenterline.app.points.timer import Timer
 from MRICenterline.app.gui_data_handling.gui_imager import GraphicalImager
@@ -13,9 +14,14 @@ class CaseModel:
     sequence_viewer = None
     centerline_model = None
 
-    def __init__(self, path, initial_sequence=None):
+    def __init__(self, path, initial_sequence=None, file_dialog_open=False):
         self.path = path
-        self.image = GraphicalImager(path)
+
+        if file_dialog_open:
+            # if opening through the file dialog box
+            self.image = GraphicalImager(path, root_folder=Path(path).parent)
+        else:
+            self.image = GraphicalImager(path)
         self.window_value, self.level_value = 0, 0
 
         self.sequence_list = self.image.get_sequences()
