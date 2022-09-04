@@ -31,6 +31,7 @@ class CenterlineModel:
         self.angle = 0
 
         self.vtk_data = vtkImageData()
+        self.nparray = None
         self.point_markers = VerticalLineArray()
 
         self.has_highlight = False
@@ -61,6 +62,10 @@ class CenterlineModel:
     def save(self):
         # TODO: save measurements from centerline calculations
         print("save points")
+
+    def export(self, destination, export_options):
+        from MRICenterline.app.export.centerline import export
+        export(self, destination, export_options)
 
     def refresh_panel(self, angle_change=None, height_change=None):
         self.calculate_centerline()
@@ -145,6 +150,7 @@ class CenterlineModel:
                                        height=self.height,
                                        angle_degrees=self.angle)
 
+            self.nparray = ppv.MPR_M
             self.vtk_data = vtk_transform(ppv)
             self.parallel_scale = self.parallel_scale * ppv.delta * \
                                   (self.vtk_data.GetExtent()[1] - self.vtk_data.GetExtent()[0])

@@ -16,7 +16,7 @@ class SliceLocImageProperties(ImageProperties):
 
         sitk_image = sitk.ReadImage(file_list)
 
-        super().__init__(sitk_image=sitk_image, image_orientation=image_orientation, parent=parent)
+        super().__init__(sitk_image=sitk_image, image_orientation=image_orientation, parent=parent, z_coords=z_coords)
 
         self.vtk_data = self.get_vtk_data_old(np_arr=np_array,
                                               origin=sitk_image.GetOrigin(),

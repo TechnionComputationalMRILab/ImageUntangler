@@ -42,7 +42,7 @@ class DisplayPanelToolbarButtons(QWidget):
             else:
                 toolbar_connect.set_picker_status(model, PickerStatus.NOT_PICKING)
 
-        length_button = QPushButton(qta.icon('mdi.ruler'), "Length")
+        length_button = QPushButton(qta.icon('mdi.ruler'), "Add Length Points")
         length_button.setCheckable(True)
         length_button.setChecked(False)
         layout.addWidget(length_button, 0, column, 1, 1)
@@ -66,7 +66,7 @@ class DisplayPanelToolbarButtons(QWidget):
             else:
                 toolbar_connect.set_picker_status(model, PickerStatus.NOT_PICKING)
 
-        mpr_button = QPushButton(qta.icon('mdi.image-filter-center-focus-strong'), "MPR")
+        mpr_button = QPushButton(qta.icon('mdi.image-filter-center-focus-strong'), "Add MPR points")
         mpr_button.setCheckable(True)
         layout.addWidget(mpr_button, 0, column, 1, 1)
         mpr_button.clicked.connect(enable_mpr_picking)
@@ -81,7 +81,7 @@ class DisplayPanelToolbarButtons(QWidget):
         # region additional MPR functions
         column += 1  # NEW COLUMN
 
-        select_point_button = QPushButton(qta.icon("mdi.select-search"), "Select MPR point")
+        select_point_button = QPushButton(qta.icon("mdi.select-search"), "Highlight MPR point")
         layout.addWidget(select_point_button, 0, column, 1, 1)
         select_point_button.setFlat(True)
         select_point_button.clicked.connect(lambda: toolbar_connect.find_point(model))
@@ -140,7 +140,7 @@ class DisplayPanelToolbarButtons(QWidget):
                 length_button.setChecked(not s)
                 mpr_button.setChecked(not s)
 
-        window_level_button = QPushButton(qta.icon('mdi.lock-reset'), "Window/level")
+        window_level_button = QPushButton(qta.icon('mdi.lock-reset'), "Change Window/level")
         window_level_button.setCheckable(True)
         window_level_button.setChecked(True)
         layout.addWidget(window_level_button, 0, column, 1, 1)

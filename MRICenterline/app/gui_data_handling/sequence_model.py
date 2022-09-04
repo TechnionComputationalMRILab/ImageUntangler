@@ -197,7 +197,7 @@ class SequenceModel:
 
         logging.info(f"Reading from MPR [{mpr_id}]")
 
-    def export(self, destination):
+    def export(self, destination, export_options):
         from MRICenterline.app.export import export
 
         export(self.current_image_properties,

@@ -82,8 +82,11 @@ class CaseModel:
 
         return session_id
 
-    def export(self, destination: str):
-        self.sequence_manager.export(destination)
+    def export(self, destination: str, display_options: dict, centerline_options: dict):
+        # self.sequence_manager.export(destination, display_options)
+
+        if self.centerline_model:
+            self.centerline_model.export(destination, centerline_options)
 
     def set_picker_status(self, status: PickerStatus):
         logging.debug(f"Setting display panel picker status to {status}")
