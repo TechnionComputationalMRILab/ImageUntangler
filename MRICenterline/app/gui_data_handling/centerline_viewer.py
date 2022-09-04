@@ -3,7 +3,6 @@ from vtkmodules.all import vtkImageActor, vtkImageReslice, vtkRenderer, vtkActor
 
 from MRICenterline.gui.help.help_text import CenterlineInteractorHelpText
 from MRICenterline.gui.vtk.IUCornerAnnotation import CornerLoc, IUCornerAnnotation
-from MRICenterline.gui.vtk.text_actor import IUTextActor
 from MRICenterline.gui.vtk.sequence_interactor_style import SequenceViewerInteractorStyle
 from MRICenterline import CFG, CONST
 

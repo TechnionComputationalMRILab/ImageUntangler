@@ -35,6 +35,10 @@ class MainDisplayWidget(QWidget):
         if CFG.get_testing_status("show-sliders"):
             layout.addLayout(self.sequence_widgets.build_slider_group_box())
 
+    def closeEvent(self, QCloseEvent):
+        super().closeEvent(QCloseEvent)
+        self.interactor.Finalize()
+
     def change_sequence(self, s):
         self.model.change_sequence(s)
         self.sequence_viewer = self.sequence_manager.load_sequence(s, self.interactor, self.interactor_style)
