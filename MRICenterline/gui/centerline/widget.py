@@ -26,5 +26,9 @@ class CenterlineWidget(QWidget):
         layout.addWidget(self.label)
         layout.addWidget(self.interactor)
 
+    def closeEvent(self, QCloseEvent):
+        super().closeEvent(QCloseEvent)
+        self.interactor.Finalize()
+
     def change_widget_text(self, text):
         self.label.setText(text)

@@ -43,9 +43,9 @@ def find_point(model):
 
 
 def export(model, parent):
-    from PyQt5.QtWidgets import QFileDialog
-    destination = str(QFileDialog.getExistingDirectory(parent, "Select destination"))
-    model.export(destination)
+    from MRICenterline.gui.export.dialog_box import ExportDialogBox
+    export_db = ExportDialogBox(model=model, parent=parent)
+    export_db.show()
 
 
 def toggle_mpr_marker(model, show: bool):

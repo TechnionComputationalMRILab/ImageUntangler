@@ -6,3 +6,7 @@ logging.getLogger(__name__)
 
 def open_help_dialog(parent):
     pass
+
+
+def dialog_box_test(parent):
+    pass

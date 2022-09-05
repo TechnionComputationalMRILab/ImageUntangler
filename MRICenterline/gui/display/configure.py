@@ -15,9 +15,9 @@ import logging
 logging.getLogger(__name__)
 
 
-def configure_main_widget(path, parent_widget, selected_sequence=None):
+def configure_main_widget(path, parent_widget, selected_sequence=None, file_dialog_open=False):
     window = parent_widget.window()
-    case_model = CaseModel(path, selected_sequence)
+    case_model = CaseModel(path, selected_sequence, file_dialog_open)
     # case_model2 = CaseModel(path, selected_sequence)
     centerline_model = CenterlineModel(case_model)
     case_model.set_centerline_model(centerline_model)

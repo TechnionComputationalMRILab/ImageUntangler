@@ -12,9 +12,9 @@ logging.getLogger(__name__)
 
 
 class ExportType(Enum):
-    DICOM = auto()
-    IPYNB = auto()
-    PNG = auto()
+    DICOM = "DICOM"
+    PNG = "PNG"
+    NPZ = "NPZ"
 
 
 def export(image_properties: ImageProperties,

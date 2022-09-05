@@ -1,6 +1,7 @@
 from PyQt5.QtCore import QSize
 from PyQt5.QtWidgets import QMainWindow, QStackedWidget, QWidget, QToolBar
 
+from MRICenterline.gui.splash.connect import open_using_file_dialog
 from MRICenterline.gui.window.Toolbar import IUToolbar
 from MRICenterline.gui.splash.InitialWidget import IUInitialWidget
 
@@ -50,3 +51,6 @@ class IUMainWindow(QMainWindow):
             self.addToolBar(self.toolbar)
 
             self.setWindowTitle(CONST.WINDOW_NAME)
+
+    def open_new_case_from_folder(self):
+        open_using_file_dialog(self)

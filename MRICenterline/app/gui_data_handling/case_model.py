@@ -1,3 +1,4 @@
+from pathlib import Path
 from MRICenterline.app.points.status import PickerStatus, PointStatus
 from MRICenterline.app.points.timer import Timer
 from MRICenterline.app.gui_data_handling.gui_imager import GraphicalImager
@@ -13,9 +14,14 @@ class CaseModel:
     sequence_viewer = None
     centerline_model = None
 
-    def __init__(self, path, initial_sequence=None):
+    def __init__(self, path, initial_sequence=None, file_dialog_open=False):
         self.path = path
-        self.image = GraphicalImager(path)
+
+        if file_dialog_open:
+            # if opening through the file dialog box
+            self.image = GraphicalImager(path, root_folder=Path(path).parent)
+        else:
+            self.image = GraphicalImager(path)
         self.window_value, self.level_value = 0, 0
 
         self.sequence_list = self.image.get_sequences()
@@ -76,8 +82,11 @@ class CaseModel:
 
         return session_id
 
-    def export(self, destination: str):
-        self.sequence_manager.export(destination)
+    def export(self, destination: str, display_options: dict, centerline_options: dict):
+        # self.sequence_manager.export(destination, display_options)
+
+        if self.centerline_model:
+            self.centerline_model.export(destination, centerline_options)
 
     def set_picker_status(self, status: PickerStatus):
         logging.debug(f"Setting display panel picker status to {status}")

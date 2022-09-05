@@ -1,3 +1,4 @@
+from copy import deepcopy
 from typing import List
 
 from MRICenterline.app.file_reader.AbstractReader import ImageOrientation
@@ -285,30 +286,38 @@ class PointArray:
     def get_as_array_for_centerline(self, image_properties):
         import numpy as np
 
-        cl_array = []
-        for pt in self.point_array:
-            itk_coords = pt.itk_index_coords
+        points = deepcopy([pt.itk_index_coords for pt in self.point_array])
 
-            viewer_origin = image_properties.size / 2
+        for i in points:
+            i[1] = image_properties.size[1] - i[1]
+            i[2] = i[2] - 2
 
-            image_coordinates = np.zeros(3)
-            image_coordinates[0] = (itk_coords[0] - 1 - viewer_origin[0]) * image_properties.spacing[0]
-            image_coordinates[1] = (itk_coords[1] - 1 - viewer_origin[1]) * image_properties.spacing[1]
+        return np.asarray(points)
 
-            slice_idx = itk_coords[2] - 1
-
-            if image_properties.orientation == ImageOrientation.CORONAL:
-                image_coordinates[2] = \
-                    image_properties.sitk_image.TransformIndexToPhysicalPoint([0, 0, int(slice_idx + 2)])[1]
-            elif image_properties.orientation == ImageOrientation.AXIAL:
-                image_coordinates[2] = \
-                    image_properties.sitk_image.TransformIndexToPhysicalPoint([0, 0, int(slice_idx)])[2]
-            else:
-                raise NotImplementedError("Sagittal cases not supported")
-
-            cl_array.append(image_coordinates)
-
-        return np.asarray(cl_array)
+        # cl_array = []
+        # for pt in self.point_array:
+        #     itk_coords = pt.itk_index_coords
+        #
+        #     viewer_origin = image_properties.size / 2
+        #
+        #     image_coordinates = np.zeros(3)
+        #     image_coordinates[0] = (itk_coords[0] - 1 - viewer_origin[0]) * image_properties.spacing[0]
+        #     image_coordinates[1] = (itk_coords[1] - 1 - viewer_origin[1]) * image_properties.spacing[1]
+        #
+        #     slice_idx = itk_coords[2] - 1
+        #
+        #     if image_properties.orientation == ImageOrientation.CORONAL:
+        #         image_coordinates[2] = \
+        #             image_properties.sitk_image.TransformIndexToPhysicalPoint([0, 0, int(slice_idx + 2)])[1]
+        #     elif image_properties.orientation == ImageOrientation.AXIAL:
+        #         image_coordinates[2] = \
+        #             image_properties.sitk_image.TransformIndexToPhysicalPoint([0, 0, int(slice_idx)])[2]
+        #     else:
+        #         raise NotImplementedError("Sagittal cases not supported")
+        #
+        #     cl_array.append(image_coordinates)
+        #
+        # return np.asarray(cl_array)
         # return np.asarray([pt.image_coordinates for pt in self.point_array])
 
     def find_nearest_point(self, other: Point, get_index: bool = False) -> Point or int:

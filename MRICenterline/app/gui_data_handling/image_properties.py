@@ -29,6 +29,7 @@ class ImageProperties:
                        0, self.size[2] - 1)
 
         self.nparray = GetArrayFromImage(sitk_image)
+        self.data = self.nparray
 
         def calculate_center():
             it = iter(self.extent)
