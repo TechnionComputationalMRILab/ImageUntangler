@@ -6,16 +6,22 @@ from vtkmodules.all import vtkImageData
 from vtkmodules.util import numpy_support
 
 
-def vtk_transform(mpr_properties):
-    mpr_m = mpr_properties.MPR_M
-    delta = mpr_properties.delta
+# def vtk_transform(mpr_properties):
+def vtk_transform(np_array, delta):
+    # mpr_m = mpr_properties.MPR_M
+    # delta = mpr_properties.delta
+    mpr_m = np_array
+    delta = delta[0]
 
     n = mpr_m.shape[0]
     m = mpr_m.shape[1]
 
     image_data = vtkImageData()
-    image_data.SetDimensions(n, m, 1)
+    image_data.SetDimensions(m, n, 1)
     image_data.SetOrigin(0, 0, 0)
+
+
+    # image_data.SetSpacing(*delta)
     image_data.SetSpacing(delta, delta, delta)
 
     vtk_type_by_numpy_type = {
@@ -32,7 +38,7 @@ def vtk_transform(mpr_properties):
     }
 
     vtk_datatype = vtk_type_by_numpy_type[mpr_m.dtype.type]
-    mpr_m = np.transpose(mpr_m)
+    # mpr_m = np.transpose(mpr_m)
     scalars = numpy_support.numpy_to_vtk(num_array=mpr_m.ravel(), deep=True, array_type=vtk_datatype)
 
     image_data.GetPointData().SetScalars(scalars)

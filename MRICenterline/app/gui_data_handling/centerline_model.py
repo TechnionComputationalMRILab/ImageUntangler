@@ -1,7 +1,7 @@
 from vtkmodules.all import vtkImageData
 
 from MRICenterline.app.points.status import PickerStatus, PointStatus
-from MRICenterline.app.centerline.calculate import PointsToPlaneVectors
+from MRICenterline.app.centerline.calculate import get_straight_mpr
 from MRICenterline.gui.vtk.transform_to_vtk import vtk_transform
 
 from MRICenterline.app.points.point import Point
@@ -145,14 +145,18 @@ class CenterlineModel:
         def _calculate():
             input_points = self.point_array.get_as_array_for_centerline(self.image_properties)
 
-            ppv = PointsToPlaneVectors(input_points,
-                                       self.image_properties,
-                                       height=self.height,
-                                       angle_degrees=self.angle)
+            mpr_np = get_straight_mpr(img=self.image_properties, points=input_points, xRad=self.height,
+                                      viewAngle=self.angle)
+            # ppv = PointsToPlaneVectors(input_points,
+            #                            self.image_properties,
+            #                            height=self.height,
+            #                            angle_degrees=self.angle)
 
-            self.nparray = ppv.MPR_M
-            self.vtk_data = vtk_transform(ppv)
-            self.parallel_scale = self.parallel_scale * ppv.delta * \
+            # self.nparray = ppv.MPR_M
+            delta = self.image_properties.spacing
+            self.nparray = mpr_np
+            self.vtk_data = vtk_transform(np_array=self.nparray, delta=delta)
+            self.parallel_scale = self.parallel_scale * delta[0] * \
                                   (self.vtk_data.GetExtent()[1] - self.vtk_data.GetExtent()[0])
 
             self.generate_vertical_line_array()

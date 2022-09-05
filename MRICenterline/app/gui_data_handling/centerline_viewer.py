@@ -21,7 +21,7 @@ class CenterlineViewer:
 
         self.window = self.interactor.GetRenderWindow()
 
-        self.reslice = vtkImageReslice()
+        # self.reslice = vtkImageReslice()
         self.panel_actor = vtkImageActor()
         self.panel_renderer = vtkRenderer()
         self.removable_actor_list = []
@@ -54,11 +54,13 @@ class CenterlineViewer:
         self.window.Render()
 
     def connect_panel_actor(self):
-        self.reslice.SetInputData(self.model.vtk_data)
-        self.reslice.SetOutputDimensionality(2)
-        self.reslice.Update()
+        # self.reslice.SetInputData(self.model.vtk_data)
+        # self.reslice.SetOutputDimensionality(2)
+        # self.reslice.Update()
 
-        self.panel_actor.GetMapper().SetInputConnection(self.reslice.GetOutputPort())
+        self.panel_actor.GetMapper().SetInputData(self.model.vtk_data)
+
+        # self.panel_actor.GetMapper().SetInputConnection(self.reslice.GetOutputPort())
 
         self.panel_renderer.SetBackground(CONST.BG_COLOR[0], CONST.BG_COLOR[1], CONST.BG_COLOR[2])
         self.panel_renderer.AddActor(self.panel_actor)
@@ -83,7 +85,7 @@ class CenterlineViewer:
         # self.panel_renderer.AddActor(self.height_text_actor)
         # self.panel_renderer.AddActor(self.angle_text_actor)
 
-        self.reslice.Update()
+        # self.reslice.Update()
         self.window.Render()
 
     def add_actor(self, actor):
@@ -111,8 +113,8 @@ class CenterlineViewer:
 
     def refresh_panel(self, angle_change=None, height_change=None):
         logging.debug(f"Current number of actors: {self.panel_renderer.GetActors().GetNumberOfItems()}")
-        self.reslice.SetInputData(self.model.vtk_data)
-        self.reslice.Update()
+        # self.reslice.SetInputData(self.model.vtk_data)
+        # self.reslice.Update()
 
         if angle_change:
             self.update_status_text("Angle", str(self.model.angle))
