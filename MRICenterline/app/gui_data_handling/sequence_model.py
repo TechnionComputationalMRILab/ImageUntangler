@@ -134,6 +134,10 @@ class SequenceModel:
         point = Point(pick_coords, slice_index, self.current_image_properties)
         logging.debug(f"{self.model.picker_status} | {point}")
 
+        if self.model.picker_status == PickerStatus.PICKING_PAIR:
+            # TODO: fill this out
+            pass
+
         if self.model.picker_status == PickerStatus.PICKING_MPR:
             self.mpr_point_array.add_point(point)
             self.current_sequence_viewer.add_actor(self.mpr_point_array.get_last_actor())

@@ -202,3 +202,12 @@ class DisplayPanelToolbarButtons(QWidget):
         timer_pause.clicked.connect(timer_pause_resume)
 
         # endregion
+
+        # region timers
+        column += 1  # NEW COLUMN
+
+        point_pair_button = QPushButton(qta.icon('mdi.comment-edit'), "DEBUG: PICK POINT PAIR")
+        point_pair_button.setFlat(True)
+        layout.addWidget(point_pair_button, 1, column, 1, 1)
+        point_pair_button.clicked.connect(lambda: toolbar_connect.pick_point_pair(model))
+        # endregion
