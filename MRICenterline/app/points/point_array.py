@@ -47,6 +47,7 @@ class PointArray:
     # region
 
     def fill_interp(self, num_points: int = 10):
+        # TODO: fix problematic interpolation
         import scipy.interpolate
 
         # linearly interpolates the points in the array. used for testing the fill function
