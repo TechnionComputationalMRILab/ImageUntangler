@@ -13,6 +13,7 @@ class Point:
                  image_properties: ImageProperties or None,
                  color=(1, 1, 1),
                  size=3):
+
         self.image_coordinates = list(picked_coords[0:3])
         self.slice_idx = slice_index
         self.image_properties = image_properties
@@ -29,6 +30,9 @@ class Point:
             if CFG.get_testing_status("use-slice-location"):
                 z_coords = self.image_properties.z_coords
                 self.image_coordinates[2] = z_coords[self.slice_idx]
+        else:
+            self.itk_index_coords = [0, 0, 0]
+            self.physical_coords = [0, 0, 0]
 
     # @classmethod
     # def point_from_physical(cls, physical_coords, image_properties, color=(1, 1, 1), size=3):

@@ -143,6 +143,8 @@ class CenterlineModel:
 
     def calculate_centerline(self):
         def _calculate():
+            print(self.point_array)
+            print(type(self.point_array))
             input_points = self.point_array.get_as_array_for_centerline(self.image_properties)
 
             mpr_np = get_straight_mpr(img=self.image_properties, points=input_points, xRad=self.height,

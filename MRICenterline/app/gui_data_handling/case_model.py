@@ -140,5 +140,7 @@ class CaseModel:
         self.sequence_manager.point_shift(direction)
 
     def pick_point_pair(self):
-        self.picker_status = PickerStatus.PICKING_PAIR
+        self.picker_status = PickerStatus.PICKING_MPR_PAIR
+        NUMBER_OF_POINTS = 10
+
     # endregion

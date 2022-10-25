@@ -14,7 +14,7 @@ class PickerStatus(Enum):
     MODIFYING_MPR = auto()
     MODIFYING_LENGTH = auto()
     FIND_MPR = auto()
-    PICKING_PAIR = auto()
+    PICKING_MPR_PAIR = auto()
 
 
 class PointStatus(Enum):
