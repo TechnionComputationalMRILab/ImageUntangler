@@ -146,7 +146,8 @@ class SequenceModel:
             if len(self.mpr_point_array) == 2:
                 dpa = DefinedPointArray()
                 dpa.transform(self.mpr_point_array)
-                self.mpr_point_array.point_array = dpa.point_array
+                # self.mpr_point_array.point_array = dpa.point_array
+                self.mpr_point_array = dpa
 
                 print(len(dpa))
                 print(len(self.mpr_point_array))

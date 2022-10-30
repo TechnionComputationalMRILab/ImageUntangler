@@ -46,40 +46,6 @@ class PointArray:
     ######################################################################
     # region
 
-    def fill_interp(self, num_points: int = 10):
-        # TODO: fix problematic interpolation
-        import scipy.interpolate
-
-        # linearly interpolates the points in the array. used for testing the fill function
-        slice_indices = set([pt.slice_idx for pt in self.point_array if pt])
-
-        # all points in a pt array have the same image_properties by definition
-        image_properties = self.point_array[0].image_properties
-
-        if len(slice_indices) == 1:
-            idx = slice_indices.pop()
-            print("running fill interp")
-
-            # assume all the points are in the same slice
-
-            start = self.point_array[0].image_coordinates[0:2]
-            end = self.point_array[-1].image_coordinates[0:2]
-
-            print(start, end)
-
-            x_fill = np.linspace(start[0], end[0], num_points)
-            print(x_fill)
-            # y_fill = [np.interp(nx, [start[0], end[0]], [start[1], end[1]]) for nx in x_fill]
-            y_fill = np.interp(x_fill, [start[0], end[0]], [start[1], end[1]])
-            print(y_fill)
-
-            pts = [Point(picked_coords=(x, y, self.point_array[0].image_coordinates[2]),
-                         slice_index=idx,
-                         image_properties=image_properties)
-                   for x, y in zip(x_fill, y_fill)]
-
-            self.point_array = pts
-
     def extend(self, point_array):
         for pt in point_array:
             self.add_point(pt)
