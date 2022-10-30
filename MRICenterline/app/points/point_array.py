@@ -1,6 +1,8 @@
 from copy import deepcopy
 from typing import List
 
+import numpy as np
+
 from MRICenterline.app.file_reader.AbstractReader import ImageOrientation
 from MRICenterline.gui.vtk.line_actor import IULineActor
 from MRICenterline.app.points.point import Point

@@ -50,3 +50,7 @@ def export(model, parent):
 
 def toggle_mpr_marker(model, show: bool):
     model.toggle_mpr_marker_visibility(show)
+
+
+def pick_point_pair(model):
+    model.pick_point_pair()

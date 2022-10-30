@@ -138,4 +138,9 @@ class CaseModel:
     def point_shift(self, direction: str):
         logging.debug(f"Point shift triggered: {direction}")
         self.sequence_manager.point_shift(direction)
+
+    def pick_point_pair(self):
+        self.picker_status = PickerStatus.PICKING_MPR_PAIR
+        NUMBER_OF_POINTS = 10
+
     # endregion

@@ -6,6 +6,7 @@ from vtkmodules.qt.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
 
 from MRICenterline.app.database.save_points import save_points
 from MRICenterline.app.file_reader.AbstractReader import ImageOrientation
+from MRICenterline.app.points.DefinedPointArray import DefinedPointArray
 from MRICenterline.app.points.status import PickerStatus, PointStatus
 from MRICenterline.app.gui_data_handling.sequence_viewer import SequenceViewer
 from MRICenterline.app.gui_data_handling.image_properties import ImageProperties
@@ -137,6 +138,23 @@ class SequenceModel:
         if self.model.picker_status == PickerStatus.PICKING_MPR:
             self.mpr_point_array.add_point(point)
             self.current_sequence_viewer.add_actor(self.mpr_point_array.get_last_actor())
+
+        if self.model.picker_status == PickerStatus.PICKING_MPR_PAIR:
+            self.mpr_point_array.add_point(point)
+            self.current_sequence_viewer.add_actor(self.mpr_point_array.get_last_actor())
+
+            if len(self.mpr_point_array) == 2:
+                dpa = DefinedPointArray()
+                dpa.transform(self.mpr_point_array)
+                # self.mpr_point_array.point_array = dpa.point_array
+                self.mpr_point_array = dpa
+
+                print(len(dpa))
+                print(len(self.mpr_point_array))
+                print([i.image_coordinates for i in dpa.point_array if i])
+
+                for pt in self.mpr_point_array:
+                    self.current_sequence_viewer.add_actor(pt.actor)
 
         if self.model.picker_status == PickerStatus.PICKING_LENGTH:
             self.length_point_array.add_point(point)
