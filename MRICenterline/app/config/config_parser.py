@@ -91,6 +91,9 @@ class ConfigParser:
     def get_db(self):
         return self.get_folder("script", "metadata.db")
 
+    def get_path_for_case_name(self, case_name: str):
+        return Path(self.get_folder("raw")) / case_name
+
     def get_icon(self):
         from PyQt5.QtGui import QIcon
         return QIcon(self.get_folder("script", "static", "labIcon.png"))

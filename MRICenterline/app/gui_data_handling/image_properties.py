@@ -8,6 +8,8 @@ import numpy as np
 
 from MRICenterline import CFG
 from MRICenterline.app.file_reader.AbstractReader import ImageOrientation
+from MRICenterline.app.file_reader.dicom.DICOMReader import DICOMReader
+from MRICenterline.app.file_reader.imager import Imager
 from MRICenterline.app.file_reader.transformation_matrix import transformation_matrix
 
 import logging
@@ -96,3 +98,13 @@ class ImageProperties:
 
         return vtkVol
 
+    @classmethod
+    def from_path(cls, folder, seq_id):
+        imager = Imager(folder)
+
+        if isinstance(imager.reader, DICOMReader):
+            idx = imager.reader.find_index_from_seq_id(seq_id=seq_id)
+            sitk_image = imager.reader[idx]
+            orientation = imager.reader.get_image_orientation(idx)
+
+            return cls(sitk_image, orientation, [])

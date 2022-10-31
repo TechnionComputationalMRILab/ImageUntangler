@@ -111,13 +111,13 @@ class ScannerWidget(QWidget):
         time_export_button.clicked.connect(lambda: self.connect_export('time'))
         export_layout.addWidget(time_export_button)
 
-        time_export_button = QPushButton("Export metadata")
-        time_export_button.clicked.connect(lambda: self.connect_export('metadata'))
-        export_layout.addWidget(time_export_button)
+        metadata_export_button = QPushButton("Export metadata")
+        metadata_export_button.clicked.connect(lambda: self.connect_export('metadata'))
+        export_layout.addWidget(metadata_export_button)
 
-        time_export_button = QPushButton("Export sequence report")
-        time_export_button.clicked.connect(lambda: self.connect_export('sequence'))
-        export_layout.addWidget(time_export_button)
+        sequence_export_button = QPushButton("Export sequence report")
+        sequence_export_button.clicked.connect(lambda: self.connect_export('sequence'))
+        export_layout.addWidget(sequence_export_button)
 
         inner_layout.addWidget(export_group_box)
 
@@ -134,11 +134,15 @@ class ScannerWidget(QWidget):
 
         if path:
             if opt == 'time':
-                scanner.run_time_report("")
+                status = scanner.time_report(path)
             elif opt == 'metadata':
-                pass
+                status = scanner.metadata_report(path)
             elif opt == 'sequence':
-                pass
+                status = scanner.sequence_report(path)
+            else:
+                status = ""
+
+            self.add_to_textbox(status)
 
     def connect_options(self):
         self.pbar.setMaximum(len(self.directories))

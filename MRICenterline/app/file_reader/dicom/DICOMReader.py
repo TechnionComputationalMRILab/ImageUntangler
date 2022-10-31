@@ -4,6 +4,7 @@ import sqlite3
 import os
 import SimpleITK as sitk
 
+from MRICenterline.app.database import name_id
 from MRICenterline.app.file_reader.dicom import InitialDatabaseBuild, constants, DICOMImageOrientation
 from MRICenterline.app.file_reader.AbstractReader import AbstractReader, ImageOrientation
 
@@ -38,6 +39,10 @@ class DICOMReader(AbstractReader):
                 logging.error("File not found. Probably an error with the raw-data folder set in config.ini")
         else:
             raise KeyError("Sequence not found in DICOMReader")
+
+    def find_index_from_seq_id(self, seq_id):
+        seq_name = name_id.get_sequence_name(seq_id, self.case_id)
+        return self.sequence_list.index(seq_name)
 
     def read_from_database(self):
         con = sqlite3.connect(CFG.get_db())
