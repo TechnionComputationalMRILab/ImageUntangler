@@ -1,6 +1,10 @@
+from datetime import datetime
+TIMESTAMP_FORMAT = "%d.%m.%Y %H:%M:%S"
+BUILD_DATE = datetime.utcnow().strftime(TIMESTAMP_FORMAT)
+
 APP_NAME = "ImageUntangler"
 APP_BYLINE = "TCML"
-VER_NUMBER = '4.3.0'
+VER_NUMBER = '4.5.0'
 WINDOW_NAME = f'{APP_NAME} by {APP_BYLINE} v-{VER_NUMBER}'
 
 BG_COLOR = (204 / 255, 204 / 255, 204 / 255)
@@ -19,5 +23,3 @@ CL_MAX_ANGLE = 180
 MPR_VLINE_LENGTH = 1000
 
 ORDER_OF_CONTROLS = ['Slice Index', "Window", "Level"]
-
-TIMESTAMP_FORMAT = "%d.%m.%Y %H:%M:%S"

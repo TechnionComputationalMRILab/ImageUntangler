@@ -5,6 +5,7 @@ from pathlib import Path
 
 from MRICenterline.app.config.log import LOGGING_CONFIG
 from MRICenterline.app.database.setup import db_init
+from MRICenterline.app.database.check_db_version import check_db_version
 
 
 def file_checks() -> None:
@@ -30,7 +31,7 @@ def file_checks() -> None:
     # set up database
     db_file_path = os.path.join(home_path, 'metadata.db')
     if Path(db_file_path).is_file():
-        logging.info(f"Using database file: {db_file_path}")
+        logging.info(f"Using database file: {db_file_path} | db version: {check_db_version(db_file_path)}")
     else:
         logging.info("Database not found, initializing...")
         db_init(db_file_path)
