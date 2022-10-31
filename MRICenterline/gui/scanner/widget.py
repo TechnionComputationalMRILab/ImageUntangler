@@ -1,15 +1,43 @@
 from pathlib import Path
 from glob import glob
 
-from PyQt5.QtCore import QObject, pyqtSignal
+from PyQt5.QtCore import QObject, pyqtSignal, QThread
 from PyQt5.QtWidgets import QWidget, QFileDialog, QPushButton, QVBoxLayout, QLabel, \
-                            QGridLayout, QTextEdit, QGroupBox, QCheckBox
+                            QGridLayout, QTextEdit, QGroupBox, QCheckBox, QProgressBar
 
 from MRICenterline import CFG
 from MRICenterline.app import scanner
 
 import logging
 logging.getLogger(__name__)
+
+
+class ScanWorker(QObject):
+    finished = pyqtSignal()
+    status_message = pyqtSignal(str)
+    pbar_value = pyqtSignal(int)
+
+    def __init__(self, options, directories, parent=None):
+        super().__init__(parent)
+        self.options = options
+        self.directories = directories
+
+    def run(self):
+        num_folders = len(self.directories)
+        opts_for_logger = [opt.isChecked() for opt in self.options.values()]
+        logging.info(f"Running scanner with {opts_for_logger}")
+
+        if self.options['organize_data'].isChecked():
+            # scanner.run_organize_data("", "", parent_widget=self)
+            self.status_message.emit("Not implemented")
+        if self.options['metadata_sequence_scan'].isChecked():
+            for index, folder in enumerate(self.directories):
+                output = scanner.get_metadata(folder, index, num_folders, None)
+                self.status_message.emit(f"[{1 + index} / {num_folders}] Reading {folder}")
+                self.status_message.emit(f'{output}')
+                self.pbar_value.emit(index + 1)
+
+        self.finished.emit()
 
 
 class ScannerWidget(QWidget):
@@ -23,6 +51,9 @@ class ScannerWidget(QWidget):
             "metadata_sequence_scan":
                 QCheckBox("Scan the files for metadata and sequences and commits to database")
         }
+
+        self.thread = QThread()
+        self.worker = None
 
         self.directories = [Path(i) for i in glob(f"{self.folder_path}/**/", recursive=True)]
         try:
@@ -64,10 +95,10 @@ class ScannerWidget(QWidget):
         preprocess_options_layout.addWidget(self.preprocess_options['organize_data'])
         preprocess_options_layout.addWidget(self.preprocess_options['metadata_sequence_scan'])
 
-        preprocess_button = QPushButton("Start")
-        preprocess_options_layout.addWidget(preprocess_button)
+        self.preprocess_button = QPushButton("Start")
+        preprocess_options_layout.addWidget(self.preprocess_button)
 
-        preprocess_button.clicked.connect(self.connect_options)
+        self.preprocess_button.clicked.connect(self.connect_options)
 
         inner_layout.addWidget(preprocess_options_group_box)
 
@@ -93,6 +124,11 @@ class ScannerWidget(QWidget):
         inner_layout.addWidget(QLabel("Status: "))
         inner_layout.addWidget(self.text_box)
 
+        self.pbar = QProgressBar(self)
+        self.pbar.setValue(0)
+
+        inner_layout.addWidget(self.pbar)
+
     def connect_export(self, opt):
         path = QFileDialog(self).getSaveFileName(filter="*.csv")[0]
 
@@ -105,13 +141,39 @@ class ScannerWidget(QWidget):
                 pass
 
     def connect_options(self):
-        opts_for_logger = [opt.isChecked() for opt in self.preprocess_options.values()]
-        logging.info(f"Running scanner with {opts_for_logger}")
+        self.pbar.setMaximum(len(self.directories))
+        self.worker = ScanWorker(self.preprocess_options, self.directories)
 
-        if self.preprocess_options['organize_data'].isChecked():
-            scanner.run_organize_data("", "", parent_widget=self)
-        if self.preprocess_options['metadata_sequence_scan'].isChecked():
-            scanner.run_metadata_sequence_scan(self.directories, parent_widget=self)
+        # Move worker to the thread
+        self.worker.moveToThread(self.thread)
+
+        # Connect signals and slots
+        self.thread.started.connect(self.worker.run)
+        self.worker.finished.connect(self.thread.quit)
+        self.worker.finished.connect(self.worker.deleteLater)
+        self.thread.finished.connect(self.thread.deleteLater)
+        self.worker.status_message.connect(self.add_to_textbox)
+        self.worker.pbar_value.connect(self.pbar.setValue)
+
+        self.thread.start()
+
+        # Final resets
+        self.preprocess_button.setEnabled(False)
+        self.thread.finished.connect(
+            lambda: self.preprocess_button.setEnabled(True)
+        )
+        self.thread.finished.connect(
+            lambda: self.add_to_textbox("Scan complete")
+        )
+        
+    # def run(self):
+    #     opts_for_logger = [opt.isChecked() for opt in self.preprocess_options.values()]
+    #     logging.info(f"Running scanner with {opts_for_logger}")
+    #
+    #     if self.preprocess_options['organize_data'].isChecked():
+    #         scanner.run_organize_data("", "", parent_widget=self)
+    #     if self.preprocess_options['metadata_sequence_scan'].isChecked():
+    #         scanner.run_metadata_sequence_scan(self.directories, parent_widget=self)
 
     def add_to_textbox(self, text, color=None):
         if color:
