@@ -47,6 +47,32 @@ class PointArray:
     ######################################################################
     # region
 
+    def recalculate_array(self, changed_index):
+        print(f"previous length: {self.total_length}")
+        pt_center = self.point_array[changed_index]
+
+        if changed_index > 0:
+            pt_before = self.point_array[changed_index-1]
+            d_before = pt_before.distance(pt_center)
+            self.lengths[changed_index-1] = d_before
+            self.length_actors[changed_index-1] = self.generate_line_actor(pt_before, pt_center)
+        else:
+            # beginning of array
+            # dont want to change value of -1
+            pass
+
+        try:
+            pt_after = self.point_array[changed_index+1]
+            d_after = pt_after.distance(pt_center)
+            self.lengths[changed_index] = d_after
+            self.length_actors[changed_index] = self.generate_line_actor(pt_center, pt_after)
+        except IndexError:
+            # end of array
+            pass
+
+        self.total_length = sum(self.lengths)
+        print(f"new length: {self.total_length}")
+
     def extend(self, point_array):
         for pt in point_array:
             self.add_point(pt)
@@ -145,6 +171,7 @@ class PointArray:
     def __setitem__(self, key, value):
         # TODO: need to recalculate everything
         self.point_array[key] = value
+        self.recalculate_array(key)
 
     def __iter__(self):
         return iter(self.point_array)
