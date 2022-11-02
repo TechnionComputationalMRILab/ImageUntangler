@@ -81,6 +81,7 @@ class DisplayPanelToolbarButtons(QWidget):
         # region additional MPR functions
         column += 1  # NEW COLUMN
 
+        # TODO: add a check if there are any MPR points on the panel before allowing this to be used
         select_point_button = QPushButton(qta.icon("mdi.select-search"), "Highlight MPR point")
         layout.addWidget(select_point_button, 0, column, 1, 1)
         select_point_button.setFlat(True)
@@ -203,11 +204,19 @@ class DisplayPanelToolbarButtons(QWidget):
 
         # endregion
 
-        # region timers
+        # region testing
         column += 1  # NEW COLUMN
 
         point_pair_button = QPushButton(qta.icon('mdi.comment-edit'), "DEBUG: PICK POINT PAIR")
         point_pair_button.setFlat(True)
-        layout.addWidget(point_pair_button, 1, column, 1, 1)
+        layout.addWidget(point_pair_button, 0, column, 1, 1)
         point_pair_button.clicked.connect(lambda: toolbar_connect.pick_point_pair(model))
+
+        edit_point_button = QPushButton(qta.icon('mdi.comment-edit'), "DEBUG: EDIT POINTS")
+        edit_point_button.setFlat(True)
+        edit_point_button.setEnabled(False)
+        layout.addWidget(edit_point_button, 1, column, 1, 1)
+        edit_point_button.clicked.connect(lambda: toolbar_connect.edit_points_button(model))
+        select_point_button.clicked.connect(lambda: edit_point_button.setEnabled(True))
+
         # endregion

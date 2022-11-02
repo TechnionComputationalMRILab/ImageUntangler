@@ -40,6 +40,7 @@ class PointArray:
         self.line_style = CFG.get_config_data(key, 'line-style')
 
         self.has_highlight = False
+        self.highlighted_point = None
 
     ######################################################################
     #                        array manipulation                          #
@@ -115,6 +116,19 @@ class PointArray:
 
         return self
 
+    def edit_point(self, point: Point):
+        if self.has_highlight:
+            origin_point = self.highlighted_point
+
+            i = self.get_index(origin_point)
+            logging.info(f"Editing point{i}")
+
+            self[i] = point
+
+            return origin_point, i
+        else:
+            logging.info("Can't edit without a highlighted point")
+
     # endregion
 
     ######################################################################
@@ -127,6 +141,10 @@ class PointArray:
 
     def __getitem__(self, item):
         return self.point_array[item]
+
+    def __setitem__(self, key, value):
+        # TODO: need to recalculate everything
+        self.point_array[key] = value
 
     def __iter__(self):
         return iter(self.point_array)
@@ -170,6 +188,9 @@ class PointArray:
     #                                 get                                #
     ######################################################################
     # region
+
+    def get_index(self, point: Point):
+        return self.point_array.index(point)
 
     def get_last_actor(self):
         if len(self) == 1:
@@ -225,6 +246,7 @@ class PointArray:
 
         self.point_array[item].set_color(self.highlight_color)
         self.has_highlight = True
+        self.highlighted_point = self.point_array[item]
 
         return self.point_array[item].slice_idx
 
@@ -296,32 +318,6 @@ class PointArray:
 
         return np.asarray(points)
 
-        # cl_array = []
-        # for pt in self.point_array:
-        #     itk_coords = pt.itk_index_coords
-        #
-        #     viewer_origin = image_properties.size / 2
-        #
-        #     image_coordinates = np.zeros(3)
-        #     image_coordinates[0] = (itk_coords[0] - 1 - viewer_origin[0]) * image_properties.spacing[0]
-        #     image_coordinates[1] = (itk_coords[1] - 1 - viewer_origin[1]) * image_properties.spacing[1]
-        #
-        #     slice_idx = itk_coords[2] - 1
-        #
-        #     if image_properties.orientation == ImageOrientation.CORONAL:
-        #         image_coordinates[2] = \
-        #             image_properties.sitk_image.TransformIndexToPhysicalPoint([0, 0, int(slice_idx + 2)])[1]
-        #     elif image_properties.orientation == ImageOrientation.AXIAL:
-        #         image_coordinates[2] = \
-        #             image_properties.sitk_image.TransformIndexToPhysicalPoint([0, 0, int(slice_idx)])[2]
-        #     else:
-        #         raise NotImplementedError("Sagittal cases not supported")
-        #
-        #     cl_array.append(image_coordinates)
-        #
-        # return np.asarray(cl_array)
-        # return np.asarray([pt.image_coordinates for pt in self.point_array])
-
     def find_nearest_point(self, other: Point, get_index: bool = False) -> Point or int:
         point_and_distances = []
         for i in self.get_points_in_slice(other.slice_idx):
@@ -359,5 +355,15 @@ class PointArray:
             simplified_points.append(d)
 
         return simplified_points
+
+    # endregion
+
+    ######################################################################
+    #                               alias                                #
+    ######################################################################
+    # region
+
+    def index(self, point: Point):
+        return self.get_index(point)
 
     # endregion

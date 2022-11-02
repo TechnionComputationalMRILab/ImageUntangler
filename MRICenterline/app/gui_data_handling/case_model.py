@@ -13,6 +13,7 @@ class CaseModel:
     picker_status = PickerStatus.NOT_PICKING
     sequence_viewer = None
     centerline_model = None
+    centerline_calc = False  # flag if centerline has been calculated
 
     def __init__(self, path, initial_sequence=None, file_dialog_open=False):
         self.path = path
@@ -50,7 +51,7 @@ class CaseModel:
     def update_window_level(self):
         self.window_value, self.level_value = self.sequence_manager.update_window_level()
 
-        if self.centerline_model:
+        if self.centerline_calc:
             self.centerline_model.set_window_level(self.window_value, self.level_value)
 
     def print_status_to_terminal(self):
@@ -85,21 +86,25 @@ class CaseModel:
     def export(self, destination: str, display_options: dict, centerline_options: dict):
         # self.sequence_manager.export(destination, display_options)
 
-        if self.centerline_model:
+        if self.centerline_calc:
             self.centerline_model.export(destination, centerline_options)
 
     def set_picker_status(self, status: PickerStatus):
         logging.debug(f"Setting display panel picker status to {status}")
         self.picker_status = status
 
-        if self.centerline_model and not (status == PickerStatus.PICKING_MPR or status == PickerStatus.MODIFYING_MPR):
+        if self.centerline_calc and not (status == PickerStatus.PICKING_MPR or status == PickerStatus.MODIFYING_MPR):
             self.centerline_model.set_picker_status(status)
+
+        if status == PickerStatus.FIND_MPR:
+            pass
+    #         turn on editing
 
     def calculate(self, status: PointStatus):
         self.sequence_manager.calculate(status)
 
-        if self.centerline_model:
-            self.centerline_model.calculate_length()
+        # if self.centerline_calc:
+        #     self.centerline_model.calculate_length()
 
     def timer_status(self, status):
         import time
@@ -123,7 +128,7 @@ class CaseModel:
     def find_point(self):
         self.picker_status = PickerStatus.FIND_MPR
 
-        if self.centerline_model:
+        if self.centerline_calc:
             self.centerline_model.set_picker_status(PickerStatus.FIND_MPR)
 
     def pick(self, pick_coords: tuple):
@@ -136,11 +141,16 @@ class CaseModel:
         self.sequence_manager.load_points(length_id, mpr_id)
 
     def point_shift(self, direction: str):
+        # Intended for debugging pre-v4 points only
         logging.debug(f"Point shift triggered: {direction}")
         self.sequence_manager.point_shift(direction)
 
     def pick_point_pair(self):
         self.picker_status = PickerStatus.PICKING_MPR_PAIR
         NUMBER_OF_POINTS = 10
+
+    def edit_points(self):
+        logging.debug(f"Point editing turned on")
+        self.picker_status = PickerStatus.MODIFYING_MPR
 
     # endregion

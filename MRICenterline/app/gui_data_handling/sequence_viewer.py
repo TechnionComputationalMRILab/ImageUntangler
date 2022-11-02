@@ -114,6 +114,7 @@ class SequenceViewer:
     ###########################################################################
     #                               text actors                               #
     ###########################################################################
+    # region
 
     def initialize_text(self):
         self.status_text_actor.SetInput(self.status_texts)
@@ -176,6 +177,7 @@ class SequenceViewer:
 
     def update_debug_text(self, text):
         self.debug_text_actor.SetInput(text)
+    # endregion
 
     ###########################################################################
     #                              panel actors                               #
@@ -311,3 +313,7 @@ class SequenceViewer:
         length_count = self.model.length_point_array.show_for_slice(slice_index)
         mpr_count = self.model.mpr_point_array.show_for_slice(slice_index)
         return length_count, mpr_count
+
+    def remove_actor(self, actor):
+        self.panel_renderer.RemoveActor(actor)
+        self.render_panel()

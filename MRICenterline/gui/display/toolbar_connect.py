@@ -54,3 +54,7 @@ def toggle_mpr_marker(model, show: bool):
 
 def pick_point_pair(model):
     model.pick_point_pair()
+
+
+def edit_points_button(model):
+    model.edit_points()
