@@ -21,5 +21,4 @@ venv/*
 /databases/
 /docs/test_results/
 *.db
-/docs/
 /archive/

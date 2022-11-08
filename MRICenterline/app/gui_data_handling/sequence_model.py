@@ -86,6 +86,7 @@ class SequenceModel:
 
     def calculate(self, status: PointStatus):
         if status == PointStatus.MPR:
+            self.model.centerline_calc = True
             self.model.centerline_model.set_points_and_image(self.mpr_point_array,
                                                              self.current_image_properties)
             self.model.centerline_model.set_window_level(self.window_value, self.level_value)
@@ -169,8 +170,14 @@ class SequenceModel:
         if self.model.picker_status == PickerStatus.FIND_MPR:
             closest_point_index = self.mpr_point_array.find_nearest_point(point, get_index=True)
             self.highlight_point(closest_point_index, PointStatus.MPR)
-            if self.model.centerline_model:
+            if self.model.centerline_calc:
                 self.model.centerline_model.highlight_selected_point(closest_point_index)
+
+        if self.model.picker_status == PickerStatus.MODIFYING_MPR:
+            origin_point, origin_point_index = self.mpr_point_array.edit_point(point)
+            self.current_sequence_viewer.add_actor(point.actor)
+            self.current_sequence_viewer.remove_actor(origin_point.actor)
+            self.highlight_point(origin_point_index, PointStatus.MPR)   # new point has the same index as the original
 
         logging.debug(f"[{len(self.length_point_array)}] length points, [{len(self.mpr_point_array)}] MPR points")
 

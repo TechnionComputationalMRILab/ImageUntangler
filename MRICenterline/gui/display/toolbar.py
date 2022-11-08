@@ -1,9 +1,10 @@
-from PyQt5.QtWidgets import QWidget, QGridLayout, QPushButton
+from PyQt5.QtWidgets import QWidget, QGridLayout, QPushButton, QCheckBox, QLabel
 import qtawesome as qta
 
 from MRICenterline.app.points.status import PickerStatus, PointStatus
 from MRICenterline.app.gui_data_handling.case_model import CaseModel
 from MRICenterline.gui.display import toolbar_connect
+from MRICenterline.gui.window.AnimatedToggle import AnimatedToggle
 from MRICenterline import CFG
 
 
@@ -30,7 +31,7 @@ class DisplayPanelToolbarButtons(QWidget):
 
         # endregion
 
-        # region length
+        # region points
         column += 1  # NEW COLUMN
 
         def enable_length_picking(s):
@@ -42,7 +43,7 @@ class DisplayPanelToolbarButtons(QWidget):
             else:
                 toolbar_connect.set_picker_status(model, PickerStatus.NOT_PICKING)
 
-        length_button = QPushButton(qta.icon('mdi.ruler'), "Add Length Points")
+        length_button = QPushButton(qta.icon('mdi.ruler'), "Select Length")
         length_button.setCheckable(True)
         length_button.setChecked(False)
         layout.addWidget(length_button, 0, column, 1, 1)
@@ -81,9 +82,10 @@ class DisplayPanelToolbarButtons(QWidget):
         # region additional MPR functions
         column += 1  # NEW COLUMN
 
-        select_point_button = QPushButton(qta.icon("mdi.select-search"), "Highlight MPR point")
-        layout.addWidget(select_point_button, 0, column, 1, 1)
-        select_point_button.setFlat(True)
+        # TODO: add a check if there are any MPR points on the panel before allowing this to be used
+        select_point_button_widget = AnimatedToggle("Point Select")
+        layout.addWidget(select_point_button_widget, 0, column, 1, 1)
+        select_point_button = select_point_button_widget.button
         select_point_button.clicked.connect(lambda: toolbar_connect.find_point(model))
 
         def show_hide_mpr_markers(s):
@@ -203,11 +205,20 @@ class DisplayPanelToolbarButtons(QWidget):
 
         # endregion
 
-        # region timers
+        # region testing
         column += 1  # NEW COLUMN
 
         point_pair_button = QPushButton(qta.icon('mdi.comment-edit'), "DEBUG: PICK POINT PAIR")
         point_pair_button.setFlat(True)
-        layout.addWidget(point_pair_button, 1, column, 1, 1)
+        layout.addWidget(point_pair_button, 0, column, 1, 1)
         point_pair_button.clicked.connect(lambda: toolbar_connect.pick_point_pair(model))
+
+        edit_point_widget = AnimatedToggle("Edit points")
+        layout.addWidget(edit_point_widget, 1, column, 1, 1)
+        edit_point_button = edit_point_widget.button
+        edit_point_button.setEnabled(False)
+        edit_point_button.setChecked(False)
+        edit_point_button.clicked.connect(lambda: toolbar_connect.edit_points_button(model))
+        select_point_button.clicked.connect(lambda: edit_point_button.setEnabled(True))
+
         # endregion
