@@ -1,5 +1,6 @@
 from PyQt5.QtCore import QSize
 from PyQt5.QtWidgets import QMainWindow, QStackedWidget, QWidget, QToolBar
+from PyQt5.QtCore import Qt
 
 from MRICenterline.gui.splash.connect import open_using_file_dialog
 from MRICenterline.gui.window.Toolbar import IUToolbar

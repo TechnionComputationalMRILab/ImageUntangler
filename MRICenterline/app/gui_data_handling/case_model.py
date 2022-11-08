@@ -150,7 +150,12 @@ class CaseModel:
         NUMBER_OF_POINTS = 10
 
     def edit_points(self):
-        logging.debug(f"Point editing turned on")
-        self.picker_status = PickerStatus.MODIFYING_MPR
+        if self.picker_status == PickerStatus.FIND_MPR:
+            logging.debug(f"Point editing turned on")
+            self.picker_status = PickerStatus.MODIFYING_MPR
+
+        elif self.picker_status == PickerStatus.MODIFYING_MPR:
+            logging.debug(f"Point editing turned off")
+            self.picker_status = PickerStatus.FIND_MPR
 
     # endregion
