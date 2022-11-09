@@ -34,6 +34,9 @@ class CaseModel:
 
         self.sequence_manager = SequenceModel(self)
 
+    def test(self):
+        print("DIALOG TEST")
+
     def set_sequence_viewer(self, sequence_viewer):
         self.sequence_viewer = sequence_viewer
 

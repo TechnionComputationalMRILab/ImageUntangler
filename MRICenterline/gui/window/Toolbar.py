@@ -21,6 +21,11 @@ class IUToolbar(QToolBar):
         self.addWidget(new_case_folder_button)
         new_case_folder_button.clicked.connect(parent.open_new_case_from_folder)
 
+        show_control_panel_button = QPushButton("Show controls")
+        show_control_panel_button.setFlat(True)
+        self.addWidget(show_control_panel_button)
+        show_control_panel_button.clicked.connect(parent.toggle_control_panel)
+
         setting_button = QPushButton(qta.icon('fa.gear'), "Settings")
         setting_button.setFlat(True)
         self.addWidget(setting_button)
@@ -32,8 +37,3 @@ class IUToolbar(QToolBar):
         help_button.clicked.connect(lambda: toolbar_connect.open_help_dialog(self))
         help_button.setEnabled(CFG.get_testing_status(testing=None))  # TODO: populate the help dialog
 
-        if CFG.get_testing_status(testing=None):
-            dialog_test = QPushButton(qta.icon('fa5s.info-circle'), "Test dialog")
-            dialog_test.setFlat(True)
-            self.addWidget(dialog_test)
-            dialog_test.clicked.connect(lambda: toolbar_connect.dialog_box_test(self))

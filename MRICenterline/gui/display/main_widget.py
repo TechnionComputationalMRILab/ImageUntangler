@@ -3,8 +3,11 @@ from PyQt5.QtWidgets import QWidget, QVBoxLayout, QGroupBox, QShortcut
 from PyQt5.QtGui import QKeySequence
 
 from MRICenterline.app.gui_data_handling.case_model import CaseModel
+from MRICenterline.app.points.status import PickerStatus
+from MRICenterline.gui.controls.main_panel import ControlPanel
 from MRICenterline.gui.display.sequence_interactor_widgets import SequenceInteractorWidgets
 from MRICenterline.gui.vtk.sequence_interactor_style import SequenceViewerInteractorStyle
+from MRICenterline.gui.display.toolbar_connect import set_picker_status, find_point, edit_points
 
 from MRICenterline import CFG
 
@@ -17,6 +20,10 @@ class MainDisplayWidget(QWidget):
         self.set_up_keyboard_shortcuts()
 
         layout = QVBoxLayout(self)
+
+        parent.control_panel_dialog.attach_model(model)
+        parent.control_panel_dialog.show()
+        # self.control_panel_dialog = ControlPanel(self, model)
 
         self._frame = QGroupBox()
         self.interactor = QVTKRenderWindowInteractor(self._frame)
@@ -35,9 +42,13 @@ class MainDisplayWidget(QWidget):
         if CFG.get_testing_status("show-sliders"):
             layout.addLayout(self.sequence_widgets.build_slider_group_box())
 
+    def test(self):
+        self.model.test()
+
     def closeEvent(self, QCloseEvent):
         super().closeEvent(QCloseEvent)
         self.interactor.Finalize()
+        self.control_panel_dialog.close()
 
     def change_sequence(self, s):
         self.model.change_sequence(s)
@@ -72,7 +83,7 @@ class MainDisplayWidget(QWidget):
         save_points.activated.connect(self.model.save)
 
         overwrite_points = QShortcut(QKeySequence('Ctrl+Shift+s'), self)
-        overwrite_points.activated.connect(lambda : print('overwrite'))
+        overwrite_points.activated.connect(lambda: print('overwrite'))
 
         if CFG.get_testing_status("point-shifter"):
             shift_points_ahead = QShortcut(QKeySequence('Ctrl+.'), self)
@@ -83,3 +94,13 @@ class MainDisplayWidget(QWidget):
 
             reverse_points = QShortcut(QKeySequence('Ctrl+/'), self)
             reverse_points.activated.connect(lambda: self.model.point_shift("R"))
+
+        # TODO: implement these
+        # add_mpr_point = QShortcut(QKeySequence('a'), self)
+        # add_mpr_point.activated.connect(lambda: set_picker_status(self.model, PickerStatus.PICKING_MPR))
+        #
+        # find_mpr_point = QShortcut(QKeySequence('s'), self)
+        # find_mpr_point.activated.connect(lambda: find_point(self.model, PickerStatus.PICKING_MPR))
+        #
+        # edit_mpr_point = QShortcut(QKeySequence('e'), self)
+        # edit_mpr_point.activated.connect(lambda: edit_points(self.model, PickerStatus.PICKING_MPR))

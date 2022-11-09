@@ -63,6 +63,13 @@ class ConfigParser:
         as_list = [int(i) / 255 for i in rgb_str]
         return tuple(as_list)
 
+    def get_hex_color(self, section, key):
+        color_str = self.config_file[section][key]
+        rgb_str = color_str.split(", ")
+        h = ['{:X}'.format(int(i)) for i in rgb_str]
+        h_pad = [i.ljust(2, '0') for i in h]
+        return "#" + "".join(h_pad)
+
     def get_testing_status(self, testing: str or None):
         if testing is None:
             return self.config_file.getboolean('testing', 'disable-all-testing-features')

@@ -25,8 +25,8 @@ def configure_main_widget(path, parent_widget, selected_sequence=None, file_dial
     splitter = QSplitter(window)
     splitter.setOrientation(Qt.Vertical)
 
-    display_panel_toolbar = DisplayPanelToolbarButtons(model=case_model, parent=window)
-    window.toolbar.addWidget(display_panel_toolbar)
+    # display_panel_toolbar = DisplayPanelToolbarButtons(model=case_model, parent=window)
+    # window.toolbar.addWidget(display_panel_toolbar)
     window.setWindowTitle(case_model.get_case_name() + " | " + CONST.WINDOW_NAME)
 
     multi_pane_widget = QWidget(window)
