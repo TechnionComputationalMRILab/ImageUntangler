@@ -83,6 +83,7 @@ class ControlPanel(QDialog):
         select_length_button = select_length_widget.button
         button_list.append((select_length_button, PickerStatus.FIND_LENGTH))
         select_length_button.clicked.connect(lambda: flip_checked_status(PickerStatus.FIND_LENGTH))
+        # select_length_button.clicked.connect(lambda: find_point(self.model, PickerStatus.FIND_LENGTH))
         # TODO: implement length picking
 
         select_mpr_widget = AnimatedToggle("MPR", checked_color=CFG.get_hex_color("mpr-display-style", "color"))
@@ -99,6 +100,7 @@ class ControlPanel(QDialog):
         edit_length_button = edit_length_widget.button
         button_list.append((edit_length_button, PickerStatus.MODIFYING_LENGTH))
         edit_length_button.clicked.connect(lambda: flip_checked_status(PickerStatus.MODIFYING_LENGTH))
+        # edit_length_button.clicked.connect(lambda: edit_points(self.model, PickerStatus.MODIFYING_LENGTH))
         # TODO: implement length modifying
 
         edit_mpr_widget = AnimatedToggle("MPR", checked_color=CFG.get_hex_color("mpr-display-style", "color"))
@@ -171,5 +173,13 @@ class ControlPanel(QDialog):
         layout = QGridLayout(frame)
 
         layout.addWidget(QLabel("Experimental Features"), 0, 0, 1, 2)
+
+        # mpr_pair_pick = AnimatedToggle("MPR PAIR (same slice)",
+        #                                checked_color=CFG.get_hex_color("mpr-display-style", "color"))
+        mpr_pair_pick = QPushButton("MPR PAIR (same slice)")
+        layout.addWidget(mpr_pair_pick, 1, 0, 1, 1)
+        # mpr_pair_pick_button = mpr_pair_pick.button
+        mpr_pair_pick_button = mpr_pair_pick
+        mpr_pair_pick_button.clicked.connect(lambda: pick_point_pair(self.model))
 
         return frame

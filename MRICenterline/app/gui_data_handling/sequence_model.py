@@ -141,6 +141,7 @@ class SequenceModel:
             self.current_sequence_viewer.add_actor(self.mpr_point_array.get_last_actor())
 
         if self.model.picker_status == PickerStatus.PICKING_MPR_PAIR:
+            # TODO: EXPERIMENTAL
             self.mpr_point_array.add_point(point)
             self.current_sequence_viewer.add_actor(self.mpr_point_array.get_last_actor())
 
@@ -166,6 +167,12 @@ class SequenceModel:
 
             if len(self.length_point_array) >= 2:
                 self.current_sequence_viewer.update_length_text(self.length_point_array.get_length_for_display())
+
+        if self.model.picker_status == PickerStatus.FIND_LENGTH:
+            # TODO: cant seem to find nearest point in the pt array fnc??
+            pass
+            # closest_point_index = self.length_point_array.find_nearest_point(point, get_index=True)
+            # self.highlight_point(closest_point_index, PointStatus.LENGTH)
 
         if self.model.picker_status == PickerStatus.FIND_MPR:
             closest_point_index = self.mpr_point_array.find_nearest_point(point, get_index=True)
