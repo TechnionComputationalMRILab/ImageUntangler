@@ -103,7 +103,7 @@ class CaseModel:
             pass
     #         turn on editing
 
-    def calculate(self, status: PointStatus):
+    def calculate(self, status: PointStatus = PointStatus.MPR):
         self.sequence_manager.calculate(status)
 
         # if self.centerline_calc:

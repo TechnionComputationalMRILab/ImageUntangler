@@ -74,7 +74,7 @@ def configure_main_widget_from_session(parent_widget, session_id):
     splitter = QSplitter(window)
     splitter.setOrientation(Qt.Vertical)
 
-    window.toolbar.addWidget(DisplayPanelToolbarButtons(model=case_model, parent=window))
+    # window.toolbar.addWidget(DisplayPanelToolbarButtons(model=case_model, parent=window))
     window.setWindowTitle(case_model.get_case_name() + " | " + CONST.WINDOW_NAME)
 
     splitter.addWidget(main_display_widget)
@@ -84,3 +84,5 @@ def configure_main_widget_from_session(parent_widget, session_id):
     splitter.setStretchFactor(1, 1)
 
     window.add_widget(splitter)
+
+    case_model.calculate()

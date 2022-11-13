@@ -2,7 +2,7 @@ from typing import Tuple, List
 from vtkmodules.all import vtkTextActor, vtkPolyDataMapper, vtkActor, vtkLineSource
 
 from MRICenterline.app.points.point import Point
-from MRICenterline import CONST
+from MRICenterline import CONST, CFG
 
 
 class IULineActor(vtkActor):
@@ -22,7 +22,9 @@ class IULineActor(vtkActor):
         self.SetMapper(mapper)
         self.GetProperty().SetColor(*color)
         self.GetProperty().SetLineWidth(width)
-        self.GetProperty().SetOpacity(0)
+
+        if not CFG.get_boolean('mpr-display-style', 'mpr-markers'):
+            self.GetProperty().SetOpacity(0)
 
     def hide(self):
         self.GetProperty().SetOpacity(0)
