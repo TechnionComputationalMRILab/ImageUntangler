@@ -38,7 +38,7 @@ def comment(model, parent):
     comment_db.show()
 
 
-def find_point(model):
+def find_point(model, s):
     model.find_point()
 
 
@@ -56,5 +56,5 @@ def pick_point_pair(model):
     model.pick_point_pair()
 
 
-def edit_points_button(model):
+def edit_points(model, s):
     model.edit_points()
