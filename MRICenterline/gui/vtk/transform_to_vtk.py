@@ -4,6 +4,7 @@ from vtkmodules.all import VTK_UNSIGNED_CHAR, VTK_UNSIGNED_SHORT, VTK_UNSIGNED_I
 import numpy as np
 from vtkmodules.all import vtkImageData
 from vtkmodules.util import numpy_support
+import vtkmodules.all as vtk
 
 
 # def vtk_transform(mpr_properties):
@@ -39,7 +40,8 @@ def vtk_transform(np_array, delta):
 
     vtk_datatype = vtk_type_by_numpy_type[mpr_m.dtype.type]
     # mpr_m = np.transpose(mpr_m)
-    scalars = numpy_support.numpy_to_vtk(num_array=mpr_m.ravel(), deep=True, array_type=vtk_datatype)
+    # scalars = numpy_support.numpy_to_vtk(num_array=mpr_m.ravel(), deep=True, array_type=vtk_datatype)
+    scalars = numpy_support.numpy_to_vtk(num_array=mpr_m.ravel(), deep=True, array_type=vtk.VTK_TYPE_UINT16)
 
     image_data.GetPointData().SetScalars(scalars)
     image_data.Modified()

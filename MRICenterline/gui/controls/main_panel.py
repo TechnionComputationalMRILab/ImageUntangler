@@ -76,7 +76,7 @@ class ControlPanel(QDialog):
         add_mpr_button.clicked.connect(lambda: flip_checked_status(PickerStatus.PICKING_MPR))
         add_mpr_button.clicked.connect(lambda: set_picker_status(self.model, PickerStatus.PICKING_MPR))
 
-        layout.addWidget(QLabel("Select points"), 3, 0, 1, 2)
+        layout.addWidget(QLabel("Highlight points"), 3, 0, 1, 2)
 
         select_length_widget = AnimatedToggle("Length", checked_color=CFG.get_hex_color("length-display-style", "color"))
         layout.addWidget(select_length_widget, 4, 0, 1, 1)
