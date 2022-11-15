@@ -115,6 +115,7 @@ class CenterlineViewer:
         logging.debug(f"Current number of actors: {self.panel_renderer.GetActors().GetNumberOfItems()}")
         # self.reslice.SetInputData(self.model.vtk_data)
         # self.reslice.Update()
+        self.panel_actor.GetMapper().SetInputData(self.model.vtk_data)
 
         if angle_change:
             self.update_status_text("Angle", str(self.model.angle))

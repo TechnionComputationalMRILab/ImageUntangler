@@ -20,6 +20,7 @@ class CenterlineModel:
     picker_status = PickerStatus.NOT_PICKING
 
     def __init__(self, case_model):
+        self.parallel_scale = 1
         self.case_model = case_model
         self.window_value, self.level_value = self.case_model.window_value, self.case_model.level_value
         self.widget = None
@@ -27,7 +28,6 @@ class CenterlineModel:
         self.original_image_properties = None
         self.cl_image_properties = None
         self.centerline_viewer = None
-        self.parallel_scale = 1
         self.length_point_array = PointArray(PointStatus.LENGTH_IN_MPR)
 
         self.height = 30
@@ -75,11 +75,7 @@ class CenterlineModel:
         self.centerline_viewer.refresh_panel(angle_change, height_change)
 
     def pick(self, pick_coords):
-
-
-
         point = Point2D(pick_coords, self.cl_image_properties)
-        # point = Point(pick_coords, 0, None)
 
         if self.picker_status == PickerStatus.PICKING_LENGTH:
 
@@ -122,12 +118,6 @@ class CenterlineModel:
 
                 self.previous_mouse_coords = None
 
-    def calculate_length(self):
-        if len(self.length_point_array) >= 2:
-            print(self.length_point_array.lengths)
-            print(self.length_point_array.total_length)
-            print(self.length_point_array.get_vertical_distance())
-
     def set_picker_status(self, status: PickerStatus):
         logging.debug(f"Setting centerline panel picker status to {status}")
         self.picker_status = status
@@ -150,40 +140,16 @@ class CenterlineModel:
         self.refresh_panel(angle_change=self.angle)
 
     def calculate_centerline(self):
-        def _calculate():
-            print(self.point_array)
-            print(type(self.point_array))
-            input_points = self.point_array.get_as_array_for_centerline(self.original_image_properties)
+        self.cl_image_properties = CenterlineImageProperties.from_input(input_points=self.point_array,
+                                                                        height=self.height,
+                                                                        angle=self.angle,
+                                                                        input_image=self.original_image_properties)
 
-            mpr_np = get_straight_mpr(img=self.original_image_properties, points=input_points, xRad=self.height,
-                                      viewAngle=self.angle)
-            # ppv = PointsToPlaneVectors(input_points,
-            #                            self.image_properties,
-            #                            height=self.height,
-            #                            angle_degrees=self.angle)
+        self.vtk_data = self.cl_image_properties.vtk_data
+        self.nparray = self.cl_image_properties.mpr_np_array
+        self.parallel_scale = self.cl_image_properties.get_parallel_scale()
 
-            # self.nparray = ppv.MPR_M
-            delta = self.original_image_properties.spacing
-            self.nparray = mpr_np
-            self.vtk_data = vtk_transform(np_array=self.nparray, delta=delta)
-            self.parallel_scale = self.parallel_scale * delta[0] * \
-                                  (self.vtk_data.GetExtent()[1] - self.vtk_data.GetExtent()[0])
-
-            self.generate_vertical_line_array()
-            # self.point_markers.hide_all()
-
-        self.cl_image_properties = CenterlineImageProperties(self.nparray, self.original_image_properties)
-
-        if CFG.get_testing_status("running-for-tests"):
-            # if the code is being run for the purposes of running tests,
-            # it should produce and error instead of catching it
-            _calculate()
-        else:
-            try:
-                _calculate()
-            except Exception as e:
-                MSG.msg_box_warning(f'Error in calculating centerline: {e}')
-                logging.warning(f'Error in calculating centerline: {e}')
+        self.generate_vertical_line_array()
 
     def generate_vertical_line_array(self):
         vl = VerticalLine(0)
