@@ -1,10 +1,7 @@
 from copy import deepcopy
 from typing import List
 
-import numpy as np
 
-from MRICenterline.app.file_reader.AbstractReader import ImageOrientation
-from MRICenterline.gui.vtk.line_actor import IULineActor
 from MRICenterline.app.points.point import Point
 from MRICenterline.app.points.status import PointStatus
 from MRICenterline import CFG
@@ -19,6 +16,7 @@ class PointArray:
                  point_status: PointStatus):
         self.point_type = point_status
         self.point_array: List[Point] = []
+        self.interpolated_point_array: List[Point] = []
         self.lengths: List[float] = []
         self.length_actors = []
         self.total_length: float = 0.0
@@ -34,13 +32,17 @@ class PointArray:
             raise KeyError("Point status not defined")
 
         self.point_color = CFG.get_color(key, 'color')
-        self.point_size = float(CFG.get_config_data(key, 'marker-size'))
         self.highlight_color = CFG.get_color(key, 'highlighted-color')
+        self.interpolated_color = None
+
+        self.point_size = float(CFG.get_config_data(key, 'marker-size'))
         self.line_thickness = float(CFG.get_config_data(key, 'line-thickness'))
         self.line_style = CFG.get_config_data(key, 'line-style')
 
         self.has_highlight = False
         self.highlighted_point = None
+        self.use_fill = False
+        self.fill_amount = 0
 
     ######################################################################
     #                        array manipulation                          #
@@ -91,7 +93,25 @@ class PointArray:
                                                                self.point_array[-1]))
         self.total_length = sum(self.lengths)
 
+        if self.use_fill:
+            if len(self) >= 2:
+                from MRICenterline.app.points.point_fill import fill_interp
+
+                image_properties = self.point_array[0].image_properties
+                interpolated_array = fill_interp(image_properties=image_properties,
+                                                 point_a=self.point_array[-2], point_b=self.point_array[-1],
+                                                 point_type=self.point_type,
+                                                 point_color=self.interpolated_color,
+                                                 num_points=self.fill_amount)
+
+                # self.interpolated_point_array.append(self.point_array[-2])
+                self.interpolated_point_array.extend(interpolated_array)
+                print(interpolated_array)
+                # self.interpolated_point_array.append(self.point_array[-1])
+
     def generate_line_actor(self, point_a, point_b):
+        from MRICenterline.gui.vtk.line_actor import IULineActor
+
         if CFG.get_testing_status('draw-connecting-lines'):
             return IULineActor(point_a, point_b,
                                color=self.point_color,
@@ -193,6 +213,11 @@ class PointArray:
     ######################################################################
     # region
 
+    def set_use_fill(self, fill_amount=10):
+        self.use_fill = True
+        self.interpolated_color = CFG.get_color('mpr-display-style', 'interpolated-color')
+        self.fill_amount = fill_amount
+
     def set_size(self, size, item=None):
         self.point_size = size
         if item:
@@ -215,6 +240,13 @@ class PointArray:
     #                                 get                                #
     ######################################################################
     # region
+
+    def get_interpolated_point_actors(self):
+        index = len(self)
+        print("GET INTERPOLATED PT ACTORS")
+        print(index, index*(self.fill_amount-2))
+        return [pt.get_actor()
+                for pt in self.interpolated_point_array[(index-2)*(self.fill_amount-2):(self.fill_amount-2)*(index-1)]]
 
     def get_index(self, point: Point):
         return self.point_array.index(point)
