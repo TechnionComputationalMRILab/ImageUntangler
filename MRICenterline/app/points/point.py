@@ -122,9 +122,18 @@ class Point:
         self.point_size = size
 
     def distance(self, other):
-        # c = np.array([((a - b) ** 2) for a, b, in zip(self.image_coordinates, other.image_coordinates)])
-        c = np.array([((a - b) ** 2) for a, b, in zip(self.physical_coords, other.physical_coords)])
+        if self.image_properties:
+            c = np.array([((a - b) ** 2) for a, b, in zip(self.physical_coords, other.physical_coords)])
+        else:
+            c = np.array([((a - b) ** 2) for a, b, in zip(self.image_coordinates, other.image_coordinates)])
+
         return np.sqrt(np.sum(c))
+
+    def __getitem__(self, item):
+        if self.image_properties:
+            return self.physical_coords[item]
+        else:
+            return self.image_coordinates[item]
 
     def __repr__(self):
         return f"""

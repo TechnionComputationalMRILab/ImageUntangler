@@ -136,27 +136,24 @@ class SequenceModel:
         point = Point(pick_coords, slice_index, self.current_image_properties)
         logging.debug(f"{self.model.picker_status} | {point}")
 
+        if self.model.picker_status == PickerStatus.PICKING_MPR_PAIR:
+            # TODO: EXPERIMENTAL
+
+            # set the fill flag so that the array knows that it's supposed to fill points
+            self.mpr_point_array.set_use_fill()
+
+            self.mpr_point_array.add_point(point)
+            self.current_sequence_viewer.add_actor(self.mpr_point_array.get_last_actor())
+
+            if len(self.mpr_point_array) >= 2:
+                print(f"FILL with {len(self.mpr_point_array.get_interpolated_point_actors())}")
+                for i, pt_actor in enumerate(self.mpr_point_array.get_interpolated_point_actors()):
+                    print(f"add actor {i}")
+                    self.current_sequence_viewer.add_actor(pt_actor)
+
         if self.model.picker_status == PickerStatus.PICKING_MPR:
             self.mpr_point_array.add_point(point)
             self.current_sequence_viewer.add_actor(self.mpr_point_array.get_last_actor())
-
-        if self.model.picker_status == PickerStatus.PICKING_MPR_PAIR:
-            # TODO: EXPERIMENTAL
-            self.mpr_point_array.add_point(point)
-            self.current_sequence_viewer.add_actor(self.mpr_point_array.get_last_actor())
-
-            if len(self.mpr_point_array) == 2:
-                dpa = DefinedPointArray()
-                dpa.transform(self.mpr_point_array)
-                # self.mpr_point_array.point_array = dpa.point_array
-                self.mpr_point_array = dpa
-
-                print(len(dpa))
-                print(len(self.mpr_point_array))
-                print([i.image_coordinates for i in dpa.point_array if i])
-
-                for pt in self.mpr_point_array:
-                    self.current_sequence_viewer.add_actor(pt.actor)
 
         if self.model.picker_status == PickerStatus.PICKING_LENGTH:
             self.length_point_array.add_point(point)

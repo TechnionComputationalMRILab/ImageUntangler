@@ -174,12 +174,10 @@ class ControlPanel(QDialog):
 
         layout.addWidget(QLabel("Experimental Features"), 0, 0, 1, 2)
 
-        # mpr_pair_pick = AnimatedToggle("MPR PAIR (same slice)",
-        #                                checked_color=CFG.get_hex_color("mpr-display-style", "color"))
-        mpr_pair_pick = QPushButton("MPR PAIR (same slice)")
+        mpr_pair_pick = AnimatedToggle("Fill MPR between points",
+                                       checked_color=CFG.get_hex_color("mpr-display-style", "color"))
         layout.addWidget(mpr_pair_pick, 1, 0, 1, 1)
-        # mpr_pair_pick_button = mpr_pair_pick.button
-        mpr_pair_pick_button = mpr_pair_pick
-        mpr_pair_pick_button.clicked.connect(lambda: pick_point_pair(self.model))
+        mpr_pair_pick_button = mpr_pair_pick.button
+        mpr_pair_pick_button.clicked.connect(lambda: set_picker_status(self.model, PickerStatus.PICKING_MPR_PAIR))
 
         return frame
