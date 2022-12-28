@@ -38,6 +38,11 @@ def fill_interp(image_properties: ImageProperties or None,
     return temp_point_array
 
 
+def fill():
+    # placeholder for Rotem's function
+    #   TODO: test if the centerline still calculates as expected
+    pass
+
 if __name__ == "__main__":
     # start_point = Point(picked_coords=(4.75, -60.67, 0), slice_index=28, image_properties=None)
     # end_point = Point(picked_coords=(24.68, 177.96, 0), slice_index=35, image_properties=None)

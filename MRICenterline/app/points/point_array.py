@@ -121,6 +121,12 @@ class PointArray:
         self.point_array[item].actor.SetVisibility(False)
         self.point_array.pop(item)
 
+        if self.use_fill:
+            # TODO: incomplete
+            self.interpolated_point_array[item].actor.SetVisibility(False)
+            for i in range((item)*(self.fill_amount-2), (self.fill_amount-2)*(item+1)):
+                del self.interpolated_point_array[i]
+
         # recalculate lengths
         if len(self):
             if CFG.get_testing_status('draw-connecting-lines'):
@@ -163,7 +169,7 @@ class PointArray:
         return self
 
     def edit_point(self, point: Point):
-        if self.has_highlight:
+        if self.has_highlight and len(self):
             origin_point = self.highlighted_point
 
             i = self.get_index(origin_point)
@@ -172,8 +178,6 @@ class PointArray:
             self[i] = point
 
             return origin_point, i
-        else:
-            logging.info("Can't edit without a highlighted point")
 
     # endregion
 
@@ -243,8 +247,6 @@ class PointArray:
 
     def get_interpolated_point_actors(self):
         index = len(self)
-        print("GET INTERPOLATED PT ACTORS")
-        print(index, index*(self.fill_amount-2))
         return [pt.get_actor()
                 for pt in self.interpolated_point_array[(index-2)*(self.fill_amount-2):(self.fill_amount-2)*(index-1)]]
 
@@ -303,15 +305,21 @@ class PointArray:
             # if a point is already highlighted, set the color of all the points to the point color
             self.set_color(self.point_color)
 
-        self.point_array[item].set_color(self.highlight_color)
-        self.has_highlight = True
-        self.highlighted_point = self.point_array[item]
+        if len(self):
+            self.point_array[item].set_color(self.highlight_color)
+            self.has_highlight = True
+            self.highlighted_point = self.point_array[item]
 
-        return self.point_array[item].slice_idx
+            return self.point_array[item].slice_idx
 
     def show_point(self, item):
         self.point_array[item].set_visibility(True)
         self.point_array[item].actor.SetVisibility(True)
+
+        if self.use_fill:
+            for pt_i in self.interpolated_point_array[item*(self.fill_amount-2):(self.fill_amount-2)*(item+1)]:
+                pt_i.set_visibility(True)
+                pt_i.actor.SetVisibility(True)
 
     def hide_point(self, item):
         self.point_array[item].set_visibility(False)
@@ -369,11 +377,20 @@ class PointArray:
     def get_as_array_for_centerline(self, image_properties):
         import numpy as np
 
-        points = deepcopy([pt.itk_index_coords for pt in self.point_array])
+        if self.use_fill:
+            picked_points = deepcopy([pt.itk_index_coords for pt in self.point_array])
+            interpolated_points = deepcopy([pt.itk_index_coords for pt in self.interpolated_point_array])
+
+            points = []
+            for i, pt in enumerate(picked_points):
+                points.append(pt)
+                points.extend(interpolated_points[i * (self.fill_amount - 2):(self.fill_amount - 2) * (i + 1)])
+        else:
+            points = deepcopy([pt.itk_index_coords for pt in self.point_array])
 
         for i in points:
-            i[1] = image_properties.size[1] - i[1]
-            i[2] = i[2] - 2
+            i[1] = image_properties.size[1] - i[1]  # flip?
+            i[2] = i[2] - 2  # slice index
 
         return np.asarray(points)
 
@@ -382,10 +399,11 @@ class PointArray:
         for i in self.get_points_in_slice(other.slice_idx):
             point_and_distances.append((other.distance(i), i))
 
-        if get_index:
-            return self.get_point_index(sorted(point_and_distances)[0][1])
-        else:
-            return sorted(point_and_distances)[0][1]
+        if len(self):
+            if get_index:
+                return self.get_point_index(sorted(point_and_distances)[0][1])
+            else:
+                return sorted(point_and_distances)[0][1]
 
     def get_vertical_distance(self):
         import numpy as np
