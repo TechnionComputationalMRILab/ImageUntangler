@@ -23,7 +23,9 @@ class ControlPanel(QDialog):
         layout.addWidget(self.point_panel(), 1, 0, 1, 1)
         layout.addWidget(self.overlay_options_panel(), 1, 1, 1, 1)
         layout.addWidget(self.centerline(), 2, 0, 1, 2)
-        layout.addWidget(self.debug(), 3, 0, 1, 2)
+
+        if CFG.get_testing_status("disable-all-testing-features"):
+            layout.addWidget(self.debug(), 3, 0, 1, 2)
 
     def attach_model(self, model):
         self.model = model

@@ -81,34 +81,40 @@ def match_prob(i, j, label_pred_proba_8):
 
 
 def calc_graph_weights(init_x, init_y, num_of_pixels, x_len, y_len, slice, img, patch_len, grid_pixel_size, model, device):
-    # from pathlib import Path
-    # return np.load(str(Path(__file__).parent / "6.npy"))
-
     # TODO: make this more efficient
     graph = np.zeros((num_of_pixels, num_of_pixels))
+    model = model.to(device)
+
+    import time
+    st = time.time()
+
+    def loop(x, y):
+        pixel = np.array([init_x + x, init_y + y, slice])
+        patch = extract_patch(pixel, img, patch_len, grid_pixel_size[0])
+        patch = torch.unsqueeze(patch, 0)
+        with torch.no_grad():
+            label_pred = model(patch.to(device))
+        label_pred_proba_16 = model.predict_proba_scores(label_pred.to(device)).cpu()
+        label_pred_proba_8 = convert_16dir_to_8dir(label_pred_proba_16[0])
+        pixel_single_cord = y * x_len + x
+        for i in [-1, 0, 1]:
+            for j in [-1, 0, 1]:
+                if check_limits(x, y, i, j, x_len, y_len):
+                    neighbor_single_cord = (y + j) * x_len + (x + i)
+                    prob = match_prob(i, j, label_pred_proba_8)
+                    if prob is not None:
+                        graph[pixel_single_cord][neighbor_single_cord] = np.exp(-prob)
 
     for x in range(x_len):
         for y in range(y_len):
-            pixel = np.array([init_x + x, init_y + y, slice])
-            patch = extract_patch(pixel, img, patch_len, grid_pixel_size[0])
-            patch = torch.unsqueeze(patch, 0)
-            with torch.no_grad():
-                label_pred = model(patch.to(device))
-            label_pred_proba_16 = model.predict_proba_scores(label_pred.to(device)).cpu()
-            label_pred_proba_8 = convert_16dir_to_8dir(label_pred_proba_16[0])
-            pixel_single_cord = y * x_len + x
-            # if pixel_single_cord == 303: print(f'{pixel_single_cord=}, {x=}, {y=}')
-            for i in [-1, 0, 1]:
-                for j in [-1, 0, 1]:
-                    if check_limits(x, y, i, j, x_len, y_len):
-                        neighbor_single_cord = (y+j) * x_len + (x+i)
-                        prob = match_prob(i, j, label_pred_proba_8)
-                        if prob is not None:
-                            graph[pixel_single_cord][neighbor_single_cord] = np.exp(-prob)
+            loop(x, y)
 
-            print(f"Graph weights: {round(x / x_len, 2)}, {round(y / y_len, 2)}")
+    et = time.time()
+
+    print("RUNTIME FOR full clac_graph_weights:", et - st)
 
     return graph
+
 
 
 def extract_roi(case_sitk, slice_num, first_annotation, second_annotation):

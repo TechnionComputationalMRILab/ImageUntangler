@@ -25,7 +25,10 @@ def FindShortestPathPerSlice(case_sitk, slice_num, first_annotation, second_anno
     model_dict_path = Path(__file__).parent / "model_dict" / f"{case_number}.pt"
     print(f"Loading {model_dict_path}")
 
-    model.load_state_dict(torch.load(model_dict_path, map_location=torch.device('cpu')))
+    # if torch.cuda.is_available():
+    model.load_state_dict(torch.load(model_dict_path))
+    # else:
+    #     model.load_state_dict(torch.load(model_dict_path, map_location=torch.device('cpu')))
 
         # os.path.join('/tcmldrive/rotem/sync_thesis', 'db_loop_output_check_seed0', '6', 'model_dict', f'off_samples_from_normal_aug_is_TRUE',
         #              'model_dict.pt')))
