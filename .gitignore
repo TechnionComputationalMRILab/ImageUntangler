@@ -22,3 +22,6 @@ venv/*
 /docs/test_results/
 *.db
 /archive/
+AlgorithmTests/*
+AlgorithmTests/test.ipynb
+*.npy

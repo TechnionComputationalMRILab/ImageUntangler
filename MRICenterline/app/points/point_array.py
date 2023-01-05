@@ -95,19 +95,26 @@ class PointArray:
 
         if self.use_fill:
             if len(self) >= 2:
-                from MRICenterline.app.points.point_fill import fill_interp
+                from MRICenterline.app.points.point_fill import fill_interp, fill
 
                 image_properties = self.point_array[0].image_properties
-                interpolated_array = fill_interp(image_properties=image_properties,
-                                                 point_a=self.point_array[-2], point_b=self.point_array[-1],
-                                                 point_type=self.point_type,
-                                                 point_color=self.interpolated_color,
-                                                 num_points=self.fill_amount)
 
-                # self.interpolated_point_array.append(self.point_array[-2])
+                # region basic line interpolate, for display testing purposes
+                # interpolated_array = fill_interp(image_properties=image_properties,
+                #                                  point_a=self.point_array[-2], point_b=self.point_array[-1],
+                #                                  point_type=self.point_type,
+                #                                  point_color=self.interpolated_color,
+                #                                  num_points=self.fill_amount)
+                # endregion
+
+                # region Rotem's code :)
+                interpolated_array, length_of_fill = fill(image_properties=image_properties,
+                                                     point_a=self.point_array[-2],
+                                                     point_b=self.point_array[-1])
+                self.fill_amount = length_of_fill
+                # endregion
+
                 self.interpolated_point_array.extend(interpolated_array)
-                print(interpolated_array)
-                # self.interpolated_point_array.append(self.point_array[-1])
 
     def generate_line_actor(self, point_a, point_b):
         from MRICenterline.gui.vtk.line_actor import IULineActor
@@ -364,9 +371,14 @@ class PointArray:
     # region
 
     def generate_table_data(self) -> dict:
-        img_coords_list = [[round(c, 2) for c in pt.image_coordinates] for pt in self.point_array]
-        physical_coords_list = [[round(c, 2) for c in pt.physical_coords] for pt in self.point_array]
-        itk_index_list = [[round(c) for c in pt.itk_index_coords] for pt in self.point_array]
+        if self.use_fill:
+            img_coords_list = [[round(c, 2) for c in pt.image_coordinates] for pt in self.interpolated_point_array]
+            physical_coords_list = [[round(c, 2) for c in pt.physical_coords] for pt in self.interpolated_point_array]
+            itk_index_list = [[round(c) for c in pt.itk_index_coords] for pt in self.interpolated_point_array]
+        else:
+            img_coords_list = [[round(c, 2) for c in pt.image_coordinates] for pt in self.point_array]
+            physical_coords_list = [[round(c, 2) for c in pt.physical_coords] for pt in self.point_array]
+            itk_index_list = [[round(c) for c in pt.itk_index_coords] for pt in self.point_array]
 
         return {
             "physical coords": physical_coords_list,

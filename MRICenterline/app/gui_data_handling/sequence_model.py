@@ -151,6 +151,8 @@ class SequenceModel:
                     print(f"add actor {i}")
                     self.current_sequence_viewer.add_actor(pt_actor)
 
+                breakpoint()
+
         if self.model.picker_status == PickerStatus.PICKING_MPR:
             self.mpr_point_array.add_point(point)
             self.current_sequence_viewer.add_actor(self.mpr_point_array.get_last_actor())

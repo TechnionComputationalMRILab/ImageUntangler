@@ -33,5 +33,5 @@ class GraphicalImager(Imager):
                 self.sitk_image = self.reader[item]
 
                 self.properties = ImageProperties(self.sitk_image, image_orientation=orientation,
-                                                  z_coords=z_coords)
+                                                  z_coords=z_coords, parent=self)
                 return self.properties

@@ -3,6 +3,7 @@ from MRICenterline.app.points.point import Point
 from MRICenterline.app.points.point_array import PointArray
 from MRICenterline.app.points.status import PointStatus
 from MRICenterline.app.gui_data_handling.image_properties import ImageProperties
+from MRICenterline.app.shortest_path.find import FindShortestPathPerSlice
 
 
 def fill_interp(image_properties: ImageProperties or None,
@@ -38,10 +39,32 @@ def fill_interp(image_properties: ImageProperties or None,
     return temp_point_array
 
 
-def fill():
-    # placeholder for Rotem's function
-    #   TODO: test if the centerline still calculates as expected
-    pass
+def fill(image_properties: ImageProperties or None,
+         point_a: Point, point_b: Point,
+         point_color=(1, 1, 1)):
+    sitk_image = image_properties.sitk_image
+
+    assert point_a.slice_idx == point_b.slice_idx
+    slice_index = point_a.slice_idx
+
+    shortest_path, _ = FindShortestPathPerSlice(case_sitk=sitk_image, slice_num=point_a.itk_index_coords[2],
+                                                first_annotation=point_a.itk_index_coords,
+                                                second_annotation=point_b.itk_index_coords,
+                                                case_number=image_properties.parent.case_name)
+
+    temp_point_array = PointArray(PointStatus.MPR)
+    for i, (x, y) in enumerate(zip(shortest_path[0][0], shortest_path[0][1])):
+        pt = Point.point_from_itk_index((x, image_properties.size[1] - y, slice_index + 1), image_properties)
+
+        if i == 0:
+            continue
+        if i == len(shortest_path[0][0]) - 1:
+            continue
+        temp_point_array.add_point(pt)
+
+    temp_point_array.set_color(point_color)
+    return temp_point_array, len(shortest_path[0][0])
+
 
 if __name__ == "__main__":
     # start_point = Point(picked_coords=(4.75, -60.67, 0), slice_index=28, image_properties=None)
