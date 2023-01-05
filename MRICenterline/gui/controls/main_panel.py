@@ -2,6 +2,7 @@ from PyQt5.QtWidgets import QDialog, QGridLayout, QLabel, QPushButton, QWidget, 
 import qtawesome as qta
 
 from MRICenterline import CFG
+from MRICenterline.gui.controls.timer import TimerWidget
 from MRICenterline.gui.display.toolbar_connect import *
 from MRICenterline.gui.window.AnimatedToggle import AnimatedToggle
 
@@ -19,6 +20,10 @@ class ControlPanel(QDialog):
         self.setLayout(layout)
         self.move(100, 150)
 
+        self.point_panel_button_list = []
+        self.comment_box = QPlainTextEdit()
+        self.timer_widget = TimerWidget()
+
         layout.addWidget(self.top(), 0, 0, 1, 2)
         layout.addWidget(self.point_panel(), 1, 0, 1, 1)
         layout.addWidget(self.overlay_options_panel(), 1, 1, 1, 1)
@@ -27,39 +32,39 @@ class ControlPanel(QDialog):
         if CFG.get_testing_status("disable-all-testing-features"):
             layout.addWidget(self.debug(), 3, 0, 1, 2)
 
+    def reset_buttons(self):
+        [button.setChecked(False) for button, status in self.point_panel_button_list]
+
     def attach_model(self, model):
         self.model = model
+        self.timer_widget.attach_model(model)
 
     def top(self) -> QWidget:
         frame = QWidget(self)
         layout = QGridLayout(frame)
 
         save_button = QPushButton(qta.icon('fa.save'), "Save")
-        save_button.clicked.connect(lambda: save(self.model))
+        save_button.clicked.connect(lambda: save(self.model, self.comment_box.toPlainText()))
         layout.addWidget(save_button, 0, 0, 1, 1)
 
         calculate_mpr_button = QPushButton(qta.icon('mdi.calculator'), "Calculate MPR")
-        # TODO: QoL: disable when no MPR points are available
         layout.addWidget(calculate_mpr_button, 0, 1, 1, 1)
         calculate_mpr_button.clicked.connect(lambda: calculate(self.model, PointStatus.MPR))
 
-        timer_button = QPushButton(qta.icon('mdi.timer-off-outline'), "TEMPORARY TIMER")
-        layout.addWidget(timer_button, 1, 0, 1, 2)
+        layout.addWidget(self.timer_widget, 1, 0, 1, 2)
 
         return frame
+
+    def flip_checked_status(self, picker_status):
+        for button, status in self.point_panel_button_list:
+            if status == picker_status:
+                pass
+            else:
+                button.setChecked(False)
 
     def point_panel(self) -> QWidget:
         frame = QWidget(self)
         layout = QGridLayout(frame)
-
-        button_list = []
-
-        def flip_checked_status(picker_status):
-            for button, status in button_list:
-                if status == picker_status:
-                    pass
-                else:
-                    button.setChecked(False)
 
         layout.addWidget(QLabel("Points"), 0, 0, 1, 2)
         layout.addWidget(QLabel("Add points"), 1, 0, 1, 2)
@@ -67,15 +72,15 @@ class ControlPanel(QDialog):
         add_length_widget = AnimatedToggle("Length", checked_color=CFG.get_hex_color("length-display-style", "color"))
         layout.addWidget(add_length_widget, 2, 0, 1, 1)
         add_length_button = add_length_widget.button
-        button_list.append((add_length_button, PickerStatus.PICKING_LENGTH))
-        add_length_button.clicked.connect(lambda: flip_checked_status(PickerStatus.PICKING_LENGTH))
+        self.point_panel_button_list.append((add_length_button, PickerStatus.PICKING_LENGTH))
+        add_length_button.clicked.connect(lambda: self.flip_checked_status(PickerStatus.PICKING_LENGTH))
         add_length_button.clicked.connect(lambda: set_picker_status(self.model, PickerStatus.PICKING_LENGTH))
 
         add_mpr_widget = AnimatedToggle("MPR", checked_color=CFG.get_hex_color("mpr-display-style", "color"))
         layout.addWidget(add_mpr_widget, 2, 1, 1, 1)
         add_mpr_button = add_mpr_widget.button
-        button_list.append((add_mpr_button, PickerStatus.PICKING_MPR))
-        add_mpr_button.clicked.connect(lambda: flip_checked_status(PickerStatus.PICKING_MPR))
+        self.point_panel_button_list.append((add_mpr_button, PickerStatus.PICKING_MPR))
+        add_mpr_button.clicked.connect(lambda: self.flip_checked_status(PickerStatus.PICKING_MPR))
         add_mpr_button.clicked.connect(lambda: set_picker_status(self.model, PickerStatus.PICKING_MPR))
 
         layout.addWidget(QLabel("Highlight points"), 3, 0, 1, 2)
@@ -83,16 +88,18 @@ class ControlPanel(QDialog):
         select_length_widget = AnimatedToggle("Length", checked_color=CFG.get_hex_color("length-display-style", "color"))
         layout.addWidget(select_length_widget, 4, 0, 1, 1)
         select_length_button = select_length_widget.button
-        button_list.append((select_length_button, PickerStatus.FIND_LENGTH))
-        select_length_button.clicked.connect(lambda: flip_checked_status(PickerStatus.FIND_LENGTH))
+        self.point_panel_button_list.append((select_length_button, PickerStatus.FIND_LENGTH))
+        select_length_button.clicked.connect(lambda: self.flip_checked_status(PickerStatus.FIND_LENGTH))
         # select_length_button.clicked.connect(lambda: find_point(self.model, PickerStatus.FIND_LENGTH))
+        if CFG.get_testing_status("disable-all-testing-features"):
+            select_length_button.setEnabled(False)
         # TODO: implement length picking
 
         select_mpr_widget = AnimatedToggle("MPR", checked_color=CFG.get_hex_color("mpr-display-style", "color"))
         layout.addWidget(select_mpr_widget, 4, 1, 1, 1)
         select_mpr_button = select_mpr_widget.button
-        button_list.append((select_mpr_button, PickerStatus.FIND_MPR))
-        select_mpr_button.clicked.connect(lambda: flip_checked_status(PickerStatus.FIND_MPR))
+        self.point_panel_button_list.append((select_mpr_button, PickerStatus.FIND_MPR))
+        select_mpr_button.clicked.connect(lambda: self.flip_checked_status(PickerStatus.FIND_MPR))
         select_mpr_button.clicked.connect(lambda: find_point(self.model, PickerStatus.FIND_MPR))
 
         layout.addWidget(QLabel("Edit points"), 5, 0, 1, 2)
@@ -100,16 +107,18 @@ class ControlPanel(QDialog):
         edit_length_widget = AnimatedToggle("Length", checked_color=CFG.get_hex_color("length-display-style", "color"))
         layout.addWidget(edit_length_widget, 6, 0, 1, 1)
         edit_length_button = edit_length_widget.button
-        button_list.append((edit_length_button, PickerStatus.MODIFYING_LENGTH))
-        edit_length_button.clicked.connect(lambda: flip_checked_status(PickerStatus.MODIFYING_LENGTH))
+        self.point_panel_button_list.append((edit_length_button, PickerStatus.MODIFYING_LENGTH))
+        edit_length_button.clicked.connect(lambda: self.flip_checked_status(PickerStatus.MODIFYING_LENGTH))
         # edit_length_button.clicked.connect(lambda: edit_points(self.model, PickerStatus.MODIFYING_LENGTH))
+        if CFG.get_testing_status("disable-all-testing-features"):
+            edit_length_button.setEnabled(False)
         # TODO: implement length modifying
 
         edit_mpr_widget = AnimatedToggle("MPR", checked_color=CFG.get_hex_color("mpr-display-style", "color"))
         layout.addWidget(edit_mpr_widget, 6, 1, 1, 1)
         edit_mpr_button = edit_mpr_widget.button
-        button_list.append((edit_mpr_button, PickerStatus.MODIFYING_MPR))
-        edit_mpr_button.clicked.connect(lambda: flip_checked_status(PickerStatus.MODIFYING_MPR))
+        self.point_panel_button_list.append((edit_mpr_button, PickerStatus.MODIFYING_MPR))
+        edit_mpr_button.clicked.connect(lambda: self.flip_checked_status(PickerStatus.MODIFYING_MPR))
         edit_mpr_button.clicked.connect(lambda: edit_points(self.model, PickerStatus.MODIFYING_MPR))
 
         undo_button = QPushButton(qta.icon('mdi.undo'), "Undo")
@@ -122,7 +131,7 @@ class ControlPanel(QDialog):
 
         adjust_contrast_button = QPushButton("Adjust contrast")
         layout.addWidget(adjust_contrast_button, 8, 0, 1, 2)
-        adjust_contrast_button.clicked.connect(lambda: flip_checked_status(PickerStatus.NOT_PICKING))
+        adjust_contrast_button.clicked.connect(lambda: self.flip_checked_status(PickerStatus.NOT_PICKING))
         adjust_contrast_button.clicked.connect(lambda: set_picker_status(self.model, PickerStatus.NOT_PICKING))
 
         return frame
@@ -138,27 +147,34 @@ class ControlPanel(QDialog):
         layout.addWidget(show_length_widget, 1, 1, 1, 1)
         show_length_button = show_length_widget.button
         show_length_button.setChecked(False)
+        if CFG.get_testing_status("disable-all-testing-features"):
+            show_length_button.setEnabled(False)
 
-        layout.addWidget(QLabel("Show patient info"), 2, 0, 1, 1)
-        show_patient_widget = AnimatedToggle()
-        layout.addWidget(show_patient_widget, 2, 1, 1, 1)
-        show_patient_button = show_patient_widget.button
-        show_patient_button.setChecked(False)
+        # layout.addWidget(QLabel("Show patient info"), 2, 0, 1, 1)
+        # show_patient_widget = AnimatedToggle()
+        # layout.addWidget(show_patient_widget, 2, 1, 1, 1)
+        # show_patient_button = show_patient_widget.button
+        # show_patient_button.setChecked(False)
+        # show_length_button.clicked.connect(lambda: show_metadata_dialog(model=self.model, parent=self.parent))
+        # from MRICenterline.gui.metadata.dialog_box import show_metadata_dialog
 
         layout.addWidget(QLabel("Show intermediate pts"), 3, 0, 1, 1)
         show_intermediate_widget = AnimatedToggle()
         layout.addWidget(show_intermediate_widget, 3, 1, 1, 1)
         show_intermediate_button = show_intermediate_widget.button
         show_intermediate_button.setChecked(True)
+        show_intermediate_button.clicked.connect(lambda x: intermediate_points(self.model, x))
 
         layout.addWidget(QLabel("Show pt order"), 4, 0, 1, 1)
         show_ptorder_widget = AnimatedToggle()
         layout.addWidget(show_ptorder_widget, 4, 1, 1, 1)
         show_ptorder_button = show_ptorder_widget.button
         show_ptorder_button.setChecked(False)
+        if CFG.get_testing_status("disable-all-testing-features"):
+            show_ptorder_button.setEnabled(False)
 
         layout.addWidget(QLabel("Comment"), 5, 0, 1, 2)
-        layout.addWidget(QPlainTextEdit(), 6, 0, 1, 2)
+        layout.addWidget(self.comment_box, 6, 0, 1, 2)
 
         return frame
 
@@ -166,7 +182,15 @@ class ControlPanel(QDialog):
         frame = QWidget(self)
         layout = QGridLayout(frame)
 
-        layout.addWidget(QLabel("Centerline options"), 0, 0, 1, 2)
+        layout.addWidget(QLabel("Centerline"), 0, 0, 1, 2)
+
+        layout.addWidget(QLabel("Measure length"), 1, 0, 1, 1)
+        add_mpr_length_widget = AnimatedToggle(checked_color=CFG.get_hex_color("mpr-length-display-style", "color"))
+        layout.addWidget(add_mpr_length_widget, 1, 1, 1, 1)
+        add_mpr_length_button = add_mpr_length_widget.button
+        self.point_panel_button_list.append((add_mpr_length_button, PickerStatus.PICKING_LENGTH))
+        add_mpr_length_button.clicked.connect(lambda: self.flip_checked_status(PickerStatus.PICKING_LENGTH))
+        add_mpr_length_button.clicked.connect(lambda: set_picker_status(self.model, PickerStatus.PICKING_LENGTH))
 
         return frame
 
@@ -183,3 +207,8 @@ class ControlPanel(QDialog):
         mpr_pair_pick_button.clicked.connect(lambda: set_picker_status(self.model, PickerStatus.PICKING_MPR_PAIR))
 
         return frame
+
+    def close(self) -> bool:
+        self.reset_buttons()
+        self.timer_widget.reset()
+        return super().close()

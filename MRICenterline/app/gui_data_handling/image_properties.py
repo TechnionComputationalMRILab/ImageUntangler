@@ -17,7 +17,7 @@ logging.getLogger(__name__)
 
 
 class ImageProperties:
-    def __init__(self, sitk_image, image_orientation: ImageOrientation, z_coords, parent):
+    def __init__(self, sitk_image, image_orientation: ImageOrientation, z_coords, parent=None):
         self.parent = parent
         self.sitk_image = sitk_image
         self.orientation = image_orientation

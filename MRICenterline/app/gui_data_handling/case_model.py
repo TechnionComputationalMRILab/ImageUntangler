@@ -17,6 +17,7 @@ class CaseModel:
 
     def __init__(self, path, initial_sequence=None, file_dialog_open=False):
         self.path = path
+        self.timer.reset_timer()
 
         if file_dialog_open:
             # if opening through the file dialog box
@@ -33,6 +34,7 @@ class CaseModel:
             self.active_sequence_index = 0
 
         self.sequence_manager = SequenceModel(self)
+        self.comment_text = None
 
     def test(self):
         print("DIALOG TEST")
@@ -99,15 +101,8 @@ class CaseModel:
         if self.centerline_calc and not (status == PickerStatus.PICKING_MPR or status == PickerStatus.MODIFYING_MPR):
             self.centerline_model.set_picker_status(status)
 
-        if status == PickerStatus.FIND_MPR:
-            pass
-    #         turn on editing
-
     def calculate(self, status: PointStatus = PointStatus.MPR):
         self.sequence_manager.calculate(status)
-
-        # if self.centerline_calc:
-        #     self.centerline_model.calculate_length()
 
     def timer_status(self, status):
         import time
@@ -126,7 +121,8 @@ class CaseModel:
 
     # region points
     def intermediate_points(self, show: bool):
-        self.sequence_manager.intermediate_points(not show)
+        logging.debug(f"Toggle intermediate points: {show}")
+        self.sequence_manager.intermediate_points(show)
 
     def find_point(self):
         self.picker_status = PickerStatus.FIND_MPR

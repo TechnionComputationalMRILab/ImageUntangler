@@ -6,7 +6,8 @@ def set_picker_status(parent: CaseModel, status: PickerStatus):
     parent.set_picker_status(status)
 
 
-def save(parent: CaseModel):
+def save(parent: CaseModel, comment_text: str = ""):
+    parent.comment_text = comment_text
     parent.save()
 
 
@@ -30,12 +31,6 @@ def patient_info(model, parent):
     from MRICenterline.gui.metadata.dialog_box import MetadataDialogBox
     metadata = MetadataDialogBox(model=model, parent=parent)
     metadata.exec()
-
-
-def comment(model, parent):
-    from MRICenterline.gui.comment.dialog_box import CommentDialogBox
-    comment_db = CommentDialogBox(model=model, parent=parent)
-    comment_db.show()
 
 
 def find_point(model, s):

@@ -5,8 +5,8 @@ from datetime import datetime, timezone
 from vtkmodules.qt.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
 
 from MRICenterline.app.database.save_points import save_points
+from MRICenterline.app.database.save_comment import save_comment
 from MRICenterline.app.file_reader.AbstractReader import ImageOrientation
-from MRICenterline.app.points.DefinedPointArray import DefinedPointArray
 from MRICenterline.app.points.status import PickerStatus, PointStatus
 from MRICenterline.app.gui_data_handling.sequence_viewer import SequenceViewer
 from MRICenterline.app.gui_data_handling.image_properties import ImageProperties
@@ -82,20 +82,24 @@ class SequenceModel:
                                  mpr_points=self.mpr_point_array,
                                  timer_data=self.model.timer)
 
+        if self.model.comment_text:
+            save_comment(self.model.comment_text)
+
         return session_id
 
     def calculate(self, status: PointStatus):
-        if status == PointStatus.MPR:
+        # if status == PointStatus.MPR:
+        if len(self.mpr_point_array):
             self.model.centerline_calc = True
             self.model.centerline_model.set_points_and_image(self.mpr_point_array,
                                                              self.current_image_properties)
             self.model.centerline_model.set_window_level(self.window_value, self.level_value)
             self.model.centerline_model.update_widget()
 
-        elif status == PointStatus.LENGTH:
-            pass
-            # print(self.length_point_array.lengths)
-            # print(self.length_point_array.total_length)
+        # elif status == PointStatus.LENGTH:
+        #     pass
+        # print(self.length_point_array.lengths)
+        # print(self.length_point_array.total_length)
 
     def intermediate_points(self, show: bool):
         if show:

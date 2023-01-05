@@ -157,30 +157,19 @@ class Point:
             itk_coords[2] = np.argmin(np.abs(np.array(self.image_properties.z_coords) - self.image_coordinates[2]))
 
         else:
-            # img = self.image_properties.sitk_image
-            #
-            # shape = np.array(img.GetSize())
-            # spacing = np.array(img.GetSpacing())
-            # viewer_origin = shape / 2
-            # coords = np.zeros((len(self.image_coordinates), 3), dtype=np.int32)
-            #
-            # for i, val in enumerate(self.image_coordinates):
-            #     coords[i][0] = round(val[0] / spacing[0] + viewer_origin[0])
-            #     coords[i][1] = round(shape[1] - (val[1] / spacing[1] + viewer_origin[1]))
-            #     coords[i][2] = round(shape[2] - np.argmin(np.abs(slice_locations - val[2])))
-
             viewer_origin = self.image_properties.size / 2.0
 
             itk_coords = np.zeros(3, dtype=np.int32)
-            # itk_coords[0] = 1 + round((self.image_coordinates[0] / self.image_properties.spacing[0]) + viewer_origin[0])
-            # itk_coords[1] = 1 + round((self.image_coordinates[1] / self.image_properties.spacing[1]) + viewer_origin[1])
-            # itk_coords[2] = 1 + round(self.slice_idx)
+            itk_coords[0] = 1 + round((self.image_coordinates[0] / self.image_properties.spacing[0]) + viewer_origin[0])
+            itk_coords[1] = 1 + round((self.image_coordinates[1] / self.image_properties.spacing[1]) + viewer_origin[1])
+            itk_coords[2] = 1 + round(self.slice_idx)
 
-            itk_coords[0] = round((self.image_coordinates[0] / self.image_properties.spacing[0]) + viewer_origin[0])
-            itk_coords[1] = self.image_properties.size[1] - round((self.image_coordinates[1] / self.image_properties.spacing[1]) + viewer_origin[1])
-            itk_coords[2] = round(self.slice_idx) - 1
+            # TODO: this bit works for the shortest path code but not for anything else
+            # itk_coords[0] = round((self.image_coordinates[0] / self.image_properties.spacing[0]) + viewer_origin[0])
+            # itk_coords[1] = self.image_properties.size[1] - round((self.image_coordinates[1] / self.image_properties.spacing[1]) + viewer_origin[1])
+            # itk_coords[2] = round(self.slice_idx) - 1
 
-        # assert all([i >= 0 for i in itk_coords]), "ITK coordinates must be positive"
+        assert all([i >= 0 for i in itk_coords]), "ITK coordinates must be positive"
 
         physical_coords = self.image_properties.sitk_image.TransformIndexToPhysicalPoint(
             [int(itk_coords[0]), int(itk_coords[1]), int(itk_coords[2])])
