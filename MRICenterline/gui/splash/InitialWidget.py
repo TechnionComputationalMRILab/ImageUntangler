@@ -37,7 +37,7 @@ class IUInitialWidget(QWidget):
 
         bottom_layout.addWidget(preferences_button)
 
-        scan_folders_button = QPushButton("Pre-process Folders")
+        scan_folders_button = QPushButton("Pre-process Folders / Export")
         scan_folders_button.setIcon(qta.icon('mdi.magnify-scan'))
         scan_folders_button.setMinimumSize(200, 300)
         scan_folders_button.clicked.connect(lambda: connect.bulk_scanner(self))

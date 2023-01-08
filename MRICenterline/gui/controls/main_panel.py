@@ -29,8 +29,7 @@ class ControlPanel(QDialog):
         layout.addWidget(self.overlay_options_panel(), 1, 1, 1, 1)
         layout.addWidget(self.centerline(), 2, 0, 1, 2)
 
-        if CFG.get_testing_status("disable-all-testing-features"):
-            layout.addWidget(self.debug(), 3, 0, 1, 2)
+        layout.addWidget(self.debug(), 3, 0, 1, 2)
 
     def reset_buttons(self):
         [button.setChecked(False) for button, status in self.point_panel_button_list]
@@ -43,15 +42,19 @@ class ControlPanel(QDialog):
         frame = QWidget(self)
         layout = QGridLayout(frame)
 
-        save_button = QPushButton(qta.icon('fa.save'), "Save")
+        save_button = QPushButton(qta.icon('fa.save'), "Save annotation")
         save_button.clicked.connect(lambda: save(self.model, self.comment_box.toPlainText()))
         layout.addWidget(save_button, 0, 0, 1, 1)
 
+        export_button = QPushButton(qta.icon("mdi.file-export"), "Export as...")
+        layout.addWidget(export_button, 0, 1, 1, 1)
+        export_button.clicked.connect(lambda: export(self.model, self))
+
         calculate_mpr_button = QPushButton(qta.icon('mdi.calculator'), "Calculate MPR")
-        layout.addWidget(calculate_mpr_button, 0, 1, 1, 1)
+        layout.addWidget(calculate_mpr_button, 1, 0, 1, 2)
         calculate_mpr_button.clicked.connect(lambda: calculate(self.model, PointStatus.MPR))
 
-        layout.addWidget(self.timer_widget, 1, 0, 1, 2)
+        layout.addWidget(self.timer_widget, 2, 0, 1, 2)
 
         return frame
 

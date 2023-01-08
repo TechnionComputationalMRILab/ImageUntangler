@@ -44,7 +44,7 @@ class ImageProperties:
 
         center = calculate_center()
         # changed to -1 from 2 to handle 2D cases. might be problematic??
-        self.sliceIdx = np.int(np.round(((center[-1]-self.origin[-1])/self.spacing[-1]))) + 1
+        self.sliceIdx = int(np.round(((center[-1]-self.origin[-1])/self.spacing[-1]))) + 1
 
         self.vtk_data = self.get_vtk_data()
         self.transformation = transformation_matrix(center, view='y_flip_axial')

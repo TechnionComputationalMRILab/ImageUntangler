@@ -8,6 +8,8 @@ class TimerWidget(QWidget):
         super().__init__()
 
         self.layout = QGridLayout()
+        self.layout.setContentsMargins(0, 0, 0, 0)
+
         self.setLayout(self.layout)
         self.model = None
 

@@ -25,3 +25,5 @@ venv/*
 AlgorithmTests/*
 AlgorithmTests/test.ipynb
 *.npy
+*.csv
+*.sqlite
