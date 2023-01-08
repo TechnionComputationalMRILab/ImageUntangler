@@ -18,7 +18,7 @@ class ControlPanel(QDialog):
 
         layout = QGridLayout(self)
         self.setLayout(layout)
-        self.move(100, 150)
+        self.move(100, 600)
 
         self.point_panel_button_list = []
         self.comment_box = QPlainTextEdit()
@@ -85,14 +85,12 @@ class ControlPanel(QDialog):
 
         layout.addWidget(QLabel("Highlight points"), 3, 0, 1, 2)
 
-        select_length_widget = AnimatedToggle("Length", checked_color=CFG.get_hex_color("length-display-style", "color"))
-        layout.addWidget(select_length_widget, 4, 0, 1, 1)
-        select_length_button = select_length_widget.button
-        self.point_panel_button_list.append((select_length_button, PickerStatus.FIND_LENGTH))
-        select_length_button.clicked.connect(lambda: self.flip_checked_status(PickerStatus.FIND_LENGTH))
+        # select_length_widget = AnimatedToggle("Length", checked_color=CFG.get_hex_color("length-display-style", "color"))
+        # layout.addWidget(select_length_widget, 4, 0, 1, 1)
+        # select_length_button = select_length_widget.button
+        # self.point_panel_button_list.append((select_length_button, PickerStatus.FIND_LENGTH))
+        # select_length_button.clicked.connect(lambda: self.flip_checked_status(PickerStatus.FIND_LENGTH))
         # select_length_button.clicked.connect(lambda: find_point(self.model, PickerStatus.FIND_LENGTH))
-        if CFG.get_testing_status("disable-all-testing-features"):
-            select_length_button.setEnabled(False)
         # TODO: implement length picking
 
         select_mpr_widget = AnimatedToggle("MPR", checked_color=CFG.get_hex_color("mpr-display-style", "color"))
@@ -104,14 +102,12 @@ class ControlPanel(QDialog):
 
         layout.addWidget(QLabel("Edit points"), 5, 0, 1, 2)
 
-        edit_length_widget = AnimatedToggle("Length", checked_color=CFG.get_hex_color("length-display-style", "color"))
-        layout.addWidget(edit_length_widget, 6, 0, 1, 1)
-        edit_length_button = edit_length_widget.button
-        self.point_panel_button_list.append((edit_length_button, PickerStatus.MODIFYING_LENGTH))
-        edit_length_button.clicked.connect(lambda: self.flip_checked_status(PickerStatus.MODIFYING_LENGTH))
+        # edit_length_widget = AnimatedToggle("Length", checked_color=CFG.get_hex_color("length-display-style", "color"))
+        # layout.addWidget(edit_length_widget, 6, 0, 1, 1)
+        # edit_length_button = edit_length_widget.button
+        # self.point_panel_button_list.append((edit_length_button, PickerStatus.MODIFYING_LENGTH))
+        # edit_length_button.clicked.connect(lambda: self.flip_checked_status(PickerStatus.MODIFYING_LENGTH))
         # edit_length_button.clicked.connect(lambda: edit_points(self.model, PickerStatus.MODIFYING_LENGTH))
-        if CFG.get_testing_status("disable-all-testing-features"):
-            edit_length_button.setEnabled(False)
         # TODO: implement length modifying
 
         edit_mpr_widget = AnimatedToggle("MPR", checked_color=CFG.get_hex_color("mpr-display-style", "color"))
@@ -142,13 +138,11 @@ class ControlPanel(QDialog):
 
         layout.addWidget(QLabel("Overlay options"), 0, 0, 1, 2)
 
-        layout.addWidget(QLabel("Show length lines"), 1, 0, 1, 1)
-        show_length_widget = AnimatedToggle(checked_color=CFG.get_hex_color("length-display-style", "color"))
-        layout.addWidget(show_length_widget, 1, 1, 1, 1)
-        show_length_button = show_length_widget.button
-        show_length_button.setChecked(False)
-        if CFG.get_testing_status("disable-all-testing-features"):
-            show_length_button.setEnabled(False)
+        # layout.addWidget(QLabel("Show length lines"), 1, 0, 1, 1)
+        # show_length_widget = AnimatedToggle(checked_color=CFG.get_hex_color("length-display-style", "color"))
+        # layout.addWidget(show_length_widget, 1, 1, 1, 1)
+        # show_length_button = show_length_widget.button
+        # show_length_button.setChecked(False)
 
         # layout.addWidget(QLabel("Show patient info"), 2, 0, 1, 1)
         # show_patient_widget = AnimatedToggle()
@@ -165,13 +159,11 @@ class ControlPanel(QDialog):
         show_intermediate_button.setChecked(True)
         show_intermediate_button.clicked.connect(lambda x: intermediate_points(self.model, x))
 
-        layout.addWidget(QLabel("Show pt order"), 4, 0, 1, 1)
-        show_ptorder_widget = AnimatedToggle()
-        layout.addWidget(show_ptorder_widget, 4, 1, 1, 1)
-        show_ptorder_button = show_ptorder_widget.button
-        show_ptorder_button.setChecked(False)
-        if CFG.get_testing_status("disable-all-testing-features"):
-            show_ptorder_button.setEnabled(False)
+        # layout.addWidget(QLabel("Show pt order"), 4, 0, 1, 1)
+        # show_ptorder_widget = AnimatedToggle()
+        # layout.addWidget(show_ptorder_widget, 4, 1, 1, 1)
+        # show_ptorder_button = show_ptorder_widget.button
+        # show_ptorder_button.setChecked(False)
 
         layout.addWidget(QLabel("Comment"), 5, 0, 1, 2)
         layout.addWidget(self.comment_box, 6, 0, 1, 2)
