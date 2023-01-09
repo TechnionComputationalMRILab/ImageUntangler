@@ -144,7 +144,7 @@ class SequenceModel:
             # TODO: EXPERIMENTAL
 
             # set the fill flag so that the array knows that it's supposed to fill points
-            self.mpr_point_array.set_use_fill()
+            self.mpr_point_array.set_use_fill(self.model.point_fill_type)
 
             self.mpr_point_array.add_point(point)
             self.current_sequence_viewer.add_actor(self.mpr_point_array.get_last_actor())

@@ -1,4 +1,6 @@
 from pathlib import Path
+
+from MRICenterline.app.points.point_fill import PointFillType
 from MRICenterline.app.points.status import PickerStatus, PointStatus
 from MRICenterline.app.points.timer import Timer
 from MRICenterline.app.gui_data_handling.gui_imager import GraphicalImager
@@ -35,9 +37,13 @@ class CaseModel:
 
         self.sequence_manager = SequenceModel(self)
         self.comment_text = None
+        self.point_fill_type = None
 
     def test(self):
         print("DIALOG TEST")
+
+    def set_fill_type(self, fill_type: PointFillType):
+        self.point_fill_type = fill_type
 
     def set_sequence_viewer(self, sequence_viewer):
         self.sequence_viewer = sequence_viewer

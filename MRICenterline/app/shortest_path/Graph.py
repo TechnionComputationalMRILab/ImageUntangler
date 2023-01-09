@@ -54,7 +54,8 @@ class Graph:
                             self.parent[y] = x
                             direction[y] = d
                 else:
-                    if self.graph[x][y] == 0: print('else: graph = 0')
+                    # if self.graph[x][y] == 0: print('else: graph = 0')
+                    if self.graph[x][y] == 0: assert False, 'else: graph = 0'
                     if self.graph[x][y] != 0 and sptSet[y] == False and \
                             dist[y] > dist[x] + self.graph[x][y]:
                         dist[y] = dist[x] + self.graph[x][y]

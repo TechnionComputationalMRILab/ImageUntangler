@@ -43,6 +43,10 @@ def FindShortestPathPerSlice(case_sitk, slice_num, first_annotation, second_anno
     print("Extracting ROI")
     roi_nda, init_x, final_x, init_y, final_y = extract_roi(case_sitk, slice_num, first_annotation, second_annotation)
 
+    # CALCULATE EVERYTHING
+    # init_x, init_y = 0, 0
+    # final_x, final_y = case_sitk.GetSize()[0:2]
+
     x_len = final_x - init_x + 1
     y_len = final_y - init_y + 1
     num_of_pixels = x_len * y_len

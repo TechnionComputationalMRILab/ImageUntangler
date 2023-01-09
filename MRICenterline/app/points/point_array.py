@@ -43,6 +43,7 @@ class PointArray:
         self.highlighted_point = None
         self.use_fill = False
         self.fill_amount = 0
+        self.fill_type = None
 
     ######################################################################
     #                        array manipulation                          #
@@ -95,23 +96,20 @@ class PointArray:
 
         if self.use_fill:
             if len(self) >= 2:
-                from MRICenterline.app.points.point_fill import fill_interp, fill
+                from MRICenterline.app.points.point_fill import fill_interp, fill, PointFillType
 
                 image_properties = self.point_array[0].image_properties
 
-                # region basic line interpolate, for display testing purposes
-                # interpolated_array = fill_interp(image_properties=image_properties,
-                #                                  point_a=self.point_array[-2], point_b=self.point_array[-1],
-                #                                  point_type=self.point_type,
-                #                                  point_color=self.interpolated_color,
-                #                                  num_points=self.fill_amount)
-                # endregion
-
-                # region Rotem's code :)
-                interpolated_array, length_of_fill = fill(image_properties=image_properties,
-                                                     point_a=self.point_array[-2],
-                                                     point_b=self.point_array[-1])
-                self.fill_amount = length_of_fill
+                if self.fill_type == PointFillType.LinearInterpolation:
+                    interpolated_array = fill_interp(image_properties=image_properties,
+                                                     point_a=self.point_array[-2], point_b=self.point_array[-1],
+                                                     point_type=self.point_type,
+                                                     num_points=self.fill_amount)
+                else:
+                    interpolated_array, length_of_fill = fill(image_properties=image_properties,
+                                                              point_a=self.point_array[-2],
+                                                              point_b=self.point_array[-1])
+                    self.fill_amount = length_of_fill
                 # endregion
 
                 self.interpolated_point_array.extend(interpolated_array)
@@ -224,10 +222,11 @@ class PointArray:
     ######################################################################
     # region
 
-    def set_use_fill(self, fill_amount=10):
+    def set_use_fill(self, fill_type, fill_amount=10):
         self.use_fill = True
         self.interpolated_color = CFG.get_color('mpr-display-style', 'interpolated-color')
         self.fill_amount = fill_amount
+        self.fill_type = fill_type
 
     def set_size(self, size, item=None):
         self.point_size = size

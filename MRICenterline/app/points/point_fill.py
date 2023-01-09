@@ -1,4 +1,5 @@
 import numpy as np
+from enum import Enum
 
 from MRICenterline import CFG
 from MRICenterline.app.points.point import Point
@@ -6,6 +7,11 @@ from MRICenterline.app.points.point_array import PointArray
 from MRICenterline.app.points.status import PointStatus
 from MRICenterline.app.gui_data_handling.image_properties import ImageProperties
 from MRICenterline.app.shortest_path.find import FindShortestPathPerSlice
+
+
+class PointFillType(Enum):
+    LinearInterpolation = "linear interp"
+    ShortestPath = "shortest path"
 
 
 def fill_interp(image_properties: ImageProperties or None,
