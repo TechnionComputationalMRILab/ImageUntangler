@@ -1,5 +1,7 @@
 import torch
 from pathlib import Path
+import SimpleITK as sitk
+
 
 GRID_SPACING = (1.5, 1.5, 1.5)
 GRID_PIXELS_SIZE = (32, 32)
@@ -41,14 +43,17 @@ def FindShortestPathPerSlice(case_sitk, slice_num, first_annotation, second_anno
     y_spline_gt = torch.load(Path(__file__).parent / 'y_spline_gt.pt')
 
     print("Extracting ROI")
-    roi_nda, init_x, final_x, init_y, final_y = extract_roi(case_sitk, slice_num, first_annotation, second_annotation)
+    # roi_nda, init_x, final_x, init_y, final_y = extract_roi(case_sitk, slice_num, first_annotation, second_annotation)
 
     # CALCULATE EVERYTHING
-    # init_x, init_y = 0, 0
-    # final_x, final_y = case_sitk.GetSize()[0:2]
+    image_nda = sitk.GetArrayFromImage(case_sitk)
+    roi_nda = image_nda[slice_num, :, :]
 
-    x_len = final_x - init_x + 1
-    y_len = final_y - init_y + 1
+    init_x, init_y = 0, 0
+    final_x, final_y = case_sitk.GetSize()[0:2]
+
+    x_len = final_x #final_x - init_x + 1
+    y_len = final_y #final_y - init_y + 1
     num_of_pixels = x_len * y_len
 
     g = Graph(num_of_pixels)
