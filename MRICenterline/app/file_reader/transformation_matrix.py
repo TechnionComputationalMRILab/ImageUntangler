@@ -7,6 +7,9 @@ def transformation_matrix(center, view='axial'):
     """
     matrix = vtkMatrix4x4()
 
+    if len(center) < 3:
+        return matrix
+
     if view == 'coronal':
         matrix.DeepCopy((1, 0, 0, center[0],
                          0, 0, 1, center[1],

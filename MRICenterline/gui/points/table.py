@@ -28,7 +28,8 @@ class PointsToTableView(QTableWidget):
     def show_mpr(self):
         self.show = PointStatus.MPR
         self.data = self.model.mpr_point_array.generate_table_data()
-        self.setRowCount(len(self.model.mpr_point_array))
+        # self.setRowCount(len(self.model.mpr_point_array))
+        self.setRowCount(len(self.data['image coords']))
         self.finalize_table()
 
     def finalize_table(self):

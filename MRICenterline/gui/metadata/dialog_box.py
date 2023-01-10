@@ -33,3 +33,8 @@ class MetadataDialogBox(QDialog):
         lines.append(f"Orientation: {self.sequence_manager.orientation}")
 
         return "\n".join(lines)
+
+
+def show_metadata_dialog(model, parent):
+    metadata = MetadataDialogBox(model=model, parent=parent)
+    metadata.exec()

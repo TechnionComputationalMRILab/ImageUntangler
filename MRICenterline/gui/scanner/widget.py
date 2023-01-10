@@ -130,15 +130,15 @@ class ScannerWidget(QWidget):
         inner_layout.addWidget(self.pbar)
 
     def connect_export(self, opt):
-        path = QFileDialog(self).getSaveFileName(filter="*.csv")[0]
+        save_as = QFileDialog(self).getSaveFileName(filter="*.csv")[0]
 
-        if path:
+        if save_as:
             if opt == 'time':
-                status = scanner.time_report(path)
+                status = scanner.time_report(save_as)
             elif opt == 'metadata':
-                status = scanner.metadata_report(path)
+                status = scanner.metadata_report(save_as)
             elif opt == 'sequence':
-                status = scanner.sequence_report(path)
+                status = scanner.sequence_report(save_as)
             else:
                 status = ""
 

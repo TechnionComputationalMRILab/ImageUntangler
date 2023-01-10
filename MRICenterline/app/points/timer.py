@@ -2,7 +2,6 @@ from typing import List
 from datetime import datetime, timezone, timedelta
 from MRICenterline.app.points.status import TimerStatus
 
-
 import logging
 logging.getLogger(__name__)
 
@@ -18,6 +17,9 @@ class Timer:
         self.pause_time = None
         self.resume_time = None
         self.time_gap: List[timedelta] = []
+
+    def reset_timer(self):
+        self.__init__()
 
     def command(self, command):
         if command == 'START':

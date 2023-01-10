@@ -1,5 +1,5 @@
 from vtkmodules.qt.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
-from vtkmodules.all import vtkImageActor, vtkImageReslice, vtkRenderer, vtkActor2D, vtkTextMapper, vtkTextProperty
+from vtkmodules.all import vtkImageActor, vtkRenderer, vtkActor2D, vtkTextMapper, vtkTextProperty
 
 from MRICenterline.gui.help.help_text import CenterlineInteractorHelpText
 from MRICenterline.gui.vtk.IUCornerAnnotation import CornerLoc, IUCornerAnnotation
@@ -21,7 +21,6 @@ class CenterlineViewer:
 
         self.window = self.interactor.GetRenderWindow()
 
-        # self.reslice = vtkImageReslice()
         self.panel_actor = vtkImageActor()
         self.panel_renderer = vtkRenderer()
         self.removable_actor_list = []
@@ -34,9 +33,6 @@ class CenterlineViewer:
         self.help_text_actor = IUCornerAnnotation(CornerLoc.LOWER_RIGHT)
 
         self.initialize_text()
-
-        # self.height_text_actor = IUTextActor("Height: " + str(self.model.height), True, 0)
-        # self.angle_text_actor = IUTextActor("Angle: " + str(self.model.angle), True, 1)
 
     def initialize_text(self):
         self.status_text_actor.SetInput(self.status_texts)
@@ -54,13 +50,7 @@ class CenterlineViewer:
         self.window.Render()
 
     def connect_panel_actor(self):
-        # self.reslice.SetInputData(self.model.vtk_data)
-        # self.reslice.SetOutputDimensionality(2)
-        # self.reslice.Update()
-
         self.panel_actor.GetMapper().SetInputData(self.model.vtk_data)
-
-        # self.panel_actor.GetMapper().SetInputConnection(self.reslice.GetOutputPort())
 
         self.panel_renderer.SetBackground(CONST.BG_COLOR[0], CONST.BG_COLOR[1], CONST.BG_COLOR[2])
         self.panel_renderer.AddActor(self.panel_actor)
@@ -81,11 +71,6 @@ class CenterlineViewer:
     def initialize_panel(self):
         self.connect_panel_actor()
         self.set_window_level()
-
-        # self.panel_renderer.AddActor(self.height_text_actor)
-        # self.panel_renderer.AddActor(self.angle_text_actor)
-
-        # self.reslice.Update()
         self.window.Render()
 
     def add_actor(self, actor):
@@ -113,15 +98,12 @@ class CenterlineViewer:
 
     def refresh_panel(self, angle_change=None, height_change=None):
         logging.debug(f"Current number of actors: {self.panel_renderer.GetActors().GetNumberOfItems()}")
-        # self.reslice.SetInputData(self.model.vtk_data)
-        # self.reslice.Update()
+        self.panel_actor.GetMapper().SetInputData(self.model.vtk_data)
 
         if angle_change:
             self.update_status_text("Angle", str(self.model.angle))
-            # self.angle_text_actor.SetInput("Angle: " + str(self.model.angle))
         if height_change:
             self.update_status_text("Height", str(self.model.height))
-            # self.height_text_actor.SetInput("Height: " + str(self.model.height))
 
         self.window.Render()
 

@@ -34,35 +34,16 @@ class Point:
             self.itk_index_coords = [0, 0, 0]
             self.physical_coords = [0, 0, 0]
 
-    # @classmethod
-    # def point_from_physical(cls, physical_coords, image_properties, color=(1, 1, 1), size=3):
-    #     sitk_image = image_properties.sitk_image
-    #     viewer_origin = image_properties.size / 2
-    #
-    #     itx_coords = sitk_image.TransformPhysicalPointToIndex(physical_coords)
-    #
-    #     image_coordinates = np.zeros(3)
-    #     # image_coordinates[0] = (image_properties.spacing[0] * itx_coords[0]) + image_properties.origin[0]
-    #     # image_coordinates[1] = viewer_origin[1] - ((image_properties.spacing[1] * itx_coords[1]) - image_properties.origin[1])
-    #     image_coordinates[0] = (image_properties.spacing[0] * itx_coords[0]) + (image_properties.spacing[0] * image_properties.origin[0])
-    #     image_coordinates[1] = viewer_origin[1] - (image_properties.spacing[1] * itx_coords[1]) + (image_properties.origin[1] / 2)
-    #     image_coordinates[2] = itx_coords[2]
-    #     slice_idx = itx_coords[2]
-    #
-    #     return cls(image_coordinates, slice_idx, image_properties, color, size)
-
     @classmethod
     def point_from_itk_index(cls, itk_coords, image_properties, color=(1, 1, 1), size=3):
-        # sitk_image = image_properties.sitk_image
+        # used to load data from the internal database to the viewer
         viewer_origin = image_properties.size / 2
 
         image_coordinates = np.zeros(3)
         image_coordinates[0] = (itk_coords[0] - 1 - viewer_origin[0]) * image_properties.spacing[0]
         image_coordinates[1] = (itk_coords[1] - 1 - viewer_origin[1]) * image_properties.spacing[1]
 
-        # slice_idx = 1 + image_properties.size[2] - itk_coords[2]
         slice_idx = itk_coords[2] - 1
-        # image_coordinates[2] = slice_idx
 
         image_coordinates[2] = image_properties.sitk_image.TransformIndexToPhysicalPoint([0, 0, int(slice_idx)])[1]
         return cls(image_coordinates, slice_idx, image_properties, color, size)
@@ -71,6 +52,8 @@ class Point:
     def point_from_v3(cls, image_coordinates, image_properties, image_orientation,
                       v3_image_size, v3_image_spacing, v3_image_dimensions, v3_z_coords,
                       color=(1, 1, 1), size=3):
+        # kept for legacy purposes.
+        # used to convert from the JSON-based saved points to the internal database
         viewer_origin = [i / 2.0 for i in v3_image_size]
 
         itk_coords = np.zeros(3, dtype=np.int32)
@@ -95,7 +78,6 @@ class Point:
         assert all([itk_coords[i] <= image_properties.size[i] for i in range(3)]), \
             "ITK coords must not be greater than the image size"
 
-        # return cls.point_from_itk_index(itk_coords, image_properties, color=color, size=size)
         return cls(picked_coords=image_coordinates,
                    slice_index=slice_index,
                    image_properties=image_properties,
@@ -140,12 +122,18 @@ class Point:
         self.point_size = size
 
     def distance(self, other):
-        # if self.image_properties:
-        #     c = np.array([((a - b) ** 2) for a, b, in zip(self.physical_coords, other.physical_coords)])
-        # else:
-        c = np.array([((a - b) ** 2) for a, b, in zip(self.image_coordinates, other.image_coordinates)])
+        if self.image_properties:
+            c = np.array([((a - b) ** 2) for a, b, in zip(self.physical_coords, other.physical_coords)])
+        else:
+            c = np.array([((a - b) ** 2) for a, b, in zip(self.image_coordinates, other.image_coordinates)])
+
         return np.sqrt(np.sum(c))
-        # return np.linalg.norm(self - other)
+
+    def __getitem__(self, item):
+        if self.image_properties:
+            return self.physical_coords[item]
+        else:
+            return self.image_coordinates[item]
 
     def __repr__(self):
         return f"""
@@ -174,8 +162,12 @@ class Point:
             itk_coords = np.zeros(3, dtype=np.int32)
             itk_coords[0] = 1 + round((self.image_coordinates[0] / self.image_properties.spacing[0]) + viewer_origin[0])
             itk_coords[1] = 1 + round((self.image_coordinates[1] / self.image_properties.spacing[1]) + viewer_origin[1])
-            # itk_coords[2] = 1 + round(self.image_properties.size[2] - self.slice_idx)
             itk_coords[2] = 1 + round(self.slice_idx)
+
+            # TODO: this bit works for the shortest path code but not for anything else
+            # itk_coords[0] = round((self.image_coordinates[0] / self.image_properties.spacing[0]) + viewer_origin[0])
+            # itk_coords[1] = self.image_properties.size[1] - round((self.image_coordinates[1] / self.image_properties.spacing[1]) + viewer_origin[1])
+            # itk_coords[2] = round(self.slice_idx) - 1
 
         assert all([i >= 0 for i in itk_coords]), "ITK coordinates must be positive"
 

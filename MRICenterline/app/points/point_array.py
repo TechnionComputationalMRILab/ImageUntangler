@@ -1,10 +1,7 @@
 from copy import deepcopy
 from typing import List
 
-import numpy as np
 
-from MRICenterline.app.file_reader.AbstractReader import ImageOrientation
-from MRICenterline.gui.vtk.line_actor import IULineActor
 from MRICenterline.app.points.point import Point
 from MRICenterline.app.points.status import PointStatus
 from MRICenterline import CFG
@@ -19,6 +16,7 @@ class PointArray:
                  point_status: PointStatus):
         self.point_type = point_status
         self.point_array: List[Point] = []
+        self.interpolated_point_array: List[Point] = []
         self.lengths: List[float] = []
         self.length_actors = []
         self.total_length: float = 0.0
@@ -34,13 +32,18 @@ class PointArray:
             raise KeyError("Point status not defined")
 
         self.point_color = CFG.get_color(key, 'color')
-        self.point_size = float(CFG.get_config_data(key, 'marker-size'))
         self.highlight_color = CFG.get_color(key, 'highlighted-color')
+        self.interpolated_color = None
+
+        self.point_size = float(CFG.get_config_data(key, 'marker-size'))
         self.line_thickness = float(CFG.get_config_data(key, 'line-thickness'))
         self.line_style = CFG.get_config_data(key, 'line-style')
 
         self.has_highlight = False
         self.highlighted_point = None
+        self.use_fill = False
+        self.fill_amount = 0
+        self.fill_type = None
 
     ######################################################################
     #                        array manipulation                          #
@@ -91,7 +94,29 @@ class PointArray:
                                                                self.point_array[-1]))
         self.total_length = sum(self.lengths)
 
+        if self.use_fill:
+            if len(self) >= 2:
+                from MRICenterline.app.points.point_fill import fill_interp, fill, PointFillType
+
+                image_properties = self.point_array[0].image_properties
+
+                if self.fill_type == PointFillType.LinearInterpolation:
+                    interpolated_array = fill_interp(image_properties=image_properties,
+                                                     point_a=self.point_array[-2], point_b=self.point_array[-1],
+                                                     point_type=self.point_type,
+                                                     num_points=self.fill_amount)
+                else:
+                    interpolated_array, length_of_fill = fill(image_properties=image_properties,
+                                                              point_a=self.point_array[-2],
+                                                              point_b=self.point_array[-1])
+                    self.fill_amount = length_of_fill
+                # endregion
+
+                self.interpolated_point_array.extend(interpolated_array)
+
     def generate_line_actor(self, point_a, point_b):
+        from MRICenterline.gui.vtk.line_actor import IULineActor
+
         if CFG.get_testing_status('draw-connecting-lines'):
             return IULineActor(point_a, point_b,
                                color=self.point_color,
@@ -100,6 +125,12 @@ class PointArray:
     def delete(self, item):
         self.point_array[item].actor.SetVisibility(False)
         self.point_array.pop(item)
+
+        if self.use_fill:
+            # TODO: incomplete
+            self.interpolated_point_array[item].actor.SetVisibility(False)
+            for i in range((item)*(self.fill_amount-2), (self.fill_amount-2)*(item+1)):
+                del self.interpolated_point_array[i]
 
         # recalculate lengths
         if len(self):
@@ -143,7 +174,7 @@ class PointArray:
         return self
 
     def edit_point(self, point: Point):
-        if self.has_highlight:
+        if self.has_highlight and len(self):
             origin_point = self.highlighted_point
 
             i = self.get_index(origin_point)
@@ -152,8 +183,6 @@ class PointArray:
             self[i] = point
 
             return origin_point, i
-        else:
-            logging.info("Can't edit without a highlighted point")
 
     # endregion
 
@@ -193,6 +222,12 @@ class PointArray:
     ######################################################################
     # region
 
+    def set_use_fill(self, fill_type, fill_amount=10):
+        self.use_fill = True
+        self.interpolated_color = CFG.get_color('mpr-display-style', 'interpolated-color')
+        self.fill_amount = fill_amount
+        self.fill_type = fill_type
+
     def set_size(self, size, item=None):
         self.point_size = size
         if item:
@@ -215,6 +250,11 @@ class PointArray:
     #                                 get                                #
     ######################################################################
     # region
+
+    def get_interpolated_point_actors(self):
+        index = len(self)
+        return [pt.get_actor()
+                for pt in self.interpolated_point_array[(index-2)*(self.fill_amount-2):(self.fill_amount-2)*(index-1)]]
 
     def get_index(self, point: Point):
         return self.point_array.index(point)
@@ -271,15 +311,21 @@ class PointArray:
             # if a point is already highlighted, set the color of all the points to the point color
             self.set_color(self.point_color)
 
-        self.point_array[item].set_color(self.highlight_color)
-        self.has_highlight = True
-        self.highlighted_point = self.point_array[item]
+        if len(self):
+            self.point_array[item].set_color(self.highlight_color)
+            self.has_highlight = True
+            self.highlighted_point = self.point_array[item]
 
-        return self.point_array[item].slice_idx
+            return self.point_array[item].slice_idx
 
     def show_point(self, item):
         self.point_array[item].set_visibility(True)
         self.point_array[item].actor.SetVisibility(True)
+
+        if self.use_fill:
+            for pt_i in self.interpolated_point_array[item*(self.fill_amount-2):(self.fill_amount-2)*(item+1)]:
+                pt_i.set_visibility(True)
+                pt_i.actor.SetVisibility(True)
 
     def hide_point(self, item):
         self.point_array[item].set_visibility(False)
@@ -324,9 +370,14 @@ class PointArray:
     # region
 
     def generate_table_data(self) -> dict:
-        img_coords_list = [[round(c, 2) for c in pt.image_coordinates] for pt in self.point_array]
-        physical_coords_list = [[round(c, 2) for c in pt.physical_coords] for pt in self.point_array]
-        itk_index_list = [[round(c) for c in pt.itk_index_coords] for pt in self.point_array]
+        if self.use_fill:
+            img_coords_list = [[round(c, 2) for c in pt.image_coordinates] for pt in self.interpolated_point_array]
+            physical_coords_list = [[round(c, 2) for c in pt.physical_coords] for pt in self.interpolated_point_array]
+            itk_index_list = [[round(c) for c in pt.itk_index_coords] for pt in self.interpolated_point_array]
+        else:
+            img_coords_list = [[round(c, 2) for c in pt.image_coordinates] for pt in self.point_array]
+            physical_coords_list = [[round(c, 2) for c in pt.physical_coords] for pt in self.point_array]
+            itk_index_list = [[round(c) for c in pt.itk_index_coords] for pt in self.point_array]
 
         return {
             "physical coords": physical_coords_list,
@@ -337,11 +388,20 @@ class PointArray:
     def get_as_array_for_centerline(self, image_properties):
         import numpy as np
 
-        points = deepcopy([pt.itk_index_coords for pt in self.point_array])
+        if self.use_fill:
+            picked_points = deepcopy([pt.itk_index_coords for pt in self.point_array])
+            interpolated_points = deepcopy([pt.itk_index_coords for pt in self.interpolated_point_array])
+
+            points = []
+            for i, pt in enumerate(picked_points):
+                points.append(pt)
+                points.extend(interpolated_points[i * (self.fill_amount - 2):(self.fill_amount - 2) * (i + 1)])
+        else:
+            points = deepcopy([pt.itk_index_coords for pt in self.point_array])
 
         for i in points:
-            i[1] = image_properties.size[1] - i[1]
-            i[2] = i[2] - 2
+            i[1] = image_properties.size[1] - i[1]  # flip?
+            i[2] = i[2] - 2  # slice index
 
         return np.asarray(points)
 
@@ -350,10 +410,11 @@ class PointArray:
         for i in self.get_points_in_slice(other.slice_idx):
             point_and_distances.append((other.distance(i), i))
 
-        if get_index:
-            return self.get_point_index(sorted(point_and_distances)[0][1])
-        else:
-            return sorted(point_and_distances)[0][1]
+        if len(self):
+            if get_index:
+                return self.get_point_index(sorted(point_and_distances)[0][1])
+            else:
+                return sorted(point_and_distances)[0][1]
 
     def get_vertical_distance(self):
         import numpy as np

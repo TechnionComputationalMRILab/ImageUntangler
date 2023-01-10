@@ -42,6 +42,11 @@ class DefinedPointArray(PointArray):
         print("interpolating")
         self.fill_interp(self.array_length)
 
+    def fill_same_slice(self, direction, image_type):
+        # image type = if it's FIESTA or T2
+        # direction = accuracy of the interpolation varies if the point orders are flipped
+        pass
+
     def fill_interp(self, num_points: int = 10):
         # the interpolation only works for one direction but it's only for testing anyway
         # linearly interpolates the points in the array. used for testing the fill function

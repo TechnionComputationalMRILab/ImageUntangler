@@ -18,17 +18,16 @@ logging.getLogger(__name__)
 
 class ImageProperties:
     def __init__(self, sitk_image, image_orientation: ImageOrientation, z_coords, parent=None):
+        self.parent = parent
         self.sitk_image = sitk_image
         self.orientation = image_orientation
-        # print(f'ITK Direction matrix: \n {np.asarray(self.sitk_image.GetDirection()).reshape((3, 3))}')
 
         self.spacing = np.array(sitk_image.GetSpacing())
         self.dimensions = np.int32(sitk_image.GetDimension())
         self.size = np.array(sitk_image.GetSize())
         self.origin = np.array(sitk_image.GetOrigin())
-        self.extent = (0, self.size[0] - 1,
-                       0, self.size[1] - 1,
-                       0, self.size[2] - 1)
+
+        self.extent = [i for j in [[0, self.size[k] - 1] for k in range(self.dimensions)] for i in j]
 
         self.nparray = GetArrayFromImage(sitk_image)
         self.data = self.nparray
@@ -44,7 +43,8 @@ class ImageProperties:
             return np.array(center)
 
         center = calculate_center()
-        self.sliceIdx = np.int(np.round(((center[2]-self.origin[2])/self.spacing[2]))) + 1
+        # changed to -1 from 2 to handle 2D cases. might be problematic??
+        self.sliceIdx = int(np.round(((center[-1]-self.origin[-1])/self.spacing[-1]))) + 1
 
         self.vtk_data = self.get_vtk_data()
         self.transformation = transformation_matrix(center, view='y_flip_axial')

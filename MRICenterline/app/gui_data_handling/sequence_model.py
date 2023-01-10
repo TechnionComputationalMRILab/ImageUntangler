@@ -5,8 +5,8 @@ from datetime import datetime, timezone
 from vtkmodules.qt.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
 
 from MRICenterline.app.database.save_points import save_points
+from MRICenterline.app.database.save_comment import save_comment
 from MRICenterline.app.file_reader.AbstractReader import ImageOrientation
-from MRICenterline.app.points.DefinedPointArray import DefinedPointArray
 from MRICenterline.app.points.status import PickerStatus, PointStatus
 from MRICenterline.app.gui_data_handling.sequence_viewer import SequenceViewer
 from MRICenterline.app.gui_data_handling.image_properties import ImageProperties
@@ -82,20 +82,24 @@ class SequenceModel:
                                  mpr_points=self.mpr_point_array,
                                  timer_data=self.model.timer)
 
+        if self.model.comment_text:
+            save_comment(self.model.comment_text)
+
         return session_id
 
     def calculate(self, status: PointStatus):
-        if status == PointStatus.MPR:
+        # if status == PointStatus.MPR:
+        if len(self.mpr_point_array):
             self.model.centerline_calc = True
             self.model.centerline_model.set_points_and_image(self.mpr_point_array,
                                                              self.current_image_properties)
             self.model.centerline_model.set_window_level(self.window_value, self.level_value)
             self.model.centerline_model.update_widget()
 
-        elif status == PointStatus.LENGTH:
-            pass
-            # print(self.length_point_array.lengths)
-            # print(self.length_point_array.total_length)
+        # elif status == PointStatus.LENGTH:
+        #     pass
+        # print(self.length_point_array.lengths)
+        # print(self.length_point_array.total_length)
 
     def intermediate_points(self, show: bool):
         if show:
@@ -136,27 +140,26 @@ class SequenceModel:
         point = Point(pick_coords, slice_index, self.current_image_properties)
         logging.debug(f"{self.model.picker_status} | {point}")
 
+        if self.model.picker_status == PickerStatus.PICKING_MPR_PAIR:
+            # TODO: EXPERIMENTAL
+
+            # set the fill flag so that the array knows that it's supposed to fill points
+            self.mpr_point_array.set_use_fill(self.model.point_fill_type)
+
+            self.mpr_point_array.add_point(point)
+            self.current_sequence_viewer.add_actor(self.mpr_point_array.get_last_actor())
+
+            if len(self.mpr_point_array) >= 2:
+                print(f"FILL with {len(self.mpr_point_array.get_interpolated_point_actors())}")
+                for i, pt_actor in enumerate(self.mpr_point_array.get_interpolated_point_actors()):
+                    print(f"add actor {i}")
+                    self.current_sequence_viewer.add_actor(pt_actor)
+
+                # breakpoint()
+
         if self.model.picker_status == PickerStatus.PICKING_MPR:
             self.mpr_point_array.add_point(point)
             self.current_sequence_viewer.add_actor(self.mpr_point_array.get_last_actor())
-
-        if self.model.picker_status == PickerStatus.PICKING_MPR_PAIR:
-            # TODO: EXPERIMENTAL
-            self.mpr_point_array.add_point(point)
-            self.current_sequence_viewer.add_actor(self.mpr_point_array.get_last_actor())
-
-            if len(self.mpr_point_array) == 2:
-                dpa = DefinedPointArray()
-                dpa.transform(self.mpr_point_array)
-                # self.mpr_point_array.point_array = dpa.point_array
-                self.mpr_point_array = dpa
-
-                print(len(dpa))
-                print(len(self.mpr_point_array))
-                print([i.image_coordinates for i in dpa.point_array if i])
-
-                for pt in self.mpr_point_array:
-                    self.current_sequence_viewer.add_actor(pt.actor)
 
         if self.model.picker_status == PickerStatus.PICKING_LENGTH:
             self.length_point_array.add_point(point)
