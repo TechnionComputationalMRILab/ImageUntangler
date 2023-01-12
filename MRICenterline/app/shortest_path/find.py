@@ -2,6 +2,7 @@ import torch
 from pathlib import Path
 import SimpleITK as sitk
 
+from MRICenterline.app.shortest_path.functions import check_limits
 
 GRID_SPACING = (1.5, 1.5, 1.5)
 GRID_PIXELS_SIZE = (32, 32)
@@ -43,7 +44,6 @@ def FindShortestPathPerSlice(case_sitk, slice_num, first_annotation, second_anno
     y_spline_gt = torch.load(Path(__file__).parent / 'y_spline_gt.pt')
 
     print("Extracting ROI")
-    # roi_nda, init_x, final_x, init_y, final_y = extract_roi(case_sitk, slice_num, first_annotation, second_annotation)
 
     # CALCULATE EVERYTHING
     image_nda = sitk.GetArrayFromImage(case_sitk)
@@ -51,15 +51,64 @@ def FindShortestPathPerSlice(case_sitk, slice_num, first_annotation, second_anno
 
     init_x, init_y = 0, 0
     final_x, final_y = case_sitk.GetSize()[0:2]
+    x_len = final_x
+    y_len = final_y
 
-    x_len = final_x #final_x - init_x + 1
-    y_len = final_y #final_y - init_y + 1
+    # CALCULATE REGION
+    # roi_nda, init_x, final_x, init_y, final_y = extract_roi(case_sitk, slice_num, first_annotation, second_annotation)
+    # x_len = final_x - init_x + 1
+    # y_len = final_y - init_y + 1
+
+
     num_of_pixels = x_len * y_len
 
-    g = Graph(num_of_pixels)
+
     print("Calculating graph weights")
-    g.graph = calc_graph_weights(init_x, init_y, num_of_pixels, x_len, y_len, slice_num, case_sitk, PATCH_LEN,
+
+    import time
+    st = time.time_ns()
+    saved_graph = calc_graph_weights(init_x, init_y, num_of_pixels, x_len, y_len, slice_num, case_sitk, PATCH_LEN,
                                  GRID_PIXELS_SIZE, model, device)
+    et = time.time_ns()
+
+    print("RUNTIME FOR full clac_graph_weights:", et - st)
+
+    #
+    roi_nda, roi_init_x, roi_final_x, roi_init_y, roi_final_y = extract_roi(case_sitk, slice_num, first_annotation, second_annotation)
+
+    import numpy as np
+    roi_x_len = roi_final_x - roi_init_x + 1
+    roi_y_len = roi_final_y - roi_init_y + 1
+    roi_num_of_pixels = roi_x_len * roi_y_len
+
+    offset = roi_init_y * x_len + roi_init_x
+
+    g = Graph(roi_num_of_pixels)
+    g.graph = np.zeros((roi_num_of_pixels, roi_num_of_pixels))
+
+    # def unpack_saved_graph()
+    for i in range(roi_num_of_pixels):
+        for j in range(8):
+            neighbor_single_cord = saved_graph[i + offset][j][1]
+
+            x, y = convert_1Dcord_to_2Dcord([int(neighbor_single_cord)], x_len, init_x, init_y)
+            x = int(x[0])
+            y = int(y[0])
+
+            conditions = [x < roi_init_x, y < roi_init_y, x >= (roi_init_x + roi_x_len), y >= (roi_init_y + roi_y_len)]
+            # conditions = [x < 0, y < 0, x >= roi_x_len, y >= roi_y_len]
+            if any(conditions):
+            # if x < 0 or y < 0 or x >= roi_x_len or y >= roi_y_len:
+                continue
+            else:
+                print(y * roi_x_len + x, y, roi_x_len, x)
+                roi_neighbor_single_cord = y * roi_x_len + x
+
+                prob = saved_graph[i + offset][j][0]
+                g.graph[i][int(roi_neighbor_single_cord)] = prob
+
+
+
     sp_2Dcord = []
 
     print("Calculating shortest path coordinates")
@@ -67,12 +116,12 @@ def FindShortestPathPerSlice(case_sitk, slice_num, first_annotation, second_anno
         first_pixel = first_annotation if j == 0 else second_annotation
         final_pixel = second_annotation if j == 0 else first_annotation
 
-        first_pixel_1DCord = (first_pixel[1] - init_y) * x_len + (first_pixel[0] - init_x)
-        final_pixel_1DCord = (final_pixel[1] - init_y) * x_len + (final_pixel[0] - init_x)
+        first_pixel_1DCord = (first_pixel[1] - roi_init_y) * roi_x_len + (first_pixel[0] - roi_init_x)
+        final_pixel_1DCord = (final_pixel[1] - roi_init_y) * roi_x_len + (final_pixel[0] - roi_init_x)
 
-        g.dijkstra(first_pixel_1DCord, x_len, y_len, a, roi_nda, init_x, init_y, x_spline_gt, y_spline_gt)
+        g.dijkstra(first_pixel_1DCord, roi_x_len, roi_y_len, a, roi_nda, roi_init_x, roi_init_y, x_spline_gt, y_spline_gt)
 
         sp_1Dcord = g.track_sp(first_pixel_1DCord, final_pixel_1DCord)
-        sp_2Dcord.append(convert_1Dcord_to_2Dcord(sp_1Dcord, x_len, init_x, init_y))
+        sp_2Dcord.append(convert_1Dcord_to_2Dcord(sp_1Dcord, roi_x_len, roi_init_x, roi_init_y))
 
     return sp_2Dcord, roi_nda

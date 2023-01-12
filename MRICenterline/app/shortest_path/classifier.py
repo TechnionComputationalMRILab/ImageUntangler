@@ -24,6 +24,12 @@ class Classifier(nn.Module, ABC):
         prob = m(z)
         return prob
 
+    def predict_proba_scores_numpy(self, z):
+        m = nn.Softmax(dim=1)
+        # m = nn.Sigmoid()
+        prob = m(torch.from_numpy(z))
+        return prob.numpy()
+
     def classify(self, x: Tensor) -> Tensor:
         y_proba = self.predict_proba(x)
         return self._classify(y_proba)

@@ -5,8 +5,9 @@ class Graph:
         self.V = vertices
         self.parent = [None] * self.V
         self.direction = [None] * self.V
-        self.graph = [[0 for column in range(vertices)]
-                      for row in range(vertices)]
+        # self.graph = [[0 for column in range(vertices)]
+        #               for row in range(vertices)]
+        self.graph = np.zeros((vertices, vertices))
 
     def printSolution(self, dist):
         print("Vertex \tDistance from Source")
@@ -54,8 +55,8 @@ class Graph:
                             self.parent[y] = x
                             direction[y] = d
                 else:
-                    # if self.graph[x][y] == 0: print('else: graph = 0')
-                    if self.graph[x][y] == 0: assert False, 'else: graph = 0'
+                    if self.graph[x][y] == 0: print('else: graph = 0')
+                    # if self.graph[x][y] == 0: assert False, 'else: graph = 0'
                     if self.graph[x][y] != 0 and sptSet[y] == False and \
                             dist[y] > dist[x] + self.graph[x][y]:
                         dist[y] = dist[x] + self.graph[x][y]
