@@ -61,10 +61,15 @@ def fill(image_properties: ImageProperties or None,
         itk_coords[2] = round(pt.slice_idx) - 1
         return itk_coords
 
-    shortest_path, _ = FindShortestPathPerSlice(case_sitk=sitk_image, slice_num=point_a.itk_index_coords[2],
+    import time
+
+    st = time.time_ns()
+    shortest_path, _ = FindShortestPathPerSlice(case_sitk=sitk_image, slice_num=convert_coords(point_a)[2],
                                                 first_annotation=convert_coords(point_a),
                                                 second_annotation=convert_coords(point_b),
                                                 case_number=image_properties.parent.case_name)
+    et = time.time_ns()
+    print(f"ELAPSED TIME {et-st}")
 
     temp_point_array = PointArray(PointStatus.MPR)
     for i, (x, y) in enumerate(zip(shortest_path[0][0], shortest_path[0][1])):

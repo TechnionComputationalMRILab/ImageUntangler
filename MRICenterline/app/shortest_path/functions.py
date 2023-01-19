@@ -85,74 +85,55 @@ def match_prob(i, j, label_pred_proba_8):
     # print(f'wrong coordinates! {i=}, {j=}')
     return None
 
-# import numba
-# @numba.jit
 def calc_graph_weights(init_x, init_y, num_of_pixels, x_len, y_len,
-                       slice_num, img, patch_len, grid_pixel_size, model, device):
-    # # TODO: make this more efficient
-    # # graph = np.zeros((num_of_pixels, num_of_pixels))
-    #
-    # graph = np.zeros((num_of_pixels, 8, 2)) # 2 is the coordinates, 8 is the actual graph value
-    # model = model.to(device)
-    #
-    # # def to_profile(input_patch):
-    # #  # 7638ms / 160ms
-    # #     return torch.unsqueeze(input_patch, 0).to(device)
-    #
-    # # def to_profile(input_patch):
-    # # # 31996ms / 269ms
-    # #     with torch.no_grad():
-    # #         label_pred = model(input_patch.to(device))
-    # #     return label_pred
-    #
-    # # def to_profile(input_patch):
-    # #     # 44254ms / 478 ms
-    # #     _patch = torch.unsqueeze(input_patch, 0).to(device)
-    # #     with torch.no_grad():
-    # #         _label_pred = model(_patch)
-    # #     return _label_pred
-    #
-    # # def to_profile(input_patch):
-    # #     # 39764ms / 377ms
-    # #     _patch = torch.unsqueeze(input_patch, 0)
-    # #     with torch.no_grad():
-    # #         _label_pred = model(_patch.to(device))
-    # #     return _label_pred
-    #
-    # from tqdm import tqdm
-    # for x in tqdm(range(x_len)):
-    #     for y in range(y_len):
-    #
-    #         pixel = np.array([init_x + x, init_y + y, slice_num])
-    #         patch = extract_patch(pixel, img, patch_len, grid_pixel_size[0])
-    #
-    #         patch = torch.unsqueeze(patch, 0)
-    #         with torch.no_grad():
-    #             label_pred = model(patch.to(device))
-    #
-    #         label_pred_proba_16 = model.predict_proba_scores(label_pred.to(device)).cpu()
-    #         # label_pred_proba_16 = model.predict_proba_scores_numpy(label_pred.cpu().numpy())
-    #
-    #         label_pred_proba_8 = convert_16dir_to_8dir(label_pred_proba_16[0])
-    #         pixel_single_cord = y * x_len + x
-    #
-    #         index = 0
-    #         for i in [-1, 0, 1]:
-    #             for j in [-1, 0, 1]:
-    #                 if check_limits(x, y, i, j, x_len, y_len):
-    #                     neighbor_single_cord = (y+j) * x_len + (x+i)
-    #                     prob = match_prob(i, j, label_pred_proba_8)
-    #                     if prob is not None:
-    #
-    #                         graph[pixel_single_cord][index][0] = np.exp(-prob)
-    #                         graph[pixel_single_cord][index][1] = neighbor_single_cord
-    #
-    #                         # graph[pixel_single_cord][neighbor_single_cord] = np.exp(-prob)
-    #                         index += 1
-    #
-    #         # print(f"Graph weights: {round(x / x_len, 2)}, {round(y / y_len, 2)}")
+                       slice_num, img, patch_len, grid_pixel_size, case_number):
+    from MRICenterline.app.shortest_path import classifier
+    from MRICenterline.app.shortest_path import Net
+    from MRICenterline.app.shortest_path.find import CIRCLE_DIRECTIONS_NUM, GRID_PIXELS_SIZE
+    from pathlib import Path
 
-    graph = np.load(r"C:\Users\ang.a\Documents\TCML-repos\ImageUntangler\graph_test.npy")
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+
+    # load model
+    model = classifier.ArgMaxClassifier(
+        model=Net.CNN(in_size=GRID_PIXELS_SIZE, directions_num=2, hidden_dims=[64, CIRCLE_DIRECTIONS_NUM]))
+
+    model_dict_path = Path(__file__).parent / "model_dict" / f"{case_number}.pt"
+    print(f"Loading {model_dict_path}")
+
+    model.load_state_dict(torch.load(model_dict_path))
+    model.eval()
+
+    graph = np.zeros((num_of_pixels, 8, 2)) # 2 is the coordinates, 8 is the actual graph value
+    model = model.to(device)
+
+    from tqdm import tqdm
+    for x in tqdm(range(x_len)):
+        for y in range(y_len):
+
+            pixel = np.array([init_x + x, init_y + y, slice_num])
+            patch = extract_patch(pixel, img, patch_len, grid_pixel_size[0])
+
+            patch = torch.unsqueeze(patch, 0)
+            with torch.no_grad():
+                label_pred = model(patch.to(device))
+
+            label_pred_proba_16 = model.predict_proba_scores(label_pred.to(device)).cpu()
+
+            label_pred_proba_8 = convert_16dir_to_8dir(label_pred_proba_16[0])
+            pixel_single_cord = y * x_len + x
+
+            index = 0
+            for i in [-1, 0, 1]:
+                for j in [-1, 0, 1]:
+                    if check_limits(x, y, i, j, x_len, y_len):
+                        neighbor_single_cord = (y+j) * x_len + (x+i)
+                        prob = match_prob(i, j, label_pred_proba_8)
+                        if prob is not None:
+
+                            graph[pixel_single_cord][index][0] = np.exp(-prob)
+                            graph[pixel_single_cord][index][1] = neighbor_single_cord
+                            index += 1
     return graph
 
 

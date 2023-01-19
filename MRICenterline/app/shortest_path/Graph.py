@@ -19,12 +19,13 @@ class Graph:
         min_index = non_zero_arr[0][np.argmin(dist[non_zero_arr])]
         return min_index
 
-    def dijkstra(self, src, len_x, len_y, a, slice_nda, init_x, init_y, x_spline_gt, y_spline_gt):
+    def dijkstra(self, src, dest, len_x, len_y, a, slice_nda, init_x, init_y, x_spline_gt, y_spline_gt):
         from MRICenterline.app.shortest_path.functions import create_circle_directions
 
         dist = np.array([np.inf] * self.V)
         dist[src] = 0.1
         sptSet = np.array([False] * self.V)
+
         self.parent[src] = -1
 
         direction = np.array([None] * self.V)
@@ -37,6 +38,9 @@ class Graph:
         for cout in range(self.V):
             x = self.minDistance(dist, sptSet)
             sptSet[x] = True
+
+            if x == dest:
+                break
 
             for n in neighbors:
                 if self.is_out_of_patch(x, n, len_x, len_y): continue
@@ -62,6 +66,7 @@ class Graph:
                         dist[y] = dist[x] + self.graph[x][y]
                         self.parent[y] = x
                         direction[y] = d
+
 
     def is_out_of_patch(self, x, n, len_x, len_y):
         if x % len_x == 0 and n in [-(len_x + 1), -1, (len_x - 1)] or \

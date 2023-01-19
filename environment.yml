@@ -1,0 +1,36 @@
+name: MPRVisualization
+
+channels:
+  - nvidia
+  - pytorch
+  - conda-forge
+  - simpleitk
+  - nodefaults
+
+dependencies:
+  - nvidia::cudatoolkit
+  - python=3.10
+  - pytorch::pytorch
+  - vtk=9.1.0
+  - pip
+  - QtAwesome
+  - pydicom
+  - SimpleITK
+  - pynrrd
+  - pandas
+  - matplotlib
+  - numpy
+  - scipy
+  - tqdm
+  - openpyxl
+  - jupyter
+  - ipykernel
+  - pyinstaller
+  - numba
+  - pip:
+      - PyQt5==5.15.4
+      - pyqt5-plugins==5.15.2.2.1.0
+      - PyQt5-Qt5==5.15.2
+      - PyQt5-sip==12.8.1
+      - PyQt5-stubs==5.15.2.0
+      - pyqt5-tools==5.15.2.3.0.2

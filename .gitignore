@@ -27,3 +27,5 @@ AlgorithmTests/test.ipynb
 *.npy
 *.csv
 *.sqlite
+condaenv*.requirements.txt
+*.db-journal

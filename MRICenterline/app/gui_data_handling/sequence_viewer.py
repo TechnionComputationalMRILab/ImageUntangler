@@ -207,9 +207,9 @@ class SequenceViewer:
         self.panel_renderer.GetActiveCamera().SetParallelScale(self.image.get_parallel_scale())
 
     def render_panel(self):
-        logging.debug(f"Rendering slice: {self.slice_idx} / ITK zindex: {1 + self.image.size[2] - self.slice_idx}")
-        logging.debug(f"Current number of actors: {self.panel_renderer.GetActors().GetNumberOfItems()}")
-        logging.debug(f"DEBUG Case Flag: {self.test_slice_idx_flag}")
+        # logging.debug(f"Rendering slice: {self.slice_idx} / ITK zindex: {1 + self.image.size[2] - self.slice_idx}")
+        # logging.debug(f"Current number of actors: {self.panel_renderer.GetActors().GetNumberOfItems()}")
+        # logging.debug(f"DEBUG Case Flag: {self.test_slice_idx_flag}")
 
         self.window.Render()
 

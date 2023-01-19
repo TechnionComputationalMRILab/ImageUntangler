@@ -44,6 +44,7 @@ class PointArray:
         self.use_fill = False
         self.fill_amount = 0
         self.fill_type = None
+        self.interpolate_downsampling = 1
 
     ######################################################################
     #                        array manipulation                          #
@@ -222,11 +223,12 @@ class PointArray:
     ######################################################################
     # region
 
-    def set_use_fill(self, fill_type, fill_amount=10):
+    def set_use_fill(self, fill_type, fill_amount=20, downsampling=5):
         self.use_fill = True
         self.interpolated_color = CFG.get_color('mpr-display-style', 'interpolated-color')
         self.fill_amount = fill_amount
         self.fill_type = fill_type
+        self.interpolate_downsampling = downsampling
 
     def set_size(self, size, item=None):
         self.point_size = size
@@ -253,8 +255,12 @@ class PointArray:
 
     def get_interpolated_point_actors(self):
         index = len(self)
+
         return [pt.get_actor()
-                for pt in self.interpolated_point_array[(index-2)*(self.fill_amount-2):(self.fill_amount-2)*(index-1)]]
+                for pt in self.interpolated_point_array[
+                          (index-2)*(self.fill_amount-2):(self.fill_amount-2)*(index-1)
+                          ]
+                ][::self.interpolate_downsampling]
 
     def get_index(self, point: Point):
         return self.point_array.index(point)

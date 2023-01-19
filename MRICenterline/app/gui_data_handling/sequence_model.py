@@ -152,7 +152,7 @@ class SequenceModel:
             if len(self.mpr_point_array) >= 2:
                 print(f"FILL with {len(self.mpr_point_array.get_interpolated_point_actors())}")
                 for i, pt_actor in enumerate(self.mpr_point_array.get_interpolated_point_actors()):
-                    print(f"add actor {i}")
+                    # print(f"add actor {i}")
                     self.current_sequence_viewer.add_actor(pt_actor)
 
                 # breakpoint()
