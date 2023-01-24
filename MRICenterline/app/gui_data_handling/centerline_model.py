@@ -159,6 +159,7 @@ class CenterlineModel:
         for length in self.point_array.lengths:
             current_location += length / self.original_image_properties.spacing[0]
             vl = VerticalLine(current_location)
+            vl.hide()
             self.point_markers.add(vl)
 
     def highlight_selected_point(self, index):

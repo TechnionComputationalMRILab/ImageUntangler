@@ -7,12 +7,17 @@ from MRICenterline.app.database.filetype import read_folder
 from MRICenterline import CFG
 
 import logging
+
+from app.file_reader.AbstractReader import AbstractReader
+
 logging.getLogger(__name__)
 
 
 class Imager:
     def __init__(self, directory, root_folder=None):
         self.directory = directory
+        self.reader: AbstractReader | None = None
+        self.file_type: str = "INVALID"
 
         if root_folder:
             self.case_name = os.path.relpath(directory, root_folder)

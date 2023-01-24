@@ -1,3 +1,5 @@
+from MRICenterline.external.dicompiler import DICOMTag
+
 case_list = '''
 create table case_list (
 case_id integer primary key autoincrement,
@@ -15,24 +17,36 @@ foreign key (case_id) references case_list(case_id)
 )
 '''
 
-metadata = '''
-create table metadata (
-StudyTime text, 
-StudyDescription text, 
-AcquisitionTime text, 
-PatientName text, 
-PatientID text, 
-PatientAge text, 
-PatientSex text, 
-PatientBirthDate text, 
-PatientPosition text, 
-Manufacturer text, 
-ManufacturerModelName text, 
-ProtocolName text,
-case_id integer,
-foreign key (case_id) references case_list(case_id) 
-)
-'''
+metadata_key_list = [tag.name + " text, " for tag in [
+    DICOMTag.Manufacturer, DICOMTag.ManufacturerModelName,
+    DICOMTag.StudyTime, DICOMTag.StudyDescription, DICOMTag.AcquisitionTime,
+    DICOMTag.PatientName, DICOMTag.PatientID, DICOMTag.PatientSex, DICOMTag.PatientPosition,
+    DICOMTag.ProtocolName
+]]
+
+metadata = \
+    "create table metadata (" + \
+    " ".join(metadata_key_list) + \
+    'case_id integer,foreign key (case_id) references case_list(case_id))'
+
+# metadata = '''
+# create table metadata (
+# StudyTime text,
+# StudyDescription text,
+# AcquisitionTime text,
+# PatientName text,
+# PatientID text,
+# PatientAge text,
+# PatientSex text,
+# PatientBirthDate text,
+# PatientPosition text,
+# Manufacturer text,
+# ManufacturerModelName text,
+# ProtocolName text,
+# case_id integer,
+# foreign key (case_id) references case_list(case_id)
+# )
+# '''
 
 sequences = '''
 create table sequences (

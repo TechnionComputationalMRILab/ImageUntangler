@@ -7,37 +7,10 @@ from PyQt5.QtWidgets import QWidget, QFileDialog, QPushButton, QVBoxLayout, QLab
 
 from MRICenterline import CFG
 from MRICenterline.app import scanner
+from MRICenterline.gui.scanner.worker import ScanWorker
 
 import logging
 logging.getLogger(__name__)
-
-
-class ScanWorker(QObject):
-    finished = pyqtSignal()
-    status_message = pyqtSignal(str)
-    pbar_value = pyqtSignal(int)
-
-    def __init__(self, options, directories, parent=None):
-        super().__init__(parent)
-        self.options = options
-        self.directories = directories
-
-    def run(self):
-        num_folders = len(self.directories)
-        opts_for_logger = [opt.isChecked() for opt in self.options.values()]
-        logging.info(f"Running scanner with {opts_for_logger}")
-
-        if self.options['organize_data'].isChecked():
-            # scanner.run_organize_data("", "", parent_widget=self)
-            self.status_message.emit("Not implemented")
-        if self.options['metadata_sequence_scan'].isChecked():
-            for index, folder in enumerate(self.directories):
-                output = scanner.get_metadata(folder, index, num_folders, None)
-                self.status_message.emit(f"[{1 + index} / {num_folders}] Reading {folder}")
-                self.status_message.emit(f'{output}')
-                self.pbar_value.emit(index + 1)
-
-        self.finished.emit()
 
 
 class ScannerWidget(QWidget):
@@ -55,18 +28,20 @@ class ScannerWidget(QWidget):
         self.thread = QThread()
         self.worker = None
 
-        self.directories = [Path(i) for i in glob(f"{self.folder_path}/**/", recursive=True)]
-        try:
-            self.directories.remove(Path(self.folder_path))
-        except ValueError:
-            # user selected a directory in a way that the root folder is not in the list
-            pass
+        # self.directories = [Path(i) for i in glob(f"{self.folder_path}/**/", recursive=True)]
+        # self.files = Path(self.folder_path).rglob("*")
+        # try:
+        #     self.directories.remove(Path(self.folder_path))
+        # except ValueError:
+        #     # user selected a directory in a way that the root folder is not in the list
+        #     pass
 
+        # region view
         main_layout = QGridLayout(self)
-        self.status_text = f"<font color='red'>Found {len(self.directories)} directories in "\
-                           f"{self.folder_path}</font>"
+        self.status_text = f"<font color='red'>Reading from {self.folder_path}</font>"
 
         self.text_box.setHtml(self.status_text)
+        self.add_to_textbox("GUI scanner is disabled in this version")
 
         # main layout
         main_layout.setRowStretch(0, 1)
@@ -97,6 +72,7 @@ class ScannerWidget(QWidget):
 
         self.preprocess_button = QPushButton("Start")
         preprocess_options_layout.addWidget(self.preprocess_button)
+        self.preprocess_button.setEnabled(False)
 
         self.preprocess_button.clicked.connect(self.connect_options)
 
@@ -128,6 +104,7 @@ class ScannerWidget(QWidget):
         self.pbar.setValue(0)
 
         inner_layout.addWidget(self.pbar)
+        # endregion
 
     def connect_export(self, opt):
         save_as = QFileDialog(self).getSaveFileName(filter="*.csv")[0]
@@ -145,8 +122,11 @@ class ScannerWidget(QWidget):
             self.add_to_textbox(status)
 
     def connect_options(self):
-        self.pbar.setMaximum(len(self.directories))
-        self.worker = ScanWorker(self.preprocess_options, self.directories)
+        # self.pbar.setMaximum(len(self.directories))
+        # self.worker = ScanWorker(self.preprocess_options, self.directories)
+        # len_files = len(list(self.files))
+        # self.pbar.setMaximum(len_files)
+        self.worker = ScanWorker(self.preprocess_options, self.folder_path)
 
         # Move worker to the thread
         self.worker.moveToThread(self.thread)

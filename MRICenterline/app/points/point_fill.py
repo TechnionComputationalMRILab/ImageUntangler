@@ -6,7 +6,6 @@ from MRICenterline.app.points.point import Point
 from MRICenterline.app.points.point_array import PointArray
 from MRICenterline.app.points.status import PointStatus
 from MRICenterline.app.gui_data_handling.image_properties import ImageProperties
-from MRICenterline.app.shortest_path.find import FindShortestPathPerSlice
 
 
 class PointFillType(Enum):
@@ -45,39 +44,41 @@ def fill_interp(image_properties: ImageProperties or None,
     return temp_point_array
 
 
-def fill(image_properties: ImageProperties or None,
-         point_a: Point, point_b: Point):
-    sitk_image = image_properties.sitk_image
-
-    assert point_a.slice_idx == point_b.slice_idx
-    slice_index = point_a.slice_idx
-
-    def convert_coords(pt):
-        viewer_origin = image_properties.size / 2.0
-        itk_coords = np.zeros(3, dtype=np.int32)
-
-        itk_coords[0] = round((pt.image_coordinates[0] / image_properties.spacing[0]) + viewer_origin[0])
-        itk_coords[1] = image_properties.size[1] - round((pt.image_coordinates[1] / image_properties.spacing[1]) + viewer_origin[1])
-        itk_coords[2] = round(pt.slice_idx) - 1
-        return itk_coords
-
-    shortest_path, _ = FindShortestPathPerSlice(case_sitk=sitk_image, slice_num=point_a.itk_index_coords[2],
-                                                first_annotation=convert_coords(point_a),
-                                                second_annotation=convert_coords(point_b),
-                                                case_number=image_properties.parent.case_name)
-
-    temp_point_array = PointArray(PointStatus.MPR)
-    for i, (x, y) in enumerate(zip(shortest_path[0][0], shortest_path[0][1])):
-        pt = Point.point_from_itk_index((x, image_properties.size[1] - y, slice_index + 1), image_properties)
-
-        if i == 0:
-            continue
-        if i == len(shortest_path[0][0]) - 1:
-            continue
-        temp_point_array.add_point(pt)
-
-    temp_point_array.set_color(CFG.get_color('mpr-display-style', 'interpolated-color'))
-    return temp_point_array, len(shortest_path[0][0])
+# def fill(image_properties: ImageProperties or None,
+#          point_a: Point, point_b: Point):
+#     from MRICenterline.app.shortest_path.find import FindShortestPathPerSlice
+#
+#     sitk_image = image_properties.sitk_image
+#
+#     assert point_a.slice_idx == point_b.slice_idx
+#     slice_index = point_a.slice_idx
+#
+#     def convert_coords(pt):
+#         viewer_origin = image_properties.size / 2.0
+#         itk_coords = np.zeros(3, dtype=np.int32)
+#
+#         itk_coords[0] = round((pt.image_coordinates[0] / image_properties.spacing[0]) + viewer_origin[0])
+#         itk_coords[1] = image_properties.size[1] - round((pt.image_coordinates[1] / image_properties.spacing[1]) + viewer_origin[1])
+#         itk_coords[2] = round(pt.slice_idx) - 1
+#         return itk_coords
+#
+#     shortest_path, _ = FindShortestPathPerSlice(case_sitk=sitk_image, slice_num=point_a.itk_index_coords[2],
+#                                                 first_annotation=convert_coords(point_a),
+#                                                 second_annotation=convert_coords(point_b),
+#                                                 case_number=image_properties.parent.case_name)
+#
+#     temp_point_array = PointArray(PointStatus.MPR)
+#     for i, (x, y) in enumerate(zip(shortest_path[0][0], shortest_path[0][1])):
+#         pt = Point.point_from_itk_index((x, image_properties.size[1] - y, slice_index + 1), image_properties)
+#
+#         if i == 0:
+#             continue
+#         if i == len(shortest_path[0][0]) - 1:
+#             continue
+#         temp_point_array.add_point(pt)
+#
+#     temp_point_array.set_color(CFG.get_color('mpr-display-style', 'interpolated-color'))
+#     return temp_point_array, len(shortest_path[0][0])
 
 
 if __name__ == "__main__":

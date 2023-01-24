@@ -1,7 +1,8 @@
 """
-Reads a directory and idetifies the type of the files using sitk
+Reads a directory and identifies the type of the files using sitk
 """
 
+import pydicom
 import SimpleITK as sitk
 from pathlib import Path
 from glob import glob
@@ -21,14 +22,19 @@ def read_as_dicom_directory(folder):
 
 
 def read_as_dicom_files(files):
-    try:
-        reader = sitk.ImageSeriesReader()
-        reader.SetFileNames(files)
-        reader.Execute()
-    except:
-        return False
-    else:
-        return True
+    found = False
+    for f in files:
+        if Path(f).name.split(".")[-1] == "dcm":
+            try:
+                pydicom.dcmread(f)
+            except:
+                found = False
+                continue
+            else:
+                found = True
+                break
+
+    return found
 
 
 def read_as_nrrd(file):

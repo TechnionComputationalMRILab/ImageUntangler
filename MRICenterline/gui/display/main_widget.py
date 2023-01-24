@@ -39,8 +39,8 @@ class MainDisplayWidget(QWidget):
         layout.addLayout(self.sequence_widgets.build_sequence_group_box())
         layout.addWidget(self.interactor)
 
-        if CFG.get_testing_status("show-sliders"):
-            layout.addLayout(self.sequence_widgets.build_slider_group_box())
+        # if CFG.get_testing_status("show-sliders"):
+        #     layout.addLayout(self.sequence_widgets.build_slider_group_box())
 
     def test(self):
         self.model.test()
