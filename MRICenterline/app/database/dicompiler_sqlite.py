@@ -51,9 +51,12 @@ class SQLiteDatabase(Database):
                     con.execute('insert into sequences (case_id, name, seq_id, orientation) values (?, ?, ?, ?)',
                                 (case_id + 1, f"({seq_name}, {seq_num})", seq_id + 1, "X"))
 
-                    for file in seq.files:
-                        con.execute('insert into sequence_files (filename, seq_id, case_id) values (?, ?, ?)',
-                                    (file.name, seq_id + 1, case_id + 1))
+                    if DICOMTag.Unspecified in seq.metadata:
+                        pass
+                    else:
+                        for file in seq.files:
+                            con.execute('insert into sequence_files (filename, seq_id, case_id) values (?, ?, ?)',
+                                        (file.name, seq_id + 1, case_id + 1))
 
         con.close()
 
@@ -62,5 +65,5 @@ class SQLiteDatabase(Database):
 
 
 if __name__ == "__main__":
-    sqlite_db = SQLiteDatabase(r"C:\Users\ang.a\Database\Rambam MRE 082022 Full", verbose=True)
+    sqlite_db = SQLiteDatabase(r"C:\Users\ang.a\Database\Rambam MRE 082022 Full", verbose=True, pbar=True)
     sqlite_db.generate_sqlite(r"C:\Users\ang.a\Database\Rambam MRE 082022 Full\metadata.db")
