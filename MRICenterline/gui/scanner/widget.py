@@ -41,7 +41,7 @@ class ScannerWidget(QWidget):
         self.status_text = f"<font color='red'>Reading from {self.folder_path}</font>"
 
         self.text_box.setHtml(self.status_text)
-        self.add_to_textbox("GUI scanner is disabled in this version")
+        self.add_to_textbox("GUI scanner is partially disabled in this version")
 
         # main layout
         main_layout.setRowStretch(0, 1)
@@ -72,7 +72,6 @@ class ScannerWidget(QWidget):
 
         self.preprocess_button = QPushButton("Start")
         preprocess_options_layout.addWidget(self.preprocess_button)
-        self.preprocess_button.setEnabled(False)
 
         self.preprocess_button.clicked.connect(self.connect_options)
 

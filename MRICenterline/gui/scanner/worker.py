@@ -1,10 +1,5 @@
-import io
-from contextlib import redirect_stdout
-
-
 from PyQt5.QtCore import QObject, pyqtSignal
-
-from MRICenterline.external.dicompiler import Database
+from MRICenterline.app.database.dicompiler_sqlite import SQLiteDatabase
 
 import logging
 logging.getLogger(__name__)
@@ -34,7 +29,9 @@ class ScanWorker(QObject):
             #     self.status_message.emit(f'{output}')
             #     self.pbar_value.emit(index + 1)
 
-            pass
+            sqlite_db = SQLiteDatabase(self.directory, verbose=True)
+            sqlite_db.generate_sqlite(fr"{self.directory}\metadata.db")
+
 
             # f = io.StringIO()
             # with redirect_stdout(f):

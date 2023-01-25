@@ -8,7 +8,7 @@ from MRICenterline import CFG
 
 import logging
 
-from app.file_reader.AbstractReader import AbstractReader
+from MRICenterline.app.file_reader.AbstractReader import AbstractReader
 
 logging.getLogger(__name__)
 
