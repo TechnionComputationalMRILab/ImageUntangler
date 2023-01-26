@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Tuple
 from pathlib import Path
 import SimpleITK as sitk
 from enum import Enum
@@ -36,6 +36,9 @@ class DICOMTag(Enum):
             tag = DICOMTag.Unspecified
         return tag
 
+DEFAULT_CASE_GROUPBY = (DICOMTag.PatientID, )
+DEFAULT_SEQUENCE_GROUPBY = (DICOMTag.SeriesDescription, DICOMTag.SeriesNumber, DICOMTag.AcquisitionDate)
+
 
 class SequenceType(Enum):
     DICOM = "DICOM"
@@ -45,7 +48,8 @@ class Sequence:
     __slots__ = (
         "filetype",
         "files",
-        "metadata"
+        "metadata",
+        "name"
     )
 
     @property
@@ -59,18 +63,23 @@ class Sequence:
         pass
 
     def __repr__(self):
-        return f"{self.filetype} with {len(self.files)} | {self.metadata}"
+        return f"Sequence {self.name} " \
+               f"| Type: {self.filetype} | File count: {len(self.files)} " \
+               f"| {self.metadata}"
 
 
 class Case:
     __slots__ = (
         "metadata",
         "files",
-        "sequences"
+        "sequences",
+        "name"
     )
 
     def __repr__(self):
-        return f"Case with {len(self.files)} files, {len(self.sequences)} sequences | {self.metadata}"
+        return f"Case {self.name} " \
+               f"| File count: {len(self.files)} | Sequence count: {len(self.sequences)} " \
+               f"| {self.metadata}"
 
 
 class Database:
@@ -99,25 +108,28 @@ class Database:
         if not skip_initial_scan:
             self.scan_dicom()
 
-    def _read_dicom_cases(self, sort_by: DICOMTag):
+    def scan_dicom(self):
+        case_groupby = self._kwargs["sort_dicom_cases_by"] \
+            if "sort_dicom_cases_by" in self._kwargs else DEFAULT_CASE_GROUPBY
+        sequence_groupby = self._kwargs["sort_dicom_sequences_by"] \
+            if "sort_dicom_sequences_by" in self._kwargs else DEFAULT_SEQUENCE_GROUPBY
+
+        cases_found = self._read_dicom_cases(sort_by=case_groupby)
+        self._read_dicom_case_metadata(cases_found)
+
+        if self._verbose: print("Reading sequences")
+
+        pbar = tqdm(enumerate(self.cases)) if self._pbar else enumerate(self.cases)
+        for idx, case in pbar:
+            if self._very_verbose: print((idx + 1, len(self.cases)))
+            sequences_found = self._read_dicom_sequences(case, sequence_groupby)
+            self._read_dicom_sequence_metadata(case, sequences_found)
+
+    def _read_dicom_cases(self, sort_by: Tuple[DICOMTag]):
         files: List[Path] = [f for f in self.root_folder.rglob("*")]
 
         if self._verbose: print("Identifying DICOM cases")
-
-        cases_found = {}
-        pbar = tqdm(files) if self._pbar else files
-        for i, f in enumerate(pbar):
-            if self._very_verbose: print((i + 1, len(files)))
-            if f.is_dir():
-                continue
-            else:
-                for k, v in self.get_metadata_dict_from_itk(str(f), verbose=self._verbose).items():
-                    if DICOMTag.from_sitk_string(k) == sort_by:
-                        if v not in cases_found:
-                            cases_found[v] = []
-                        cases_found[v].append(f)
-
-        return cases_found
+        return self._group_by(files, sort_by, show_pbar=self._pbar, pbar_desc="Reading cases")
 
     def _read_dicom_case_metadata(self, cases_found):
         if self._verbose: print("Reading case metadata")
@@ -127,66 +139,64 @@ class Database:
             if self._very_verbose: print((idx + 1, len(cases_found)))
             c = Case()
             c.files = files
+            c.name = str(case_sorter)
 
             c.metadata = {}
-            for k, v in self.get_metadata_dict_from_itk(str(files[0])).items():
-                tag = DICOMTag.from_sitk_string(k)
-                if tag != DICOMTag.Unspecified:
-                    if not tag.name.startswith("Series"):
-                        c.metadata[tag] = v
-
-
+            for k, v in get_metadata_dict_from_itk(str(files[0]),
+                                                   verbose=self._very_verbose).items():
+                if k != DICOMTag.Unspecified:
+                    if not k.name.startswith("Series"):
+                        c.metadata[k] = v
 
             self.cases.append(c)
 
-    def _read_dicom_sequences(self, case: Case):
-        case.sequences = []
-        sequences_found = {}
+    @staticmethod
+    def _group_by(files: list, groupby_keys: tuple, skip_none: bool = True,
+                  show_pbar: bool = False, pbar_desc: str = "",
+                  verbose: bool = False):
+        found = {}
+        pbar = tqdm(files) if show_pbar else files
+        for f in pbar:
+            if show_pbar: pbar.set_description(f"{pbar_desc}: {f}")
+            if f not in found.keys():
+                found[f] = [None] * len(groupby_keys)
+
+            for k, v in get_metadata_dict_from_itk(f,
+                                                   verbose=verbose).items():
+                if k in groupby_keys:
+                    found[f][groupby_keys.index(k)] = v
+
+            found[f] = tuple(found[f])
+
+        d = {}
+        for f, group_values in found.items():
+            if skip_none and all(group_values):
+                if group_values not in d.keys():
+                    d[group_values] = []
+                d[group_values].append(f)
+
+        return d
+
+    def _read_dicom_sequences(self, case: Case, sequence_groupby: Tuple[DICOMTag]):
         case_path = case.files[0].parent
 
-        for file in case.files:
-            fn = file.name
-            if fn not in sequences_found.keys():
-                sequences_found[fn] = [None] * 4
-                # study_uid, series_uid, series_desc, series_num
-
-            for k, v in self.get_metadata_dict_from_itk(str(file)).items():
-                match DICOMTag.from_sitk_string(k):
-                    case DICOMTag.StudyInstanceUID:
-                        sequences_found[fn][0] = v
-                    case DICOMTag.SeriesInstanceUID:
-                        sequences_found[fn][1] = v
-                    case DICOMTag.SeriesDescription:
-                        sequences_found[fn][2] = v
-                    case DICOMTag.SeriesNumber:
-                        sequences_found[fn][3] = v
-
-        seq_dict = {}
-        for f, (study_uid, series_uid, series_desc, series_num) in sequences_found.items():
-            if series_num and series_desc:  # skip the files where these are None
-                key = int(series_num), series_desc
-                if key not in seq_dict.keys():
-                    seq_dict[key] = []
-                seq_dict[key].append(f)
-
-        out_dict = {}
-        for key, files in seq_dict.items():
-            out_dict[key] = [Path(case_path) / f for f in files]
-
-        return out_dict
+        seq_dict = self._group_by(case.files, sequence_groupby, verbose=self._very_verbose)
+        return {key: [Path(case_path) / f for f in files] for key, files in seq_dict.items()}
 
     def _read_dicom_sequence_metadata(self, case: Case, sequences_found):
+        case.sequences = []
         sequences_with_one_file = []
-        for _, files in sequences_found.items():
+        for seq_key, files in sequences_found.items():
             if len(files) > 1:
                 seq = Sequence()
+                seq.name = str(seq_key)
                 seq.filetype = SequenceType.DICOM
                 seq.files = files
                 seq.metadata = {}
-                for k, v in self.get_metadata_dict_from_itk(str(files[0])).items():
-                    tag = DICOMTag.from_sitk_string(k)
-                    if tag.name.startswith("Series"):
-                        seq.metadata[tag] = v
+                for k, v in get_metadata_dict_from_itk(str(files[0]),
+                                                       verbose=self._very_verbose).items():
+                    if k.name.startswith("Series"):
+                        seq.metadata[k] = v
 
                 case.sequences.append(seq)
             else:
@@ -201,30 +211,12 @@ class Database:
             seq.files = sequences_with_one_file
 
             seq.metadata = {DICOMTag.Unspecified: "Single-file sequence"}
-            for k, v in self.get_metadata_dict_from_itk(str(sequences_with_one_file[0])).items():
-                tag = DICOMTag.from_sitk_string(k)
-                if tag.name.startswith("Series"):
-                    seq.metadata[tag] = v
+            for k, v in get_metadata_dict_from_itk(str(sequences_with_one_file[0]),
+                                                   verbose=self._very_verbose).items():
+                if k.name.startswith("Series"):
+                    seq.metadata[k] = v
 
             case.sequences.append(seq)
-
-    @staticmethod
-    def get_metadata_dict_from_itk(f, verbose: bool = False):
-        out = {}
-        try:
-            file_reader = sitk.ImageFileReader()
-            file_reader.SetFileName(str(f))
-            file_reader.ReadImageInformation()
-        except RuntimeError as runtime_error:
-            if "Unable to determine ImageIO reader" in str(runtime_error):
-                if verbose:
-                    print(f"sitk cannot read file {f}")
-        except Exception as e:
-            if verbose:
-                print(f"{f} error: {e}")
-        else:
-            out = {k: file_reader.GetMetaData(k) for k in file_reader.GetMetaDataKeys()}
-        return out
 
     def generate_csv_report(self, file_destination: str | Path):
         import csv
@@ -257,24 +249,30 @@ class Database:
 
                 writer.writerow(clean_dict)
 
-    def scan_dicom(self):
-        cases_found = self._read_dicom_cases(
-            sort_by=self._kwargs["sort_dicom_by"] if "sort_dicom_by" in self._kwargs else DICOMTag.PatientID
-        )
 
-        self._read_dicom_case_metadata(cases_found)
+def get_metadata_dict_from_itk(f, verbose: bool = False):
+    import io
+    from contextlib import redirect_stdout
+    stdout = io.StringIO()
 
-        if self._verbose: print("Reading sequences")
-
-        pbar = tqdm(enumerate(self.cases)) if self._pbar else enumerate(self.cases)
-        for idx, case in pbar:
-            if self._very_verbose: print((idx + 1, len(self.cases)))
-            sequences_found = self._read_dicom_sequences(case)
-            self._read_dicom_sequence_metadata(case, sequences_found)
-
+    out = {}
+    try:
+        with redirect_stdout(stdout):
+            file_reader = sitk.ImageFileReader()
+            file_reader.SetFileName(str(f))
+            file_reader.ReadImageInformation()
+        if verbose: print(stdout)
+    except RuntimeError as runtime_error:
+        if "Unable to determine ImageIO reader" in str(runtime_error):
+            if verbose: print(f"sitk cannot read file {f}")
+    except Exception as e:
+        if verbose: print(f"{f} error: {e}")
+    else:
+        out = {DICOMTag.from_sitk_string(k): file_reader.GetMetaData(k) for k in file_reader.GetMetaDataKeys()}
+    return out
 
 if __name__ == "__main__":
-    ROOT_FOLDER = r"C:\Users\ang.a\Database\HodgkinsRambam\1"
+    ROOT_FOLDER = r"C:\Users\ang.a\Database\Rambam MRE 082022 Full\1024089432272"
 
     db = Database(ROOT_FOLDER, pbar=True)
     db.generate_csv_report(r"C:\Users\ang.a\Desktop\out.csv")

@@ -76,7 +76,7 @@ class Imager:
         if self.case_name in available_cases:
             # skips the read_folder part, assigns self.file_type according to what the db says
             logging.debug(f"Found case {self.case_name} in database, reading file type from table")
-            execute = con.cursor().execute(f"select * from case_list where case_name='{self.case_name}';").fetchone()
+            execute = con.cursor().execute(f'select * from case_list where case_name="{self.case_name}";').fetchone()
 
             self.new_case_flag = False
             self.case_id = execute[0]

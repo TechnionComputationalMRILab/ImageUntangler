@@ -20,16 +20,13 @@ class SQLiteDatabase(Database):
 
         db_init(sqlite_destination)
         con = sqlite3.connect(sqlite_destination)
-
-        case_name_tag = self._kwargs["sort_dicom_by"] if "sort_dicom_by" in self._kwargs else DICOMTag.PatientID
         values_string = "(" + len(relevant_metadata) * "?, " + "? )"
 
         with con:
             pbar = tqdm(enumerate(self.cases)) if self._pbar else enumerate(self.cases)
             for case_id, case in pbar:
                 # insert case names
-                # case_name = case.metadata[case_name_tag]
-                case_name = str(case.files[0].parent.relative_to(self.root_folder))
+                case_name = case.files[0].parent.stem # TEMPORARY - assumes that each case has its own folder
                 con.execute('insert into case_list (case_name, case_type) values (?, ?)',
                             (case_name, "DICOM",))
 
@@ -45,13 +42,11 @@ class SQLiteDatabase(Database):
 
                 # insert sequences
                 for seq_id, seq in enumerate(case.sequences):
-                    seq_name = seq.metadata[DICOMTag.SeriesDescription] if DICOMTag.SeriesDescription in seq.metadata else "No series description"
-                    seq_num = seq.metadata[DICOMTag.SeriesNumber] if DICOMTag.SeriesNumber in seq.metadata else 0
-
                     con.execute('insert into sequences (case_id, name, seq_id, orientation) values (?, ?, ?, ?)',
-                                (case_id + 1, f"({seq_name}, {seq_num})", seq_id + 1, "X"))
+                                (case_id + 1, seq.name, seq_id + 1, "X"))
 
                     if DICOMTag.Unspecified in seq.metadata:
+                        # do not include sequences with one file
                         pass
                     else:
                         for file in seq.files:
