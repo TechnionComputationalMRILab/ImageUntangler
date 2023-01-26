@@ -9,14 +9,14 @@ class SequenceFileOpenTable(QTableWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.selected_item = None
-        self.showing = 'SEQ'
+        self.showing = 'CASE'
 
         self.resizeRowsToContents()
         self.setSelectionBehavior(QAbstractItemView.SelectRows)
         self.setSizeAdjustPolicy(QAbstractScrollArea.AdjustToContents)
 
         self.clicked.connect(self.log_clicked_item)
-        self.use_sequences()
+        self.use_cases()
 
     def use_sequences(self):
         self.showing = 'SEQ'
@@ -53,5 +53,5 @@ class SequenceFileOpenTable(QTableWidget):
         if self.showing == "SEQ":
             return self.data['case_name'][self.selected_item], self.data['sequences'][self.selected_item]
         elif self.showing == "CASE":
-            return self.data['case_name'][self.selected_item], None
+            return self.data['Case Name'][self.selected_item], None
 

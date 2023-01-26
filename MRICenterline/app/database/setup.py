@@ -19,7 +19,7 @@ foreign key (case_id) references case_list(case_id)
 
 metadata_key_list = [tag.name + " text, " for tag in [
     DICOMTag.Manufacturer, DICOMTag.ManufacturerModelName,
-    DICOMTag.StudyTime, DICOMTag.StudyDescription, DICOMTag.AcquisitionTime,
+    DICOMTag.StudyTime, DICOMTag.StudyDescription, DICOMTag.AcquisitionDate,
     DICOMTag.PatientName, DICOMTag.PatientID, DICOMTag.PatientSex, DICOMTag.PatientPosition,
     DICOMTag.ProtocolName
 ]]

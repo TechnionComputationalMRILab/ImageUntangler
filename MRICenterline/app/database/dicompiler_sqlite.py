@@ -6,7 +6,7 @@ from MRICenterline.app.database.setup import db_init
 
 relevant_metadata = [
     DICOMTag.Manufacturer, DICOMTag.ManufacturerModelName,
-    DICOMTag.StudyTime, DICOMTag.StudyDescription, DICOMTag.AcquisitionTime,
+    DICOMTag.StudyTime, DICOMTag.StudyDescription, DICOMTag.AcquisitionDate,
     DICOMTag.PatientName, DICOMTag.PatientID, DICOMTag.PatientSex, DICOMTag.PatientPosition,
     DICOMTag.ProtocolName
 ]
@@ -42,13 +42,13 @@ class SQLiteDatabase(Database):
 
                 # insert sequences
                 for seq_id, seq in enumerate(case.sequences):
-                    con.execute('insert into sequences (case_id, name, seq_id, orientation) values (?, ?, ?, ?)',
-                                (case_id + 1, seq.name, seq_id + 1, "X"))
-
                     if DICOMTag.Unspecified in seq.metadata:
                         # do not include sequences with one file
                         pass
                     else:
+                        con.execute('insert into sequences (case_id, name, seq_id, orientation) values (?, ?, ?, ?)',
+                                    (case_id + 1, seq.name, seq_id + 1, "X"))
+
                         for file in seq.files:
                             con.execute('insert into sequence_files (filename, seq_id, case_id) values (?, ?, ?)',
                                         (file.name, seq_id + 1, case_id + 1))

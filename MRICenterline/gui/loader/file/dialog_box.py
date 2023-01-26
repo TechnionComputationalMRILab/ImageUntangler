@@ -20,6 +20,7 @@ class FileOpenDialogBox(QDialog):
 
         self.toggle_style = QCheckBox("Show by case metadata")
         self.toggle_style.clicked.connect(self.toggle_table)
+        self.toggle_style.setEnabled(False)
 
         layout = QVBoxLayout(self)
         layout.addWidget(self.table)
@@ -31,13 +32,13 @@ class FileOpenDialogBox(QDialog):
 
     def toggle_table(self, s):
         if s:
-            self.toggle_style.setText("Show by case sequences")
-            self.table.clear_table()
-            self.table.use_cases()
-        else:
             self.toggle_style.setText("Show by case metadata")
             self.table.clear_table()
             self.table.use_sequences()
+        else:
+            self.toggle_style.setText("Show by case sequences")
+            self.table.clear_table()
+            self.table.use_cases()
 
     def accept(self) -> None:
         if type(self.table.selected_item) is int:

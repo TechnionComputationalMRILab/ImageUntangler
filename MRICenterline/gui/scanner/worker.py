@@ -29,7 +29,7 @@ class ScanWorker(QObject):
             #     self.status_message.emit(f'{output}')
             #     self.pbar_value.emit(index + 1)
 
-            sqlite_db = SQLiteDatabase(self.directory, verbose=True)
+            sqlite_db = SQLiteDatabase(self.directory, verbose=True, pbar=True)
             sqlite_db.generate_sqlite(fr"{self.directory}\metadata.db")
 
 

@@ -18,7 +18,7 @@ class DICOMTag(Enum):
     StudyTime = 0x0008, 0x0030
     StudyDescription = 0x0008, 0x1030
     AcquisitionDate = 0x0008, 0x0022
-    AcquisitionTime = 0x0008, 0x0032
+    # AcquisitionTime = 0x0008, 0x0032
     PatientName = 0x0010, 0x0010
     PatientAge = 0x0010, 0x1010
     PatientSex = 0x0010, 0x0040
@@ -36,8 +36,9 @@ class DICOMTag(Enum):
             tag = DICOMTag.Unspecified
         return tag
 
-DEFAULT_CASE_GROUPBY = (DICOMTag.PatientID, )
-DEFAULT_SEQUENCE_GROUPBY = (DICOMTag.SeriesDescription, DICOMTag.SeriesNumber, DICOMTag.AcquisitionDate)
+
+DEFAULT_CASE_GROUPBY = (DICOMTag.PatientID, DICOMTag.AcquisitionDate)
+DEFAULT_SEQUENCE_GROUPBY = (DICOMTag.SeriesDescription, DICOMTag.SeriesNumber)
 
 
 class SequenceType(Enum):
@@ -126,7 +127,7 @@ class Database:
             self._read_dicom_sequence_metadata(case, sequences_found)
 
     def _read_dicom_cases(self, sort_by: Tuple[DICOMTag]):
-        files: List[Path] = [f for f in self.root_folder.rglob("*")]
+        files: List[Path] = [f for f in self.root_folder.rglob("*") if f.is_file()]
 
         if self._verbose: print("Identifying DICOM cases")
         return self._group_by(files, sort_by, show_pbar=self._pbar, pbar_desc="Reading cases")
