@@ -26,7 +26,7 @@ class SQLiteDatabase(Database):
             pbar = tqdm(enumerate(self.cases)) if self._pbar else enumerate(self.cases)
             for case_id, case in pbar:
                 # insert case names
-                case_name = case.files[0].parent.stem # TEMPORARY - assumes that each case has its own folder
+                case_name = case.files[0].parent.stem # TODO: TEMPORARY - assumes that each case is confined in its own folder
                 con.execute('insert into case_list (case_name, case_type) values (?, ?)',
                             (case_name, "DICOM",))
 
