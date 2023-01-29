@@ -1,8 +1,8 @@
-import numba
+# import numba
 import numpy as np
 
 
-@numba.njit(cache=True, nogil=True)
+# @numba.njit(cache=True, nogil=True)
 def unpack_saved_graph(saved_graph, graph, sitk_image_size, roi_x, roi_y):
     # saved_graph = np.load(saved_graph_path)
     init_x, init_y = 0, 0
@@ -37,7 +37,7 @@ def unpack_saved_graph(saved_graph, graph, sitk_image_size, roi_x, roi_y):
                     graph[i][int(roi_neighbor_single_cord)] = prob
 
 
-@numba.njit(nogil=True)
+# @numba.njit(nogil=True)
 def compiled_dijkstra(V, graph_parent, graph, src, len_x, len_y, a, slice_nda, init_x, init_y, x_spline_gt, y_spline_gt):
     def create_circle_directions(num_pts=16):
         theta = np.linspace(0, 2 * np.pi, num_pts + 1)[:-1]

@@ -32,7 +32,7 @@ def FindShortestPathPerSlice(case_sitk, slice_num, first_annotation, second_anno
     g = Graph(roi_num_of_pixels)
 
     import numpy as np
-    saved_graph = np.load(r"C:\Users\ang.a\Documents\TCML-repos\ImageUntangler\graph_test.npy")
+    saved_graph = np.load(str(Path(__file__).parent / "saved_graph" / "6.npy"))  # TODO: generalize this
     unpack_saved_graph(saved_graph, g.graph, case_sitk.GetSize()[0:2],
                        roi_x=(roi_init_x, roi_final_x, roi_x_len),
                        roi_y=(roi_init_y, roi_final_y, roi_y_len))
