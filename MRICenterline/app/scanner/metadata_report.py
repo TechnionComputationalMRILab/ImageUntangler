@@ -21,12 +21,10 @@ def metadata_report(save_to):
     cases = con.cursor().execute("""
                                  select StudyTime, 
                                         StudyDescription, 
-                                        AcquisitionTime, 
+                                        AcquisitionDate, 
                                         PatientName, 
                                         PatientID, 
-                                        PatientAge, 
                                         PatientSex, 
-                                        PatientBirthDate,
                                         PatientPosition, 
                                         Manufacturer, 
                                         ManufacturerModelName, 
