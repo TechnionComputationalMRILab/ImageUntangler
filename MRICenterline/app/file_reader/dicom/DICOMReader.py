@@ -97,6 +97,9 @@ class DICOMReader(AbstractReader):
                 raise KeyError("Sequence not found in database")
 
     def get_z_coords(self, seq, use_v3=False):
+        if not (CFG.get_testing_status("use-slice-location") or use_v3):
+            return []
+
         con = sqlite3.connect(CFG.get_db())
 
         if type(seq) is str:

@@ -31,6 +31,23 @@ class ConfigParser:
         self.config_file.read(self.config_file_path)
         self.reset_script_folder()
 
+    @property
+    def torch_installed(self):
+        try:
+            import torch
+        except (ImportError, ModuleNotFoundError):
+            return False
+        else:
+            return True
+
+    @property
+    def torch_cuda_available(self):
+        if self.torch_installed:
+            import torch
+            return torch.cuda.is_available()
+        else:
+            return False
+
     def reset_script_folder(self):
         if self.get_config_data('folders', 'script-folder') == "none":
             self.set_config_data('folders', 'script-folder', self._home_path)

@@ -1,4 +1,3 @@
-import torch
 from pathlib import Path
 from MRICenterline.app.shortest_path.compile import unpack_saved_graph
 
@@ -12,6 +11,8 @@ PATCH_LEN = GRID_SPACING[0] * GRID_PIXELS_SIZE[0]
 # input(2): numpy array of size 2 for the coordinates of the first annotation
 # input(3): numpy array of size 2 for the coordinates of the second annotation
 def FindShortestPathPerSlice(case_sitk, slice_num, first_annotation, second_annotation, case_number):
+    import torch
+
     from MRICenterline.app.shortest_path.Graph import Graph
     from MRICenterline.app.shortest_path.functions import extract_roi, convert_1Dcord_to_2Dcord
 

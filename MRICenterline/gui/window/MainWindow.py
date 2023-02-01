@@ -1,7 +1,6 @@
 from PyQt5.QtCore import QSize
 from PyQt5.QtWidgets import QMainWindow, QStackedWidget, QWidget, QToolBar
 from PyQt5.QtCore import Qt
-import torch
 
 from MRICenterline.gui.controls.main_panel import ControlPanel
 from MRICenterline.gui.splash.connect import open_using_file_dialog
@@ -26,7 +25,7 @@ class IUMainWindow(QMainWindow):
         self.setWindowTitle(CONST.WINDOW_NAME)
         self.setWindowIcon(CFG.get_icon())
 
-        logging.info(f"TORCH CUDA: {torch.cuda.is_available()}")
+        logging.info(f"TORCH CUDA: {CFG.torch_cuda_available} | TORCH: {CFG.torch_installed}")
 
         self.control_panel_dialog = ControlPanel(self)
 
