@@ -194,7 +194,7 @@ class PointArray:
     # region
 
     def __len__(self):
-        return len(self.point_array)
+        return len(self.point_array) #+ len(self.interpolated_point_array)
 
     def __getitem__(self, item):
         return self.point_array[item]
@@ -281,6 +281,7 @@ class PointArray:
         # set the visibility of all actors that are not shown - they dont get plotted in the viewer regardless,
         #  but the point picker will use this property so that it wont select hidden points
         for pt in invisible_actors:
+            pt.visible_interpolated = False
             pt.set_visibility(False)
 
         return [pt.get_actor() for pt in visible_actors]
@@ -364,17 +365,21 @@ class PointArray:
                 return pt.slice_idx
 
     def show_point(self, item):
-        self.point_array[item].set_visibility(True)
-        self.point_array[item].actor.SetVisibility(True)
+        item.set_visibility(True)
+        item.actor.SetVisibility(True)
+        # self.point_array[item].set_visibility(True)
+        # self.point_array[item].actor.SetVisibility(True)
 
-        if self.use_fill:
-            for pt_i in self.interpolated_point_array[item*(self.fill_amount-2):(self.fill_amount-2)*(item+1)]:
-                pt_i.set_visibility(True)
-                pt_i.actor.SetVisibility(True)
+        # if self.use_fill:
+        #     for pt_i in self.interpolated_point_array[item*(self.fill_amount-2):(self.fill_amount-2)*(item+1)]:
+        #         pt_i.set_visibility(True)
+        #         pt_i.actor.SetVisibility(True)
 
     def hide_point(self, item):
-        self.point_array[item].set_visibility(False)
-        self.point_array[item].actor.SetVisibility(False)
+        # self.point_array[item].set_visibility(False)
+        # self.point_array[item].actor.SetVisibility(False)
+        item.set_visibility(False)
+        item.actor.SetVisibility(False)
 
     def hide_intermediate_points(self):
         for i in range(len(self)):
@@ -394,12 +399,21 @@ class PointArray:
 
     def show_for_slice(self, slice_index):
         count = 0
+
+        if self.use_fill:
+            for i, pt in enumerate(self.interpolated_point_array):
+                if pt.slice_idx == slice_index and pt.visible_interpolated:
+                    self.show_point(pt)
+                    count += 1
+                else:
+                    self.hide_point(pt)
+
         for i, pt in enumerate(self.point_array):
             if pt.slice_idx == slice_index:
-                self.show_point(i)
+                self.show_point(pt)
                 count += 1
             else:
-                self.hide_point(i)
+                self.hide_point(pt)
 
         return count
 

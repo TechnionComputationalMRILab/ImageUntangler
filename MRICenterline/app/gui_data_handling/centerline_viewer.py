@@ -3,7 +3,8 @@ from vtkmodules.all import vtkImageActor, vtkRenderer, vtkActor2D, vtkTextMapper
 
 from MRICenterline.gui.help.help_text import CenterlineInteractorHelpText
 from MRICenterline.gui.vtk.IUCornerAnnotation import CornerLoc, IUCornerAnnotation
-from MRICenterline.gui.vtk.sequence_interactor_style import SequenceViewerInteractorStyle
+from MRICenterline.gui.vtk.centerline_interactor_style import CenterlineInteractorStyle
+
 from MRICenterline import CFG, CONST
 
 import logging
@@ -14,7 +15,7 @@ class CenterlineViewer:
     def __init__(self,
                  model,
                  interactor: QVTKRenderWindowInteractor,
-                 interactor_style: SequenceViewerInteractorStyle):
+                 interactor_style: CenterlineInteractorStyle):
         self.model = model
         self.interactor = interactor
         self.interactor_style = interactor_style

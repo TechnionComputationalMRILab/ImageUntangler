@@ -1,8 +1,8 @@
-# import numba
+import numba
 import numpy as np
 
 
-# @numba.njit(cache=True, nogil=True)
+@numba.njit(cache=True, nogil=True)
 def unpack_saved_graph(saved_graph, graph, sitk_image_size, roi_x, roi_y):
     # saved_graph = np.load(saved_graph_path)
     init_x, init_y = 0, 0

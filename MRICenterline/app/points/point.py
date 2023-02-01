@@ -23,6 +23,7 @@ class Point:
         self.point_visibility: bool = True
 
         self.is_interpolated = False
+        self.visible_interpolated = True  # is this point going to be visible given that it's interpolated?
 
         self.actor = self.generate_actor()
 

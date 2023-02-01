@@ -139,6 +139,9 @@ class CenterlineModel:
         logging.debug(f"Adjusting angle to {self.angle}")
         self.refresh_panel(angle_change=self.angle)
 
+    def clear(self):
+        pass
+
     def calculate_centerline(self):
         self.cl_image_properties = CenterlineImageProperties.from_input(input_points=self.point_array,
                                                                         height=self.height,
