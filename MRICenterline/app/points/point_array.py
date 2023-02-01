@@ -97,7 +97,7 @@ class PointArray:
 
         if self.use_fill:
             if len(self) >= 2:
-                from MRICenterline.app.points.point_fill import fill_interp, fill, PointFillType
+                from MRICenterline.app.points.point_fill import fill_interp, PointFillType
 
                 image_properties = self.point_array[0].image_properties
 
@@ -107,10 +107,11 @@ class PointArray:
                                                      point_type=self.point_type,
                                                      num_points=self.fill_amount)
                 else:
-                    interpolated_array, length_of_fill = fill(image_properties=image_properties,
-                                                              point_a=self.point_array[-2],
-                                                              point_b=self.point_array[-1])
-                    self.fill_amount = length_of_fill
+                    pass
+                    # interpolated_array, length_of_fill = fill(image_properties=image_properties,
+                    #                                           point_a=self.point_array[-2],
+                    #                                           point_b=self.point_array[-1])
+                    # self.fill_amount = length_of_fill
                 # endregion
 
                 self.interpolated_point_array.extend(interpolated_array)

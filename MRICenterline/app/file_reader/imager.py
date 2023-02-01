@@ -7,12 +7,17 @@ from MRICenterline.app.database.filetype import read_folder
 from MRICenterline import CFG
 
 import logging
+
+from MRICenterline.app.file_reader.AbstractReader import AbstractReader
+
 logging.getLogger(__name__)
 
 
 class Imager:
     def __init__(self, directory, root_folder=None):
         self.directory = directory
+        self.reader: AbstractReader | None = None
+        self.file_type: str = "INVALID"
 
         if root_folder:
             self.case_name = os.path.relpath(directory, root_folder)
@@ -71,7 +76,7 @@ class Imager:
         if self.case_name in available_cases:
             # skips the read_folder part, assigns self.file_type according to what the db says
             logging.debug(f"Found case {self.case_name} in database, reading file type from table")
-            execute = con.cursor().execute(f"select * from case_list where case_name='{self.case_name}';").fetchone()
+            execute = con.cursor().execute(f'select * from case_list where case_name="{self.case_name}";').fetchone()
 
             self.new_case_flag = False
             self.case_id = execute[0]

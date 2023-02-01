@@ -4,7 +4,7 @@ from MRICenterline import CFG
 
 def get_case_id(case_name: str):
     con = sqlite3.connect(CFG.get_db())
-    case_id = con.cursor().execute(f"select case_id from case_list where case_name='{case_name}';").fetchone()[0]
+    case_id = con.cursor().execute(f'select case_id from case_list where case_name="{case_name}";').fetchone()[0]
     con.close()
     return case_id
 
@@ -23,7 +23,7 @@ def get_sequence_name(seq_id: int, case):
         case = int(case)
 
     con = sqlite3.connect(CFG.get_db())
-    sequence_name = con.cursor().execute(f"SELECT name FROM 'sequences' where seq_id={seq_id} and case_id='{case}'").fetchone()[0]
+    sequence_name = con.cursor().execute(f'SELECT name FROM "sequences" where seq_id={seq_id} and case_id="{case}"').fetchone()[0]
     con.close()
 
     return sequence_name
@@ -36,7 +36,7 @@ def get_sequence_id(seq_name: str, case):
         case = int(case)
 
     con = sqlite3.connect(CFG.get_db())
-    sequence_id = con.cursor().execute(f"SELECT seq_id FROM 'sequences' where name='{seq_name}' and case_id='{case}'").fetchone()[0]
+    sequence_id = con.cursor().execute(f'SELECT seq_id FROM "sequences" where name="{seq_name}" and case_id="{case}"').fetchone()[0]
     con.close()
 
     return sequence_id

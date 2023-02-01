@@ -10,7 +10,7 @@ tables used by the "Open MRI images" button
 def get_openable_sequences():
     con = sqlite3.connect(CFG.get_db())
     cases = con.cursor().execute("""
-                                 select case_name, case_type, name, orientation 
+                                 select case_list.case_id, case_name, name, orientation 
                                  from case_list 
                                  inner join sequences 
                                  on case_list.case_id = sequences.case_id 
@@ -33,31 +33,30 @@ def get_openable_sequences():
 
 def get_openable_cases():
     con = sqlite3.connect(CFG.get_db())
-
-    columns = con.cursor().execute("""
-                                   select name 
-                                   from pragma_table_info('metadata')
-                                   """).fetchall()
+    con.row_factory = sqlite3.Row
 
     cases = con.cursor().execute("""
-                                 select * 
-                                 from 'metadata' 
-                                 inner join case_list 
-                                 on case_list.case_id = metadata.case_id
+                                select distinct 
+                                    case_list.case_id as "Case ID", 
+                                    case_list.case_name as "Case Name", 
+                                    metadata.Manufacturer, 
+                                    metadata.AcquisitionDate
+                                from 'metadata'
+                                inner join case_list
+                                    on case_list.case_id = metadata.case_id
                                  """).fetchall()
     con.close()
 
-    columns = [i[0] for i in columns]
-    columns.extend(['case_id', 'case_name', 'case_type'])
+    query_out = [dict(r) for r in cases]
+    out = {}
+    for k in query_out[0].keys():
+        out[k] = []
 
-    out_dict = dict()
-    for col_idx, col in enumerate(columns):
-        temp_list = [dat[col_idx] for dat_idx, dat in enumerate(cases)]
-        out_dict[col] = temp_list
+    for i in query_out:
+        for k, v in i.items():
+            out[k].append(v)
 
-    out_dict.pop('case_id')
-
-    return out_dict, len(out_dict.keys()), len(cases)
+    return out, len(query_out[0].keys()), len(query_out)
 
 
 if __name__ == "__main__":

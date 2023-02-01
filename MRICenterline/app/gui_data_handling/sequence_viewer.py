@@ -266,10 +266,10 @@ class SequenceViewer:
         center = [round(i, 1) for i in matrix.MultiplyPoint((0, 0, delta * spacing, 1))]
         if CFG.get_testing_status("use-slice-location"):
             # center = [round(i, 1) for i in matrix.MultiplyPoint((0, 0, delta * spacing, 1))]
-            slice_idx = 1 + np.int(np.round(((center[2] - self.image.origin[2]) / self.image.spacing[2])))
+            slice_idx = 1 + int(np.round(((center[2] - self.image.origin[2]) / self.image.spacing[2])))
         else:
             # center = matrix.MultiplyPoint((0, 0, delta * spacing, 1))
-            slice_idx = 1 + np.int(np.round(((center[2] - self.image.origin[2]) / self.image.spacing[2])))
+            slice_idx = 1 + int(np.round(((center[2] - self.image.origin[2]) / self.image.spacing[2])))
 
         if 1 <= slice_idx <= self.image.size[2]:
             matrix = self.reslice.GetResliceAxes()

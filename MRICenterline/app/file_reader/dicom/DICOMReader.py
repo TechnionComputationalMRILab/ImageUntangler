@@ -82,10 +82,10 @@ class DICOMReader(AbstractReader):
             con = sqlite3.connect(CFG.get_db())
             if type(seq) is str:
                 query = f"""
-                        SELECT filename FROM sequences
+                        SELECT distinct filename FROM sequences
                         inner join sequence_files
                         on sequences.seq_id = sequence_files.seq_id
-                        where sequences.name = '{seq}'
+                        where sequences.seq_id = {self.sequence_list.index(seq) + 1}
                         and sequence_files.case_id = {self.case_id};
                         """
                 sequence_files = [item[0] for item in con.cursor().execute(query).fetchall()]
@@ -113,7 +113,8 @@ class DICOMReader(AbstractReader):
                      and sequence_files.case_id = {self.case_id}
                      order by slice_location desc;
                      """
-            z_list = [float(item[0]) for item in con.cursor().execute(query).fetchall()]
+
+            z_list = [float(item[0]) for item in con.cursor().execute(query).fetchall() if item[0] is not None]
             con.close()
             return sorted(z_list)
         elif type(seq) is int:
