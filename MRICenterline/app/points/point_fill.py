@@ -35,6 +35,8 @@ def fill_interp(image_properties: ImageProperties or None,
            for x, y in zip(x_fill, y_fill)]
 
     for i, pt in enumerate(pts):
+        pt.is_interpolated = True
+
         if i == 0:
             continue
         if i == len(pts) - 1:
@@ -74,6 +76,7 @@ def fill(image_properties: ImageProperties or None,
     temp_point_array = PointArray(PointStatus.MPR)
     for i, (x, y) in enumerate(zip(shortest_path[0][0], shortest_path[0][1])):
         pt = Point.point_from_itk_index((x, image_properties.size[1] - y, slice_index + 1), image_properties)
+        pt.is_interpolated = True
 
         if i == 0:
             continue

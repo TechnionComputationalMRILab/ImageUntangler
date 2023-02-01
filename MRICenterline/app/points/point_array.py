@@ -97,7 +97,7 @@ class PointArray:
 
         if self.use_fill:
             if len(self) >= 2:
-                from MRICenterline.app.points.point_fill import fill_interp, PointFillType
+                from MRICenterline.app.points.point_fill import fill_interp, PointFillType, fill
 
                 image_properties = self.point_array[0].image_properties
 
@@ -107,11 +107,10 @@ class PointArray:
                                                      point_type=self.point_type,
                                                      num_points=self.fill_amount)
                 else:
-                    pass
-                    # interpolated_array, length_of_fill = fill(image_properties=image_properties,
-                    #                                           point_a=self.point_array[-2],
-                    #                                           point_b=self.point_array[-1])
-                    # self.fill_amount = length_of_fill
+                    interpolated_array, length_of_fill = fill(image_properties=image_properties,
+                                                              point_a=self.point_array[-2],
+                                                              point_b=self.point_array[-1])
+                    self.fill_amount = length_of_fill
                 # endregion
 
                 self.interpolated_point_array.extend(interpolated_array)
@@ -177,7 +176,8 @@ class PointArray:
 
     def edit_point(self, point: Point):
         if self.has_highlight and len(self):
-            origin_point = self.highlighted_point
+            origin_point: Point = self.highlighted_point
+            point.is_interpolated = origin_point.is_interpolated
 
             i = self.get_index(origin_point)
             logging.info(f"Editing point{i}")
@@ -199,10 +199,13 @@ class PointArray:
     def __getitem__(self, item):
         return self.point_array[item]
 
-    def __setitem__(self, key, value):
+    def __setitem__(self, key: int, value: Point):
         # TODO: need to recalculate everything
-        self.point_array[key] = value
-        self.recalculate_array(key)
+        if value.is_interpolated:
+            self.interpolated_point_array[key] = value
+        else:
+            self.point_array[key] = value
+            self.recalculate_array(key)
 
     def __iter__(self):
         return iter(self.point_array)
@@ -247,6 +250,14 @@ class PointArray:
             for pt in self.point_array:
                 pt.set_color(color)
 
+    def reset_colors(self):
+        for pt in self.point_array:
+            pt.set_color(self.point_color)
+
+        if self.use_fill:
+            for pt in self.interpolated_point_array:
+                pt.set_color(self.interpolated_color)
+
     # endregion
 
     ######################################################################
@@ -257,14 +268,28 @@ class PointArray:
     def get_interpolated_point_actors(self):
         index = len(self)
 
-        return [pt.get_actor()
-                for pt in self.interpolated_point_array[
-                          (index-2)*(self.fill_amount-2):(self.fill_amount-2)*(index-1)
-                          ]
-                ][::self.interpolate_downsampling]
+        all_actors = [pt
+                      for pt in self.interpolated_point_array[
+                                (index-2)*(self.fill_amount-2):(self.fill_amount-2)*(index-1)
+                                ]
+                      ]
+        visible_actors = all_actors[::self.interpolate_downsampling]
+
+        # cant use set().difference since Points are not hashable...
+        invisible_actors = [pt for pt in all_actors if pt not in visible_actors]
+
+        # set the visibility of all actors that are not shown - they dont get plotted in the viewer regardless,
+        #  but the point picker will use this property so that it wont select hidden points
+        for pt in invisible_actors:
+            pt.set_visibility(False)
+
+        return [pt.get_actor() for pt in visible_actors]
 
     def get_index(self, point: Point):
-        return self.point_array.index(point)
+        if point.is_interpolated:
+            return self.interpolated_point_array.index(point)
+        else:
+            return self.point_array.index(point)
 
     def get_last_actor(self):
         if len(self) == 1:
@@ -301,7 +326,13 @@ class PointArray:
                 return key
 
     def get_points_in_slice(self, slice_index: int) -> List[Point]:
-        return [pt for pt in self.point_array if slice_index == pt.slice_idx]
+        picked_points_in_slice = [pt for pt in self.point_array if slice_index == pt.slice_idx]
+
+        if self.use_fill:
+            return [pt for pt in self.interpolated_point_array if slice_index == pt.slice_idx and pt.point_visibility] \
+                + picked_points_in_slice
+        else:
+            return picked_points_in_slice
 
     def get_slices_with_points(self) -> List[int]:
         return [pt.slice_idx for pt in self.point_array]
@@ -313,17 +344,24 @@ class PointArray:
     ######################################################################
     # region
 
-    def highlight_specific_point(self, item):
+    def highlight_specific_point(self, pt):
         if self.has_highlight:
             # if a point is already highlighted, set the color of all the points to the point color
-            self.set_color(self.point_color)
+            self.reset_colors()
 
         if len(self):
-            self.point_array[item].set_color(self.highlight_color)
             self.has_highlight = True
-            self.highlighted_point = self.point_array[item]
 
-            return self.point_array[item].slice_idx
+            if isinstance(pt, int):
+                self.point_array[pt].set_color(self.highlight_color)
+                self.highlighted_point = self.point_array[pt]
+
+                return self.point_array[pt].slice_idx
+            elif isinstance(pt, Point):
+                pt.set_color(self.highlight_color)
+                self.highlighted_point = pt
+
+                return pt.slice_idx
 
     def show_point(self, item):
         self.point_array[item].set_visibility(True)

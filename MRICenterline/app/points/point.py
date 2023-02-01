@@ -22,6 +22,8 @@ class Point:
         self.point_size = size
         self.point_visibility: bool = True
 
+        self.is_interpolated = False
+
         self.actor = self.generate_actor()
 
         if self.image_properties:

@@ -178,16 +178,16 @@ class SequenceModel:
             # self.highlight_point(closest_point_index, PointStatus.LENGTH)
 
         if self.model.picker_status == PickerStatus.FIND_MPR:
-            closest_point_index = self.mpr_point_array.find_nearest_point(point, get_index=True)
-            self.highlight_point(closest_point_index, PointStatus.MPR)
-            if self.model.centerline_calc:
-                self.model.centerline_model.highlight_selected_point(closest_point_index)
+            pt = self.mpr_point_array.find_nearest_point(point)
+            self.highlight_point(pt, PointStatus.MPR)
+            # if self.model.centerline_calc:
+            #     self.model.centerline_model.highlight_selected_point(closest_point_index)
 
         if self.model.picker_status == PickerStatus.MODIFYING_MPR:
             origin_point, origin_point_index = self.mpr_point_array.edit_point(point)
             self.current_sequence_viewer.add_actor(point.actor)
             self.current_sequence_viewer.remove_actor(origin_point.actor)
-            self.highlight_point(origin_point_index, PointStatus.MPR)   # new point has the same index as the original
+            self.highlight_point(point, PointStatus.MPR)   # new point has the same index as the original
 
         logging.debug(f"[{len(self.length_point_array)}] length points, [{len(self.mpr_point_array)}] MPR points")
 
