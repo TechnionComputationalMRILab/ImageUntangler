@@ -6,7 +6,7 @@ from scipy import ndimage
 
 
 def create_circle_directions(num_pts=16):
-    theta = np.linspace(0, 2*np.pi, num_pts+1)[:-1]
+    theta = np.linspace(0, 2 * np.pi, num_pts + 1)[:-1]
     circle_directions = np.zeros((num_pts, 2))
     circle_directions[:, 0] = np.cos(theta)
     circle_directions[:, 1] = np.sin(theta)
@@ -25,10 +25,10 @@ def extract_patch(annotation, img, patch_len, patch_pixels_len):
     pad_x_right = (x_idx + d + 1 - image_nda.shape[2]) if (x_idx + d + 1) >= image_nda.shape[2] else 0
     pad_y_left = np.abs(y_idx - d) if (y_idx - d) <= 0 else 0
     pad_y_right = (y_idx + d + 1 - image_nda.shape[1]) if (y_idx + d + 1) >= image_nda.shape[1] else 0
-    if (y_idx - d) <= 0 or (y_idx + d + 1) >= image_nda.shape[1] or (x_idx - d) <= 0 or (x_idx + d + 1) >= image_nda.shape[2]:
-        # print(f'{pad_y_left=}, {pad_y_right=}, {pad_x_left=}, {pad_x_right=}, {x_idx=}, {y_idx=}, {d=}, {image_nda.shape=}, {patch.shape}')
+    if (y_idx - d) <= 0 or (y_idx + d + 1) >= image_nda.shape[1] or (x_idx - d) <= 0 or (x_idx + d + 1) >= \
+            image_nda.shape[2]:
         x_left = 0 if (x_idx - d) <= 0 else (x_idx - d)
-        x_right = image_nda.shape[2]if (x_idx + d + 1) >= image_nda.shape[2] else (x_idx + d + 1)
+        x_right = image_nda.shape[2] if (x_idx + d + 1) >= image_nda.shape[2] else (x_idx + d + 1)
         y_left = 0 if (y_idx - d) <= 0 else (y_idx - d)
         y_right = image_nda.shape[1] if (y_idx + d + 1) >= image_nda.shape[1] else (y_idx + d + 1)
         patch = image_nda[z_idx, y_left:y_right, x_left:x_right]
@@ -85,6 +85,7 @@ def match_prob(i, j, label_pred_proba_8):
     # print(f'wrong coordinates! {i=}, {j=}')
     return None
 
+
 def calc_graph_weights(init_x, init_y, num_of_pixels, x_len, y_len,
                        slice_num, img, patch_len, grid_pixel_size, case_number):
     from MRICenterline.app.shortest_path import classifier
@@ -104,7 +105,7 @@ def calc_graph_weights(init_x, init_y, num_of_pixels, x_len, y_len,
     model.load_state_dict(torch.load(model_dict_path))
     model.eval()
 
-    graph = np.zeros((num_of_pixels, 8, 2)) # 2 is the coordinates, 8 is the actual graph value
+    graph = np.zeros((num_of_pixels, 8, 2))  # 2 is the coordinates, 8 is the actual graph value
     model = model.to(device)
 
     from tqdm import tqdm
@@ -127,10 +128,9 @@ def calc_graph_weights(init_x, init_y, num_of_pixels, x_len, y_len,
             for i in [-1, 0, 1]:
                 for j in [-1, 0, 1]:
                     if check_limits(x, y, i, j, x_len, y_len):
-                        neighbor_single_cord = (y+j) * x_len + (x+i)
+                        neighbor_single_cord = (y + j) * x_len + (x + i)
                         prob = match_prob(i, j, label_pred_proba_8)
                         if prob is not None:
-
                             graph[pixel_single_cord][index][0] = np.exp(-prob)
                             graph[pixel_single_cord][index][1] = neighbor_single_cord
                             index += 1
@@ -149,7 +149,7 @@ def extract_roi(case_sitk, slice_num, first_annotation, second_annotation):
     max_y = np.max((first_annotation[1], second_annotation[1]))
 
     init_x = round(min_x - 0.5 * GRID_PIXELS_SIZE[0] if min_x >= (0.5 * GRID_PIXELS_SIZE[0]) else 0)
-    final_x = round(max_x + 0.5 * GRID_PIXELS_SIZE[0] if max_x < (len[0] - 0.5 * GRID_PIXELS_SIZE[0]) else (len[0]-1))
+    final_x = round(max_x + 0.5 * GRID_PIXELS_SIZE[0] if max_x < (len[0] - 0.5 * GRID_PIXELS_SIZE[0]) else (len[0] - 1))
     init_y = round(min_y - 0.5 * GRID_PIXELS_SIZE[1] if min_y >= (0.5 * GRID_PIXELS_SIZE[1]) else 0)
     final_y = round(max_y + 0.5 * GRID_PIXELS_SIZE[1] if max_y < (len[1] - 0.5 * GRID_PIXELS_SIZE[1]) else (len[1] - 1))
 
@@ -168,3 +168,15 @@ def convert_1Dcord_to_2Dcord(_1Dcord, x_len, init_x, init_y):
         # _2Dcord[1, i] = np.floor(cord / x_len)
         # _2Dcord[0, i] = cord % x_len
     return _2Dcord
+
+
+def calc_contrast_mean_std(x_spline_gt, y_spline_gt, init_x, init_y, slice_nda):
+    x_spline_gt_shifted = x_spline_gt - init_x
+    y_spline_gt_shifted = y_spline_gt - init_y
+    spline_val = []
+    for i in range(len(x_spline_gt)):
+        spline_val.append(slice_nda[int(y_spline_gt_shifted[i]), int(x_spline_gt_shifted[i])])
+    mean = np.mean(spline_val)
+    var = np.var(spline_val)
+    std = np.sqrt(var)
+    return mean, var, std

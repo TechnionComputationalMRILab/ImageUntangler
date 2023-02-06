@@ -22,4 +22,6 @@ class PointStatus(Enum):
     LENGTH = auto()
     MPR = auto()
     LENGTH_IN_MPR = auto()
+    MPR_FILL = auto()
+
 

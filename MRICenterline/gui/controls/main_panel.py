@@ -201,6 +201,7 @@ class ControlPanel(QDialog):
         mpr_pair_lerp_pick_button = mpr_pair_lerp_pick.button
         mpr_pair_lerp_pick_button.clicked.connect(lambda: set_picker_status(self.model, PickerStatus.PICKING_MPR_PAIR))
         mpr_pair_lerp_pick_button.clicked.connect(lambda: set_fill_type(self.model, PointFillType.LinearInterpolation))
+        self.point_panel_button_list.append((mpr_pair_lerp_pick_button, PickerStatus.PICKING_MPR_PAIR))
 
         mpr_pair_sp_pick = AnimatedToggle("Fill MPR between points using shortest path algorithm",
                                           checked_color=CFG.get_hex_color("mpr-display-style", "color"))
@@ -208,6 +209,11 @@ class ControlPanel(QDialog):
         mpr_pair_sp_pick_button = mpr_pair_sp_pick.button
         mpr_pair_sp_pick_button.clicked.connect(lambda: set_picker_status(self.model, PickerStatus.PICKING_MPR_PAIR))
         mpr_pair_sp_pick_button.clicked.connect(lambda: set_fill_type(self.model, PointFillType.ShortestPath))
+        self.point_panel_button_list.append((mpr_pair_sp_pick_button, PickerStatus.PICKING_MPR_PAIR))
+
+        mpr_pair_sp_calculate = QPushButton("Run shortest path fill")
+        layout.addWidget(mpr_pair_sp_calculate, 2, 1, 1, 1)
+        mpr_pair_sp_calculate.clicked.connect(lambda: calculate(self.model, PointStatus.MPR_FILL))
 
         return frame
 

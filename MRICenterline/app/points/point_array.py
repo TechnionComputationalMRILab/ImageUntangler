@@ -1,6 +1,7 @@
 from copy import deepcopy
 from typing import List
 
+import numpy as np
 
 from MRICenterline.app.points.point import Point
 from MRICenterline.app.points.status import PointStatus
@@ -95,11 +96,12 @@ class PointArray:
                                                                self.point_array[-1]))
         self.total_length = sum(self.lengths)
 
+    def fill(self):
         if self.use_fill:
             if len(self) >= 2:
                 from MRICenterline.app.points.point_fill import fill_interp, PointFillType, fill
 
-                image_properties = self.point_array[0].image_properties
+                image_properties = self.point_array[0].image_properties  # it's the same one for all points
 
                 if self.fill_type == PointFillType.LinearInterpolation:
                     interpolated_array = fill_interp(image_properties=image_properties,
@@ -108,8 +110,7 @@ class PointArray:
                                                      num_points=self.fill_amount)
                 else:
                     interpolated_array, length_of_fill = fill(image_properties=image_properties,
-                                                              point_a=self.point_array[-2],
-                                                              point_b=self.point_array[-1])
+                                                              point_array=self)
                     self.fill_amount = length_of_fill
                 # endregion
 
@@ -268,11 +269,12 @@ class PointArray:
     def get_interpolated_point_actors(self):
         index = len(self)
 
-        all_actors = [pt
-                      for pt in self.interpolated_point_array[
-                                (index-2)*(self.fill_amount-2):(self.fill_amount-2)*(index-1)
-                                ]
-                      ]
+        all_actors = [pt for pt in self.interpolated_point_array]
+        # all_actors = [pt
+        #               for pt in self.interpolated_point_array[
+        #                         (index-2)*(self.fill_amount-2):(self.fill_amount-2)*(index-1)
+        #                         ]
+        #               ]
         visible_actors = all_actors[::self.interpolate_downsampling]
 
         # cant use set().difference since Points are not hashable...
@@ -382,20 +384,22 @@ class PointArray:
         item.actor.SetVisibility(False)
 
     def hide_intermediate_points(self):
-        for i in range(len(self)):
-            if i == 0 or i == len(self) - 1:
-                self.set_color(color=self.point_color, item=i)
-            else:
-                self.point_array[i].set_visibility(False)
-                self.hide_point(i)
+        pass
+        # for i in range(len(self)):
+        #     if i == 0 or i == len(self) - 1:
+        #         self.set_color(color=self.point_color, item=i)
+        #     else:
+        #         self.point_array[i].set_visibility(False)
+        #         self.hide_point(i)
 
     def show_intermediate_points(self):
-        for i in range(len(self)):
-            if i == 0 or i == len(self) - 1:
-                self.set_color(color=self.point_color, item=i)
-            else:
-                self.point_array[i].set_visibility(True)
-                self.show_point(i)
+        pass
+        # for i in range(len(self)):
+        #     if i == 0 or i == len(self) - 1:
+        #         self.set_color(color=self.point_color, item=i)
+        #     else:
+        #         self.point_array[i].set_visibility(True)
+        #         self.show_point(i)
 
     def show_for_slice(self, slice_index):
         count = 0
@@ -448,13 +452,14 @@ class PointArray:
         import numpy as np
 
         if self.use_fill:
-            picked_points = deepcopy([pt.itk_index_coords for pt in self.point_array])
-            interpolated_points = deepcopy([pt.itk_index_coords for pt in self.interpolated_point_array])
-
-            points = []
-            for i, pt in enumerate(picked_points):
-                points.append(pt)
-                points.extend(interpolated_points[i * (self.fill_amount - 2):(self.fill_amount - 2) * (i + 1)])
+            points = deepcopy([pt.itk_index_coords for pt in self.interpolated_point_array])
+            # picked_points = deepcopy([pt.itk_index_coords for pt in self.point_array])
+            # interpolated_points = deepcopy([pt.itk_index_coords for pt in self.interpolated_point_array])
+            #
+            # points = []
+            # for i, pt in enumerate(picked_points):
+            #     points.append(pt)
+            #     points.extend(interpolated_points[i * (self.fill_amount - 2):(self.fill_amount - 2) * (i + 1)])
         else:
             points = deepcopy([pt.itk_index_coords for pt in self.point_array])
 

@@ -88,13 +88,27 @@ class SequenceModel:
         return session_id
 
     def calculate(self, status: PointStatus):
-        # if status == PointStatus.MPR:
+        match status:
+            case PointStatus.MPR_FILL:
+
+                if len(self.mpr_point_array) >= 2:
+                    self.mpr_point_array.fill()
+
+                    print(f"FILL with {len(self.mpr_point_array.get_interpolated_point_actors())}")
+                    for i, pt_actor in enumerate(self.mpr_point_array.get_interpolated_point_actors()):
+                        # print(f"add actor {i}")
+                        self.current_sequence_viewer.add_actor(pt_actor)
+
+                return
+
         if len(self.mpr_point_array):
             self.model.centerline_calc = True
             self.model.centerline_model.set_points_and_image(self.mpr_point_array,
                                                              self.current_image_properties)
             self.model.centerline_model.set_window_level(self.window_value, self.level_value)
             self.model.centerline_model.update_widget()
+        else:
+            print("not enough points for centerline calc")
 
         # elif status == PointStatus.LENGTH:
         #     pass
@@ -148,14 +162,6 @@ class SequenceModel:
 
             self.mpr_point_array.add_point(point)
             self.current_sequence_viewer.add_actor(self.mpr_point_array.get_last_actor())
-
-            if len(self.mpr_point_array) >= 2:
-                print(f"FILL with {len(self.mpr_point_array.get_interpolated_point_actors())}")
-                for i, pt_actor in enumerate(self.mpr_point_array.get_interpolated_point_actors()):
-                    # print(f"add actor {i}")
-                    self.current_sequence_viewer.add_actor(pt_actor)
-
-                # breakpoint()
 
         if self.model.picker_status == PickerStatus.PICKING_MPR:
             self.mpr_point_array.add_point(point)

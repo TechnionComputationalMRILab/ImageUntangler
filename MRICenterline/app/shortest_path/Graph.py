@@ -19,7 +19,7 @@ class Graph:
         min_index = non_zero_arr[0][np.argmin(dist[non_zero_arr])]
         return min_index
 
-    def dijkstra(self, src, dest, len_x, len_y, a, slice_nda, init_x, init_y, x_spline_gt, y_spline_gt):
+    def dijkstra(self, src: int, dest, len_x, len_y, a, slice_nda, init_x, init_y, mean, var):
         from MRICenterline.app.shortest_path.functions import create_circle_directions
 
         dist = np.array([np.inf] * self.V)
@@ -30,8 +30,6 @@ class Graph:
 
         direction = np.array([None] * self.V)
         directions_8 = create_circle_directions(8)
-
-        mean, var, std = self.calc_contrast_mean_std(x_spline_gt, y_spline_gt, init_x, init_y, slice_nda)
 
         neighbors = [-(len_x - 1), -len_x, -(len_x + 1), -1, (len_x - 1), len_x, (len_x + 1), 1]
 
@@ -106,17 +104,6 @@ class Graph:
     def calc_angle(self, d1, d2):
         # print("CALC ANGLE", d1, d2)
         return (np.pi - np.arccos(np.sum(d1 * d2) / (np.sqrt(np.sum(d1 * d1)) * np.sqrt(np.sum(d2 * d2)))))/np.pi
-
-    def calc_contrast_mean_std(self, x_spline_gt, y_spline_gt, init_x, init_y, slice_nda):
-        x_spline_gt_shifted = x_spline_gt - init_x
-        y_spline_gt_shifted = y_spline_gt - init_y
-        spline_val = []
-        for i in range(len(x_spline_gt)):
-            spline_val.append(slice_nda[int(y_spline_gt_shifted[i]), int(x_spline_gt_shifted[i])])
-        mean = np.mean(spline_val)
-        var = np.var(spline_val)
-        std = np.sqrt(var)
-        return mean, var, std
 
     def calc_contrast_var(self, y, slice_nda, len_x, init_x, init_y, var, mean):
         from MRICenterline.app.shortest_path.functions import convert_1Dcord_to_2Dcord

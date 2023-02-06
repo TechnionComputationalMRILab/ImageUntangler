@@ -1,12 +1,13 @@
 import numpy as np
 from enum import Enum
+from typing import List
 
 from MRICenterline import CFG
 from MRICenterline.app.points.point import Point
 from MRICenterline.app.points.point_array import PointArray
 from MRICenterline.app.points.status import PointStatus
 from MRICenterline.app.gui_data_handling.image_properties import ImageProperties
-from MRICenterline.app.shortest_path.find import FindShortestPathPerSlice
+from MRICenterline.app.shortest_path.find import FindShortestPathPerSlice, find_shortest_path
 
 
 class PointFillType(Enum):
@@ -48,11 +49,8 @@ def fill_interp(image_properties: ImageProperties or None,
 
 
 def fill(image_properties: ImageProperties or None,
-         point_a: Point, point_b: Point):
+         point_array: PointArray):
     sitk_image = image_properties.sitk_image
-
-    assert point_a.slice_idx == point_b.slice_idx
-    slice_index = point_a.slice_idx
 
     def convert_coords(pt):
         viewer_origin = image_properties.size / 2.0
@@ -63,29 +61,39 @@ def fill(image_properties: ImageProperties or None,
         itk_coords[2] = round(pt.slice_idx) - 1
         return itk_coords
 
+    converted_coords = np.array([convert_coords(pt) for pt in point_array])
+
     import time
 
     st = time.time_ns()
-    shortest_path, _ = FindShortestPathPerSlice(case_sitk=sitk_image, slice_num=convert_coords(point_a)[2],
-                                                first_annotation=convert_coords(point_a),
-                                                second_annotation=convert_coords(point_b),
-                                                case_number=image_properties.parent.case_name)
+    paths = []
+
+    shortest_path = find_shortest_path(case_sitk=sitk_image,
+                                       case_number=image_properties.parent.case_name,
+                                       annotation_points=converted_coords)
+
+    # shortest_path, _ = FindShortestPathPerSlice(case_sitk=sitk_image, slice_num=convert_coords(point_a)[2],
+    #                                             first_annotation=convert_coords(point_a),
+    #                                             second_annotation=convert_coords(point_b),
+    #                                             case_number=image_properties.parent.case_name)
     et = time.time_ns()
     print(f"ELAPSED TIME {et-st}")
 
     temp_point_array = PointArray(PointStatus.MPR)
-    for i, (x, y) in enumerate(zip(shortest_path[0][0], shortest_path[0][1])):
-        pt = Point.point_from_itk_index((x, image_properties.size[1] - y, slice_index + 1), image_properties)
+
+    for idx in range(len(shortest_path)):
+        x, y, z = shortest_path[idx, :]
+        pt = Point.point_from_itk_index((x, image_properties.size[1] - y, z + 2), image_properties)
         pt.is_interpolated = True
 
-        if i == 0:
-            continue
-        if i == len(shortest_path[0][0]) - 1:
-            continue
+        # if idx == 0:
+        #     continue
+        # if idx == len(shortest_path) - 1:
+        #     continue
         temp_point_array.add_point(pt)
 
     temp_point_array.set_color(CFG.get_color('mpr-display-style', 'interpolated-color'))
-    return temp_point_array, len(shortest_path[0][0])
+    return temp_point_array, len(shortest_path)
 
 
 if __name__ == "__main__":
