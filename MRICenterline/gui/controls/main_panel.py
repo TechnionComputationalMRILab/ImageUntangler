@@ -1,10 +1,14 @@
-from PyQt5.QtWidgets import QDialog, QGridLayout, QLabel, QPushButton, QWidget, QPlainTextEdit
+from PyQt5.QtCore import QThread
+from PyQt5.QtWidgets import QDialog, QGridLayout, QLabel, QPushButton, QWidget, QPlainTextEdit, QVBoxLayout, \
+    QProgressBar
 import qtawesome as qta
+from pyqtspinner import WaitingSpinner
 
 from MRICenterline import CFG
 from MRICenterline.gui.controls.timer import TimerWidget
 from MRICenterline.gui.display.toolbar_connect import *
 from MRICenterline.gui.window.AnimatedToggle import AnimatedToggle
+from MRICenterline.gui.controls.shortest_path_worker import ShortestPathWorker
 
 
 class ControlPanel(QDialog):
@@ -30,6 +34,21 @@ class ControlPanel(QDialog):
         layout.addWidget(self.centerline(), 2, 0, 1, 2)
 
         layout.addWidget(self.debug(), 3, 0, 1, 2)
+
+        self.thread = QThread()
+        self.worker = None
+
+        self.spinner = WaitingSpinner(
+            self,
+            disable_parent_when_spinning=True,
+            roundness=100.0,
+            fade=24.11,
+            radius=40,
+            lines=143,
+            line_length=15,
+            line_width=17,
+            speed=0.61,
+        )
 
     def reset_buttons(self):
         [button.setChecked(False) for button, status in self.point_panel_button_list]
@@ -213,7 +232,8 @@ class ControlPanel(QDialog):
 
         mpr_pair_sp_calculate = QPushButton("Run shortest path fill")
         layout.addWidget(mpr_pair_sp_calculate, 2, 1, 1, 1)
-        mpr_pair_sp_calculate.clicked.connect(lambda: calculate(self.model, PointStatus.MPR_FILL))
+        mpr_pair_sp_calculate.clicked.connect(lambda: calculate(self.model, PointStatus.MPR_FILL, self))
+        # mpr_pair_sp_calculate.clicked.connect(self.show_loading_pbar_dialog)
 
         return frame
 
@@ -221,3 +241,36 @@ class ControlPanel(QDialog):
         self.reset_buttons()
         self.timer_widget.reset()
         return super().close()
+
+    def show_loading_spinner(self):
+
+        self.thread = QThread()
+        self.worker = None
+
+        import time
+
+        dialog = QDialog()
+        dialog.setModal(True)
+        layout = QVBoxLayout()
+        dialog.setLayout(layout)
+        label = QLabel("Processing")
+        # pbar = QProgressBar(dialog)
+        # pbar.setTextVisible(False)
+        pbar = WaitingSpinner(dialog)
+        pbar.start()
+
+        layout.addWidget(label)
+        layout.addWidget(pbar)
+
+        self.worker = ShortestPathWorker(self.model)
+        self.worker.moveToThread(self.thread)
+        self.thread.started.connect(self.worker.run)
+        self.worker.finished.connect(self.thread.quit)
+        self.worker.finished.connect(self.worker.deleteLater)
+        self.thread.finished.connect(self.thread.deleteLater)
+
+        self.thread.start()
+
+        dialog.show()
+
+        self.thread.finished.connect(dialog.close)

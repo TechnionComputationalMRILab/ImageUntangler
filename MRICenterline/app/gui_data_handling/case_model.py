@@ -107,8 +107,8 @@ class CaseModel:
         if self.centerline_calc and not (status == PickerStatus.PICKING_MPR or status == PickerStatus.MODIFYING_MPR):
             self.centerline_model.set_picker_status(status)
 
-    def calculate(self, status: PointStatus = PointStatus.MPR):
-        self.sequence_manager.calculate(status)
+    def calculate(self, status: PointStatus = PointStatus.MPR, parent_widget=None):
+        return self.sequence_manager.calculate(status, parent_widget)
 
     def timer_status(self, status):
         import time

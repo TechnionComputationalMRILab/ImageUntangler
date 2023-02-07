@@ -15,10 +15,12 @@ from MRICenterline.gui.vtk.sequence_interactor_style import SequenceViewerIntera
 from MRICenterline.app.points.point import Point
 from MRICenterline.app.points.point_array import PointArray
 
+from PyQt5.QtCore import QThread
 
 from MRICenterline import CFG, CONST
 
 import logging
+
 logging.getLogger(__name__)
 
 
@@ -35,6 +37,9 @@ class SequenceModel:
 
         self.mpr_point_array = PointArray(PointStatus.MPR)
         self.length_point_array = PointArray(PointStatus.LENGTH)
+
+        self.thread = QThread()
+        self.worker = None
 
     def __repr__(self):
         return f"Viewer Manager with index {self.seq_idx}"
@@ -87,28 +92,64 @@ class SequenceModel:
 
         return session_id
 
-    def calculate(self, status: PointStatus):
+    def calculation_done(self):
+        print("worker output", self.worker.output)
+
+        print(f"FILL with {len(self.mpr_point_array.get_interpolated_point_actors())}")
+        for i, pt_actor in enumerate(self.mpr_point_array.get_interpolated_point_actors()[::-1]):
+            # print(f"add actor {i}")
+            self.current_sequence_viewer.add_actor(pt_actor)
+
+        self.calculate(PointStatus.MPR)
+
+    def calculate(self, status: PointStatus, parent_widget=None):
         match status:
             case PointStatus.MPR_FILL:
 
                 if len(self.mpr_point_array) >= 2:
-                    self.mpr_point_array.fill()
 
-                    print(f"FILL with {len(self.mpr_point_array.get_interpolated_point_actors())}")
-                    for i, pt_actor in enumerate(self.mpr_point_array.get_interpolated_point_actors()):
-                        # print(f"add actor {i}")
-                        self.current_sequence_viewer.add_actor(pt_actor)
+                    if parent_widget:
+                        from MRICenterline.gui.controls.shortest_path_worker import ShortestPathWorker
 
-                return
+                        self.worker = ShortestPathWorker(self.mpr_point_array)
 
-        if len(self.mpr_point_array):
-            self.model.centerline_calc = True
-            self.model.centerline_model.set_points_and_image(self.mpr_point_array,
-                                                             self.current_image_properties)
-            self.model.centerline_model.set_window_level(self.window_value, self.level_value)
-            self.model.centerline_model.update_widget()
-        else:
-            print("not enough points for centerline calc")
+                        parent_widget.spinner.start()
+                        parent_widget.parent.setEnabled(False)
+                        # dialog = shortest_path_dialog(parent_widget)
+                        # dialog.show()
+
+                        self.worker.moveToThread(self.thread)
+                        self.thread.started.connect(self.worker.run)
+                        self.worker.finished.connect(self.thread.quit)
+                        self.worker.finished.connect(self.worker.deleteLater)
+                        self.thread.finished.connect(self.thread.deleteLater)
+
+                        self.thread.start()
+
+                        self.thread.finished.connect(lambda : parent_widget.spinner.stop())
+                        self.thread.finished.connect(lambda : parent_widget.parent.setEnabled(True))
+                        self.thread.finished.connect(self.calculation_done)
+
+                    # self.mpr_point_array.fill()
+                    #
+                    # print(f"FILL with {len(self.mpr_point_array.get_interpolated_point_actors())}")
+                    # for i, pt_actor in enumerate(self.mpr_point_array.get_interpolated_point_actors()):
+                    #     # print(f"add actor {i}")
+                    #     self.current_sequence_viewer.add_actor(pt_actor)
+
+            case _:
+
+                if len(self.mpr_point_array):
+                    self.model.centerline_calc = True
+                    self.model.centerline_model.set_points_and_image(self.mpr_point_array,
+                                                                     self.current_image_properties)
+                    self.model.centerline_model.set_window_level(self.window_value, self.level_value)
+                    self.model.centerline_model.update_widget()
+                    return True
+
+                else:
+                    print("not enough points for centerline calc")
+                    return False
 
         # elif status == PointStatus.LENGTH:
         #     pass

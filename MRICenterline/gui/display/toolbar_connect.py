@@ -16,8 +16,8 @@ def save(parent: CaseModel, comment_text: str = ""):
     parent.save()
 
 
-def calculate(parent: CaseModel, s: PointStatus):
-    parent.calculate(s)
+def calculate(parent: CaseModel, s: PointStatus, parent_widget=None):
+    return parent.calculate(s, parent_widget)
 
 
 def intermediate_points(parent: CaseModel, show: bool):
