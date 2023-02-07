@@ -25,7 +25,7 @@ x_len, y_len, max_slice = image.GetSize()
 if not CFG.torch_cuda_available:
     assert False, "CUDA required"
 else:
-    for slice_num in range(17, 27):
+    for slice_num in range(15, 30):
         print("Processing", slice_num)
         graph_weights = calc_graph_weights(0, 0, x_len*y_len, x_len, y_len,
                                            slice_num, image, PATCH_LEN, GRID_PIXELS_SIZE, case_number)
