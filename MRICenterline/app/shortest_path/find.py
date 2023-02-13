@@ -29,7 +29,11 @@ def find_shortest_path(case_sitk, annotation_points, case_number):
                                                                  second_annotation=slice_points[0],
                                                                  case_number=case_number)
 
-            for pt in list(zip(shortest_path_in_slice[0][0], shortest_path_in_slice[0][1], [slice_num]*len(shortest_path_in_slice[0][1]))):
+            for pt in list(zip(
+                    shortest_path_in_slice[0][0],
+                    shortest_path_in_slice[0][1],
+                    [slice_num]*len(shortest_path_in_slice[0][1])
+            )):
                 total_track.append(pt)
 
     return np.array(total_track, dtype=int)
@@ -84,10 +88,10 @@ def FindShortestPathPerSlice(case_sitk, slice_num, first_annotation, second_anno
     first_pixel = first_annotation if j == 0 else second_annotation
     final_pixel = second_annotation if j == 0 else first_annotation
 
-    first_pixel_1DCord = (first_pixel[1] - roi_init_y) * roi_x_len + (first_pixel[0] - roi_init_x)
-    final_pixel_1DCord = (final_pixel[1] - roi_init_y) * roi_x_len + (final_pixel[0] - roi_init_x)
+    first_pixel_1DCord = int((first_pixel[1] - roi_init_y) * roi_x_len + (first_pixel[0] - roi_init_x))
+    final_pixel_1DCord = int((final_pixel[1] - roi_init_y) * roi_x_len + (final_pixel[0] - roi_init_x))
 
-    g.dijkstra(src=int(first_pixel_1DCord), dest=final_pixel_1DCord,
+    g.dijkstra(src=first_pixel_1DCord, dest=final_pixel_1DCord,
                len_x=roi_x_len, len_y=roi_y_len,
                a=a, slice_nda=roi_nda,
                init_x=roi_init_x, init_y=roi_init_y,

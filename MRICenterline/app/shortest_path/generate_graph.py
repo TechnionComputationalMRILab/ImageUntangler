@@ -6,7 +6,7 @@ from pathlib import Path
 sys.path.append(str(Path(__file__).parents[3]))
 
 import SimpleITK as sitk
-from MRICenterline.app.shortest_path.functions import calc_graph_weights
+from MRICenterline.app.shortest_path.gpu_only import calc_graph_weights
 from MRICenterline.app.shortest_path.find import GRID_PIXELS_SIZE, PATCH_LEN
 from MRICenterline import CFG
 
@@ -23,7 +23,7 @@ case_number = 6
 x_len, y_len, max_slice = image.GetSize()
 
 if not CFG.torch_cuda_available:
-    assert False, "CUDA required"
+    assert False, "CUDA is required to run this script"
 else:
     for slice_num in range(15, 30):
         print("Processing", slice_num)
@@ -32,7 +32,7 @@ else:
 
         np.save(os.path.join(saved_graph_path, "6", f"{slice_num}.npy"), graph_weights)
 
-# slice_dict = {}
-# for i in range(max_slice):
-#     slice_dict[i] = graph_weights...
-# np.savez(filename, **slice_dict)
+
+if __name__ == "__main__":
+    # TODO
+    pass
