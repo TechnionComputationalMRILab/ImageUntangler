@@ -452,7 +452,9 @@ class PointArray:
         import numpy as np
 
         if self.use_fill:
-            points = deepcopy([pt.itk_index_coords for pt in self.interpolated_point_array])
+            points = deepcopy([pt.itk_index_coords for pt in self.interpolated_point_array][::self.interpolate_downsampling])
+            # points = deepcopy([pt.itk_index_coords for pt in self.interpolated_point_array])
+
             # picked_points = deepcopy([pt.itk_index_coords for pt in self.point_array])
             # interpolated_points = deepcopy([pt.itk_index_coords for pt in self.interpolated_point_array])
             #

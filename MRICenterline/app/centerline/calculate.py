@@ -74,10 +74,17 @@ def interp3D(img, coords, interpMode='LINEAR'):
 
 
 def get_straight_mpr(img, points, xRad=20, viewAngle=0):
-    tck, u = splprep(points.T, s=0)
-    x_knots, y_knots, z_knots = splev(tck[0], tck)
-    u_fine = np.linspace(0, 1, points.shape[0] * 100)
-    x_fine, y_fine, z_fine = splev(u_fine, tck)
+    ## original interpolation
+    # tck, u = splprep(points.T, s=0)
+    # x_knots, y_knots, z_knots = splev(tck[0], tck)
+    # u_fine = np.linspace(0, 1, points.shape[0] * 100)
+    # x_fine, y_fine, z_fine = splev(u_fine, tck)
+
+    ## rotem's interpolation
+    tck, myu = splprep(points.T, k=3, s=1)
+    u_samples = np.linspace(0, 1, points.shape[0] * 1000)
+    x_fine, y_fine, z_fine = splev(u_samples, tck)
+
 
     CCfine = np.column_stack((x_fine, y_fine, z_fine))
     v = CCfine[1:, ] - CCfine[0:-1, :]
