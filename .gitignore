@@ -20,10 +20,7 @@ venv/*
 /docs/test_results/
 *.db
 /archive/
-AlgorithmTests/*
 *.sqlite
 condaenv*.requirements.txt
 *.db-journal
-/MRICenterline/app/shortest_path/saved_graph/
-/MRICenterline/app/shortest_path/test_data/
-/MRICenterline/app/shortest_path/model_dict/
+/models/

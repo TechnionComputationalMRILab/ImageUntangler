@@ -45,12 +45,12 @@ def find_shortest_path(case_sitk, annotation_points, case_number):
 def FindShortestPathPerSlice(case_sitk, slice_num, first_annotation, second_annotation, case_number):
     if CFG.torch_cuda_available:
         import torch
-        x_spline_gt = torch.load(Path(__file__).parent / 'x_spline_gt.pt')
-        y_spline_gt = torch.load(Path(__file__).parent / 'y_spline_gt.pt')
+        x_spline_gt = torch.load(Path(CFG.get_folder("model", "shortest_path")) / 'x_spline_gt.pt')
+        y_spline_gt = torch.load(Path(CFG.get_folder("model", "shortest_path")) / 'y_spline_gt.pt')
     else:
         import numpy as np
-        x_spline_gt = np.load(str(Path(__file__).parent / 'x_spline_gt.npy'))
-        y_spline_gt = np.load(str(Path(__file__).parent / 'y_spline_gt.npy'))
+        x_spline_gt = np.load(str(Path(CFG.get_folder("model", "shortest_path")) / 'x_spline_gt.npy'))
+        y_spline_gt = np.load(str(Path(CFG.get_folder("model", "shortest_path")) / 'y_spline_gt.npy'))
 
     from MRICenterline.app.shortest_path.Graph import Graph
     from MRICenterline.app.shortest_path.functions import extract_roi, convert_1Dcord_to_2Dcord, calc_contrast_mean_std
@@ -70,7 +70,7 @@ def FindShortestPathPerSlice(case_sitk, slice_num, first_annotation, second_anno
     g = Graph(roi_num_of_pixels)
 
     import numpy as np
-    saved_graph = np.load(str(Path(__file__).parent / "saved_graph" / "6" / f"{slice_num}.npy"))  # TODO: generalize this
+    saved_graph = np.load(str(Path(CFG.get_folder("model", "shortest_path", "saved_graph", case_number)) / f"{slice_num}.npy"))
     unpack_saved_graph(saved_graph, g.graph, case_sitk.GetSize()[0:2],
                        roi_x=(roi_init_x, roi_final_x, roi_x_len),
                        roi_y=(roi_init_y, roi_final_y, roi_y_len))

@@ -3,12 +3,17 @@
 
 block_cipher = None
 
+added_files = [
+                ('MRICenterline//app//config//config.ini', '.'),
+                ('models//*', 'models')
+             ]
+
 
 a = Analysis(['main.py'],
-             pathex=['C:\\Users\\ang.a\\Documents\\ImageUntangler'],
+             pathex=['Z:\\ang.a\\Code\\ImageUntangler\\ImageUntangler'],
              binaries=[],
-             datas=[('MRICenterline/app/config/config.ini', '.')],
-             hiddenimports=['configparser', 'vtkmodules','vtkmodules.all','vtkmodules.qt.QVTKRenderWindowInteractor','vtkmodules.util','vtkmodules.util.numpy_support'],
+             datas=added_files,
+             hiddenimports=['configparser', 'vtkmodules','vtkmodules.all','vtkmodules.qt.QVTKRenderWindowInteractor','vtkmodules.util','vtkmodules.util.numpy_support', 'pydicom.encoders.gdcm', 'pydicom.encoders.pylibjpeg'],
              hookspath=[],
              runtime_hooks=[],
              excludes=[],

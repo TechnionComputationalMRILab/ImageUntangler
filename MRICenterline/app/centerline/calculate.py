@@ -1,20 +1,8 @@
-# import numpy as np
-# from scipy.interpolate import RegularGridInterpolator, splprep, splev
-# from typing import List
-#
-# from MRICenterline.app.gui_data_handling.image_properties import ImageProperties
-#
-# import SimpleITK as sitk
 import numpy as np
-# import shutil
-# import tempfile
-# from glob import glob
 from scipy.interpolate import RegularGridInterpolator, splprep, splev
-# from typing import List
 import copy
 
 from numpy import matlib
-# from mpl_toolkits import mplot3d
 
 
 def interp3D(img, coords, interpMode='LINEAR'):

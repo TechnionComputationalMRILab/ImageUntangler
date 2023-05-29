@@ -101,6 +101,7 @@ class ConfigParser:
             'raw_data': self.get_config_data("folders", "data-folder"),
             'raw': self.get_config_data("folders", "data-folder"),
             'script': self.get_config_data('folders', 'script-folder'),
+            "model": self.get_config_data('folders', 'model-folder'),
             'log': os.path.join(self.get_config_data('folders', 'script-folder'), 'logs'),
         }
 
@@ -112,7 +113,12 @@ class ConfigParser:
         else:
             raise KeyError(f"{folder_key} does not exist in the get_folder list")
 
+    def set_db_file(self, file: str | Path):
+        assert Path(file).is_file()
+        self.set_config_data("folders", "metadata-file", file)
+
     def get_db(self):
+        # return self.get_config_data("folders", "metadata-file")
         return self.get_folder("script", "metadata.db")
 
     def get_path_for_case_name(self, case_name: str):

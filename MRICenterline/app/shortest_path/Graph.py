@@ -8,6 +8,8 @@ class Graph:
     parent: np.ndarray
 
     def __init__(self, vertices):
+        from MRICenterline.app.shortest_path.functions import create_circle_directions
+
         self.V = vertices
         # self.parent = [None] * self.V
         self.parent: np.ndarray = np.nan * np.zeros(self.V)
@@ -16,26 +18,28 @@ class Graph:
 
         self.graph = np.zeros((vertices, vertices))
 
+        self._directions_8 = create_circle_directions(8)
+
     def printSolution(self, dist):
         print("Vertex \tDistance from Source")
         for node in range(self.V):
             print(node, "\t", dist[node], "\t", "parent: ", self.parent[node])
 
     def dijkstra(self, src: int, dest, len_x, len_y, a, slice_nda, init_x, init_y, mean, var):
-        from MRICenterline.app.shortest_path.functions import create_circle_directions
 
+        # cant use numba on this because of the np.inf
         dist = np.array([np.inf] * self.V)
-        dist[src] = 0.1
         sptSet = np.array([False] * self.V)
+        dist[src] = 0.1
 
         self.parent[src] = -1
 
         direction = np.array([None] * self.V)
-        directions_8 = create_circle_directions(8)
+        # directions_8 = create_circle_directions(8)
 
         neighbors = [-(len_x - 1), -len_x, -(len_x + 1), -1, (len_x - 1), len_x, (len_x + 1), 1]
 
-        for cout in range(self.V):
+        for _ in range(self.V):
             x = minDistance(dist, sptSet)
             sptSet[x] = True
 
@@ -46,7 +50,7 @@ class Graph:
                 if is_out_of_patch(x, n, len_x, len_y): continue
                 y = x + n
                 if y < 0 or y >= self.V: continue
-                d = match_dir(n, len_x, directions_8)
+                d = match_dir(n, len_x, self._directions_8)
                 if direction[x] is not None:
                     # if self.graph[x][y] == 0: print(f'if: graph = 0, {x=}, {y=}, {n=}')
                     if self.graph[x][y] != 0:
@@ -120,7 +124,7 @@ def calc_contrast_var(y, slice_nda, len_x, init_x, init_y, var, mean):
     return exp_contrast
 
 
-def minDistance( dist, sptSet):
+def minDistance(dist, sptSet):
     non_zero_arr = np.nonzero(dist * ~sptSet)
     min_index = non_zero_arr[0][np.argmin(dist[non_zero_arr])]
     return min_index
